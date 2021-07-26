@@ -1,0 +1,10 @@
+*.orig
+.vs/
+.idea/
+_ReSharper.Caches/
+obj/
+bin/
+packages/
+*.user
+*.Snk
+*.nuget
