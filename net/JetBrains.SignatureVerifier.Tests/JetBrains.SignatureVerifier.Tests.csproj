@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
-    <RootNamespace>JetBrains.DownloadPgpVerifier.Tests</RootNamespace>
+    <RootNamespace>JetBrains.SignatureVerifier.Tests</RootNamespace>
     <IsPackable>false</IsPackable>
     <LangVersion>latestmajor</LangVersion>
     <Company>JetBrains s.r.o.</Company>
@@ -12,6 +12,6 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
     <ProjectReference Include="..\JetBrains.SignatureVerifier\JetBrains.SignatureVerifier.csproj" />
-    <EmbeddedResource Include="..\..\data\*" LinkBase="Resources" />
+    <EmbeddedResource Include="..\..\pedata\*" LinkBase="Resources" />
   </ItemGroup>
 </Project>
