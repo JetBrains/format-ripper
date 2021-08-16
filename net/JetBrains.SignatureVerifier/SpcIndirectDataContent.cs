@@ -11,6 +11,7 @@ namespace JetBrains.SignatureVerifier
     public static class OIDs
     {
         public static readonly DerObjectIdentifier SPC_INDIRECT_DATA_OBJ_ID = new("1.3.6.1.4.1.311.2.1.4");
+        public static readonly DerObjectIdentifier MS_COUNTER_SIGN_OBJ_ID = new("1.3.6.1.4.1.311.3.3.1");
     }
 
     public class SpcIndirectDataContent

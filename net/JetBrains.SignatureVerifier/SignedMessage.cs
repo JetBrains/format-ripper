@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections;
-using System.Diagnostics;
+using System.IO;
 using JetBrains.Annotations;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Cms;
+using Org.BouncyCastle.Pkix;
+using Org.BouncyCastle.Utilities.Collections;
+using Org.BouncyCastle.Utilities.Date;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 
@@ -14,6 +17,12 @@ namespace JetBrains.SignatureVerifier
     {
         private readonly ContentInfo _pkcs7;
         private readonly SpcIndirectDataContent _indirectDataContent;
+
+        public byte[] GetHash() => _indirectDataContent.MessageDigest.GetDigest();
+
+        public string GetHashAlgorithmName() =>
+            Org.BouncyCastle.Security.DigestUtilities.GetAlgorithmName(_indirectDataContent.MessageDigest.AlgorithmID
+                .Algorithm);
 
         public SignedMessage([NotNull] byte[] data)
         {
@@ -25,61 +34,104 @@ namespace JetBrains.SignatureVerifier
             _indirectDataContent = new SpcIndirectDataContent(signedData.EncapContentInfo);
         }
 
-        public byte[] GetHash() => _indirectDataContent.MessageDigest.GetDigest();
-
-        public string GetHashAlgorithmName() =>
-            Org.BouncyCastle.Security.DigestUtilities.GetAlgorithmName(_indirectDataContent.MessageDigest.AlgorithmID
-                .Algorithm);
-
-        public VerifySignatureResult VerifySignature(bool withChain)
-        {
-            //TODO TEMP
-            if (withChain)
-                throw new NotImplementedException();
-
-            return verifySignature()
-                ? VerifySignatureResult.OK
-                : VerifySignatureResult.InvalidSignature;
-        }
-
-        private bool verifySignature()
+        public VerifySignatureResult VerifySignature(byte[][] rootCertificates)
         {
             var cmsSignedData =
                 new CmsSignedData(new CmsProcessableByteArray(_indirectDataContent.SignedContent), _pkcs7);
-            var certs = cmsSignedData.GetCertificates("Collection");
-            var signersStore = cmsSignedData.GetSignerInfos();
-            return verifySignature(signersStore, certs);
+            return verifySignature(cmsSignedData, readRootCertificates(rootCertificates));
         }
 
-        private bool verifySignature(SignerInformationStore signersStore, IX509Store certs)
+        private HashSet readRootCertificates(byte[][] rootCertificates)
+        {
+            if (rootCertificates == null)
+                return null;
+            
+            HashSet rootCerts = new HashSet();
+            X509CertificateParser parser = new X509CertificateParser();
+
+            foreach (var stream in rootCertificates)
+            {
+                X509Certificate rootCertificate = parser.ReadCertificate(stream);
+                rootCerts.Add(new TrustAnchor(rootCertificate, new byte[0]));
+            }
+
+            return rootCerts;
+        }
+
+        private VerifySignatureResult verifySignature(CmsSignedData cmsSignedData, HashSet rootCertificates)
+        {
+            var certs = cmsSignedData.GetCertificates("Collection");
+            var signersStore = cmsSignedData.GetSignerInfos();
+            return verifySignature(signersStore, certs, rootCertificates);
+        }
+
+        private VerifySignatureResult verifySignature(SignerInformationStore signersStore, IX509Store certs,
+            HashSet rootCertificates)
         {
             foreach (SignerInformation signer in signersStore.GetSigners())
             {
                 var certList = new ArrayList(certs.GetMatches(signer.SignerID));
 
                 if (certList.Count < 1)
-                    return false;
+                    return VerifySignatureResult.InvalidSignature;
 
                 var cert = (X509Certificate) certList[0];
 
                 try
                 {
                     if (!signer.Verify(cert))
-                        return false;
-                    
+                        return VerifySignatureResult.InvalidSignature;
+
+                    if (rootCertificates != null)
+                        try
+                        {
+                            BuildCertificateChain(cert, certs, rootCertificates);
+                        }
+                        catch (PkixCertPathBuilderException e)
+                        {
+                            Console.WriteLine(e);
+                            return VerifySignatureResult.InvalidChain;
+                        }
+
                     var counterSignaturesStore = signer.GetCounterSignatures();
-                    
+
                     if (counterSignaturesStore.Count > 0)
-                        return verifySignature(counterSignaturesStore, certs);
+                        return verifySignature(counterSignaturesStore, certs, rootCertificates);
+
+                    var attr = signer.UnsignedAttributes?[OIDs.MS_COUNTER_SIGN_OBJ_ID];
+
+                    if (attr != null && attr.AttrValues.Count > 0)
+                    {
+                        var contentInfo = ContentInfo.GetInstance(attr.AttrValues[0]);
+                        var cmsSignedData = new CmsSignedData(contentInfo);
+                        return verifySignature(cmsSignedData, rootCertificates);
+                    }
                 }
                 catch (CmsException e)
                 {
-                    Debug.WriteLine(e);
-                    throw;
+                    Console.WriteLine(e);
+                    return VerifySignatureResult.InvalidSignature;
                 }
             }
 
-            return true;
+            return VerifySignatureResult.OK;
+        }
+
+        static void BuildCertificateChain(X509Certificate primary, IX509Store additional, HashSet rootCertificates)
+        {
+            PkixCertPathBuilder builder = new PkixCertPathBuilder();
+
+            var holder = new X509CertStoreSelector {Certificate = primary};
+
+            var builderParams = new PkixBuilderParameters(rootCertificates, holder)
+            {
+                IsRevocationEnabled = false,
+                ValidityModel = PkixParameters.ChainValidityModel,
+                Date = new DateTimeObject(DateTime.Now.AddYears(0)) //TODO temp
+            };
+
+            builderParams.AddStore(additional);
+            builder.Build(builderParams);
         }
     }
 

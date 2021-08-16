@@ -178,10 +178,10 @@ namespace JetBrains.SignatureVerifier
         /// <summary>
         /// Validate the signature of the PE
         /// </summary>
-        /// <param name="withChain">Compute a certificate chain and validate it</param>
+        /// <param name="rootCertificates">A chain for thes certificates will be build and validate</param>
         /// <returns>Validation status</returns>
-        public VerifySignatureResult ValidateSignature(bool withChain) =>
-            Cms?.VerifySignature(withChain) ?? VerifySignatureResult.NotSigned;
+        public VerifySignatureResult VerifySignature(byte[][] rootCertificates) =>
+            Cms?.VerifySignature(rootCertificates) ?? VerifySignatureResult.NotSigned;
 
         private byte[] getRawPeData()
         {
