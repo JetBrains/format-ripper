@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections;
-using System.IO;
 using JetBrains.Annotations;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Pkix;
 using Org.BouncyCastle.Utilities.Collections;
-using Org.BouncyCastle.Utilities.Date;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 
-namespace JetBrains.SignatureVerifier
+namespace JetBrains.SignatureVerifier.Crypt
 {
     public class SignedMessage
     {
@@ -45,7 +42,7 @@ namespace JetBrains.SignatureVerifier
         {
             if (rootCertificates == null)
                 return null;
-            
+
             HashSet rootCerts = new HashSet();
             X509CertificateParser parser = new X509CertificateParser();
 
@@ -70,68 +67,14 @@ namespace JetBrains.SignatureVerifier
         {
             foreach (SignerInformation signer in signersStore.GetSigners())
             {
-                var certList = new ArrayList(certs.GetMatches(signer.SignerID));
+                var siw = new SignerInfoWrap(signer, certs, rootCertificates);
+                var result = siw.Verify();
 
-                if (certList.Count < 1)
-                    return VerifySignatureResult.InvalidSignature;
-
-                var cert = (X509Certificate) certList[0];
-
-                try
-                {
-                    if (!signer.Verify(cert))
-                        return VerifySignatureResult.InvalidSignature;
-
-                    if (rootCertificates != null)
-                        try
-                        {
-                            BuildCertificateChain(cert, certs, rootCertificates);
-                        }
-                        catch (PkixCertPathBuilderException e)
-                        {
-                            Console.WriteLine(e);
-                            return VerifySignatureResult.InvalidChain;
-                        }
-
-                    var counterSignaturesStore = signer.GetCounterSignatures();
-
-                    if (counterSignaturesStore.Count > 0)
-                        return verifySignature(counterSignaturesStore, certs, rootCertificates);
-
-                    var attr = signer.UnsignedAttributes?[OIDs.MS_COUNTER_SIGN_OBJ_ID];
-
-                    if (attr != null && attr.AttrValues.Count > 0)
-                    {
-                        var contentInfo = ContentInfo.GetInstance(attr.AttrValues[0]);
-                        var cmsSignedData = new CmsSignedData(contentInfo);
-                        return verifySignature(cmsSignedData, rootCertificates);
-                    }
-                }
-                catch (CmsException e)
-                {
-                    Console.WriteLine(e);
-                    return VerifySignatureResult.InvalidSignature;
-                }
+                if (result != VerifySignatureResult.OK)
+                    return result;
             }
 
             return VerifySignatureResult.OK;
-        }
-
-        static void BuildCertificateChain(X509Certificate primary, IX509Store additional, HashSet rootCertificates)
-        {
-            PkixCertPathBuilder builder = new PkixCertPathBuilder();
-
-            var holder = new X509CertStoreSelector {Certificate = primary};
-
-            var builderParams = new PkixBuilderParameters(rootCertificates, holder)
-            {
-                IsRevocationEnabled = false,
-                ValidityModel = PkixParameters.ChainValidityModel,
-                Date = new DateTimeObject(DateTime.Now.AddYears(0)) //TODO temp
-            };
-
-            builderParams.AddStore(additional);
-            builder.Build(builderParams);
         }
     }
 
@@ -140,6 +83,7 @@ namespace JetBrains.SignatureVerifier
         OK,
         NotSigned,
         InvalidSignature,
-        InvalidChain
+        InvalidChain,
+        InvalidTimestamp
     }
 }

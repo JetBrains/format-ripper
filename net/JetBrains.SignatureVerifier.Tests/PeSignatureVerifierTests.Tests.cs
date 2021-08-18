@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.IO;
+using JetBrains.SignatureVerifier.Crypt;
 using NUnit.Framework;
 
 namespace JetBrains.SignatureVerifier.Tests
@@ -36,6 +37,7 @@ namespace JetBrains.SignatureVerifier.Tests
         private const string pe_07_ts_root = "Certum Trusted Network CA.cer";
 
         private const string pe_08_signed = "dotnet.exe";
+        private const string pe_09_broken_timestamp = "dotnet_broken_timestamp.exe";
 
         [TestCase(pe_01_signed, VerifySignatureResult.OK)]
         [TestCase(pe_01_not_signed, VerifySignatureResult.NotSigned)]
@@ -61,16 +63,17 @@ namespace JetBrains.SignatureVerifier.Tests
         [TestCase(pe_01_signed, VerifySignatureResult.OK, ms_root_2011)]
         [TestCase(pe_07_signed, VerifySignatureResult.OK, pe_07_sign_root, pe_07_ts_root)]
         [TestCase(pe_08_signed, VerifySignatureResult.OK, ms_root_2010, ms_root_2011)]
+        [TestCase(pe_09_broken_timestamp, VerifySignatureResult.InvalidTimestamp, ms_root_2010, ms_root_2011)]
         public void VerifySignWithChainTest(string peResourceName,
             VerifySignatureResult expectedResult, params string[] rootCertsResourceName)
         {
-           var certs = rootCertsResourceName.Select(name => Utils.StreamFromResource(name, stream =>
-           {
-               using var ms = new MemoryStream();
-               stream.CopyTo(ms);
-               return ms.ToArray();
-           })).ToArray();
-           
+            var certs = rootCertsResourceName.Select(name => Utils.StreamFromResource(name, stream =>
+            {
+                using var ms = new MemoryStream();
+                stream.CopyTo(ms);
+                return ms.ToArray();
+            })).ToArray();
+
             var result = Utils.StreamFromResource(peResourceName,
                 peFileStream => new PeFile(peFileStream).VerifySignature(certs));
 

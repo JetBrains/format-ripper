@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using JetBrains.Annotations;
+using JetBrains.SignatureVerifier.Crypt;
 
 namespace JetBrains.SignatureVerifier
 {

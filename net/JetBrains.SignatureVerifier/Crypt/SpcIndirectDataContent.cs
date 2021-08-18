@@ -6,14 +6,8 @@ using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Asn1.X509;
 
-namespace JetBrains.SignatureVerifier
+namespace JetBrains.SignatureVerifier.Crypt
 {
-    public static class OIDs
-    {
-        public static readonly DerObjectIdentifier SPC_INDIRECT_DATA_OBJ_ID = new("1.3.6.1.4.1.311.2.1.4");
-        public static readonly DerObjectIdentifier MS_COUNTER_SIGN_OBJ_ID = new("1.3.6.1.4.1.311.3.3.1");
-    }
-
     public class SpcIndirectDataContent
     {
         private byte[] _signedContent;
@@ -55,7 +49,7 @@ namespace JetBrains.SignatureVerifier
         {
             if (contentInfo == null) throw new ArgumentNullException(nameof(contentInfo));
 
-            if (!contentInfo.ContentType.Equals(OIDs.SPC_INDIRECT_DATA_OBJ_ID))
+            if (!contentInfo.ContentType.Equals(OIDs.SPC_INDIRECT_DATA))
                 return;
 
             _content = contentInfo.Content;
