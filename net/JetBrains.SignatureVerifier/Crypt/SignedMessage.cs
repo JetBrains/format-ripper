@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
+using JetBrains.SignatureVerifier.Crypt.BC;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Cms;
@@ -7,6 +9,8 @@ using Org.BouncyCastle.Pkix;
 using Org.BouncyCastle.Utilities.Collections;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
+using CmsSignedData = JetBrains.SignatureVerifier.Crypt.BC.CmsSignedData;
+using SignerInformation = JetBrains.SignatureVerifier.Crypt.BC.SignerInformation;
 
 namespace JetBrains.SignatureVerifier.Crypt
 {
@@ -28,6 +32,7 @@ namespace JetBrains.SignatureVerifier.Crypt
             var asnStream = new Asn1InputStream(_data);
             _pkcs7 = ContentInfo.GetInstance(asnStream.ReadObject());
             var signedData = SignedData.GetInstance(_pkcs7.Content);
+            
             _indirectDataContent = new SpcIndirectDataContent(signedData.EncapContentInfo);
         }
 
@@ -35,9 +40,32 @@ namespace JetBrains.SignatureVerifier.Crypt
         {
             var cmsSignedData =
                 new CmsSignedData(new CmsProcessableByteArray(_indirectDataContent.SignedContent), _pkcs7);
+
             return verifySignature(cmsSignedData, readRootCertificates(rootCertificates));
         }
+       
+        private VerifySignatureResult verifySignature(CmsSignedData cmsSignedData, HashSet rootCertificates)
+        {
+            var certs = cmsSignedData.GetCertificates("Collection");
+            var signersStore = cmsSignedData.GetSignerInfos();
+            return verifySignature(signersStore, certs, rootCertificates);
+        }
 
+        private VerifySignatureResult verifySignature(IReadOnlyCollection<SignerInformation> signersStore, IX509Store certs,
+            HashSet rootCertificates)
+        {
+            foreach (var signer in signersStore)
+            {
+                var siw = new SignerInfoWrap(signer, certs, rootCertificates);
+                var result = siw.Verify();
+
+                if (result != VerifySignatureResult.OK)
+                    return result;
+            }
+
+            return VerifySignatureResult.OK;
+        }
+        
         private HashSet readRootCertificates(byte[][] rootCertificates)
         {
             if (rootCertificates == null)
@@ -55,27 +83,6 @@ namespace JetBrains.SignatureVerifier.Crypt
             return rootCerts;
         }
 
-        private VerifySignatureResult verifySignature(CmsSignedData cmsSignedData, HashSet rootCertificates)
-        {
-            var certs = cmsSignedData.GetCertificates("Collection");
-            var signersStore = cmsSignedData.GetSignerInfos();
-            return verifySignature(signersStore, certs, rootCertificates);
-        }
-
-        private VerifySignatureResult verifySignature(SignerInformationStore signersStore, IX509Store certs,
-            HashSet rootCertificates)
-        {
-            foreach (SignerInformation signer in signersStore.GetSigners())
-            {
-                var siw = new SignerInfoWrap(signer, certs, rootCertificates);
-                var result = siw.Verify();
-
-                if (result != VerifySignatureResult.OK)
-                    return result;
-            }
-
-            return VerifySignatureResult.OK;
-        }
     }
 
     public enum VerifySignatureResult

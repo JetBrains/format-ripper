@@ -4,9 +4,11 @@ using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Tsp;
 using Org.BouncyCastle.X509;
 
-namespace JetBrains.SignatureVerifier.Crypt
+namespace JetBrains.SignatureVerifier.Crypt.BC
 {
-    //Borrowed from Bouncy for custom ValidateCertificate
+    /// <summary>
+    /// Borrowed from Bouncy for custom ValidateCertificate
+    /// </summary>
     public static class TspUtil
     {
         public static void ValidateCertificate(X509Certificate cert)

@@ -16,20 +16,20 @@ using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 
-namespace JetBrains.SignatureVerifier.Crypt
+namespace JetBrains.SignatureVerifier.Crypt.BC
 {
     //Borrowed from Bouncy for custom TspUtil        
     public class TimeStampToken
     {
-        private readonly CmsSignedData tsToken;
-        private readonly SignerInformation tsaSignerInfo;
+        private readonly Org.BouncyCastle.Cms.CmsSignedData tsToken;
+        private readonly Org.BouncyCastle.Cms.SignerInformation tsaSignerInfo;
 
 //		private readonly DateTime			genTime;
         private readonly TimeStampTokenInfo tstInfo;
         private readonly CertID certID;
 
 
-        public TimeStampToken(CmsSignedData signedData)
+        public TimeStampToken(Org.BouncyCastle.Cms.CmsSignedData signedData)
         {
             this.tsToken = signedData;
 
@@ -51,7 +51,7 @@ namespace JetBrains.SignatureVerifier.Crypt
             IEnumerator signerEnum = signers.GetEnumerator();
 
             signerEnum.MoveNext();
-            tsaSignerInfo = (SignerInformation) signerEnum.Current;
+            tsaSignerInfo = (Org.BouncyCastle.Cms.SignerInformation) signerEnum.Current;
 
             try
             {
@@ -241,7 +241,7 @@ namespace JetBrains.SignatureVerifier.Crypt
 		 *
 		 * @return the underlying CMS structure.
 		 */
-        public CmsSignedData ToCmsSignedData()
+        public Org.BouncyCastle.Cms.CmsSignedData ToCmsSignedData()
         {
             return tsToken;
         }

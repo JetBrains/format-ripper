@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.SignatureVerifier.Crypt.BC;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Pkix;
@@ -10,6 +11,9 @@ using Org.BouncyCastle.Utilities.Collections;
 using Org.BouncyCastle.Utilities.Date;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
+using CmsSignedData = Org.BouncyCastle.Cms.CmsSignedData;
+using SignerInformation = JetBrains.SignatureVerifier.Crypt.BC.SignerInformation;
+using TimeStampToken = JetBrains.SignatureVerifier.Crypt.BC.TimeStampToken;
 
 namespace JetBrains.SignatureVerifier.Crypt
 {
@@ -46,6 +50,16 @@ namespace JetBrains.SignatureVerifier.Crypt
                 if (!_signer.Verify(cert))
                     return VerifySignatureResult.InvalidSignature;
 
+                var verifySignatureResult = veriryCounterSign();
+
+                if (verifySignatureResult != VerifySignatureResult.OK)
+                    return verifySignatureResult;
+                
+                verifySignatureResult = verifyTimeStamp();
+                
+                if (verifySignatureResult != VerifySignatureResult.OK)
+                    return verifySignatureResult;
+
                 if (_rootCertificates != null)
                     try
                     {
@@ -57,12 +71,7 @@ namespace JetBrains.SignatureVerifier.Crypt
                         return VerifySignatureResult.InvalidChain;
                     }
 
-                var verifySignatureResult = veriryCounterSign();
-
-                if (verifySignatureResult != VerifySignatureResult.OK)
-                    return verifySignatureResult;
-
-                return verifyTimeStamp();
+                return VerifySignatureResult.OK;
             }
             catch (CmsException e)
             {
@@ -73,7 +82,8 @@ namespace JetBrains.SignatureVerifier.Crypt
 
         private VerifySignatureResult veriryCounterSign()
         {
-            var signerInfoWraps = CounterSignatures.Select(signerInformation => new SignerInfoWrap(signerInformation, _certs, _rootCertificates));
+            var signerInfoWraps = CounterSignatures.Select(signerInformation =>
+                new SignerInfoWrap(signerInformation, _certs, _rootCertificates));
 
             foreach (var signerInfoWrap in signerInfoWraps)
             {
@@ -137,7 +147,7 @@ namespace JetBrains.SignatureVerifier.Crypt
             {
                 IsRevocationEnabled = false,
                 ValidityModel = PkixParameters.ChainValidityModel,
-                Date = signValidationTime.HasValue ? new DateTimeObject(signValidationTime.Value): null
+                Date = signValidationTime.HasValue ? new DateTimeObject(signValidationTime.Value) : null
             };
 
             builderParams.AddStore(additional);
@@ -152,7 +162,7 @@ namespace JetBrains.SignatureVerifier.Crypt
 
             void addCounterSign(SignerInformation current)
             {
-                foreach (SignerInformation signer in current.GetCounterSignatures().GetSigners())
+                foreach (var signer in current.GetCounterSignatures())
                 {
                     res.Add(signer);
                     addCounterSign(signer);
@@ -195,6 +205,4 @@ namespace JetBrains.SignatureVerifier.Crypt
             return res;
         }
     }
-
-   
 }
