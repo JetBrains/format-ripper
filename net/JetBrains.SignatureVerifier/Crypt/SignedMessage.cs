@@ -16,34 +16,35 @@ namespace JetBrains.SignatureVerifier.Crypt
 {
     public class SignedMessage
     {
-        private readonly ContentInfo _pkcs7;
-        private readonly SpcIndirectDataContent _indirectDataContent;
-
-        public byte[] GetHash() => _indirectDataContent.MessageDigest.GetDigest();
-
-        public string GetHashAlgorithmName() =>
-            Org.BouncyCastle.Security.DigestUtilities.GetAlgorithmName(_indirectDataContent.MessageDigest.AlgorithmID
-                .Algorithm);
+        private readonly CmsSignedData _cmsSignedData;
 
         public SignedMessage([NotNull] byte[] data)
         {
             var _data = data ?? throw new ArgumentNullException(nameof(data));
 
             var asnStream = new Asn1InputStream(_data);
-            _pkcs7 = ContentInfo.GetInstance(asnStream.ReadObject());
-            var signedData = SignedData.GetInstance(_pkcs7.Content);
-            
-            _indirectDataContent = new SpcIndirectDataContent(signedData.EncapContentInfo);
+            var pkcs7 = ContentInfo.GetInstance(asnStream.ReadObject());
+            _cmsSignedData = new CmsSignedData(pkcs7);
+        }
+
+        internal SignedMessage([NotNull] Asn1Object obj)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+
+            var pkcs7 = ContentInfo.GetInstance(obj);
+            _cmsSignedData = new CmsSignedData(pkcs7);
         }
 
         public VerifySignatureResult VerifySignature(byte[][] rootCertificates)
         {
-            var cmsSignedData =
-                new CmsSignedData(new CmsProcessableByteArray(_indirectDataContent.SignedContent), _pkcs7);
-
-            return verifySignature(cmsSignedData, readRootCertificates(rootCertificates));
+            return VerifySignature(readRootCertificates(rootCertificates));
         }
-       
+
+        internal VerifySignatureResult VerifySignature(HashSet rootCertificates)
+        {
+            return verifySignature(_cmsSignedData, rootCertificates);
+        }
+
         private VerifySignatureResult verifySignature(CmsSignedData cmsSignedData, HashSet rootCertificates)
         {
             var certs = cmsSignedData.GetCertificates("Collection");
@@ -51,7 +52,8 @@ namespace JetBrains.SignatureVerifier.Crypt
             return verifySignature(signersStore, certs, rootCertificates);
         }
 
-        private VerifySignatureResult verifySignature(IReadOnlyCollection<SignerInformation> signersStore, IX509Store certs,
+        private VerifySignatureResult verifySignature(IReadOnlyCollection<SignerInformation> signersStore,
+            IX509Store certs,
             HashSet rootCertificates)
         {
             foreach (var signer in signersStore)
@@ -65,7 +67,7 @@ namespace JetBrains.SignatureVerifier.Crypt
 
             return VerifySignatureResult.OK;
         }
-        
+
         private HashSet readRootCertificates(byte[][] rootCertificates)
         {
             if (rootCertificates == null)
@@ -82,7 +84,6 @@ namespace JetBrains.SignatureVerifier.Crypt
 
             return rootCerts;
         }
-
     }
 
     public enum VerifySignatureResult

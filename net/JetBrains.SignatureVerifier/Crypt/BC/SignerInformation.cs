@@ -245,7 +245,7 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
         }
 
         /**
-		* Return a SignerInformationStore containing the counter signatures attached to this
+		* Return a collection containing the counter signatures attached to this
 		* signer. If no counter signatures are present an empty store is returned.
 		*/
         public IReadOnlyCollection<SignerInformation> GetCounterSignatures()

@@ -17,7 +17,10 @@ namespace JetBrains.SignatureVerifier.Tests
         private const string pe_01_sha1 = "D64EC6AEC642441554E7CBA0E0513E35683C87AE";
         private const string pe_01_broken_sign = "ServiceModelRegUI_broken_sign.dll";
         private const string pe_01_broken_counter_sign = "ServiceModelRegUI_broken_counter_sign.dll";
+        private const string pe_01_broken_nested_sign = "ServiceModelRegUI_broken_nested_sign.dll";
+        private const string pe_01_broken_nested_sign_timestamp = "ServiceModelRegUI_broken_nested_sign_timestamp.dll";
         private const string pe_01_sha256 = "834394AC48C8AB8F6D21E64A2461BA196D28140558D36430C057E49ADF41967A";
+        private const string ms_root_01 = "Microsoft Root Certificate Authority.cer";
         private const string ms_root_2010 = "Microsoft Root Certificate Authority 2010.cer";
         private const string ms_root_2011 = "Microsoft Root Certificate Authority 2011.cer";
 
@@ -46,12 +49,15 @@ namespace JetBrains.SignatureVerifier.Tests
         [TestCase(pe_01_broken_hash, VerifySignatureResult.InvalidSignature)]
         [TestCase(pe_01_broken_sign, VerifySignatureResult.InvalidSignature)]
         [TestCase(pe_01_broken_counter_sign, VerifySignatureResult.InvalidSignature)]
+        [TestCase(pe_01_broken_nested_sign, VerifySignatureResult.InvalidSignature)]
+        [TestCase(pe_01_broken_nested_sign_timestamp, VerifySignatureResult.InvalidTimestamp)]
         [TestCase(pe_02_empty_sign, VerifySignatureResult.NotSigned)]
         [TestCase(pe_03_signed, VerifySignatureResult.OK)]
         [TestCase(pe_04_signed, VerifySignatureResult.OK)]
         [TestCase(pe_05_signed, VerifySignatureResult.InvalidSignature)]
         [TestCase(pe_06_signed, VerifySignatureResult.InvalidSignature)]
         [TestCase(pe_07_signed, VerifySignatureResult.OK)]
+        [TestCase(pe_09_broken_timestamp, VerifySignatureResult.InvalidTimestamp)]
         public void VerifySignTest(string peResourceName, VerifySignatureResult expectedResult)
         {
             var result = Utils.StreamFromResource(peResourceName,
@@ -60,10 +66,9 @@ namespace JetBrains.SignatureVerifier.Tests
             Assert.AreEqual(expectedResult, result);
         }
 
-        [TestCase(pe_01_signed, VerifySignatureResult.OK, ms_root_2011)]
+        [TestCase(pe_01_signed, VerifySignatureResult.OK, ms_root_01, ms_root_2010, ms_root_2011)]
         [TestCase(pe_07_signed, VerifySignatureResult.OK, pe_07_sign_root, pe_07_ts_root)]
         [TestCase(pe_08_signed, VerifySignatureResult.OK, ms_root_2010, ms_root_2011)]
-        [TestCase(pe_09_broken_timestamp, VerifySignatureResult.InvalidTimestamp, ms_root_2010, ms_root_2011)]
         public void VerifySignWithChainTest(string peResourceName,
             VerifySignatureResult expectedResult, params string[] rootCertsResourceName)
         {

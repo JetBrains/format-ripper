@@ -6,11 +6,13 @@ using JetBrains.SignatureVerifier.Crypt.BC;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Pkix;
+using Org.BouncyCastle.Security.Certificates;
 using Org.BouncyCastle.Tsp;
 using Org.BouncyCastle.Utilities.Collections;
 using Org.BouncyCastle.Utilities.Date;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
+using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using CmsSignedData = Org.BouncyCastle.Cms.CmsSignedData;
 using SignerInformation = JetBrains.SignatureVerifier.Crypt.BC.SignerInformation;
 using TimeStampToken = JetBrains.SignatureVerifier.Crypt.BC.TimeStampToken;
@@ -36,7 +38,7 @@ namespace JetBrains.SignatureVerifier.Crypt
             _rootCertificates = rootCertificates;
         }
 
-        public VerifySignatureResult Verify()
+        public VerifySignatureResult Verify(DateTime? signValidationTime = null)
         {
             var certList = new ArrayList(_certs.GetMatches(_signer.SignerID));
 
@@ -50,20 +52,25 @@ namespace JetBrains.SignatureVerifier.Crypt
                 if (!_signer.Verify(cert))
                     return VerifySignatureResult.InvalidSignature;
 
-                var verifySignatureResult = veriryCounterSign();
+                var verifySignatureResult = veriryCounterSign(getTimestamp() ?? signValidationTime);
 
                 if (verifySignatureResult != VerifySignatureResult.OK)
                     return verifySignatureResult;
-                
+
                 verifySignatureResult = verifyTimeStamp();
-                
+
+                if (verifySignatureResult != VerifySignatureResult.OK)
+                    return verifySignatureResult;
+
+                verifySignatureResult = verifyNestedSigns();
+
                 if (verifySignatureResult != VerifySignatureResult.OK)
                     return verifySignatureResult;
 
                 if (_rootCertificates != null)
                     try
                     {
-                        buildCertificateChain(cert, _certs, _rootCertificates, getTimestamp());
+                        buildCertificateChain(cert, _certs, _rootCertificates, getTimestamp() ?? signValidationTime);
                     }
                     catch (PkixCertPathBuilderException e)
                     {
@@ -80,14 +87,37 @@ namespace JetBrains.SignatureVerifier.Crypt
             }
         }
 
-        private VerifySignatureResult veriryCounterSign()
+        private VerifySignatureResult verifyNestedSigns()
+        {
+            var nestedSignAttrs = _signer.UnsignedAttributes?.GetAll(OIDs.SPC_NESTED_SIGNATURE);
+
+            if (nestedSignAttrs != null)
+            {
+                foreach (Attribute nestedSignAttr in nestedSignAttrs)
+                {
+                    if (nestedSignAttr.AttrValues.Count > 0)
+                    {
+                        var nestedSignVerifyResult =
+                            new SignedMessage(nestedSignAttr.AttrValues[0].ToAsn1Object()).VerifySignature(
+                                _rootCertificates);
+
+                        if (nestedSignVerifyResult != VerifySignatureResult.OK)
+                            return nestedSignVerifyResult;
+                    }
+                }
+            }
+
+            return VerifySignatureResult.OK;
+        }
+
+        private VerifySignatureResult veriryCounterSign(DateTime? signValidationTime)
         {
             var signerInfoWraps = CounterSignatures.Select(signerInformation =>
                 new SignerInfoWrap(signerInformation, _certs, _rootCertificates));
 
             foreach (var signerInfoWrap in signerInfoWraps)
             {
-                var res = signerInfoWrap.Verify();
+                var res = signerInfoWrap.Verify(signValidationTime);
 
                 if (res != VerifySignatureResult.OK)
                     return res;
@@ -129,6 +159,11 @@ namespace JetBrains.SignatureVerifier.Crypt
                     }
             }
             catch (TspException e)
+            {
+                Console.WriteLine(e);
+                return VerifySignatureResult.InvalidTimestamp;
+            }
+            catch (CertificateExpiredException e)
             {
                 Console.WriteLine(e);
                 return VerifySignatureResult.InvalidTimestamp;

@@ -26,8 +26,6 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
             this.signedData = SignedData.GetInstance(contentInfo.Content);
         }
 
-        //TODO acoder84 implement
-
         public CmsSignedData(
             ContentInfo sigData)
         {
@@ -40,13 +38,16 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
             //
             if (signedData.EncapContentInfo.Content != null)
             {
-                this.signedContent = new CmsProcessableByteArray(
-                    ((Asn1OctetString) (signedData.EncapContentInfo.Content)).GetOctets());
+                if (signedData.EncapContentInfo.Content is Asn1OctetString)
+                {
+                    signedContent = new CmsProcessableByteArray(
+                        ((Asn1OctetString) (signedData.EncapContentInfo.Content)).GetOctets());
+                }
+                else
+                {
+                    signedContent = new Pkcs7ProcessableObject(signedData.EncapContentInfo.ContentType, signedData.EncapContentInfo.Content);
+                }
             }
-//			else
-//			{
-//				this.signedContent = null;
-//			}
         }
 
         /// <summary>Return the version number for this object.</summary>

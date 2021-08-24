@@ -167,16 +167,6 @@ namespace JetBrains.SignatureVerifier
         }
 
         /// <summary>
-        /// Retrieve an existing PE hash from a signature data
-        /// </summary>
-        public byte[] GetHash() => Cms?.GetHash();
-
-        /// <summary>
-        /// Retrieve an existing hash algorithm name from a signature data
-        /// </summary>
-        public string GetHashAlgorithmName() => Cms?.GetHashAlgorithmName();
-
-        /// <summary>
         /// Validate the signature of the PE
         /// </summary>
         /// <param name="rootCertificates">A chain for thes certificates will be build and validate</param>
