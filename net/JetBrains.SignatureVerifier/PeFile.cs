@@ -171,8 +171,8 @@ namespace JetBrains.SignatureVerifier
         /// </summary>
         /// <param name="rootCertificates">A chain for thes certificates will be build and validate</param>
         /// <returns>Validation status</returns>
-        public VerifySignatureResult VerifySignature(byte[][] rootCertificates) =>
-            Cms?.VerifySignature(rootCertificates) ?? VerifySignatureResult.NotSigned;
+        public VerifySignatureResult VerifySignature(Stream signRootCertStore, Stream timestampRootCertStore) =>
+            Cms?.VerifySignature(signRootCertStore, timestampRootCertStore) ?? VerifySignatureResult.NotSigned;
 
         private byte[] getRawPeData()
         {

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using JetBrains.Annotations;
 using JetBrains.SignatureVerifier.Crypt.BC;
 using Org.BouncyCastle.Asn1;
@@ -35,9 +37,9 @@ namespace JetBrains.SignatureVerifier.Crypt
             _cmsSignedData = new CmsSignedData(pkcs7);
         }
 
-        public VerifySignatureResult VerifySignature(byte[][] rootCertificates)
+        public VerifySignatureResult VerifySignature(Stream signRootCertStore, Stream timestampRootCertStore)
         {
-            return VerifySignature(readRootCertificates(rootCertificates));
+            return VerifySignature(readRootCertificates(signRootCertStore, timestampRootCertStore));
         }
 
         internal VerifySignatureResult VerifySignature(HashSet rootCertificates)
@@ -68,21 +70,25 @@ namespace JetBrains.SignatureVerifier.Crypt
             return VerifySignatureResult.OK;
         }
 
-        private HashSet readRootCertificates(byte[][] rootCertificates)
+        private HashSet readRootCertificates(Stream signRootCertStore, Stream timestampRootCertStore)
         {
-            if (rootCertificates == null)
+            if (signRootCertStore is null 
+                && timestampRootCertStore is null)
                 return null;
 
             HashSet rootCerts = new HashSet();
             X509CertificateParser parser = new X509CertificateParser();
-
-            foreach (var stream in rootCertificates)
-            {
-                X509Certificate rootCertificate = parser.ReadCertificate(stream);
-                rootCerts.Add(new TrustAnchor(rootCertificate, new byte[0]));
-            }
-
+            addCerts(signRootCertStore);
+            addCerts(timestampRootCertStore);
             return rootCerts;
+
+            void addCerts(Stream storeStream)
+            {
+                if (storeStream is not null)
+                    rootCerts.AddAll(parser.ReadCertificates(storeStream)
+                            .Cast<X509Certificate>()
+                            .Select(cert => new TrustAnchor(cert, new byte[0])));
+            }
         }
     }
 

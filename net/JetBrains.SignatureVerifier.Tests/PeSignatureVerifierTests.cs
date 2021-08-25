@@ -20,9 +20,8 @@ namespace JetBrains.SignatureVerifier.Tests
         private const string pe_01_broken_nested_sign = "ServiceModelRegUI_broken_nested_sign.dll";
         private const string pe_01_broken_nested_sign_timestamp = "ServiceModelRegUI_broken_nested_sign_timestamp.dll";
         private const string pe_01_sha256 = "834394AC48C8AB8F6D21E64A2461BA196D28140558D36430C057E49ADF41967A";
-        private const string ms_root_01 = "Microsoft Root Certificate Authority.cer";
-        private const string ms_root_2010 = "Microsoft Root Certificate Authority 2010.cer";
-        private const string ms_root_2011 = "Microsoft Root Certificate Authority 2011.cer";
+        private const string ms_codesign_roots = "ms_codesign_roots.p7b";
+        private const string ms_timestamp_root = "ms_timestamp_root.p7b";
 
         private const string pe_02_empty_sign = "uninst.exe";
         private const string pe_02_sha1 = "58AA2C6CF6A446426F3596F1BC4AB4E1FAAC297A";
@@ -36,8 +35,8 @@ namespace JetBrains.SignatureVerifier.Tests
         private const string pe_05_signed = "libcrypto-1_1-x64.dll";
         private const string pe_06_signed = "libssl-1_1-x64.dll";
         private const string pe_07_signed = "JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe";
-        private const string pe_07_sign_root = "Go Daddy Root Certificate Authority - G2.cer";
-        private const string pe_07_ts_root = "Certum Trusted Network CA.cer";
+        private const string jb_codesign_roots = "jb_codesign_roots.p7b";
+        private const string jb_timestamp_roots = "jb_timestamp_roots.p7b";
 
         private const string pe_08_signed = "dotnet.exe";
         private const string pe_09_broken_timestamp = "dotnet_broken_timestamp.exe";
@@ -61,26 +60,25 @@ namespace JetBrains.SignatureVerifier.Tests
         public void VerifySignTest(string peResourceName, VerifySignatureResult expectedResult)
         {
             var result = Utils.StreamFromResource(peResourceName,
-                peFileStream => new PeFile(peFileStream).VerifySignature(null));
+                peFileStream => new PeFile(peFileStream).VerifySignature(null,null));
 
             Assert.AreEqual(expectedResult, result);
         }
 
-        [TestCase(pe_01_signed, VerifySignatureResult.OK, ms_root_01, ms_root_2010, ms_root_2011)]
-        [TestCase(pe_07_signed, VerifySignatureResult.OK, pe_07_sign_root, pe_07_ts_root)]
-        [TestCase(pe_08_signed, VerifySignatureResult.OK, ms_root_2010, ms_root_2011)]
+        [TestCase(pe_01_signed, VerifySignatureResult.OK, ms_codesign_roots, ms_timestamp_root)]
+        [TestCase(pe_07_signed, VerifySignatureResult.OK, jb_codesign_roots, jb_timestamp_roots)]
+        [TestCase(pe_08_signed, VerifySignatureResult.OK, ms_codesign_roots, ms_timestamp_root)]
         public void VerifySignWithChainTest(string peResourceName,
-            VerifySignatureResult expectedResult, params string[] rootCertsResourceName)
+            VerifySignatureResult expectedResult,
+            string codesignRootCertStoreResourceName,
+            string timestampRootCertStoreResourceName)
         {
-            var certs = rootCertsResourceName.Select(name => Utils.StreamFromResource(name, stream =>
-            {
-                using var ms = new MemoryStream();
-                stream.CopyTo(ms);
-                return ms.ToArray();
-            })).ToArray();
-
             var result = Utils.StreamFromResource(peResourceName,
-                peFileStream => new PeFile(peFileStream).VerifySignature(certs));
+                pe =>
+                    Utils.StreamFromResource(codesignRootCertStoreResourceName,
+                        codesignroots =>
+                            Utils.StreamFromResource(timestampRootCertStoreResourceName,
+                                timestamproots => new PeFile(pe).VerifySignature(codesignroots, timestamproots))));
 
             Assert.AreEqual(expectedResult, result);
         }
