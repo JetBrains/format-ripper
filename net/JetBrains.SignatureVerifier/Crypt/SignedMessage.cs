@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
-using JetBrains.SignatureVerifier.Crypt.BC;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Cms;
@@ -11,8 +10,8 @@ using Org.BouncyCastle.Pkix;
 using Org.BouncyCastle.Utilities.Collections;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
-using CmsSignedData = JetBrains.SignatureVerifier.Crypt.BC.CmsSignedData;
-using SignerInformation = JetBrains.SignatureVerifier.Crypt.BC.SignerInformation;
+using CmsSignedData = JetBrains.SignatureVerifier.BouncyCastle.Cms.CmsSignedData;
+using SignerInformationStore = JetBrains.SignatureVerifier.BouncyCastle.Cms.SignerInformationStore;
 
 namespace JetBrains.SignatureVerifier.Crypt
 {
@@ -54,11 +53,11 @@ namespace JetBrains.SignatureVerifier.Crypt
             return verifySignature(signersStore, certs, rootCertificates);
         }
 
-        private VerifySignatureResult verifySignature(IReadOnlyCollection<SignerInformation> signersStore,
+        private VerifySignatureResult verifySignature(SignerInformationStore signersStore,
             IX509Store certs,
             HashSet rootCertificates)
         {
-            foreach (var signer in signersStore)
+            foreach (JetBrains.SignatureVerifier.BouncyCastle.Cms.SignerInformation signer in signersStore.GetSigners())
             {
                 var siw = new SignerInfoWrap(signer, certs, rootCertificates);
                 var result = siw.Verify();

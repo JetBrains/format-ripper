@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.SignatureVerifier.Crypt.BC;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Pkix;
@@ -13,9 +12,9 @@ using Org.BouncyCastle.Utilities.Date;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
-using CmsSignedData = Org.BouncyCastle.Cms.CmsSignedData;
-using SignerInformation = JetBrains.SignatureVerifier.Crypt.BC.SignerInformation;
-using TimeStampToken = JetBrains.SignatureVerifier.Crypt.BC.TimeStampToken;
+using CmsSignedData = JetBrains.SignatureVerifier.BouncyCastle.Cms.CmsSignedData;
+using SignerInformation = JetBrains.SignatureVerifier.BouncyCastle.Cms.SignerInformation;
+using TimeStampToken = JetBrains.SignatureVerifier.BouncyCastle.Tsp.TimeStampToken;
 
 namespace JetBrains.SignatureVerifier.Crypt
 {
@@ -197,7 +196,7 @@ namespace JetBrains.SignatureVerifier.Crypt
 
             void addCounterSign(SignerInformation current)
             {
-                foreach (var signer in current.GetCounterSignatures())
+                foreach (SignerInformation signer in current.GetCounterSignatures().GetSigners())
                 {
                     res.Add(signer);
                     addCounterSign(signer);

@@ -1,4 +1,5 @@
-﻿using System;
+
+using System;
 using System.Collections;
 using System.IO;
 using Org.BouncyCastle.Asn1;
@@ -15,58 +16,65 @@ using Org.BouncyCastle.Tsp;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
+using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
+using ContentInfo = Org.BouncyCastle.Asn1.Cms.ContentInfo;
+using CmsSignedData = JetBrains.SignatureVerifier.BouncyCastle.Cms.CmsSignedData;
+using SignerInformation = JetBrains.SignatureVerifier.BouncyCastle.Cms.SignerInformation;
 
-namespace JetBrains.SignatureVerifier.Crypt.BC
+namespace JetBrains.SignatureVerifier.BouncyCastle.Tsp
 {
-    //Borrowed from Bouncy for custom TspUtil        
-    public class TimeStampToken
-    {
-        private readonly Org.BouncyCastle.Cms.CmsSignedData tsToken;
-        private readonly Org.BouncyCastle.Cms.SignerInformation tsaSignerInfo;
-
+	public class TimeStampToken
+	{
+		private readonly CmsSignedData		tsToken;
+		private readonly SignerInformation	tsaSignerInfo;
 //		private readonly DateTime			genTime;
-        private readonly TimeStampTokenInfo tstInfo;
-        private readonly CertID certID;
+		private readonly TimeStampTokenInfo	tstInfo;
+		private readonly CertID				certID;
+
+		public TimeStampToken(
+			ContentInfo contentInfo)
+				: this(new CmsSignedData(contentInfo))
+		{
+		}
+
+		public TimeStampToken(
+			CmsSignedData signedData)
+		{
+			this.tsToken = signedData;
+
+			if (!this.tsToken.SignedContentType.Equals(PkcsObjectIdentifiers.IdCTTstInfo))
+			{
+				throw new TspValidationException("ContentInfo object not for a time stamp.");
+			}
+
+			ICollection signers = tsToken.GetSignerInfos().GetSigners();
+
+			if (signers.Count != 1)
+			{
+				throw new ArgumentException("Time-stamp token signed by "
+					+ signers.Count
+					+ " signers, but it must contain just the TSA signature.");
+			}
 
 
-        public TimeStampToken(Org.BouncyCastle.Cms.CmsSignedData signedData)
-        {
-            this.tsToken = signedData;
+			IEnumerator signerEnum = signers.GetEnumerator();
 
-            if (!this.tsToken.SignedContentType.Equals(PkcsObjectIdentifiers.IdCTTstInfo))
-            {
-                throw new TspValidationException("ContentInfo object not for a time stamp.");
-            }
+			signerEnum.MoveNext();
+			tsaSignerInfo = (SignerInformation) signerEnum.Current;
 
-            ICollection signers = tsToken.GetSignerInfos().GetSigners();
+			try
+			{
+				CmsProcessable content = tsToken.SignedContent;
+				MemoryStream bOut = new MemoryStream();
 
-            if (signers.Count != 1)
-            {
-                throw new ArgumentException("Time-stamp token signed by "
-                                            + signers.Count
-                                            + " signers, but it must contain just the TSA signature.");
-            }
+				content.Write(bOut);
 
+				this.tstInfo = new TimeStampTokenInfo(
+					TstInfo.GetInstance(
+						Asn1Object.FromByteArray(bOut.ToArray())));
 
-            IEnumerator signerEnum = signers.GetEnumerator();
-
-            signerEnum.MoveNext();
-            tsaSignerInfo = (Org.BouncyCastle.Cms.SignerInformation) signerEnum.Current;
-
-            try
-            {
-                CmsProcessable content = tsToken.SignedContent;
-                MemoryStream bOut = new MemoryStream();
-
-                content.Write(bOut);
-
-                this.tstInfo = new TimeStampTokenInfo(
-                    TstInfo.GetInstance(
-                        Asn1Object.FromByteArray(bOut.ToArray())));
-
-                Org.BouncyCastle.Asn1.Cms.Attribute attr =
-                    tsaSignerInfo.SignedAttributes[PkcsObjectIdentifiers.IdAASigningCertificate];
-
+				Attribute attr = tsaSignerInfo.SignedAttributes[
+					PkcsObjectIdentifiers.IdAASigningCertificate];
 
 //				if (attr == null)
 //				{
@@ -79,81 +87,82 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
 //
 //				this.certID = EssCertID.GetInstance(signCert.GetCerts()[0]);
 
-                if (attr != null)
-                {
-                    if (attr.AttrValues[0] is SigningCertificateV2)
-                    {
-                        SigningCertificateV2 signCert = SigningCertificateV2.GetInstance(attr.AttrValues[0]);
-                        this.certID = new CertID(EssCertIDv2.GetInstance(signCert.GetCerts()[0]));
-                    }
-                    else
-                    {
-                        SigningCertificate signCert = SigningCertificate.GetInstance(attr.AttrValues[0]);
-                        this.certID = new CertID(EssCertID.GetInstance(signCert.GetCerts()[0]));
-                    }
-                }
-                else
-                {
-                    attr = tsaSignerInfo.SignedAttributes[PkcsObjectIdentifiers.IdAASigningCertificateV2];
+				if (attr != null)
+				{
 
-                    if (attr == null)
-                        throw new TspValidationException("no signing certificate attribute found, time stamp invalid.");
+					if (attr.AttrValues[0] is SigningCertificateV2)
+					{
+						SigningCertificateV2 signCert = SigningCertificateV2.GetInstance(attr.AttrValues[0]);
+						this.certID = new CertID(EssCertIDv2.GetInstance(signCert.GetCerts()[0]));
+					}
+					else
+					{
+						SigningCertificate signCert = SigningCertificate.GetInstance(attr.AttrValues[0]);
+						this.certID = new CertID(EssCertID.GetInstance(signCert.GetCerts()[0]));
+					}
+				}
+				else
+				{
+					attr = tsaSignerInfo.SignedAttributes[PkcsObjectIdentifiers.IdAASigningCertificateV2];
 
-                    SigningCertificateV2 signCertV2 = SigningCertificateV2.GetInstance(attr.AttrValues[0]);
+					if (attr == null)
+						throw new TspValidationException("no signing certificate attribute found, time stamp invalid.");
 
-                    this.certID = new CertID(EssCertIDv2.GetInstance(signCertV2.GetCerts()[0]));
-                }
-            }
-            catch (CmsException e)
-            {
-                throw new TspException(e.Message, e.InnerException);
-            }
-        }
+					SigningCertificateV2 signCertV2 = SigningCertificateV2.GetInstance(attr.AttrValues[0]);
 
-        public TimeStampTokenInfo TimeStampInfo
-        {
-            get { return tstInfo; }
-        }
+					this.certID = new CertID(EssCertIDv2.GetInstance(signCertV2.GetCerts()[0]));
+				}
+			}
+			catch (CmsException e)
+			{
+				throw new TspException(e.Message, e.InnerException);
+			}
+		}
 
-        public SignerID SignerID
-        {
-            get { return tsaSignerInfo.SignerID; }
-        }
+		public TimeStampTokenInfo TimeStampInfo
+		{
+			get { return tstInfo; }
+		}
 
-        public Org.BouncyCastle.Asn1.Cms.AttributeTable SignedAttributes
-        {
-            get { return tsaSignerInfo.SignedAttributes; }
-        }
+		public SignerID SignerID
+		{
+			get { return tsaSignerInfo.SignerID; }
+		}
 
-        public Org.BouncyCastle.Asn1.Cms.AttributeTable UnsignedAttributes
-        {
-            get { return tsaSignerInfo.UnsignedAttributes; }
-        }
+		public Org.BouncyCastle.Asn1.Cms.AttributeTable SignedAttributes
+		{
+			get { return tsaSignerInfo.SignedAttributes; }
+		}
 
-        public IX509Store GetCertificates(
-            string type)
-        {
-            return tsToken.GetCertificates(type);
-        }
+		public Org.BouncyCastle.Asn1.Cms.AttributeTable UnsignedAttributes
+		{
+			get { return tsaSignerInfo.UnsignedAttributes; }
+		}
 
-        public IX509Store GetCrls(
-            string type)
-        {
-            return tsToken.GetCrls(type);
-        }
+		public IX509Store GetCertificates(
+			string type)
+		{
+			return tsToken.GetCertificates(type);
+		}
+
+		public IX509Store GetCrls(
+			string type)
+		{
+			return tsToken.GetCrls(type);
+		}
 
         public IX509Store GetCertificates()
         {
-            return tsToken.GetCertificates("Collection");
+			return tsToken.GetCertificates();
         }
 
         public IX509Store GetAttributeCertificates(
-            string type)
-        {
-            return tsToken.GetAttributeCertificates(type);
-        }
+			string type)
+	    {
+	        return tsToken.GetAttributeCertificates(type);
+	    }
 
-        /**
+		/**
 		 * Validate the time stamp token.
 		 * <p>
 		 * To be valid the token must be signed by the passed in certificate and
@@ -167,92 +176,91 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
 		 * A successful call to validate means all the above are true.
 		 * </p>
 		 */
-        public void Validate(
-            X509Certificate cert)
-        {
-            try
-            {
-                byte[] hash = DigestUtilities.CalculateDigest(
-                    certID.GetHashAlgorithmName(), cert.GetEncoded());
+		public void Validate(
+			X509Certificate cert)
+		{
+			try
+			{
+				byte[] hash = DigestUtilities.CalculateDigest(
+					certID.GetHashAlgorithmName(), cert.GetEncoded());
 
-                if (!Arrays.ConstantTimeAreEqual(certID.GetCertHash(), hash))
-                {
-                    throw new TspValidationException("certificate hash does not match certID hash.");
-                }
+				if (!Arrays.ConstantTimeAreEqual(certID.GetCertHash(), hash))
+				{
+					throw new TspValidationException("certificate hash does not match certID hash.");
+				}
 
-                if (certID.IssuerSerial != null)
-                {
-                    if (!certID.IssuerSerial.Serial.Value.Equals(cert.SerialNumber))
-                    {
-                        throw new TspValidationException(
-                            "certificate serial number does not match certID for signature.");
-                    }
+				if (certID.IssuerSerial != null)
+				{
+					if (!certID.IssuerSerial.Serial.Value.Equals(cert.SerialNumber))
+					{
+						throw new TspValidationException("certificate serial number does not match certID for signature.");
+					}
 
-                    GeneralName[] names = certID.IssuerSerial.Issuer.GetNames();
-                    X509Name principal = PrincipalUtilities.GetIssuerX509Principal(cert);
-                    bool found = false;
+					GeneralName[] names = certID.IssuerSerial.Issuer.GetNames();
+					X509Name principal = PrincipalUtilities.GetIssuerX509Principal(cert);
+					bool found = false;
 
-                    for (int i = 0; i != names.Length; i++)
-                    {
-                        if (names[i].TagNo == 4
-                            && X509Name.GetInstance(names[i].Name).Equivalent(principal))
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
+					for (int i = 0; i != names.Length; i++)
+					{
+						if (names[i].TagNo == 4
+							&& X509Name.GetInstance(names[i].Name).Equivalent(principal))
+						{
+							found = true;
+							break;
+						}
+					}
 
-                    if (!found)
-                    {
-                        throw new TspValidationException("certificate name does not match certID for signature. ");
-                    }
-                }
+					if (!found)
+					{
+						throw new TspValidationException("certificate name does not match certID for signature. ");
+					}
+				}
 
-                TspUtil.ValidateCertificate(cert);
+				TspUtil.ValidateCertificate(cert);
 
-                cert.CheckValidity(tstInfo.GenTime);
+				cert.CheckValidity(tstInfo.GenTime);
 
-                if (!tsaSignerInfo.Verify(cert))
-                {
-                    throw new TspValidationException("signature not created by certificate.");
-                }
-            }
-            catch (CmsException e)
-            {
-                if (e.InnerException != null)
-                {
-                    throw new TspException(e.Message, e.InnerException);
-                }
+				if (!tsaSignerInfo.Verify(cert))
+				{
+					throw new TspValidationException("signature not created by certificate.");
+				}
+			}
+			catch (CmsException e)
+			{
+				if (e.InnerException != null)
+				{
+					throw new TspException(e.Message, e.InnerException);
+				}
 
-                throw new TspException("CMS exception: " + e, e);
-            }
-            catch (CertificateEncodingException e)
-            {
-                throw new TspException("problem processing certificate: " + e, e);
-            }
-            catch (SecurityUtilityException e)
-            {
-                throw new TspException("cannot find algorithm: " + e.Message, e);
-            }
-        }
+				throw new TspException("CMS exception: " + e, e);
+			}
+			catch (CertificateEncodingException e)
+			{
+				throw new TspException("problem processing certificate: " + e, e);
+			}
+			catch (SecurityUtilityException e)
+			{
+				throw new TspException("cannot find algorithm: " + e.Message, e);
+			}
+		}
 
-        /**
+		/**
 		 * Return the underlying CmsSignedData object.
 		 *
 		 * @return the underlying CMS structure.
 		 */
-        public Org.BouncyCastle.Cms.CmsSignedData ToCmsSignedData()
-        {
-            return tsToken;
-        }
+		public CmsSignedData ToCmsSignedData()
+		{
+			return tsToken;
+		}
 
-        /**
+		/**
 		 * Return a ASN.1 encoded byte stream representing the encoded object.
 		 *
 		 * @throws IOException if encoding fails.
 		 */
-        public byte[] GetEncoded()
-        {
+		public byte[] GetEncoded()
+		{
             return tsToken.GetEncoded(Asn1Encodable.Der);
         }
 
@@ -266,58 +274,58 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
             return tsToken.GetEncoded(encoding);
         }
 
-        // perhaps this should be done using an interface on the ASN.1 classes...
-        private class CertID
-        {
-            private EssCertID certID;
-            private EssCertIDv2 certIDv2;
+		// perhaps this should be done using an interface on the ASN.1 classes...
+		private class CertID
+		{
+			private EssCertID certID;
+			private EssCertIDv2 certIDv2;
 
-            internal CertID(EssCertID certID)
-            {
-                this.certID = certID;
-                this.certIDv2 = null;
-            }
+			internal CertID(EssCertID certID)
+			{
+				this.certID = certID;
+				this.certIDv2 = null;
+			}
 
-            internal CertID(EssCertIDv2 certID)
-            {
-                this.certIDv2 = certID;
-                this.certID = null;
-            }
+			internal CertID(EssCertIDv2 certID)
+			{
+				this.certIDv2 = certID;
+				this.certID = null;
+			}
 
-            public string GetHashAlgorithmName()
-            {
-                if (certID != null)
-                    return "SHA-1";
+			public string GetHashAlgorithmName()
+			{
+				if (certID != null)
+					return "SHA-1";
 
                 if (NistObjectIdentifiers.IdSha256.Equals(certIDv2.HashAlgorithm.Algorithm))
-                    return "SHA-256";
+					return "SHA-256";
 
                 return certIDv2.HashAlgorithm.Algorithm.Id;
-            }
+			}
 
-            public AlgorithmIdentifier GetHashAlgorithm()
-            {
-                return (certID != null)
-                    ? new AlgorithmIdentifier(OiwObjectIdentifiers.IdSha1)
-                    : certIDv2.HashAlgorithm;
-            }
+			public AlgorithmIdentifier GetHashAlgorithm()
+			{
+				return (certID != null)
+					?	new AlgorithmIdentifier(OiwObjectIdentifiers.IdSha1)
+					:	certIDv2.HashAlgorithm;
+			}
 
-            public byte[] GetCertHash()
-            {
-                return certID != null
-                    ? certID.GetCertHash()
-                    : certIDv2.GetCertHash();
-            }
+			public byte[] GetCertHash()
+			{
+				return certID != null
+					?	certID.GetCertHash()
+					:	certIDv2.GetCertHash();
+			}
 
-            public IssuerSerial IssuerSerial
-            {
-                get
-                {
-                    return certID != null
-                        ? certID.IssuerSerial
-                        : certIDv2.IssuerSerial;
-                }
-            }
-        }
-    }
+			public IssuerSerial IssuerSerial
+			{
+				get
+				{
+					return certID != null
+						?	certID.IssuerSerial
+						:	certIDv2.IssuerSerial;
+				}
+			}
+		}
+	}
 }

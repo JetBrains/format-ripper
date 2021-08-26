@@ -1,10 +1,9 @@
-﻿namespace JetBrains.SignatureVerifier.Crypt.BC
+using System;
+
+namespace JetBrains.SignatureVerifier.BouncyCastle.Cms
 {
-    /// <summary>
-    /// Borrowed from Org.BouncyCastle.Cms.IDigestCalculator
-    /// </summary>
-    internal interface IDigestCalculator
-    {
-        byte[] GetDigest();
-    }
+	internal interface IDigestCalculator
+	{
+		byte[] GetDigest();
+	}
 }
