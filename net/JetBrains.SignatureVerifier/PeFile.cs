@@ -2,6 +2,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using JetBrains.SignatureVerifier.Crypt;
 
@@ -169,10 +170,18 @@ namespace JetBrains.SignatureVerifier
         /// <summary>
         /// Validate the signature of the PE
         /// </summary>
-        /// <param name="rootCertificates">A chain for thes certificates will be build and validate</param>
+        /// <param name="signRootCertStore">Stream of PKCS #7 store with CA certificates for which a chain will be build and validate</param>
+        /// <param name="timestampRootCertStore">Stream of PKCS #7 store with a timestamp CA certificates for which a chain will be build and validate</param>
+        /// <param name="withRevocationCheck">If true - verify a revocation status for certificates in all chains</param>
         /// <returns>Validation status</returns>
-        public VerifySignatureResult VerifySignature(Stream signRootCertStore, Stream timestampRootCertStore) =>
-            Cms?.VerifySignature(signRootCertStore, timestampRootCertStore) ?? VerifySignatureResult.NotSigned;
+        public async Task<VerifySignatureResult> VerifySignatureAsync(Stream signRootCertStore, Stream timestampRootCertStore,
+            bool withRevocationCheck)
+        {
+            if (Cms is null)
+                return VerifySignatureResult.NotSigned;
+
+            return await Cms.VerifySignatureAsync(signRootCertStore, timestampRootCertStore, withRevocationCheck); 
+        }
 
         private byte[] getRawPeData()
         {

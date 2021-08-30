@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.IO;
+using System.Threading.Tasks;
 using JetBrains.SignatureVerifier.Crypt;
 using NUnit.Framework;
 
@@ -57,28 +58,30 @@ namespace JetBrains.SignatureVerifier.Tests
         [TestCase(pe_06_signed, VerifySignatureResult.InvalidSignature)]
         [TestCase(pe_07_signed, VerifySignatureResult.OK)]
         [TestCase(pe_09_broken_timestamp, VerifySignatureResult.InvalidTimestamp)]
-        public void VerifySignTest(string peResourceName, VerifySignatureResult expectedResult)
+        public async Task VerifySignTest(string peResourceName, VerifySignatureResult expectedResult)
         {
-            var result = Utils.StreamFromResource(peResourceName,
-                peFileStream => new PeFile(peFileStream).VerifySignature(null,null));
+            var result = await Utils.StreamFromResource(peResourceName,
+                async peFileStream => await new PeFile(peFileStream).VerifySignatureAsync(null, null, false));
 
             Assert.AreEqual(expectedResult, result);
         }
 
-        [TestCase(pe_01_signed, VerifySignatureResult.OK, ms_codesign_roots, ms_timestamp_root)]
-        [TestCase(pe_07_signed, VerifySignatureResult.OK, jb_codesign_roots, jb_timestamp_roots)]
-        [TestCase(pe_08_signed, VerifySignatureResult.OK, ms_codesign_roots, ms_timestamp_root)]
-        public void VerifySignWithChainTest(string peResourceName,
+        [TestCase(pe_01_signed, VerifySignatureResult.OK, ms_codesign_roots, ms_timestamp_root, false)]
+        [TestCase(pe_07_signed, VerifySignatureResult.OK, jb_codesign_roots, jb_timestamp_roots, true)]
+        [TestCase(pe_08_signed, VerifySignatureResult.OK, ms_codesign_roots, ms_timestamp_root, true)]
+        public async Task VerifySignWithChainTest(string peResourceName,
             VerifySignatureResult expectedResult,
             string codesignRootCertStoreResourceName,
-            string timestampRootCertStoreResourceName)
+            string timestampRootCertStoreResourceName,
+            bool withRevocationCheck)
         {
-            var result = Utils.StreamFromResource(peResourceName,
+            var result = await Utils.StreamFromResource(peResourceName,
                 pe =>
                     Utils.StreamFromResource(codesignRootCertStoreResourceName,
                         codesignroots =>
-                            Utils.StreamFromResource(timestampRootCertStoreResourceName,
-                                timestamproots => new PeFile(pe).VerifySignature(codesignroots, timestamproots))));
+                            Utils.StreamFromResource(timestampRootCertStoreResourceName, async timestamproots =>
+                                await new PeFile(pe).VerifySignatureAsync(codesignroots, timestamproots,
+                                    withRevocationCheck))));
 
             Assert.AreEqual(expectedResult, result);
         }

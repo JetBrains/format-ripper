@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
+using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Pkix;
 using Org.BouncyCastle.Security.Certificates;
@@ -14,11 +18,12 @@ using Org.BouncyCastle.X509.Store;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using CmsSignedData = JetBrains.SignatureVerifier.BouncyCastle.Cms.CmsSignedData;
 using SignerInformation = JetBrains.SignatureVerifier.BouncyCastle.Cms.SignerInformation;
+using Time = Org.BouncyCastle.Asn1.Cms.Time;
 using TimeStampToken = JetBrains.SignatureVerifier.BouncyCastle.Tsp.TimeStampToken;
 
 namespace JetBrains.SignatureVerifier.Crypt
 {
-    class SignerInfoWrap
+    class SignerInfoVerifier
     {
         private readonly SignerInformation _signer;
         private readonly IX509Store _certs;
@@ -30,46 +35,49 @@ namespace JetBrains.SignatureVerifier.Crypt
 
         private List<SignerInformation> CounterSignatures => _counterSignatures ??= getCounterSignatures();
 
-        public SignerInfoWrap(SignerInformation signer, IX509Store certs, HashSet rootCertificates)
+        public SignerInfoVerifier(SignerInformation signer, IX509Store certs, HashSet rootCertificates)
         {
             _signer = signer;
             _certs = certs;
             _rootCertificates = rootCertificates;
         }
 
-        public VerifySignatureResult Verify(DateTime? signValidationTime = null)
+        public async Task<VerifySignatureResult> VerifyAsync(bool withRevocationCheck,
+            DateTime? signValidationTime = null)
         {
             var certList = new ArrayList(_certs.GetMatches(_signer.SignerID));
 
             if (certList.Count < 1)
                 return VerifySignatureResult.InvalidSignature;
 
-            var cert = (X509Certificate) certList[0];
+            var cert = (X509Certificate)certList[0];
 
             try
             {
                 if (!_signer.Verify(cert))
                     return VerifySignatureResult.InvalidSignature;
 
-                var verifySignatureResult = veriryCounterSign(getTimestamp() ?? signValidationTime);
+                var verifyCounterSignResult =
+                    await verifyCounterSignAsync(withRevocationCheck, getTimestamp() ?? signValidationTime);
 
-                if (verifySignatureResult != VerifySignatureResult.OK)
-                    return verifySignatureResult;
+                if (verifyCounterSignResult != VerifySignatureResult.OK)
+                    return verifyCounterSignResult;
 
-                verifySignatureResult = verifyTimeStamp();
+                var verifyTimeStampResult = await verifyTimeStampAsync(withRevocationCheck);
 
-                if (verifySignatureResult != VerifySignatureResult.OK)
-                    return verifySignatureResult;
+                if (verifyTimeStampResult != VerifySignatureResult.OK)
+                    return verifyTimeStampResult;
 
-                verifySignatureResult = verifyNestedSigns();
+                var verifyNestedSignsResult = await verifyNestedSignsAsync(withRevocationCheck);
 
-                if (verifySignatureResult != VerifySignatureResult.OK)
-                    return verifySignatureResult;
+                if (verifyNestedSignsResult != VerifySignatureResult.OK)
+                    return verifyNestedSignsResult;
 
                 if (_rootCertificates != null)
                     try
                     {
-                        buildCertificateChain(cert, _certs, _rootCertificates, getTimestamp() ?? signValidationTime);
+                        await buildCertificateChainAsync(cert, _certs, _rootCertificates, withRevocationCheck,
+                            getTimestamp() ?? signValidationTime);
                     }
                     catch (PkixCertPathBuilderException e)
                     {
@@ -86,7 +94,7 @@ namespace JetBrains.SignatureVerifier.Crypt
             }
         }
 
-        private VerifySignatureResult verifyNestedSigns()
+        private async Task<VerifySignatureResult> verifyNestedSignsAsync(bool withRevocationCheck)
         {
             var nestedSignAttrs = _signer.UnsignedAttributes?.GetAll(OIDs.SPC_NESTED_SIGNATURE);
 
@@ -96,9 +104,9 @@ namespace JetBrains.SignatureVerifier.Crypt
                 {
                     if (nestedSignAttr.AttrValues.Count > 0)
                     {
+                        var nestedSignedMessage = new SignedMessage(nestedSignAttr.AttrValues[0].ToAsn1Object());
                         var nestedSignVerifyResult =
-                            new SignedMessage(nestedSignAttr.AttrValues[0].ToAsn1Object()).VerifySignature(
-                                _rootCertificates);
+                            await nestedSignedMessage.VerifySignatureAsync(_rootCertificates, withRevocationCheck);
 
                         if (nestedSignVerifyResult != VerifySignatureResult.OK)
                             return nestedSignVerifyResult;
@@ -109,14 +117,15 @@ namespace JetBrains.SignatureVerifier.Crypt
             return VerifySignatureResult.OK;
         }
 
-        private VerifySignatureResult veriryCounterSign(DateTime? signValidationTime)
+        private async Task<VerifySignatureResult> verifyCounterSignAsync(bool withRevocationCheck,
+            DateTime? signValidationTime)
         {
             var signerInfoWraps = CounterSignatures.Select(signerInformation =>
-                new SignerInfoWrap(signerInformation, _certs, _rootCertificates));
+                new SignerInfoVerifier(signerInformation, _certs, _rootCertificates));
 
             foreach (var signerInfoWrap in signerInfoWraps)
             {
-                var res = signerInfoWrap.Verify(signValidationTime);
+                var res = await signerInfoWrap.VerifyAsync(withRevocationCheck, signValidationTime);
 
                 if (res != VerifySignatureResult.OK)
                     return res;
@@ -125,7 +134,7 @@ namespace JetBrains.SignatureVerifier.Crypt
             return VerifySignatureResult.OK;
         }
 
-        private VerifySignatureResult verifyTimeStamp()
+        private async Task<VerifySignatureResult> verifyTimeStampAsync(bool withRevocationCheck)
         {
             var tst = TimeStampToken;
 
@@ -138,7 +147,7 @@ namespace JetBrains.SignatureVerifier.Crypt
             if (tstCertsList.Count < 1)
                 return VerifySignatureResult.InvalidSignature;
 
-            var tstCert = (X509Certificate) tstCertsList[0];
+            var tstCert = (X509Certificate)tstCertsList[0];
 
             try
             {
@@ -149,7 +158,8 @@ namespace JetBrains.SignatureVerifier.Crypt
                     {
                         var tstCmsSignedData = tst.ToCmsSignedData();
                         var certs = tstCmsSignedData.GetCertificates("Collection");
-                        buildCertificateChain(tstCert, certs, _rootCertificates, getTimestamp());
+                        await buildCertificateChainAsync(tstCert, certs, _rootCertificates, withRevocationCheck,
+                            getTimestamp());
                     }
                     catch (PkixCertPathBuilderException e)
                     {
@@ -171,21 +181,55 @@ namespace JetBrains.SignatureVerifier.Crypt
             return VerifySignatureResult.OK;
         }
 
-        void buildCertificateChain(X509Certificate primary, IX509Store additional, HashSet rootCertificates,
+        private async Task buildCertificateChainAsync(
+            X509Certificate primary,
+            IX509Store certStore,
+            HashSet rootCertificates,
+            bool withRevocationCheck,
             DateTime? signValidationTime)
         {
             var builder = new PkixCertPathBuilder();
-            var holder = new X509CertStoreSelector {Certificate = primary};
+            var holder = new X509CertStoreSelector { Certificate = primary };
 
             var builderParams = new CustomPkixBuilderParameters(rootCertificates, holder)
             {
-                IsRevocationEnabled = false,
+                IsRevocationEnabled = withRevocationCheck,
                 ValidityModel = PkixParameters.ChainValidityModel,
                 Date = signValidationTime.HasValue ? new DateTimeObject(signValidationTime.Value) : null
             };
 
-            builderParams.AddStore(additional);
+            builderParams.AddStore(certStore);
+
+            if (withRevocationCheck)
+            {
+                IX509Store crlStore = await getCrlStoreAsync(certStore);
+                builderParams.AddStore(crlStore);
+            }
+
             builder.Build(builderParams);
+        }
+
+        private async Task<IX509Store> getCrlStoreAsync(IX509Store certs)
+        {
+            var crlList = new List<X509Crl>();
+
+            foreach (X509Certificate cert in certs.GetMatches(null))
+            {
+                var crls = await getCrlsAsync(cert);
+                crlList.AddRange(crls);
+            }
+
+            IX509Store crlStore = X509StoreFactory.Create(
+                "CRL/Collection",
+                new X509CollectionStoreParameters(crlList));
+
+            return crlStore;
+        }
+
+        private Task<List<X509Crl>> getCrlsAsync(X509Certificate cert)
+        {
+            var crlProvider = new CrlProvider(new CrlCacheFileSystem());
+            return crlProvider.GetCrlsAsync(cert);
         }
 
         private List<SignerInformation> getCounterSignatures()
@@ -233,7 +277,7 @@ namespace JetBrains.SignatureVerifier.Crypt
                     return time.Date;
                 }
 
-                return (DateTime?) null;
+                return (DateTime?)null;
             }).FirstOrDefault(f => f.HasValue);
 
             return res;

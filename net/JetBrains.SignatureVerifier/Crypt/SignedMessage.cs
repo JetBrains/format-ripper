@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
@@ -36,31 +37,39 @@ namespace JetBrains.SignatureVerifier.Crypt
             _cmsSignedData = new CmsSignedData(pkcs7);
         }
 
-        public VerifySignatureResult VerifySignature(Stream signRootCertStore, Stream timestampRootCertStore)
+        public Task<VerifySignatureResult> VerifySignatureAsync(
+            Stream signRootCertStore,
+            Stream timestampRootCertStore,
+            bool withRevocationCheck)
         {
-            return VerifySignature(readRootCertificates(signRootCertStore, timestampRootCertStore));
+            return VerifySignatureAsync(readRootCertificates(signRootCertStore, timestampRootCertStore), withRevocationCheck);
         }
 
-        internal VerifySignatureResult VerifySignature(HashSet rootCertificates)
+        internal Task<VerifySignatureResult> VerifySignatureAsync(HashSet rootCertificates, bool withRevocationCheck)
         {
-            return verifySignature(_cmsSignedData, rootCertificates);
+            return verifySignatureAsync(_cmsSignedData, rootCertificates, withRevocationCheck);
         }
 
-        private VerifySignatureResult verifySignature(CmsSignedData cmsSignedData, HashSet rootCertificates)
+        private Task<VerifySignatureResult> verifySignatureAsync(
+            CmsSignedData cmsSignedData, 
+            HashSet rootCertificates, 
+            bool withRevocationCheck)
         {
             var certs = cmsSignedData.GetCertificates("Collection");
             var signersStore = cmsSignedData.GetSignerInfos();
-            return verifySignature(signersStore, certs, rootCertificates);
+            return verifySignatureAsync(signersStore, certs, rootCertificates, withRevocationCheck);
         }
 
-        private VerifySignatureResult verifySignature(SignerInformationStore signersStore,
+        private async Task<VerifySignatureResult> verifySignatureAsync(
+            SignerInformationStore signersStore,
             IX509Store certs,
-            HashSet rootCertificates)
+            HashSet rootCertificates,
+            bool withRevocationCheck)
         {
             foreach (JetBrains.SignatureVerifier.BouncyCastle.Cms.SignerInformation signer in signersStore.GetSigners())
             {
-                var siw = new SignerInfoWrap(signer, certs, rootCertificates);
-                var result = siw.Verify();
+                var siv = new SignerInfoVerifier(signer, certs, rootCertificates);
+                var result = await siv.VerifyAsync(withRevocationCheck);
 
                 if (result != VerifySignatureResult.OK)
                     return result;
