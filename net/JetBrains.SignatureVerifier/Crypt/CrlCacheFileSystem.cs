@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using JetBrains.Annotations;
 using Org.BouncyCastle.Asn1.X509;
@@ -18,7 +19,7 @@ namespace JetBrains.SignatureVerifier.Crypt
             _cacheDir = Path.Combine(Path.GetTempPath(), cacheDirName);
         }
 
-        public List<X509Crl> GetCrls([NotNull] string issuerId)
+        public ReadOnlyCollection<X509Crl> GetCrls([NotNull] string issuerId)
         {
             if (issuerId == null) throw new ArgumentNullException(nameof(issuerId));
 
@@ -32,7 +33,7 @@ namespace JetBrains.SignatureVerifier.Crypt
                 res.Add(crl);
             }
 
-            return res;
+            return res.AsReadOnly();
         }
 
         public void UpdateCrls(string issuerId, List<byte[]> crlsData)

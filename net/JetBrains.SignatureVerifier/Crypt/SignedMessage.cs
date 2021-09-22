@@ -18,94 +18,82 @@ namespace JetBrains.SignatureVerifier.Crypt
 {
     public class SignedMessage
     {
+        [CanBeNull] private readonly ILogger _logger;
         private readonly CmsSignedData _cmsSignedData;
 
-        public SignedMessage([NotNull] byte[] data)
+        public SignedMessage([NotNull] byte[] pkcs7Data, [CanBeNull] ILogger logger)
         {
-            var _data = data ?? throw new ArgumentNullException(nameof(data));
+            _logger = logger ?? NullLogger.Instance;
+            var _data = pkcs7Data ?? throw new ArgumentNullException(nameof(pkcs7Data));
 
             var asnStream = new Asn1InputStream(_data);
             var pkcs7 = ContentInfo.GetInstance(asnStream.ReadObject());
             _cmsSignedData = new CmsSignedData(pkcs7);
         }
 
-        internal SignedMessage([NotNull] Asn1Object obj)
+        public SignedMessage([NotNull] byte[] signdeData, [NotNull] byte[] pkcs7Data, [CanBeNull] ILogger logger)
+        {
+            if (signdeData == null) throw new ArgumentNullException(nameof(signdeData));
+            if (pkcs7Data == null) throw new ArgumentNullException(nameof(pkcs7Data));
+            
+            _logger = logger ?? NullLogger.Instance;
+            var signedContent = new CmsProcessableByteArray(signdeData);
+            
+            try
+            {
+                using var asnStream = new Asn1InputStream(pkcs7Data);
+                var pkcs7 = ContentInfo.GetInstance(asnStream.ReadObject());
+                _cmsSignedData = new CmsSignedData(signedContent, pkcs7);
+            }
+            catch (IOException ex)
+            {
+                _logger.Error($"Invalid signature format. {ex.FlatMessages()}");
+                throw;
+            }
+        }
+
+        internal SignedMessage([NotNull] Asn1Object obj, [CanBeNull] ILogger logger)
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
-
+            _logger = logger ?? NullLogger.Instance;
             var pkcs7 = ContentInfo.GetInstance(obj);
             _cmsSignedData = new CmsSignedData(pkcs7);
         }
 
         public Task<VerifySignatureResult> VerifySignatureAsync(
-            Stream signRootCertStore,
-            Stream timestampRootCertStore,
-            bool withRevocationCheck)
+            [NotNull] SignatureVerificationParams signatureVerificationParams)
         {
-            return VerifySignatureAsync(readRootCertificates(signRootCertStore, timestampRootCertStore), withRevocationCheck);
+            if (signatureVerificationParams == null)
+                throw new ArgumentNullException(nameof(signatureVerificationParams));
+            
+            _logger.Trace($"Verify with params: {signatureVerificationParams}");
+            
+            return verifySignatureAsync(_cmsSignedData, signatureVerificationParams);
         }
 
-        internal Task<VerifySignatureResult> VerifySignatureAsync(HashSet rootCertificates, bool withRevocationCheck)
-        {
-            return verifySignatureAsync(_cmsSignedData, rootCertificates, withRevocationCheck);
-        }
-
-        private Task<VerifySignatureResult> verifySignatureAsync(
-            CmsSignedData cmsSignedData, 
-            HashSet rootCertificates, 
-            bool withRevocationCheck)
+        private Task<VerifySignatureResult> verifySignatureAsync(CmsSignedData cmsSignedData,
+            SignatureVerificationParams signatureVerificationParams)
         {
             var certs = cmsSignedData.GetCertificates("Collection");
             var signersStore = cmsSignedData.GetSignerInfos();
-            return verifySignatureAsync(signersStore, certs, rootCertificates, withRevocationCheck);
+            return verifySignatureAsync(signersStore, certs, signatureVerificationParams);
         }
 
         private async Task<VerifySignatureResult> verifySignatureAsync(
             SignerInformationStore signersStore,
             IX509Store certs,
-            HashSet rootCertificates,
-            bool withRevocationCheck)
+            SignatureVerificationParams signatureVerificationParams)
         {
             foreach (JetBrains.SignatureVerifier.BouncyCastle.Cms.SignerInformation signer in signersStore.GetSigners())
             {
-                var siv = new SignerInfoVerifier(signer, certs, rootCertificates);
-                var result = await siv.VerifyAsync(withRevocationCheck);
+                var siv = new SignerInfoVerifier(signer, certs, _logger);
+                var result = await siv.VerifyAsync(signatureVerificationParams);
 
-                if (result != VerifySignatureResult.OK)
+                if (result != VerifySignatureResult.Valid)
                     return result;
             }
 
-            return VerifySignatureResult.OK;
+            return VerifySignatureResult.Valid;
         }
-
-        private HashSet readRootCertificates(Stream signRootCertStore, Stream timestampRootCertStore)
-        {
-            if (signRootCertStore is null 
-                && timestampRootCertStore is null)
-                return null;
-
-            HashSet rootCerts = new HashSet();
-            X509CertificateParser parser = new X509CertificateParser();
-            addCerts(signRootCertStore);
-            addCerts(timestampRootCertStore);
-            return rootCerts;
-
-            void addCerts(Stream storeStream)
-            {
-                if (storeStream is not null)
-                    rootCerts.AddAll(parser.ReadCertificates(storeStream)
-                            .Cast<X509Certificate>()
-                            .Select(cert => new TrustAnchor(cert, new byte[0])));
-            }
-        }
-    }
-
-    public enum VerifySignatureResult
-    {
-        OK,
-        NotSigned,
-        InvalidSignature,
-        InvalidChain,
-        InvalidTimestamp
     }
 }

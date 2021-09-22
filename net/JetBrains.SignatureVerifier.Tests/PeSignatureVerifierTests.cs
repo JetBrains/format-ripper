@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.IO;
@@ -42,35 +43,42 @@ namespace JetBrains.SignatureVerifier.Tests
         private const string pe_08_signed = "dotnet.exe";
         private const string pe_09_broken_timestamp = "dotnet_broken_timestamp.exe";
 
-        [TestCase(pe_01_signed, VerifySignatureResult.OK)]
-        [TestCase(pe_01_not_signed, VerifySignatureResult.NotSigned)]
-        [TestCase(pe_01_trimmed_sign, VerifySignatureResult.NotSigned)]
-        [TestCase(pe_01_empty_sign, VerifySignatureResult.NotSigned)]
-        [TestCase(pe_01_broken_hash, VerifySignatureResult.InvalidSignature)]
-        [TestCase(pe_01_broken_sign, VerifySignatureResult.InvalidSignature)]
-        [TestCase(pe_01_broken_counter_sign, VerifySignatureResult.InvalidSignature)]
-        [TestCase(pe_01_broken_nested_sign, VerifySignatureResult.InvalidSignature)]
-        [TestCase(pe_01_broken_nested_sign_timestamp, VerifySignatureResult.InvalidTimestamp)]
-        [TestCase(pe_02_empty_sign, VerifySignatureResult.NotSigned)]
-        [TestCase(pe_03_signed, VerifySignatureResult.OK)]
-        [TestCase(pe_04_signed, VerifySignatureResult.OK)]
-        [TestCase(pe_05_signed, VerifySignatureResult.InvalidSignature)]
-        [TestCase(pe_06_signed, VerifySignatureResult.InvalidSignature)]
-        [TestCase(pe_07_signed, VerifySignatureResult.OK)]
-        [TestCase(pe_09_broken_timestamp, VerifySignatureResult.InvalidTimestamp)]
-        public async Task VerifySignTest(string peResourceName, VerifySignatureResult expectedResult)
+        [TestCase(pe_01_signed, VerifySignatureStatus.Valid)]
+        [TestCase(pe_01_not_signed, VerifySignatureStatus.NotSigned)]
+        [TestCase(pe_01_trimmed_sign, VerifySignatureStatus.NotSigned)]
+        [TestCase(pe_01_empty_sign, VerifySignatureStatus.NotSigned)]
+        [TestCase(pe_01_broken_hash, VerifySignatureStatus.InvalidSignature)]
+        [TestCase(pe_01_broken_sign, VerifySignatureStatus.InvalidSignature)]
+        [TestCase(pe_01_broken_counter_sign, VerifySignatureStatus.InvalidSignature)]
+        [TestCase(pe_01_broken_nested_sign, VerifySignatureStatus.InvalidSignature)]
+        [TestCase(pe_01_broken_nested_sign_timestamp, VerifySignatureStatus.InvalidTimestamp)]
+        [TestCase(pe_02_empty_sign, VerifySignatureStatus.NotSigned)]
+        [TestCase(pe_03_signed, VerifySignatureStatus.Valid)]
+        [TestCase(pe_04_signed, VerifySignatureStatus.Valid)]
+        [TestCase(pe_05_signed, VerifySignatureStatus.InvalidSignature)]
+        [TestCase(pe_06_signed, VerifySignatureStatus.InvalidSignature)]
+        [TestCase(pe_07_signed, VerifySignatureStatus.Valid)]
+        [TestCase(pe_09_broken_timestamp, VerifySignatureStatus.InvalidTimestamp)]
+        public async Task VerifySignTest(string peResourceName, VerifySignatureStatus expectedResult)
         {
             var result = await Utils.StreamFromResource(peResourceName,
-                async peFileStream => await new PeFile(peFileStream).VerifySignatureAsync(null, null, false));
+                async peFileStream =>
+                {
+                    var p = new SignatureVerificationParams(null, null, false, false);
+                    return await new PeFile(peFileStream, ConsoleLogger.Instance).VerifySignatureAsync(p);
+                });
 
-            Assert.AreEqual(expectedResult, result);
+            Assert.AreEqual(expectedResult, result.Status);
         }
 
-        [TestCase(pe_01_signed, VerifySignatureResult.OK, ms_codesign_roots, ms_timestamp_root, false)]
-        [TestCase(pe_07_signed, VerifySignatureResult.OK, jb_codesign_roots, jb_timestamp_roots, true)]
-        [TestCase(pe_08_signed, VerifySignatureResult.OK, ms_codesign_roots, ms_timestamp_root, true)]
+        [TestCase(pe_01_signed, VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root, false)]
+        [TestCase(pe_01_signed, VerifySignatureStatus.InvalidChain, ms_codesign_roots, ms_timestamp_root, true)]
+        [TestCase(pe_07_signed, VerifySignatureStatus.Valid, jb_codesign_roots, jb_timestamp_roots, false)] 
+        [TestCase(pe_07_signed, VerifySignatureStatus.Valid, jb_codesign_roots, jb_timestamp_roots, true)]
+        [TestCase(pe_08_signed, VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root, false)]
+        [TestCase(pe_08_signed, VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root, true)]
         public async Task VerifySignWithChainTest(string peResourceName,
-            VerifySignatureResult expectedResult,
+            VerifySignatureStatus expectedResult,
             string codesignRootCertStoreResourceName,
             string timestampRootCertStoreResourceName,
             bool withRevocationCheck)
@@ -79,11 +87,97 @@ namespace JetBrains.SignatureVerifier.Tests
                 pe =>
                     Utils.StreamFromResource(codesignRootCertStoreResourceName,
                         codesignroots =>
-                            Utils.StreamFromResource(timestampRootCertStoreResourceName, async timestamproots =>
-                                await new PeFile(pe).VerifySignatureAsync(codesignroots, timestamproots,
-                                    withRevocationCheck))));
+                            Utils.StreamFromResource(timestampRootCertStoreResourceName, timestamproots =>
+                            {
+                                var p = new SignatureVerificationParams(
+                                    codesignroots, 
+                                    timestamproots, 
+                                    buildChain: true,
+                                    withRevocationCheck);
+                                return new PeFile(pe, ConsoleLogger.Instance).VerifySignatureAsync(p);
+                            })));
 
-            Assert.AreEqual(expectedResult, result);
+            Assert.AreEqual(expectedResult, result.Status);
+        }
+
+        [TestCase(pe_01_signed, VerifySignatureStatus.InvalidChain, ms_codesign_roots, ms_timestamp_root)]
+        public async Task VerifySignWithChainTestInPast(string peResourceName,
+            VerifySignatureStatus expectedResult,
+            string codesignRootCertStoreResourceName,
+            string timestampRootCertStoreResourceName)
+        {
+            var actual = await VerifySignWithChainTestInTime(peResourceName,
+                codesignRootCertStoreResourceName,
+                timestampRootCertStoreResourceName,
+                DateTime.MinValue);
+
+            Assert.AreEqual(expectedResult, actual.Status);
+        }
+
+        [TestCase(pe_01_signed, VerifySignatureStatus.InvalidChain, ms_codesign_roots, ms_timestamp_root)]
+        public async Task VerifySignWithChainTestInPresent(string peResourceName,
+            VerifySignatureStatus expectedResult,
+            string codesignRootCertStoreResourceName,
+            string timestampRootCertStoreResourceName)
+        {
+            var actual = await VerifySignWithChainTestInTime(peResourceName,
+                codesignRootCertStoreResourceName,
+                timestampRootCertStoreResourceName,
+                DateTime.Now);
+
+            Assert.AreEqual(expectedResult, actual.Status);
+        }
+
+        [TestCase(pe_01_signed, VerifySignatureStatus.InvalidChain, ms_codesign_roots, ms_timestamp_root)]
+        public async Task VerifySignWithChainTestInFuture(string peResourceName,
+            VerifySignatureStatus expectedResult,
+            string codesignRootCertStoreResourceName,
+            string timestampRootCertStoreResourceName)
+        {
+            var actual = await VerifySignWithChainTestInTime(peResourceName,
+                codesignRootCertStoreResourceName,
+                timestampRootCertStoreResourceName,
+                DateTime.MaxValue);
+
+            Assert.AreEqual(expectedResult, actual.Status);
+        }
+
+        [TestCase(pe_01_signed, VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root)]
+        public async Task VerifySignWithChainTestAboutSignTime(string peResourceName,
+            VerifySignatureStatus expectedResult,
+            string codesignRootCertStoreResourceName,
+            string timestampRootCertStoreResourceName)
+        {
+            var actual = await VerifySignWithChainTestInTime(peResourceName,
+                codesignRootCertStoreResourceName,
+                timestampRootCertStoreResourceName,
+                new DateTime(2019, 11, 24));
+
+            Assert.AreEqual(expectedResult, actual.Status);
+        }
+
+        private Task<VerifySignatureResult> VerifySignWithChainTestInTime(string peResourceName,
+            string codesignRootCertStoreResourceName,
+            string timestampRootCertStoreResourceName,
+            DateTime time)
+        {
+            return Utils.StreamFromResource(peResourceName,
+                pe =>
+                    Utils.StreamFromResource(codesignRootCertStoreResourceName,
+                        codesignroots =>
+                            Utils.StreamFromResource(timestampRootCertStoreResourceName, timestamproots =>
+                            {
+                                var p = new SignatureVerificationParams(
+                                    codesignroots,
+                                    timestamproots,
+                                    buildChain: true,
+                                    withRevocationCheck: false,
+                                    ocspResponseTimeout: null,
+                                    SignatureValidationTimeMode.SignValidationTime,
+                                    signatureValidationTime: time);
+
+                                return new PeFile(pe, ConsoleLogger.Instance).VerifySignatureAsync(p);
+                            })));
         }
 
         [TestCase(pe_01_signed, "SHA1", pe_01_sha1)]
@@ -98,7 +192,7 @@ namespace JetBrains.SignatureVerifier.Tests
         public void ComputeHashTest(string peResourceName, string alg, string expectedResult)
         {
             var result = Utils.StreamFromResource(peResourceName,
-                peFileStream => new PeFile(peFileStream).ComputeHash(alg));
+                peFileStream => new PeFile(peFileStream, ConsoleLogger.Instance).ComputeHash(alg));
 
             Assert.AreEqual(expectedResult, Utils.ConvertToHexString(result));
         }

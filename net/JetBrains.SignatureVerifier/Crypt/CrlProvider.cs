@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace JetBrains.SignatureVerifier.Crypt
             _crlCash = crlCash ?? throw new ArgumentNullException(nameof(crlCash));
         }
 
-        public async Task<List<X509Crl>> GetCrlsAsync(X509Certificate cert)
+        public async Task<ReadOnlyCollection<X509Crl>> GetCrlsAsync(X509Certificate cert)
         {
             var crlId = cert.GetAuthorityKeyIdentifier();
             var res = _crlCash.GetCrls(crlId);
@@ -31,9 +32,10 @@ namespace JetBrains.SignatureVerifier.Crypt
 
             //We have to filter out CRLs with an empty NextUpdate field
             //See https://github.com/bcgit/bc-csharp/issues/315
-            var crls = crlsData.Select(_crlParser.ReadCrl).Where(w => w.NextUpdate is not null).ToList();
-            _crlCash.UpdateCrls(crlId, crlsData);
-            return crls;
+            var crls = crlsData.Select(s => new { Crl = _crlParser.ReadCrl(s), Data = s })
+                .Where(w => w.Crl.NextUpdate is not null).ToList();
+            _crlCash.UpdateCrls(crlId, crls.Select(s => s.Data).ToList());
+            return crls.Select(s => s.Crl).ToList().AsReadOnly();
         }
 
         private async Task<List<byte[]>> downloadCrlsAsync(List<string> urls)
@@ -43,14 +45,21 @@ namespace JetBrains.SignatureVerifier.Crypt
             foreach (var url in urls)
             {
                 using var httpClient = new HttpClient();
-                var data =  await httpClient.GetByteArrayAsync(url).ConfigureAwait(false);
-                res.Add(data);
+                try
+                {
+                    var data = await httpClient.GetByteArrayAsync(url).ConfigureAwait(false);
+                    res.Add(data);
+                }
+                catch (HttpRequestException ex)
+                {
+                    throw new Exception($"Cannot download CRL from: {url}", ex);
+                }
             }
 
             return res;
         }
 
-        private bool crlsIsOutDate(List<X509Crl> crls)
+        private bool crlsIsOutDate(ReadOnlyCollection<X509Crl> crls)
         {
             var now = DateTime.Now;
             return crls.Any(a => a.NextUpdate.Value.Ticks <= now.Ticks);

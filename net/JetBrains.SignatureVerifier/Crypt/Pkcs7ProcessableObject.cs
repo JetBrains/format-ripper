@@ -22,9 +22,9 @@ namespace JetBrains.SignatureVerifier.Crypt
 
             if (Content is Asn1Sequence)
             {
-                Asn1Sequence s = Asn1Sequence.GetInstance(Content);
+                Asn1Sequence seq = Asn1Sequence.GetInstance(Content);
 
-                foreach (Asn1Encodable enc in s)
+                foreach (Asn1Encodable enc in seq)
                 {
                     sw.Write(enc.ToAsn1Object().GetEncoded("DER"));
                 }

@@ -13,5 +13,6 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
     <ProjectReference Include="..\JetBrains.SignatureVerifier\JetBrains.SignatureVerifier.csproj" />
     <EmbeddedResource Include="..\..\pedata\*" LinkBase="Resources" />
+    <EmbeddedResource Include="..\..\machodata\*" LinkBase="Resources" />
   </ItemGroup>
 </Project>

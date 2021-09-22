@@ -14,6 +14,7 @@ namespace JetBrains.SignatureVerifier
     public class PeFile
     {
         private readonly Stream _stream;
+        private readonly ILogger _logger;
         private readonly DataInfo _checkSum;
         private readonly DataInfo _imageDirectoryEntrySecurity;
         private readonly DataInfo _signData;
@@ -31,12 +32,14 @@ namespace JetBrains.SignatureVerifier
         /// <exception cref="PlatformNotSupportedException">Indicates the byte order ("endianness")
         /// in which data is stored in this computer architecture is not Little Endian.</exception>
         /// <exception cref="InvalidDataException">Indicates the data in the input stream does not correspond to PE-format.</exception>
-        public PeFile(Stream stream)
+        public PeFile([NotNull] Stream stream, [CanBeNull] ILogger logger)
         {
             if (!BitConverter.IsLittleEndian)
                 throw new PlatformNotSupportedException("Only Little endian is expected");
 
-            _stream = stream;
+            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+            _logger = logger ?? NullLogger.Instance;
+            _stream.Rewind();
             using var reader = new BinaryReader(stream, Encoding.UTF8, true);
 
             if (reader.ReadUInt16() != 0x5A4D) // IMAGE_DOS_SIGNATURE
@@ -45,7 +48,7 @@ namespace JetBrains.SignatureVerifier
             stream.Seek(0x3C, SeekOrigin.Begin); // IMAGE_DOS_HEADER::e_lfanew
             var ntHeaderOffset = reader.ReadUInt32();
             stream.Seek(ntHeaderOffset, SeekOrigin.Begin);
-            _checkSum = new DataInfo((int) (ntHeaderOffset + 0x58), 4);
+            _checkSum = new DataInfo((int)(ntHeaderOffset + 0x58), 4);
 
             if (reader.ReadUInt32() != 0x00004550) // IMAGE_NT_SIGNATURE
                 throw new InvalidDataException("Unknown format");
@@ -73,10 +76,10 @@ namespace JetBrains.SignatureVerifier
             }
 
             stream.Seek(sizeof(ulong) * 4, SeekOrigin.Current); // DataDirectory + IMAGE_DIRECTORY_ENTRY_SECURITY
-            _imageDirectoryEntrySecurity = new DataInfo((int) stream.Position, 8);
+            _imageDirectoryEntrySecurity = new DataInfo((int)stream.Position, 8);
             var securityRva = reader.ReadUInt32();
             var securitySize = reader.ReadUInt32();
-            _signData = new DataInfo((int) securityRva, (int) securitySize);
+            _signData = new DataInfo((int)securityRva, (int)securitySize);
         }
 
         /// <summary>
@@ -170,22 +173,22 @@ namespace JetBrains.SignatureVerifier
         /// <summary>
         /// Validate the signature of the PE
         /// </summary>
-        /// <param name="signRootCertStore">Stream of PKCS #7 store with CA certificates for which a chain will be build and validate</param>
-        /// <param name="timestampRootCertStore">Stream of PKCS #7 store with a timestamp CA certificates for which a chain will be build and validate</param>
-        /// <param name="withRevocationCheck">If true - verify a revocation status for certificates in all chains</param>
         /// <returns>Validation status</returns>
-        public async Task<VerifySignatureResult> VerifySignatureAsync(Stream signRootCertStore, Stream timestampRootCertStore,
-            bool withRevocationCheck)
+        public async Task<VerifySignatureResult> VerifySignatureAsync(
+            SignatureVerificationParams signatureVerificationParams)
         {
             if (Cms is null)
+            {
+                _logger.Warning("No signatures in PE");
                 return VerifySignatureResult.NotSigned;
-
-            return await Cms.VerifySignatureAsync(signRootCertStore, timestampRootCertStore, withRevocationCheck); 
+            }
+            else
+                return await Cms.VerifySignatureAsync(signatureVerificationParams);
         }
 
         private byte[] getRawPeData()
         {
-            _stream.Seek(0, SeekOrigin.Begin);
+            _stream.Rewind();
             using var ms = new MemoryStream();
             _stream.CopyTo(ms);
             return ms.ToArray();
@@ -194,20 +197,7 @@ namespace JetBrains.SignatureVerifier
         private SignedMessage getCms()
         {
             var cmsdata = GetSignatureData();
-            return cmsdata != null ? new SignedMessage(cmsdata) : null;
+            return cmsdata != null ? new SignedMessage(cmsdata, _logger) : null;
         }
-    }
-
-    readonly struct DataInfo
-    {
-        public DataInfo(int offset, int size)
-        {
-            Offset = offset;
-            Size = size;
-        }
-
-        public bool IsEmpty => Offset == 0 && Size == 0;
-        public int Offset { get; }
-        public int Size { get; }
     }
 }
