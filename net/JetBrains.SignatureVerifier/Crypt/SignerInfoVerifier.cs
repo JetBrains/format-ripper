@@ -234,7 +234,8 @@ namespace JetBrains.SignatureVerifier.Crypt
             {
                 SignatureValidationTimeMode.Timestamp => getSigningTime() ?? getTimestamp(),
                 SignatureValidationTimeMode.SignValidationTime => signatureVerificationParams.SignatureValidationTime,
-                SignatureValidationTimeMode.Current => null
+                SignatureValidationTimeMode.Current => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(signatureVerificationParams.SignValidationTimeMode))
             };
         }
 

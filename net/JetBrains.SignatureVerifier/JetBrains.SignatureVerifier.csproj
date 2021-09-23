@@ -3,7 +3,7 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <RootNamespace>JetBrains.SignatureVerifier</RootNamespace>
         <AssemblyName>JetBrains.SignatureVerifier</AssemblyName>
-        <LangVersion>latestmajor</LangVersion>        
+        <LangVersion>latestmajor</LangVersion>
         <Company>JetBrains s.r.o.</Company>
         <Copyright>Copyright © 2021 JetBrains s.r.o.</Copyright>
         <Authors>Anton Vladimirov</Authors>
@@ -17,19 +17,22 @@
         <Version>0.0.1</Version>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Portable.BouncyCastle" Version="1.8.10" />
-        <PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
-        <EmbeddedResource Include="..\..\data\real-master-public-key.asc" LinkBase="Resources" />
-        <EmbeddedResource Update="Messages.resx">
-          <Generator>ResXFileCodeGenerator</Generator>
-          <LastGenOutput>Messages.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
+        <PackageReference Include="Portable.BouncyCastle" Version="1.8.10"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2021.1.0"/>
     </ItemGroup>
     <ItemGroup>
-      <Compile Update="Messages.Designer.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>Messages.resx</DependentUpon>
-      </Compile>
+        <EmbeddedResource Update="Messages.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>Messages.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <None Remove="DefaultRoots.p7b"/>
+        <EmbeddedResource Include="DefaultRoots.p7b"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Update="Messages.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Messages.resx</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>
