@@ -12,7 +12,7 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
     <ProjectReference Include="..\JetBrains.SignatureVerifier\JetBrains.SignatureVerifier.csproj" />
-    <EmbeddedResource Include="..\..\pedata\*" LinkBase="Resources" />
-    <EmbeddedResource Include="..\..\machodata\*" LinkBase="Resources" />
+    <EmbeddedResource Include="..\..\data\pe\*" LinkBase="Resources" />
+    <EmbeddedResource Include="..\..\data\mach-o\*" LinkBase="Resources" />
   </ItemGroup>
 </Project>
