@@ -40,33 +40,31 @@ namespace JetBrains.SignatureVerifier.Tests
       }
     }
 
-    [TestCase("env-wrapper.x64", VerifySignatureStatus.InvalidChain, apple_root, true)]
-    [TestCase("libMonoSupportW.x64.dylib", VerifySignatureStatus.InvalidChain, apple_root, true)]
-    [TestCase("libhostfxr.dylib", VerifySignatureStatus.Valid, apple_root, true)]
-    [TestCase("cat", VerifySignatureStatus.InvalidChain, apple_root, true)]
-    [TestCase("JetBrains.Profiler.PdbServer", VerifySignatureStatus.Valid, apple_root, true)]
+    [TestCase("env-wrapper.x64", VerifySignatureStatus.Valid, apple_root)]
+    [TestCase("libMonoSupportW.x64.dylib", VerifySignatureStatus.Valid, apple_root)]
+    [TestCase("libhostfxr.dylib", VerifySignatureStatus.Valid, apple_root)]
+    [TestCase("cat", VerifySignatureStatus.Valid, apple_root)]
+    [TestCase("JetBrains.Profiler.PdbServer", VerifySignatureStatus.Valid, apple_root)]
     public void VerifySignWithChainTest(string machoResourceName,
       VerifySignatureStatus expectedResult,
-      string codesignRootCertStoreResourceName,
-      bool withRevocationCheck)
+      string codesignRootCertStoreResourceName)
     {
       var machoFiles = Utils.StreamFromResource(machoResourceName,
         machoFileStream => new MachoArch(machoFileStream, ConsoleLogger.Instance).Extract());
 
-      var results = Utils.StreamFromResource(machoResourceName,
-        machoFileStream =>
-          Utils.StreamFromResource(codesignRootCertStoreResourceName, codesignroots =>
-          {
-            var p = new SignatureVerificationParams(
-              codesignroots,
-              timestampRootCertStore: null,
-              buildChain: true,
-              withRevocationCheck);
+      var results =
+        Utils.StreamFromResource(codesignRootCertStoreResourceName, codesignroots =>
+        {
+          var p = new SignatureVerificationParams(
+            codesignroots,
+            timestampRootCertStore: null,
+            buildChain: true,
+            withRevocationCheck: false);
 
-            return machoFiles.Select(async machoFile => await machoFile.VerifySignatureAsync(p))
-              .Select(s => s.Result)
-              .ToList();
-          }));
+          return machoFiles.Select(async machoFile => await machoFile.VerifySignatureAsync(p))
+            .Select(s => s.Result)
+            .ToList();
+        });
 
       foreach (VerifySignatureResult result in results)
       {
