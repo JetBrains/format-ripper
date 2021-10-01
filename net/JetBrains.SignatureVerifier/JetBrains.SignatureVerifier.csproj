@@ -8,12 +8,11 @@
         <Copyright>Copyright © 2021 JetBrains s.r.o.</Copyright>
         <Authors>Anton Vladimirov</Authors>
         <Description>The cross platform signature verifier for executables</Description>
-        <RepositoryUrl>https://git.jetbrains.team/dpgpv/download-pgp-verifier.git</RepositoryUrl>
+        <RepositoryUrl>https://github.com/jetbrains/download-pgp-verifier</RepositoryUrl>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <SignAssembly>true</SignAssembly>
         <AssemblyOriginatorKeyFile>..\Subplatform.Snk</AssemblyOriginatorKeyFile>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-        <PackageProjectUrl>https://jetbrains.team/p/dpgpv</PackageProjectUrl>
         <Version>0.0.1</Version>
     </PropertyGroup>
     <ItemGroup>
