@@ -4,20 +4,20 @@ using JetBrains.Annotations;
 
 namespace JetBrains.SignatureVerifier.Crypt
 {
-    static class Utils
+  static class Utils
+  {
+    public static string FlatMessages([NotNull] this Exception ex)
     {
-        public static string FlatMessages([NotNull] this Exception ex)
-        {
-            if (ex == null) throw new ArgumentNullException(nameof(ex));
-            var sb = new StringBuilder(ex.Message);
+      if (ex == null) throw new ArgumentNullException(nameof(ex));
+      var sb = new StringBuilder(ex.Message);
 
-            while (ex.InnerException is not null)
-            {
-                ex = ex.InnerException;
-                sb.AppendLine(ex.Message);
-            }
+      while (ex.InnerException is not null)
+      {
+        ex = ex.InnerException;
+        sb.AppendLine(ex.Message);
+      }
 
-            return sb.ToString();
-        }
+      return sb.ToString();
     }
+  }
 }

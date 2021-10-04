@@ -100,7 +100,9 @@ private static void displayResult(ILogger logger, VerifySignatureResult result)
 ```
 
 # Hash computing
+
 Following hashing algorithms are supported:
+
 - MD5
 - SHA1
 - SHA256

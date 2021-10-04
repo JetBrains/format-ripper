@@ -2,8 +2,8 @@ using System;
 
 namespace JetBrains.SignatureVerifier.BouncyCastle.Cms
 {
-	internal interface IDigestCalculator
-	{
-		byte[] GetDigest();
-	}
+  internal interface IDigestCalculator
+  {
+    byte[] GetDigest();
+  }
 }

@@ -19,7 +19,7 @@
     void ILogger.Error(string str)
     {
     }
-    
+
     void ILogger.Trace(string str)
     {
     }
