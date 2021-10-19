@@ -1,7 +1,5 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.IO;
 using System.Threading.Tasks;
 using JetBrains.SignatureVerifier.Crypt;
 using NUnit.Framework;
@@ -44,15 +42,11 @@ namespace JetBrains.SignatureVerifier.Tests
     private const string pe_09_broken_timestamp = "dotnet_broken_timestamp.exe";
 
     [TestCase(pe_01_signed, VerifySignatureStatus.Valid)]
-    [TestCase(pe_01_not_signed, VerifySignatureStatus.NotSigned)]
-    [TestCase(pe_01_trimmed_sign, VerifySignatureStatus.NotSigned)]
-    [TestCase(pe_01_empty_sign, VerifySignatureStatus.NotSigned)]
     [TestCase(pe_01_broken_hash, VerifySignatureStatus.InvalidSignature)]
     [TestCase(pe_01_broken_sign, VerifySignatureStatus.InvalidSignature)]
     [TestCase(pe_01_broken_counter_sign, VerifySignatureStatus.InvalidSignature)]
     [TestCase(pe_01_broken_nested_sign, VerifySignatureStatus.InvalidSignature)]
     [TestCase(pe_01_broken_nested_sign_timestamp, VerifySignatureStatus.InvalidTimestamp)]
-    [TestCase(pe_02_empty_sign, VerifySignatureStatus.NotSigned)]
     [TestCase(pe_03_signed, VerifySignatureStatus.Valid)]
     [TestCase(pe_04_signed, VerifySignatureStatus.Valid)]
     [TestCase(pe_05_signed, VerifySignatureStatus.InvalidSignature)]
@@ -64,37 +58,42 @@ namespace JetBrains.SignatureVerifier.Tests
       var result = await Utils.StreamFromResource(peResourceName,
         async peFileStream =>
         {
-          var p = new SignatureVerificationParams(null, null, false, false);
-          return await new PeFile(peFileStream, ConsoleLogger.Instance).VerifySignatureAsync(p);
+          var verificationParams = new SignatureVerificationParams(null, null, false, false);
+          var peFile = new PeFile(peFileStream);
+          var signatureData = peFile.GetSignatureData();
+          var signedMessage = SignedMessage.CreateInstance(signatureData);
+          var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
+          return await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
         });
 
       Assert.AreEqual(expectedResult, result.Status);
     }
 
-    [TestCase(pe_01_signed, VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root, false)]
-    [TestCase(pe_01_signed, VerifySignatureStatus.InvalidChain, ms_codesign_roots, ms_timestamp_root, true)]
-    [TestCase(pe_07_signed, VerifySignatureStatus.Valid, jb_codesign_roots, jb_timestamp_roots, false)]
-    [TestCase(pe_07_signed, VerifySignatureStatus.Valid, jb_codesign_roots, jb_timestamp_roots, true)]
-    [TestCase(pe_08_signed, VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root, false)]
-    [TestCase(pe_08_signed, VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root, true)]
+    [TestCase(pe_01_signed, VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root)]
+    [TestCase(pe_07_signed, VerifySignatureStatus.Valid, jb_codesign_roots, jb_timestamp_roots)]
+    [TestCase(pe_08_signed, VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root)]
     public async Task VerifySignWithChainTest(string peResourceName,
       VerifySignatureStatus expectedResult,
       string codesignRootCertStoreResourceName,
-      string timestampRootCertStoreResourceName,
-      bool withRevocationCheck)
+      string timestampRootCertStoreResourceName)
     {
       var result = await Utils.StreamFromResource(peResourceName,
-        pe =>
+        peFileStream =>
           Utils.StreamFromResource(codesignRootCertStoreResourceName,
             codesignroots =>
               Utils.StreamFromResource(timestampRootCertStoreResourceName, timestamproots =>
               {
-                var p = new SignatureVerificationParams(
+                var verificationParams = new SignatureVerificationParams(
                   codesignroots,
                   timestamproots,
                   buildChain: true,
-                  withRevocationCheck);
-                return new PeFile(pe, ConsoleLogger.Instance).VerifySignatureAsync(p);
+                  withRevocationCheck: false);
+
+                var peFile = new PeFile(peFileStream);
+                var signatureData = peFile.GetSignatureData();
+                var signedMessage = SignedMessage.CreateInstance(signatureData);
+                var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
+                return signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
               })));
 
       Assert.AreEqual(expectedResult, result.Status);
@@ -162,12 +161,12 @@ namespace JetBrains.SignatureVerifier.Tests
       DateTime time)
     {
       return Utils.StreamFromResource(peResourceName,
-        pe =>
+        peFileStream =>
           Utils.StreamFromResource(codesignRootCertStoreResourceName,
             codesignroots =>
               Utils.StreamFromResource(timestampRootCertStoreResourceName, timestamproots =>
               {
-                var p = new SignatureVerificationParams(
+                var verificationParams = new SignatureVerificationParams(
                   codesignroots,
                   timestamproots,
                   buildChain: true,
@@ -176,7 +175,11 @@ namespace JetBrains.SignatureVerifier.Tests
                   SignatureValidationTimeMode.SignValidationTime,
                   signatureValidationTime: time);
 
-                return new PeFile(pe, ConsoleLogger.Instance).VerifySignatureAsync(p);
+                var peFile = new PeFile(peFileStream);
+                var signatureData = peFile.GetSignatureData();
+                var signedMessage = SignedMessage.CreateInstance(signatureData);
+                var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
+                return signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
               })));
     }
 
@@ -192,7 +195,7 @@ namespace JetBrains.SignatureVerifier.Tests
     public void ComputeHashTest(string peResourceName, string alg, string expectedResult)
     {
       var result = Utils.StreamFromResource(peResourceName,
-        peFileStream => new PeFile(peFileStream, ConsoleLogger.Instance).ComputeHash(alg));
+        peFileStream => new PeFile(peFileStream).ComputeHash(alg));
 
       Assert.AreEqual(expectedResult, Utils.ConvertToHexString(result));
     }

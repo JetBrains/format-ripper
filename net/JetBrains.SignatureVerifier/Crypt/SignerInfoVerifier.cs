@@ -1,28 +1,18 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
-using Org.BouncyCastle.Asn1.Ocsp;
-using Org.BouncyCastle.Asn1.Oiw;
-using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Cms;
-using Org.BouncyCastle.Ocsp;
 using Org.BouncyCastle.Pkix;
 using Org.BouncyCastle.Security.Certificates;
 using Org.BouncyCastle.Tsp;
-using Org.BouncyCastle.Utilities.Collections;
-using Org.BouncyCastle.Utilities.Date;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
-using AttributeTable = Org.BouncyCastle.Asn1.Cms.AttributeTable;
-using CertStatus = Org.BouncyCastle.Asn1.Ocsp.CertStatus;
 using CmsSignedData = JetBrains.SignatureVerifier.BouncyCastle.Cms.CmsSignedData;
 using SignerInformation = JetBrains.SignatureVerifier.BouncyCastle.Cms.SignerInformation;
 using Time = Org.BouncyCastle.Asn1.Cms.Time;
@@ -34,18 +24,21 @@ namespace JetBrains.SignatureVerifier.Crypt
   {
     private readonly SignerInformation _signer;
     private readonly IX509Store _certs;
+    private readonly CrlProvider _crlProvider;
     private readonly ILogger _logger;
     private TimeStampToken _timeStampToken;
     private List<SignerInformation> _counterSignatures;
     private TimeStampToken TimeStampToken => _timeStampToken ??= getTimeStampToken();
     private List<SignerInformation> CounterSignatures => _counterSignatures ??= getCounterSignatures();
-    private CrlProvider _crlProvider;
-    private CrlProvider CrlProvider => _crlProvider ??= new CrlProvider(new CrlCacheFileSystem());
 
-    public SignerInfoVerifier([NotNull] SignerInformation signer, [NotNull] IX509Store certs, ILogger logger)
+    public SignerInfoVerifier([NotNull] SignerInformation signer,
+      [NotNull] IX509Store certs,
+      CrlProvider crlProvider,
+      ILogger logger)
     {
       _signer = signer ?? throw new ArgumentNullException(nameof(signer));
       _certs = certs ?? throw new ArgumentNullException(nameof(certs));
+      _crlProvider = crlProvider ?? throw new ArgumentNullException(nameof(crlProvider));
       _logger = logger ?? NullLogger.Instance;
     }
 
@@ -98,6 +91,11 @@ namespace JetBrains.SignatureVerifier.Crypt
         return new VerifySignatureResult(VerifySignatureStatus.InvalidSignature)
           { Message = ex.FlatMessages() };
       }
+      catch (CertificateExpiredException ex)
+      {
+        return new VerifySignatureResult(VerifySignatureStatus.InvalidSignature)
+          { Message = ex.FlatMessages() };
+      }
     }
 
     private async Task<VerifySignatureResult> verifyNestedSignsAsync(
@@ -112,10 +110,11 @@ namespace JetBrains.SignatureVerifier.Crypt
           if (nestedSignAttr.AttrValues.Count > 0)
           {
             var nestedSignedMessage =
-              new SignedMessage(nestedSignAttr.AttrValues[0].ToAsn1Object(), _logger);
+              new SignedMessage(nestedSignAttr.AttrValues[0].ToAsn1Object());
 
             var nestedSignVerifyResult =
-              await nestedSignedMessage.VerifySignatureAsync(signatureVerificationParams);
+              await new SignedMessageVerifier(_crlProvider, _logger).VerifySignatureAsync(nestedSignedMessage,
+                signatureVerificationParams);
 
             if (nestedSignVerifyResult.NotValid)
               return nestedSignVerifyResult;
@@ -130,7 +129,7 @@ namespace JetBrains.SignatureVerifier.Crypt
       SignatureVerificationParams signatureVerificationParams)
     {
       var signerInfoWraps = CounterSignatures.Select(signerInformation =>
-        new SignerInfoVerifier(signerInformation, _certs, _logger));
+        new SignerInfoVerifier(signerInformation, _certs, _crlProvider, _logger));
 
       foreach (var signerInfoWrap in signerInfoWraps)
       {
@@ -202,7 +201,7 @@ namespace JetBrains.SignatureVerifier.Crypt
         getSignValidationTime(signatureVerificationParams));
 
       var useOCSP = signatureVerificationParams.WithRevocationCheck &&
-                    await builderParams.PrepareCrls(CrlProvider);
+                    await builderParams.PrepareCrls(_crlProvider);
 
       try
       {
@@ -212,20 +211,25 @@ namespace JetBrains.SignatureVerifier.Crypt
         if (useOCSP)
         {
           _logger.Trace($"Start OCSP for certificate {primary.FormatId()}");
-
-          var issuerCert = chain.CertPath.Certificates.Cast<X509Certificate>().Last();
-
+          var issuerCert = getIssuerCert(chain, primary);
           return await new OcspVerifier(signatureVerificationParams.OcspResponseTimeout, _logger)
             .CheckCertificateRevocationStatusAsync(primary, issuerCert);
         }
-        else
-          return VerifySignatureResult.Valid;
+
+        return VerifySignatureResult.Valid;
       }
       catch (PkixCertPathBuilderException ex)
       {
         _logger.Error($"Build chain for certificate was failed. {primary.FormatId()} {ex.FlatMessages()}");
         return VerifySignatureResult.InvalidChain(ex.FlatMessages());
       }
+    }
+
+    private X509Certificate getIssuerCert(PkixCertPathBuilderResult chain, X509Certificate cert)
+    {
+      return chain.CertPath.Certificates.Cast<X509Certificate>()
+               .LastOrDefault(s => s.SubjectDN.Equivalent(cert.IssuerDN))
+             ?? chain.TrustAnchor.TrustedCert;
     }
 
     private DateTime? getSignValidationTime(SignatureVerificationParams signatureVerificationParams)

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using JetBrains.Annotations;
-using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.X509;
 
 namespace JetBrains.SignatureVerifier.Crypt
@@ -11,9 +10,14 @@ namespace JetBrains.SignatureVerifier.Crypt
   public class CrlCacheFileSystem
   {
     private readonly string _cacheDir;
-    private readonly X509CrlParser _crlParser = new X509CrlParser();
+    private readonly X509CrlParser _crlParser = new();
 
-    public CrlCacheFileSystem([NotNull] string cacheDir = "crlscache")
+    public CrlCacheFileSystem()
+      : this("crlscache")
+    {
+    }
+
+    public CrlCacheFileSystem([NotNull] string cacheDir)
     {
       var cacheDirName = cacheDir ?? throw new ArgumentNullException(nameof(cacheDir));
       _cacheDir = Path.Combine(Path.GetTempPath(), cacheDirName);
@@ -36,7 +40,7 @@ namespace JetBrains.SignatureVerifier.Crypt
       return res.AsReadOnly();
     }
 
-    public void UpdateCrls(string issuerId, List<byte[]> crlsData)
+    public virtual void UpdateCrls(string issuerId, List<byte[]> crlsData)
     {
       cleanUpCrls(issuerId);
       saveCrls(issuerId, crlsData);

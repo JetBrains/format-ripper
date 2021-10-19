@@ -29,7 +29,7 @@ namespace JetBrains.SignatureVerifier.Crypt
 
       _intermediateCertsStore = intermediateCertsStore;
       _primaryCertHolder = primaryCertHolder;
-      ValidityModel = PkixParameters.ChainValidityModel;
+      ValidityModel = ChainValidityModel;
       Date = signValidationTime.HasValue ? new DateTimeObject(signValidationTime.Value) : null;
       IsRevocationEnabled = false;
       AddStore(intermediateCertsStore);
@@ -53,15 +53,11 @@ namespace JetBrains.SignatureVerifier.Crypt
       var allCrls = await getCrlsForCertsAsync(crlProvider, allCerts);
 
       if (allCrls is null)
-      {
         return true;
-      }
-      else
-      {
-        var crlStore = getCrlStore(allCrls);
-        AddStore(crlStore);
-        IsRevocationEnabled = true;
-      }
+
+      var crlStore = getCrlStore(allCrls);
+      AddStore(crlStore);
+      IsRevocationEnabled = true;
 
       return false;
     }

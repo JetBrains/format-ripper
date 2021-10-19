@@ -1,9 +1,6 @@
-using System;
 using System.Collections;
-using System.IO;
 using JetBrains.SignatureVerifier.BouncyCastle.Compat;
 using Org.BouncyCastle.Cms;
-using Org.BouncyCastle.Utilities;
 
 namespace JetBrains.SignatureVerifier.BouncyCastle.Cms
 {

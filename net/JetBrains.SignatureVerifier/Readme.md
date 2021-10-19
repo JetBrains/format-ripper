@@ -47,55 +47,64 @@ Certificate revocation status checking is performed when
 ```c#
 static async Task Main(string[] args)
 {
-   var logger = new SimpleConsoleLogger();
-   //client is responsible for dispose the stream
-   await using Stream defaultRootsStream = JetBrains.SignatureVerifier.Resources.GetDefaultRoots();
+    var logger = new SimpleConsoleLogger();
+    //client is responsible for dispose the stream
+    await using var defaultRootsStream = JetBrains.SignatureVerifier.Resources.GetDefaultRoots();
 
-   var verificationParams = new SignatureVerificationParams(
-       signRootCertStore: defaultRootsStream,
-       timestampRootCertStore: null,
-       buildChain: true,
-       withRevocationCheck: false);
+    var verificationParams = new SignatureVerificationParams(
+        signRootCertStore: defaultRootsStream,
+        timestampRootCertStore: null,
+        buildChain: true,
+        withRevocationCheck: false);
 
-   //Path to Fat-Macho
-   var pathToFatMacho = args[0];
-   await verifyFatMacho(pathToFatMacho, verificationParams, logger);
+    //Path to Fat-Macho
+    var pathToFatMacho = args[0];
+    await verifyFatMacho(pathToFatMacho, verificationParams, logger);
 
-   //Path to PE or Macho, depends on type you have detected
-   var pathToExecutable = args[1];
-   await verifyExecutable(pathToExecutable, verificationParams, logger);
+    //Path to PE
+    var pathToExcutable = args[1];
+    await verifyPortableExcutable(pathToExcutable, verificationParams, logger);
 }
 
-static async Task verifyFatMacho(string pathToExecutable,
-   SignatureVerificationParams signatureVerificationParams,
-   ILogger logger)
+static async Task verifyFatMacho(string pathToExcutable,
+    SignatureVerificationParams verificationParams,
+    ILogger logger)
 {
-   await using var fs = File.OpenRead(pathToExecutable);
-   var machoArch = new MachoArch(fs, logger);
+    await using var fs = File.OpenRead(pathToExcutable);
+    var machoArch = new MachoArch(fs, logger);
 
-   foreach (MachoFile executable in machoArch.Extract())
-   {
-       VerifySignatureResult result = await executable.VerifySignatureAsync(signatureVerificationParams);
-       displayResult(logger, result);
-   }
+    foreach (MachoFile excutable in machoArch.Extract())
+    {
+        VerifySignatureResult result = await verifySignature(excutable.GetSignatureData(), verificationParams, logger);
+        displayResult(logger, result);
+    }
 }
 
-private static async Task verifyExecutable(string pathToExecutable,
-   SignatureVerificationParams signatureVerificationParams,
-   ILogger logger)
+private static async Task verifyPortableExcutable(string pathToExcutable,
+    SignatureVerificationParams verificationParams,
+    ILogger logger)
 {
-   await using var fs = File.OpenRead(pathToExecutable);
-   var executable = new PeFile(fs, logger);
-   VerifySignatureResult result = await executable.VerifySignatureAsync(signatureVerificationParams);
-   displayResult(logger, result);
+    await using var fs = File.OpenRead(pathToExcutable);
+    var excutable = new PeFile(fs);
+    var result = await verifySignature(excutable.GetSignatureData(), verificationParams, logger);
+    displayResult(logger, result);
+}
+
+private static async Task<VerifySignatureResult> verifySignature(SignatureData signatureData,
+    SignatureVerificationParams verificationParams,
+    ILogger logger)
+{
+    SignedMessage signedMessage = SignedMessage.CreateInstance(signatureData);
+    SignedMessageVerifier signedMessageVerifier = new SignedMessageVerifier(logger);
+    return await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 }
 
 private static void displayResult(ILogger logger, VerifySignatureResult result)
 {
-   if (result.Status == VerifySignatureStatus.Valid)
-       logger.Info("Signature is OK!");
-   else
-       logger.Error($"Signature is invalid! {result.Message}");
+    if (result.Status == VerifySignatureStatus.Valid)
+        logger.Info("Signature is OK!");
+    else
+        logger.Error($"Signature is invalid! {result.Message}");
 }
 ```
 
@@ -116,10 +125,10 @@ In order to compute hash of the executable call the `ComputeHash` method.
 ```c#
 static void Main(string[] args)
 {
-   string pathToExecutable = args[1];
-   using var fs = File.OpenRead(pathToExecutable);
-   var pe = new PeFile(fs, new SimpleConsoleLogger());
-   byte[] sha512 = pe.ComputeHash("sha512");
+    string pathToExcutable = args[1];
+    using var fs = File.OpenRead(pathToExcutable);
+    var pe = new PeFile(fs);
+    byte[] sha512 = pe.ComputeHash("sha512");
 }
 ```
 

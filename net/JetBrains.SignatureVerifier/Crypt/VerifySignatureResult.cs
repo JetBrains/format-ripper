@@ -6,8 +6,7 @@
     public VerifySignatureStatus Status => _status;
     public bool NotValid => _status != VerifySignatureStatus.Valid;
     public string Message { get; set; }
-    public static VerifySignatureResult Valid = new VerifySignatureResult(VerifySignatureStatus.Valid);
-    public static VerifySignatureResult NotSigned = new VerifySignatureResult(VerifySignatureStatus.NotSigned);
+    public static readonly VerifySignatureResult Valid = new(VerifySignatureStatus.Valid);
 
     public VerifySignatureResult(VerifySignatureStatus status)
     {
@@ -15,14 +14,13 @@
     }
 
     public static VerifySignatureResult InvalidChain(string message) =>
-      new VerifySignatureResult(VerifySignatureStatus.InvalidChain)
+      new(VerifySignatureStatus.InvalidChain)
         { Message = message };
   }
 
   public enum VerifySignatureStatus
   {
     Valid,
-    NotSigned,
     InvalidSignature,
     InvalidChain,
     InvalidTimestamp

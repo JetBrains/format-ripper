@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
+using System.Security.Cryptography;
 using JetBrains.Annotations;
 using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.X509;
 using AttributeTable = Org.BouncyCastle.Asn1.Cms.AttributeTable;
 using X509Extension = Org.BouncyCastle.Asn1.X509.X509Extension;
@@ -24,13 +21,16 @@ namespace JetBrains.SignatureVerifier.Crypt
     public static string SN(this X509Certificate cert) =>
       ConvertToHexString(cert.SerialNumber.ToByteArrayUnsigned());
 
+    public static string Thumbprint(this X509Certificate cert) =>
+      ConvertToHexString(new SHA1Managed().ComputeHash(cert.GetEncoded()));
+
     public static string ConvertToHexString(byte[] data) => BitConverter.ToString(data).Replace("-", "");
 
     /// <summary>
-    /// Extract the OCSP responder URL from certificate extension (OID 1.3.6.1.5.5.7.1.1) 
+    /// Extract the OCSP responder URL from certificate extension (OID 1.3.6.1.5.5.7.1.1)
     /// </summary>
     /// <param name="cert">Target certificate</param>
-    /// <returns>URL-string for request an OCSP responder</returns> 
+    /// <returns>URL-string for request an OCSP responder</returns>
     public static string GetOcspUrl(this X509Certificate cert)
     {
       var authorityInformationAccess =
@@ -52,11 +52,11 @@ namespace JetBrains.SignatureVerifier.Crypt
 
 
     /// <summary>
-    /// Extract the CRL distribution urls from certificate extension (OID 2.5.29.31) 
-    /// See rfc5280 section-4.2.1.13 
+    /// Extract the CRL distribution urls from certificate extension (OID 2.5.29.31)
+    /// See rfc5280 section-4.2.1.13
     /// </summary>
     /// <param name="cert">Target certificate</param>
-    /// <returns>List of URL-strings from which CRL-files can be downloaded</returns> 
+    /// <returns>List of URL-strings from which CRL-files can be downloaded</returns>
     public static List<string> GetCrlDistributionUrls(this X509Certificate cert)
     {
       var res = new List<string>();

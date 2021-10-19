@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 
 namespace JetBrains.SignatureVerifier.BouncyCastle.Compat
 {

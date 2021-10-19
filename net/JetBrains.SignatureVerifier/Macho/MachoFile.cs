@@ -1,47 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using JetBrains.Annotations;
-using JetBrains.SignatureVerifier.Crypt;
 
 namespace JetBrains.SignatureVerifier.Macho
 {
   public class MachoFile
   {
     private readonly Stream _stream;
-    private readonly ILogger _logger;
     public uint Magic { get; private set; }
 
-    /// <summary>
-    ///Initializes a new instance of the <see cref="T:JetBrains.SignatureVerifier.MachoFile"></see> 
-    /// </summary>
-    /// <param name="stream">An input stream</param>
-    /// <param name="logger">A logger</param>
-    /// <exception cref="PlatformNotSupportedException">Indicates the byte order ("endianness")
-    /// in which data is stored in this computer architecture is not Little Endian.</exception>
-    /// <exception cref="InvalidDataException">If the input stream not contain MachO</exception>
-    public MachoFile([NotNull] Stream stream, ILogger logger)
+    ///  <summary>
+    /// Initializes a new instance of the <see cref="T:JetBrains.SignatureVerifier.MachoFile"></see>
+    ///  </summary>
+    ///  <param name="stream">An input stream</param>
+    ///  <exception cref="PlatformNotSupportedException">Indicates the byte order ("endianness")
+    ///  in which data is stored in this computer architecture is not Little Endian.</exception>
+    ///  <exception cref="InvalidDataException">If the input stream not contain MachO</exception>
+    public MachoFile([NotNull] Stream stream)
     {
       if (!BitConverter.IsLittleEndian)
         throw new PlatformNotSupportedException("Only Little endian is expected");
 
       _stream = stream ?? throw new ArgumentNullException(nameof(stream));
-      _logger = logger ?? NullLogger.Instance;
       setMagic();
     }
 
-    /// <summary>
-    ///Initializes a new instance of the <see cref="T:JetBrains.SignatureVerifier.MachoFile"></see> 
-    /// </summary>
-    /// <param name="stream">A raw data</param>
-    /// <param name="logger">A logger</param>
-    /// <exception cref="PlatformNotSupportedException">Indicates the byte order ("endianness")
-    /// in which data is stored in this computer architecture is not Little Endian.</exception>
-    /// <exception cref="InvalidDataException">If the input data not contain MachO</exception>
-    public MachoFile([NotNull] byte[] data, ILogger logger)
+    ///  <summary>
+    /// Initializes a new instance of the <see cref="T:JetBrains.SignatureVerifier.MachoFile"></see>
+    ///  </summary>
+    ///  <param name="data">A raw data</param>
+    ///  <exception cref="PlatformNotSupportedException">Indicates the byte order ("endianness")
+    ///  in which data is stored in this computer architecture is not Little Endian.</exception>
+    ///  <exception cref="InvalidDataException">If the input data not contain MachO</exception>
+    public MachoFile([NotNull] byte[] data)
     {
       if (data == null)
         throw new ArgumentNullException(nameof(data));
@@ -50,7 +42,6 @@ namespace JetBrains.SignatureVerifier.Macho
         throw new PlatformNotSupportedException("Only Little endian is expected");
 
       _stream = new MemoryStream(data);
-      _logger = logger ?? NullLogger.Instance;
       setMagic();
     }
 
@@ -69,7 +60,7 @@ namespace JetBrains.SignatureVerifier.Macho
     }
 
     /// <summary>
-    /// Retrive the signature data from MachO
+    /// Retrieve the signature data from MachO
     /// </summary>
     /// <exception cref="InvalidDataException">Indicates the data in the input stream does not correspond to MachO format or the signature data is malformed</exception>
     [NotNull]
@@ -83,42 +74,6 @@ namespace JetBrains.SignatureVerifier.Macho
       {
         throw new InvalidDataException("Invalid format");
       }
-    }
-
-    /// <summary>
-    /// Validate the signature of the MachO 
-    /// </summary>
-    /// <returns>Validation status</returns>
-    public async Task<VerifySignatureResult> VerifySignatureAsync(
-      [NotNull] SignatureVerificationParams signatureVerificationParams)
-    {
-      if (signatureVerificationParams == null)
-        throw new ArgumentNullException(nameof(signatureVerificationParams));
-
-      var signedData = GetSignatureData();
-
-      if (signedData.IsEmpty)
-      {
-        _logger.Warning("No signature in MachO");
-        return VerifySignatureResult.NotSigned;
-      }
-
-      try
-      {
-        var cms = new SignedMessage(signedData.SignedData, signedData.CmsData, _logger);
-        var res = await cms.VerifySignatureAsync(signatureVerificationParams);
-
-        if (res != VerifySignatureResult.Valid)
-          return res;
-      }
-      catch (Exception ex)
-      {
-        return new VerifySignatureResult(VerifySignatureStatus.InvalidSignature)
-          { Message = ex.FlatMessages() };
-      }
-
-
-      return VerifySignatureResult.Valid;
     }
 
     private SignatureData getMachoSignatureData()
@@ -184,10 +139,8 @@ namespace JetBrains.SignatureVerifier.Macho
 
         return new SignatureData(signedData, cmsData);
       }
-      else
-      {
-        throw new InvalidDataException("Unknown format");
-      }
+
+      throw new InvalidDataException("Unknown format");
     }
   }
 }

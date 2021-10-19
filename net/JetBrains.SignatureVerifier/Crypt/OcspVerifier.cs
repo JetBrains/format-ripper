@@ -1,14 +1,13 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Oiw;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Ocsp;
-using Org.BouncyCastle.Pkix;
 using Org.BouncyCastle.X509;
 
 namespace JetBrains.SignatureVerifier.Crypt
@@ -27,9 +26,12 @@ namespace JetBrains.SignatureVerifier.Crypt
       _logger = logger ?? NullLogger.Instance;
     }
 
-    public async Task<VerifySignatureResult> CheckCertificateRevocationStatusAsync(X509Certificate targetCert,
-      X509Certificate issuerCert)
+    public async Task<VerifySignatureResult> CheckCertificateRevocationStatusAsync([NotNull] X509Certificate targetCert,
+      [NotNull] X509Certificate issuerCert)
     {
+      if (targetCert == null) throw new ArgumentNullException(nameof(targetCert));
+      if (issuerCert == null) throw new ArgumentNullException(nameof(issuerCert));
+
       var ocspUrl = targetCert.GetOcspUrl();
 
       if (ocspUrl is null)

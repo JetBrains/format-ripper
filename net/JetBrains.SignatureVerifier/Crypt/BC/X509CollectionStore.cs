@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using JetBrains.SignatureVerifier.BouncyCastle.Compat;
-using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509.Store;
 
 namespace JetBrains.SignatureVerifier.BouncyCastle.X509.Store

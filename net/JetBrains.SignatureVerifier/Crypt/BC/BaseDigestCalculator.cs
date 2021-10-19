@@ -1,4 +1,3 @@
-using System;
 using Org.BouncyCastle.Utilities;
 
 namespace JetBrains.SignatureVerifier.BouncyCastle.Cms

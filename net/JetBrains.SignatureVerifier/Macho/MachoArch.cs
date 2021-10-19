@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -85,7 +84,7 @@ namespace JetBrains.SignatureVerifier.Macho
             s =>
             {
               _stream.Seek(s.Offset, SeekOrigin.Begin);
-              return new MachoFile(reader.ReadBytes(s.Size), _logger);
+              return new MachoFile(reader.ReadBytes(s.Size));
             })
           .ToList()
           .AsReadOnly();
@@ -98,7 +97,7 @@ namespace JetBrains.SignatureVerifier.Macho
     {
       using var ms = new MemoryStream();
       stream.CopyTo(ms);
-      return new MachoFile(ms.ToArray(), _logger);
+      return new MachoFile(ms.ToArray());
     }
   }
 }

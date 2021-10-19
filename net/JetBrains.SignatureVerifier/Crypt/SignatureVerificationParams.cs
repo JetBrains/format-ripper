@@ -18,7 +18,7 @@ namespace JetBrains.SignatureVerifier.Crypt
     public SignatureValidationTimeMode SignValidationTimeMode { get; private set; }
     public DateTime? SignatureValidationTime { get; private set; }
 
-    private string SignatureValidationTimeFormated =>
+    private string SignatureValidationTimeFormatted =>
       SignatureValidationTime.HasValue ? SignatureValidationTime.ToString() : "<null>";
 
     private HashSet _rootCertificates;
@@ -84,7 +84,7 @@ namespace JetBrains.SignatureVerifier.Crypt
     public override string ToString()
     {
       return
-        $"{nameof(BuildChain)}: {BuildChain}, {nameof(WithRevocationCheck)}: {WithRevocationCheck}, {nameof(OcspResponseTimeout)}: {OcspResponseTimeout}, {nameof(SignValidationTimeMode)}: {SignValidationTimeMode}, {nameof(SignatureValidationTime)}: {SignatureValidationTimeFormated}";
+        $"{nameof(BuildChain)}: {BuildChain}, {nameof(WithRevocationCheck)}: {WithRevocationCheck}, {nameof(OcspResponseTimeout)}: {OcspResponseTimeout}, {nameof(SignValidationTimeMode)}: {SignValidationTimeMode}, {nameof(SignatureValidationTime)}: {SignatureValidationTimeFormatted}";
     }
   }
 

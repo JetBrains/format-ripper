@@ -1,15 +1,10 @@
 using System;
 using System.Collections;
-using System.IO;
 using JetBrains.SignatureVerifier.BouncyCastle.Compat;
 using JetBrains.SignatureVerifier.Crypt;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
-using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Cms;
-using Org.BouncyCastle.Security.Certificates;
-using Org.BouncyCastle.Utilities;
-using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 
 namespace JetBrains.SignatureVerifier.BouncyCastle.Cms

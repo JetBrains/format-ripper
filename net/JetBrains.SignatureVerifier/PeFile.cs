@@ -2,19 +2,16 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using JetBrains.Annotations;
-using JetBrains.SignatureVerifier.Crypt;
 
 namespace JetBrains.SignatureVerifier
 {
   /// <summary>
-  ///Portable Executable file 
+  ///Portable Executable file
   /// </summary>
   public class PeFile
   {
     private readonly Stream _stream;
-    private readonly ILogger _logger;
     private readonly DataInfo _checkSum;
     private readonly DataInfo _imageDirectoryEntrySecurity;
     private readonly DataInfo _signData;
@@ -22,23 +19,21 @@ namespace JetBrains.SignatureVerifier
     private byte[] _rawPeData;
     private byte[] RawPeData => _rawPeData ??= getRawPeData();
 
-    private SignedMessage _cms;
-    private SignedMessage Cms => _cms ??= getCms();
+    public int ImageDirectoryEntrySecurityOffset => _imageDirectoryEntrySecurity.Offset;
 
-    /// <summary>
-    ///Initializes a new instance of the  <see cref="T:JetBrains.SignatureVerifier.PeFile"></see> 
-    /// </summary>
-    /// <param name="stream">An input stream</param>
-    /// <exception cref="PlatformNotSupportedException">Indicates the byte order ("endianness")
-    /// in which data is stored in this computer architecture is not Little Endian.</exception>
-    /// <exception cref="InvalidDataException">Indicates the data in the input stream does not correspond to PE-format.</exception>
-    public PeFile([NotNull] Stream stream, [CanBeNull] ILogger logger)
+    ///  <summary>
+    /// Initializes a new instance of the  <see cref="T:JetBrains.SignatureVerifier.PeFile"></see>
+    ///  </summary>
+    ///  <param name="stream">An input stream</param>
+    ///  <exception cref="PlatformNotSupportedException">Indicates the byte order ("endianness")
+    ///  in which data is stored in this computer architecture is not Little Endian.</exception>
+    ///  <exception cref="InvalidDataException">Indicates the data in the input stream does not correspond to PE-format.</exception>
+    public PeFile([NotNull] Stream stream)
     {
       if (!BitConverter.IsLittleEndian)
         throw new PlatformNotSupportedException("Only Little endian is expected");
 
       _stream = stream ?? throw new ArgumentNullException(nameof(stream));
-      _logger = logger ?? NullLogger.Instance;
       _stream.Rewind();
       using var reader = new BinaryReader(stream, Encoding.UTF8, true);
 
@@ -83,19 +78,19 @@ namespace JetBrains.SignatureVerifier
     }
 
     /// <summary>
-    /// Retrive the signature data from PE
+    /// Retrieve the signature data from PE
     /// </summary>
-    public byte[] GetSignatureData()
+    public SignatureData GetSignatureData()
     {
       if (_signData.IsEmpty)
-        return null;
+        return SignatureData.Empty;
 
       if (!_stream.CanRead || !_stream.CanSeek)
-        return null;
+        return SignatureData.Empty;
 
       try
       {
-        using var reader = new BinaryReader(_stream, Encoding.UTF8, true);
+        using var reader = new BinaryReader(_stream.Rewind(), Encoding.UTF8, true);
         //jump to the sign data
         _stream.Seek(_signData.Offset, SeekOrigin.Begin);
         var dwLength = reader.ReadInt32();
@@ -107,14 +102,14 @@ namespace JetBrains.SignatureVerifier
 
         //need more data
         if (res.Length < dwLength - 8)
-          return null;
+          return SignatureData.Empty;
 
-        return res;
+        return new SignatureData(null, res);
       }
       catch (EndOfStreamException)
       {
         //need more data
-        return null;
+        return SignatureData.Empty;
       }
     }
 
@@ -170,34 +165,12 @@ namespace JetBrains.SignatureVerifier
       return hash.GetHashAndReset();
     }
 
-    /// <summary>
-    /// Validate the signature of the PE
-    /// </summary>
-    /// <returns>Validation status</returns>
-    public async Task<VerifySignatureResult> VerifySignatureAsync(
-      SignatureVerificationParams signatureVerificationParams)
-    {
-      if (Cms is null)
-      {
-        _logger.Warning("No signatures in PE");
-        return VerifySignatureResult.NotSigned;
-      }
-      else
-        return await Cms.VerifySignatureAsync(signatureVerificationParams);
-    }
-
     private byte[] getRawPeData()
     {
       _stream.Rewind();
       using var ms = new MemoryStream();
       _stream.CopyTo(ms);
       return ms.ToArray();
-    }
-
-    private SignedMessage getCms()
-    {
-      var cmsdata = GetSignatureData();
-      return cmsdata != null ? new SignedMessage(cmsdata, _logger) : null;
     }
   }
 }

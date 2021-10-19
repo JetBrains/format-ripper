@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
-using JetBrains.SignatureVerifier.BouncyCastle.Cms;
 using JetBrains.SignatureVerifier.BouncyCastle.Compat;
-using Org.BouncyCastle;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Asn1.Pkcs;
