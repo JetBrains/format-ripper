@@ -65,6 +65,9 @@ namespace JetBrains.SignatureVerifier.Crypt
         if (!_signer.Verify(cert))
           return new VerifySignatureResult(VerifySignatureStatus.InvalidSignature);
 
+        if (signatureVerificationParams.BuildChain)
+          applySignValidationTime(signatureVerificationParams);
+
         var verifyCounterSignResult =
           await verifyCounterSignAsync(signatureVerificationParams);
 
@@ -98,27 +101,58 @@ namespace JetBrains.SignatureVerifier.Crypt
       }
     }
 
+    private void applySignValidationTime(SignatureVerificationParams signatureVerificationParams)
+    {
+      if (signatureVerificationParams.SignValidationTimeMode != SignatureValidationTimeMode.Timestamp ||
+          signatureVerificationParams.SignatureValidationTime.HasValue)
+        return;
+
+      var signValidationTime = getSigningTime() ?? getTimestamp();
+
+      if (signValidationTime.HasValue)
+        signatureVerificationParams.SetSignValidationTime(signValidationTime.Value);
+      else
+        _logger.Warning("Unknown sign validation time");
+    }
+
     private async Task<VerifySignatureResult> verifyNestedSignsAsync(
       SignatureVerificationParams signatureVerificationParams)
     {
-      var nestedSignAttrs = _signer.UnsignedAttributes?.GetAll(OIDs.SPC_NESTED_SIGNATURE);
+      var verifyNestedSignsResult =
+        await verifyNestedSignsAsync(OIDs.SPC_NESTED_SIGNATURE, signatureVerificationParams);
 
-      if (nestedSignAttrs is not null)
+      if (verifyNestedSignsResult.NotValid)
+        return verifyNestedSignsResult;
+
+      var verifyMsCounterSignsResult = await verifyNestedSignsAsync(OIDs.MS_COUNTER_SIGN, signatureVerificationParams);
+
+      if (verifyMsCounterSignsResult.NotValid)
+        return verifyMsCounterSignsResult;
+
+      return VerifySignatureResult.Valid;
+    }
+
+    private async Task<VerifySignatureResult> verifyNestedSignsAsync(DerObjectIdentifier attrOid,
+      SignatureVerificationParams signatureVerificationParams)
+    {
+      var nestedSignAttrs = _signer.UnsignedAttributes?.GetAll(attrOid);
+
+      if (nestedSignAttrs is null)
+        return VerifySignatureResult.Valid;
+
+      foreach (Attribute nestedSignAttr in nestedSignAttrs)
       {
-        foreach (Attribute nestedSignAttr in nestedSignAttrs)
+        foreach (Asn1Encodable attrValue in nestedSignAttr.AttrValues)
         {
-          if (nestedSignAttr.AttrValues.Count > 0)
-          {
-            var nestedSignedMessage =
-              new SignedMessage(nestedSignAttr.AttrValues[0].ToAsn1Object());
+          var nestedSignedMessage =
+            new SignedMessage(attrValue.ToAsn1Object());
 
-            var nestedSignVerifyResult =
-              await new SignedMessageVerifier(_crlProvider, _logger).VerifySignatureAsync(nestedSignedMessage,
-                signatureVerificationParams);
+          var nestedSignVerifyResult =
+            await new SignedMessageVerifier(_crlProvider, _logger).VerifySignatureAsync(nestedSignedMessage,
+              signatureVerificationParams);
 
-            if (nestedSignVerifyResult.NotValid)
-              return nestedSignVerifyResult;
-          }
+          if (nestedSignVerifyResult.NotValid)
+            return nestedSignVerifyResult;
         }
       }
 
@@ -194,11 +228,14 @@ namespace JetBrains.SignatureVerifier.Crypt
       IX509Store intermediateCertsStore,
       SignatureVerificationParams signatureVerificationParams)
     {
+      _logger.Trace(
+        $"Signature validation time: {signatureVerificationParams.SignatureValidationTime?.ToString("dd.MM.yyyy HH:mm:ss") ?? "<null>"}");
+
       var builderParams = new CustomPkixBuilderParameters(
         signatureVerificationParams.RootCertificates,
         intermediateCertsStore,
         new X509CertStoreSelector { Certificate = primary },
-        getSignValidationTime(signatureVerificationParams));
+        signatureVerificationParams.SignatureValidationTime);
 
       var useOCSP = signatureVerificationParams.WithRevocationCheck &&
                     await builderParams.PrepareCrls(_crlProvider);
@@ -232,16 +269,6 @@ namespace JetBrains.SignatureVerifier.Crypt
              ?? chain.TrustAnchor.TrustedCert;
     }
 
-    private DateTime? getSignValidationTime(SignatureVerificationParams signatureVerificationParams)
-    {
-      return signatureVerificationParams.SignValidationTimeMode switch
-      {
-        SignatureValidationTimeMode.Timestamp => getSigningTime() ?? getTimestamp(),
-        SignatureValidationTimeMode.SignValidationTime => signatureVerificationParams.SignatureValidationTime,
-        SignatureValidationTimeMode.Current => null,
-        _ => throw new ArgumentOutOfRangeException(nameof(signatureVerificationParams.SignValidationTimeMode))
-      };
-    }
 
     private List<SignerInformation> getCounterSignatures()
     {

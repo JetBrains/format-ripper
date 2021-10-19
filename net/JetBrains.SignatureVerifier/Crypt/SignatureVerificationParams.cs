@@ -47,7 +47,7 @@ namespace JetBrains.SignatureVerifier.Crypt
       _timestampRootCertStore = timestampRootCertStore;
       BuildChain = buildChain;
       WithRevocationCheck = withRevocationCheck;
-      OcspResponseTimeout = ocspResponseTimeout.HasValue ? ocspResponseTimeout.Value : TimeSpan.FromSeconds(5);
+      OcspResponseTimeout = ocspResponseTimeout ?? TimeSpan.FromSeconds(5);
       SignValidationTimeMode = signatureValidationTimeMode;
 
       if (SignValidationTimeMode == SignatureValidationTimeMode.SignValidationTime
@@ -55,6 +55,17 @@ namespace JetBrains.SignatureVerifier.Crypt
         throw new ArgumentNullException(nameof(signatureValidationTime));
 
       SignatureValidationTime = signatureValidationTime;
+    }
+
+    public void SetSignValidationTime(DateTime signValidationTime)
+    {
+      if (SignValidationTimeMode != SignatureValidationTimeMode.Timestamp)
+        throw new InvalidOperationException("Invalid SignValidationTimeMode");
+
+      if (SignatureValidationTime.HasValue)
+        throw new InvalidOperationException("SignatureValidationTime already set");
+
+      SignatureValidationTime = signValidationTime;
     }
 
     private HashSet readRootCertificates()
