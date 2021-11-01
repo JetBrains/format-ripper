@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using JetBrains.SignatureVerifier.Crypt;
@@ -14,7 +12,6 @@ using Org.BouncyCastle.Asn1.Oiw;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 using X509Certificate = Org.BouncyCastle.X509.X509Certificate;
@@ -133,13 +130,13 @@ namespace JetBrains.SignatureVerifier.Tests
 
       //write attribute certificate table
       writer.Write(encodedCmsSignedData.Length); //dwLength
-      writer.Write((short)0x0200); // wRevision = WIN_CERT_REVISION_2_0
-      writer.Write((short)2); //wCertificateType = WIN_CERT_TYPE_PKCS_SIGNED_DATA
+      writer.Write((short) 0x0200); // wRevision = WIN_CERT_REVISION_2_0
+      writer.Write((short) 2); //wCertificateType = WIN_CERT_TYPE_PKCS_SIGNED_DATA
       writer.Write(encodedCmsSignedData); //bCertificate
 
       //write new ImageDirectoryEntrySecurity
       signedPeStream.Seek(peFile.ImageDirectoryEntrySecurityOffset, SeekOrigin.Begin);
-      writer.Write((int)attributeCertificateTableOffset);
+      writer.Write((int) attributeCertificateTableOffset);
       writer.Write(encodedCmsSignedData.Length);
       return signedPeStream;
     }
@@ -155,10 +152,11 @@ namespace JetBrains.SignatureVerifier.Tests
 
     private static Stream getRootStoreStream(X509Certificate cert)
     {
-      var collection = new X509Certificate2Collection { new(DotNetUtilities.ToX509Certificate(cert)) };
-      var store = collection.Export(X509ContentType.Pkcs7);
-      Debug.Assert(store != null, nameof(store) + " != null");
-      return new MemoryStream(store);
+      var cmsGen = new CmsSignedDataGenerator();
+      cmsGen.AddCertificates(getStore(StoreType.CERTIFICATE, cert));
+      CmsSignedData cmsSignedData = cmsGen.Generate(new CmsProcessableByteArray(new byte[] { }), false);
+      var data = cmsSignedData.GetEncoded();
+      return new MemoryStream(data);
     }
 
     private static Stream getPeStream(string resourceName)
