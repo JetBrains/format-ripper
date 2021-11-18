@@ -17,7 +17,7 @@ namespace JetBrains.SignatureVerifier
     private readonly DataInfo _signData;
 
     private byte[] _rawPeData;
-    private byte[] RawPeData => _rawPeData ??= getRawPeData();
+    private byte[] RawPeData => _rawPeData ??= _stream.ReadAll();
 
     public int ImageDirectoryEntrySecurityOffset => _imageDirectoryEntrySecurity.Offset;
 
@@ -163,14 +163,6 @@ namespace JetBrains.SignatureVerifier
       }
 
       return hash.GetHashAndReset();
-    }
-
-    private byte[] getRawPeData()
-    {
-      _stream.Rewind();
-      using var ms = new MemoryStream();
-      _stream.CopyTo(ms);
-      return ms.ToArray();
     }
   }
 }

@@ -18,7 +18,7 @@ namespace JetBrains.SignatureVerifier.Crypt
     public static SignedMessage CreateInstance(SignatureData signatureData)
     {
       if (signatureData.IsEmpty)
-        throw new InvalidDataException(nameof(signatureData));
+        throw new InvalidDataException($"{nameof(signatureData)} is empty");
 
       if (signatureData.HasAttachedSignedData)
         return new SignedMessage(signatureData.SignedData, signatureData.CmsData);

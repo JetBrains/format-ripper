@@ -6,9 +6,8 @@ using FluentAssertions;
 using JetBrains.SignatureVerifier.Crypt;
 using JetBrains.SignatureVerifier.Macho;
 using NUnit.Framework;
-using Org.BouncyCastle.Pkix;
 
-namespace JetBrains.SignatureVerifier.Tests
+namespace JetBrains.SignatureVerifier.Tests.Macho
 {
   [SuppressMessage("ReSharper", "InconsistentNaming")]
   public class MachoSignatureVerifierTests

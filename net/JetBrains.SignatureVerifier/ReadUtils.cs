@@ -15,6 +15,29 @@ namespace JetBrains.SignatureVerifier
       return stream;
     }
 
+    /// <summary>
+    /// Read all data from the stream
+    /// </summary>
+    /// <param name="stream">Stream</param>
+    internal static byte[] ReadAll(this Stream stream)
+    {
+      stream.Rewind();
+      using var ms = new MemoryStream();
+      stream.CopyTo(ms);
+      return ms.ToArray();
+    }
+
+    /// <summary>
+    /// Read all data from the current position of the stream
+    /// </summary>
+    /// <param name="stream">Stream</param>
+    internal static byte[] ReadToEnd(this Stream stream)
+    {
+      using var ms = new MemoryStream();
+      stream.CopyTo(ms);
+      return ms.ToArray();
+    }
+
     internal static uint ReadUInt32Le(BinaryReader reader, bool isBe)
     {
       var value = reader.ReadUInt32();

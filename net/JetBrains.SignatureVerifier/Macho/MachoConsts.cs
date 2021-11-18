@@ -16,5 +16,9 @@ namespace JetBrains.SignatureVerifier.Macho
     public const uint CSSLOT_CMS_SIGNATURE = 0x10000; // slot index for CmsSignedData
     public const uint CSMAGIC_BLOBWRAPPER = 0xfade0b01; //used for the cms blob
     public const uint CSMAGIC_CODEDIRECTORY = 0xfade0c02; //used for the CodeDirectory blob
+
+    public const uint LC_SEGMENT = 1;
+    public const uint LC_SEGMENT_64 = 0x19;
+    public const uint LC_CODE_SIGNATURE = 0x1D;
   }
 }
