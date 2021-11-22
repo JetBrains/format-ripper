@@ -8,7 +8,7 @@
         <Copyright>Copyright © 2021 JetBrains s.r.o.</Copyright>
         <Authors>Anton Vladimirov</Authors>
         <Description>The cross platform signature verifier for executables</Description>
-        <RepositoryUrl>https://github.com/jetbrains/download-pgp-verifier</RepositoryUrl>
+        <RepositoryUrl>https://github.com/JetBrains/format-ripper</RepositoryUrl>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <SignAssembly>true</SignAssembly>
         <AssemblyOriginatorKeyFile>..\Subplatform.Snk</AssemblyOriginatorKeyFile>
@@ -16,16 +16,16 @@
         <Version>0.0.1</Version>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
-        <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
+        <PackageReference Include="Portable.BouncyCastle" Version="1.9.0"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2021.3.0"/>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Update="Messages.resx">
             <Generator>ResXFileCodeGenerator</Generator>
             <LastGenOutput>Messages.Designer.cs</LastGenOutput>
         </EmbeddedResource>
-        <None Remove="DefaultRoots.p7b" />
-        <EmbeddedResource Include="DefaultRoots.p7b" />
+        <None Remove="DefaultRoots.p7b"/>
+        <EmbeddedResource Include="DefaultRoots.p7b"/>
     </ItemGroup>
     <ItemGroup>
         <Compile Update="Messages.Designer.cs">
