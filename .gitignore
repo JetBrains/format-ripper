@@ -6,5 +6,4 @@ obj/
 bin/
 packages/
 *.user
-*.Snk
 *.nuget

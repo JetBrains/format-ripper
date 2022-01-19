@@ -11,21 +11,21 @@
         <RepositoryUrl>https://github.com/JetBrains/format-ripper</RepositoryUrl>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>..\Subplatform.Snk</AssemblyOriginatorKeyFile>
+        <AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <Version>0.0.2</Version>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Portable.BouncyCastle" Version="1.9.0"/>
-        <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" PrivateAssets="All"/>
+        <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+        <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" PrivateAssets="All" />
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Update="Messages.resx">
             <Generator>ResXFileCodeGenerator</Generator>
             <LastGenOutput>Messages.Designer.cs</LastGenOutput>
         </EmbeddedResource>
-        <None Remove="DefaultRoots.p7b"/>
-        <EmbeddedResource Include="DefaultRoots.p7b"/>
+        <None Remove="DefaultRoots.p7b" />
+        <EmbeddedResource Include="DefaultRoots.p7b" />
     </ItemGroup>
     <ItemGroup>
         <Compile Update="Messages.Designer.cs">
