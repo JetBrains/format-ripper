@@ -1,5 +1,7 @@
+[![JetBrains incubator project](https://jb.gg/badges/incubator-flat-square.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+[![Maven Central](https://img.shields.io/maven-central/v/com.jetbrains.format-ripper/format-ripper)](https://mvnrepository.com/artifact/com.jetbrains.format-ripper)
 ---
-JetBrains format-ripper usage
+JetBrains format-ripper
 ---
 
 JetBrains format-ripper library is applicable for:
