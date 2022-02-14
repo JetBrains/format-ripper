@@ -2,19 +2,11 @@
 JetBrains.SignatureVerifier usage
 ---
 
-JetBrains.SignatureVerifier library is applicable for:
-
-- determine the origin of software binaries via verification the cryptographic signatures
-- determine the integrity of software binaries via computation and comparing the binaries hashes
-
 Following types of executable files are supported:
 
 - for Portable executable (PE) files use `JetBrains.SignatureVerifier.PeFile`
 - for MachO use `JetBrains.SignatureVerifier.Macho.MachoFile`
 - for Fat-MachO use `JetBrains.SignatureVerifier.Macho.MachoArch` to extract containing MachOs
-
-Detection of the file type is not part of this library. The client code should detect the file type and create
-appropriate object to use.
 
 # Signature verification
 
@@ -43,6 +35,8 @@ Certificate revocation status checking is performed when
 `withRevocationCheck` is true. The check is based on CRLs, but if it is not available, OCSP is used.
 
 ## Example
+
+### C#
 
 ```c#
 static async Task Main(string[] args)
@@ -122,6 +116,8 @@ In order to compute hash of the executable call the `ComputeHash` method.
 
 ## Example
 
+### C#
+
 ```c#
 static void Main(string[] args)
 {
@@ -135,6 +131,8 @@ static void Main(string[] args)
 # Additional
 
 ## Example of logger
+
+### C#
 
 ```c#
 class SimpleConsoleLogger : ILogger
