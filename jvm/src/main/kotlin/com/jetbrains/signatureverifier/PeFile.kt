@@ -11,11 +11,16 @@ class PeFile {
   private val _checkSum: DataInfo
   private val _imageDirectoryEntrySecurity: DataInfo
   private val _signData: DataInfo
+  private val _dotnetMetadata: DataInfo
 
   private val RawPeData: ByteArray by lazy { rawPeData() }
 
   val ImageDirectoryEntrySecurityOffset: Int
     get() = _imageDirectoryEntrySecurity.Offset
+
+  /** PE is .NET assembly */
+  val IsDotNet: Boolean
+    get() = _dotnetMetadata.IsEmpty.not()
 
   /** Initializes a new instance of the PeFile */
   constructor(@NotNull stream: SeekableByteChannel) {
@@ -64,6 +69,11 @@ class PeFile {
     val securityRva = reader.ReadUInt32().toInt()
     val securitySize = reader.ReadUInt32().toInt()
     _signData = DataInfo(securityRva, securitySize)
+
+    stream.Seek(Long.SIZE_BYTES * 9L, SeekOrigin.Current) // DataDirectory + IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+    val dotnetMetadataRva = reader.ReadUInt32().toInt()
+    val dotnetMetadataSize = reader.ReadUInt32().toInt()
+    _dotnetMetadata = DataInfo(dotnetMetadataRva, dotnetMetadataSize)
   }
 
   /** Retrieve the signature data from PE */

@@ -13,7 +13,7 @@
         <SignAssembly>true</SignAssembly>
         <AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-        <Version>0.0.2</Version>
+        <Version>0.0.3</Version>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />

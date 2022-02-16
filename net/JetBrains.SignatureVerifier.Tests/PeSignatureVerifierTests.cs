@@ -199,5 +199,15 @@ namespace JetBrains.SignatureVerifier.Tests
 
       Assert.AreEqual(expectedResult, Utils.ConvertToHexString(result));
     }
+
+    [TestCase(pe_01_signed, false)]
+    [TestCase(pe_04_signed, true)]
+    public void IsDotNetTest(string peResourceName, bool expectedResult)
+    {
+      var result = Utils.StreamFromResource(peResourceName,
+        peFileStream => new PeFile(peFileStream).IsDotNet);
+
+      Assert.AreEqual(expectedResult, result);
+    }
   }
 }

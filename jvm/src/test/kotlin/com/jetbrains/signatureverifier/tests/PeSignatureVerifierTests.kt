@@ -169,6 +169,16 @@ class PeSignatureVerifierTests {
     assertEquals(expectedResult, result.ConvertToHexString().uppercase())
   }
 
+  @ParameterizedTest
+  @MethodSource("VerifyIsDotNetProvider")
+  fun IsDotNetTest(peResourceName: String, expectedResult: Boolean) {
+    val result = getTestByteChannel("pe", peResourceName).use {
+      val peFile = PeFile(it)
+      peFile.IsDotNet
+    }
+    assertEquals(expectedResult, result)
+  }
+
   companion object {
     private const val pe_01_signed = "ServiceModelRegUI.dll"
     private const val pe_01_not_signed = "ServiceModelRegUI_no_sign.dll"
@@ -269,6 +279,14 @@ class PeSignatureVerifierTests {
     fun VerifySignWithChainTestAboutSignTimeProvider(): Stream<Arguments> {
       return Stream.of(
         Arguments.of(pe_01_signed, VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root)
+      )
+    }
+
+    @JvmStatic
+    fun VerifyIsDotNetProvider(): Stream<Arguments> {
+      return Stream.of(
+        Arguments.of(pe_01_signed, false),
+        Arguments.of(pe_04_signed, true)
       )
     }
   }
