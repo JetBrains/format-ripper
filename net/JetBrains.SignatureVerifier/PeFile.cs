@@ -15,11 +15,17 @@ namespace JetBrains.SignatureVerifier
     private readonly DataInfo _checkSum;
     private readonly DataInfo _imageDirectoryEntrySecurity;
     private readonly DataInfo _signData;
+    private readonly DataInfo _dotnetMetadata;
 
     private byte[] _rawPeData;
     private byte[] RawPeData => _rawPeData ??= _stream.ReadAll();
 
     public int ImageDirectoryEntrySecurityOffset => _imageDirectoryEntrySecurity.Offset;
+
+    /// <summary>
+    /// PE is .NET assembly
+    /// </summary>
+    public bool IsDotNet => !_dotnetMetadata.IsEmpty;
 
     ///  <summary>
     /// Initializes a new instance of the  <see cref="T:JetBrains.SignatureVerifier.PeFile"></see>
@@ -75,6 +81,11 @@ namespace JetBrains.SignatureVerifier
       var securityRva = reader.ReadUInt32();
       var securitySize = reader.ReadUInt32();
       _signData = new DataInfo((int)securityRva, (int)securitySize);
+
+      stream.Seek(sizeof(ulong) * 9L, SeekOrigin.Current); // DataDirectory + IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+      var dotnetMetadataRva = reader.ReadUInt32();
+      var dotnetMetadataSize = reader.ReadUInt32();
+      _dotnetMetadata = new DataInfo((int)dotnetMetadataRva, (int)dotnetMetadataSize);
     }
 
     /// <summary>
