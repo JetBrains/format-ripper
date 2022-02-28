@@ -8,6 +8,32 @@ Following types of executable files are supported:
 - for MachO use `com.jetbrains.signatureverifier.macho.MachoFile`
 - for Fat-MachO use `com.jetbrains.signatureverifier.macho.MachoArch` to extract containing MachOs
 
+The client code should detect the file type and create an appropriate object to use.
+
+# File type detection
+
+In order to detect the file type the `com.jetbrains.util.filetype.FileTypeDetector.DetectFileType` extension method can be used.
+
+### Kotlin
+
+```kotlin
+import com.jetbrains.util.filetype.FileProperties
+import com.jetbrains.util.filetype.FileType
+import com.jetbrains.util.filetype.FileTypeDetector.DetectFileType
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.EnumSet
+
+fun main(args: Array<String>) {
+    val pathToAnyExecutable = Paths.get(args[0])
+
+    Files.newByteChannel(pathToAnyExecutable).use { fs ->
+        val res: Pair<FileType, EnumSet<FileProperties>> = fs.DetectFileType()
+        println(res) // (Pe, [ExecutableType, Signed])
+    }
+}
+```
+
 # Signature verification
 
 ## Signature verification parameters

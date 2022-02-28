@@ -4,8 +4,8 @@ import com.jetbrains.signatureverifier.PeFile
 import com.jetbrains.signatureverifier.crypt.*
 import com.jetbrains.signatureverifier.crypt.BcExt.ConvertToHexString
 import com.jetbrains.signatureverifier.crypt.Utils.ConvertToLocalDateTime
-import com.jetbrains.signatureverifier.tests.TestUtil.getTestByteChannel
-import com.jetbrains.signatureverifier.tests.TestUtil.getTestDataInputStream
+import com.jetbrains.util.TestUtil.getTestByteChannel
+import com.jetbrains.util.TestUtil.getTestDataInputStream
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest

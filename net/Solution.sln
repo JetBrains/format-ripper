@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28309.60
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.SignatureVerifier", "JetBrains.SignatureVerifier\JetBrains.SignatureVerifier.csproj", "{0972A24C-BF90-4299-B4A9-C2496E624F84}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.FormatRipper", "JetBrains.FormatRipper\JetBrains.FormatRipper.csproj", "{0972A24C-BF90-4299-B4A9-C2496E624F84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.SignatureVerifier.Tests", "JetBrains.SignatureVerifier.Tests\JetBrains.SignatureVerifier.Tests.csproj", "{F16D4F03-6C1D-4546-871D-16396510C6F7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.FormatRipper.Tests", "JetBrains.FormatRipper.Tests\JetBrains.FormatRipper.Tests.csproj", "{F16D4F03-6C1D-4546-871D-16396510C6F7}"
 EndProject
 	ProjectSection(SolutionItems) = preProject
 		doc\FAQ.md = doc\FAQ.md

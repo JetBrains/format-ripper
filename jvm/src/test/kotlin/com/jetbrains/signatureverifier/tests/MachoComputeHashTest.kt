@@ -3,6 +3,7 @@ package com.jetbrains.signatureverifier.tests
 import com.jetbrains.signatureverifier.crypt.BcExt.ConvertToHexString
 import com.jetbrains.signatureverifier.macho.MachoArch
 import com.jetbrains.signatureverifier.macho.MachoFile
+import com.jetbrains.util.TestUtil.getTestDataFile
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -16,7 +17,7 @@ class MachoComputeHashTest {
   @MethodSource("MachoComputeHashTestProvider")
   fun ComputeHashTest(machoResourceName: String, alg: String, expectedResult: Collection<String>) {
     val machoFiles =
-      Files.newByteChannel(TestUtil.getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
+      Files.newByteChannel(getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
         MachoArch(it).Extract()
       }
 
