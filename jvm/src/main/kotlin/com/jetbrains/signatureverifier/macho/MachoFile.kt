@@ -1,6 +1,7 @@
 package com.jetbrains.signatureverifier.macho
 
 import com.jetbrains.signatureverifier.*
+import com.jetbrains.util.*
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel
 import org.jetbrains.annotations.NotNull
 import java.io.IOException

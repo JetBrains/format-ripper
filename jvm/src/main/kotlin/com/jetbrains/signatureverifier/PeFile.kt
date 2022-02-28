@@ -1,5 +1,6 @@
 ﻿package com.jetbrains.signatureverifier
 
+import com.jetbrains.util.*
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
 import java.nio.channels.SeekableByteChannel

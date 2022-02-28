@@ -5,6 +5,7 @@ import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.crypt.SignedMessageVerifier
 import com.jetbrains.signatureverifier.crypt.VerifySignatureStatus
 import com.jetbrains.signatureverifier.macho.MachoArch
+import com.jetbrains.util.TestUtil.getTestDataFile
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -21,7 +22,7 @@ class MachoSignatureVerifierTests {
   @MethodSource("VerifySignTestProvider")
   fun VerifySignTest(machoResourceName: String, expectedResult: VerifySignatureStatus) {
     val machoFiles =
-      Files.newByteChannel(TestUtil.getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
+      Files.newByteChannel(getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
         MachoArch(it).Extract()
       }
 
@@ -41,7 +42,7 @@ class MachoSignatureVerifierTests {
   @MethodSource("VerifySignInvalidSignatureFormatTestProvider")
   fun VerifySignInvalidSignatureFormat(machoResourceName: String) {
     val machoFiles =
-      Files.newByteChannel(TestUtil.getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
+      Files.newByteChannel(getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
         MachoArch(it).Extract()
       }
 

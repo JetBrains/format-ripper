@@ -1,6 +1,7 @@
 package com.jetbrains.signatureverifier.macho
 
 import com.jetbrains.signatureverifier.*
+import com.jetbrains.util.*
 import org.jetbrains.annotations.NotNull
 import java.nio.ByteOrder
 import java.nio.channels.SeekableByteChannel

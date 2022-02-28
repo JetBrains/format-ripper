@@ -2,6 +2,7 @@ package com.jetbrains.signatureverifier.tests
 
 import com.jetbrains.signatureverifier.macho.MachoArch
 import com.jetbrains.signatureverifier.macho.MachoConsts
+import com.jetbrains.util.TestUtil.getTestDataFile
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -15,7 +16,7 @@ class MachoArchTests {
   @MethodSource("MachoArchExtractTestProvider")
   fun MachoArchExtractTest(machoResourceName: String, expHeader1: Long, expHeader2: Long?) {
     val result =
-      Files.newByteChannel(TestUtil.getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
+      Files.newByteChannel(getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
         MachoArch(it).Extract()
       }
 

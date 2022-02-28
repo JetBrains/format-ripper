@@ -1,14 +1,15 @@
 package com.jetbrains.signatureverifier.tests
 
 import com.jetbrains.signatureverifier.PeFile
-import com.jetbrains.signatureverifier.ReadToEnd
-import com.jetbrains.signatureverifier.Seek
-import com.jetbrains.signatureverifier.SeekOrigin
 import com.jetbrains.signatureverifier.crypt.*
 import com.jetbrains.signatureverifier.crypt.Utils.ConvertToDate
 import com.jetbrains.signatureverifier.tests.authenticode.SpcAttributeOptional
 import com.jetbrains.signatureverifier.tests.authenticode.SpcIndirectDataContent
 import com.jetbrains.signatureverifier.tests.authenticode.SpcPeImageData
+import com.jetbrains.util.ReadToEnd
+import com.jetbrains.util.Seek
+import com.jetbrains.util.SeekOrigin
+import com.jetbrains.util.TestUtil.getTestByteChannelCopy
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel
@@ -55,7 +56,7 @@ class FakePkiTest {
 
     val (keyPair, cert) = pki.Enroll("sub", nowPlusDays(0), nowPlusDays(9), false)
 
-    TestUtil.getTestByteChannelCopy("pe", peResourceName).use { peStream ->
+    getTestByteChannelCopy("pe", peResourceName).use { peStream ->
       signPe(peStream, keyPair.private, cert, false).use { signedPeStream ->
         val peFile = PeFile(signedPeStream)
         val signatureData = peFile.GetSignatureData()
@@ -88,7 +89,7 @@ class FakePkiTest {
     val crlSource = mock(CrlSource::class.java)
     runBlocking { `when`(crlSource.GetCrlAsync(anyString())).thenReturn(pki.Crl?.encoded) }
 
-    TestUtil.getTestByteChannelCopy("pe", peResourceName).use { peStream ->
+    getTestByteChannelCopy("pe", peResourceName).use { peStream ->
       signPe(peStream, keyPair.private, cert).use { signedPeStream ->
         val peFile = PeFile(signedPeStream)
         val signatureData = peFile.GetSignatureData()
@@ -114,7 +115,7 @@ class FakePkiTest {
 
     runBlocking { delay(2000) }
 
-    TestUtil.getTestByteChannelCopy("pe", peResourceName).use { peStream ->
+    getTestByteChannelCopy("pe", peResourceName).use { peStream ->
       signPe(peStream, keyPair.private, cert).use { signedPeStream ->
         val peFile = PeFile(signedPeStream)
         val signatureData = peFile.GetSignatureData()
