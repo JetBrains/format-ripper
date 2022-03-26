@@ -8,6 +8,14 @@ fun SeekableByteChannel.Rewind(): SeekableByteChannel {
   return this
 }
 
+fun SeekableByteChannel.Skip(len: Long) {
+  this.Seek(len, SeekOrigin.Current)
+}
+
+fun SeekableByteChannel.Jump(len: UInt) {
+  this.Seek(len.toLong(), SeekOrigin.Begin)
+}
+
 fun SeekableByteChannel.Seek(position: Long, origin: SeekOrigin) {
   when (origin) {
     SeekOrigin.Begin -> this.position(position)

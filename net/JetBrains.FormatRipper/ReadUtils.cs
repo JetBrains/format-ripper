@@ -15,6 +15,16 @@ namespace JetBrains.Util
       return stream;
     }
 
+    internal static void Skip(this BinaryReader reader, int len)
+    {
+      reader.BaseStream.Seek(len, SeekOrigin.Current);
+    }
+
+    internal static void Jump(this BinaryReader reader, uint len)
+    {
+      reader.BaseStream.Seek(len, SeekOrigin.Begin);
+    }
+
     /// <summary>
     /// Read all data from the stream
     /// </summary>
