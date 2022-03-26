@@ -5,6 +5,7 @@ JetBrains.SignatureVerifier usage
 Following types of executable files are supported:
 
 - for Portable executable (PE) files use `JetBrains.SignatureVerifier.PeFile`
+- for MS Windows Installer compound (MSI) files use `JetBrains.SignatureVerifier.Cf.MsiFile`
 - for MachO use `JetBrains.SignatureVerifier.Macho.MachoFile`
 - for Fat-MachO use `JetBrains.SignatureVerifier.Macho.MachoArch` to extract containing MachOs
 

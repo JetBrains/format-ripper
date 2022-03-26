@@ -9,6 +9,9 @@ using JetBrains.Util;
 
 namespace JetBrains.SignatureVerifier.Macho
 {
+  /// <summary>
+  /// Mach object file
+  /// </summary>
   public class MachoFile
   {
     private readonly Stream _stream;
@@ -26,7 +29,7 @@ namespace JetBrains.SignatureVerifier.Macho
     private long firstLoadCommandPosition;
 
     ///  <summary>
-    /// Initializes a new instance of the <see cref="T:JetBrains.SignatureVerifier.MachoFile"></see>
+    /// Initializes a new instance of the <see cref="T:JetBrains.SignatureVerifier.Macho.MachoFile"></see>
     ///  </summary>
     ///  <param name="stream">An input stream</param>
     ///  <exception cref="PlatformNotSupportedException">Indicates the byte order ("endianness")
@@ -74,8 +77,15 @@ namespace JetBrains.SignatureVerifier.Macho
       firstLoadCommandPosition = _stream.Position + (is32 ? 4 : 8); // load_command[0]
     }
 
-    public byte[] ComputeHash(string algName)
+    /// <summary>
+    /// Compute hash of Mach-o structure
+    /// </summary>
+    /// <param name="algName">Name of the hashing algorithm</param>
+    /// <exception cref="ArgumentNullException">if algName is null</exception>
+    public byte[] ComputeHash([NotNull] string algName)
     {
+      if (algName == null) throw new ArgumentNullException(nameof(algName));
+
       var (excludeRanges, hasLcCodeSignature) = getHashExcludeRanges();
       using var hash = IncrementalHash.CreateHash(new HashAlgorithmName(algName.ToUpper()));
 

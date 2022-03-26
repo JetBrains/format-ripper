@@ -5,6 +5,7 @@ com.jetbrains.signatureverifier usage
 Following types of executable files are supported:
 
 - for Portable executable (PE) files use `com.jetbrains.signatureverifier.PeFile`
+- for MS Windows Installer (MSI) files use `com.jetbrains.signatureverifier.cf.MsiFile`
 - for MachO use `com.jetbrains.signatureverifier.macho.MachoFile`
 - for Fat-MachO use `com.jetbrains.signatureverifier.macho.MachoArch` to extract containing MachOs
 
