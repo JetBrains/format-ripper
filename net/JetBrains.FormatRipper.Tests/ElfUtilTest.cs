@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using JetBrains.Util.FileType.Elf;
+using JetBrains.SignatureVerifier.Elf;
 using NUnit.Framework;
 
 namespace JetBrains.SignatureVerifier.Tests.Elf

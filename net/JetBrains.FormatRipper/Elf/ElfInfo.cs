@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace JetBrains.Util.FileType.Elf
+namespace JetBrains.SignatureVerifier.Elf
 {
   public sealed class ElfInfo
   {

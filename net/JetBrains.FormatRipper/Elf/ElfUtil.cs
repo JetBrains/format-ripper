@@ -1,12 +1,10 @@
 ﻿using System;
 using System.IO;
-using System.IO.MemoryMappedFiles;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using JetBrains.Annotations;
+using JetBrains.Util;
 
-namespace JetBrains.Util.FileType.Elf
+namespace JetBrains.SignatureVerifier.Elf
 {
   public static class ElfUtil
   {
