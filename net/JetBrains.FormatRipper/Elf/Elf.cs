@@ -410,7 +410,7 @@ namespace JetBrains.SignatureVerifier.Elf
     EF_IA_64_CONS_GP            = 0x00000040, // gp as program wide constant
     EF_IA_64_NOFUNCDESC_CONS_GP = 0x00000080, // And no function descriptors
     EF_IA_64_ABSOLUTE           = 0x00000100, // Load at absolute addresses
-}
+  }
 
   [SuppressMessage("ReSharper", "IdentifierTypo")]
   [SuppressMessage("ReSharper", "InconsistentNaming")]
