@@ -273,15 +273,29 @@ object FileTypeDetector {
           if (filePropertiesList.any { x -> x == null })
             return null
 
-          // Headers are incompatible
-          if (filePropertiesList.distinct().count() > 1)
+          val signed = filePropertiesList.all {
+            it != null && it.contains(FileProperties.Signed)
+          }
+          if (filePropertiesList.asSequence().filterNotNull().map {
+              if (signed) it else {
+                // One binary in MultiArch file is not signed
+                it - FileProperties.Signed
+              }
+            }.distinct().count() > 1
+          ) {
+            // Headers are incompatible
             return null
+          }
 
           val totalFileProperty = filePropertiesList[0]
 
           if (filePropertiesList.count() > 1)
-            if (totalFileProperty != null)
+            if (totalFileProperty != null) {
               totalFileProperty += FileProperties.MultiArch
+              if (!signed) {
+                totalFileProperty -= FileProperties.Signed
+              }
+            }
 
           return totalFileProperty!! to fileArchitecturesList
         }

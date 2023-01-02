@@ -67,6 +67,11 @@ class FileTypeDetectorTest {
           FileType.MachO,
           enumSetOf(FileProperties.ExecutableType, FileProperties.MultiArch, FileProperties.Signed)
         ),
+        Arguments.of(
+          "fsnotifier",
+          FileType.MachO,
+          enumSetOf(FileProperties.ExecutableType, FileProperties.MultiArch)
+        ),
         Arguments.of("tempfile.x64", FileType.Elf, enumSetOf(FileProperties.ExecutableType)),
         Arguments.of("libulockmgr.so.1.0.1.x64", FileType.Elf, enumSetOf(FileProperties.SharedLibraryType)),
         Arguments.of("catsay.ppc64", FileType.Elf, enumSetOf(FileProperties.ExecutableType)),
