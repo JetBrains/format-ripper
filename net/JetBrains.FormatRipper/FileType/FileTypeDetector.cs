@@ -284,13 +284,32 @@ namespace JetBrains.Util.FileType
               if (filePropertiesList.Any(x => x == null))
                 return null;
 
-              // Headers are incompatible
-              if (filePropertiesList.Distinct().Count() > 1)
+              var signed = filePropertiesList.All(p => (p & FileProperties.Signed) != 0);
+
+              if (filePropertiesList.Where(p => p != null).Select(p =>
+                  {
+                    if (signed)
+                    {
+                      return p;
+                    }
+
+                    // One binary in MultiArch file is not signed
+                    return p & ~FileProperties.Signed;
+                  }).Distinct().Count() > 1)
+              {
+                // Headers are incompatible
                 return null;
+              }
 
               var totalFileProperty = filePropertiesList[0];
               if (filePropertiesList.Count > 1)
+              {
                 totalFileProperty |= FileProperties.MultiArch;
+                if (!signed)
+                {
+                  totalFileProperty &= ~FileProperties.Signed;
+                }
+              }
 
               fileArchitectures = fileArchitecturesList.ToArray();
               return totalFileProperty;
