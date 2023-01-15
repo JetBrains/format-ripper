@@ -29,6 +29,7 @@ namespace JetBrains.Platform.Tests.Cases.Util.FileType
     [TestCase("x64.bundle", FileType.MachO, FileProperties.BundleType)]
     [TestCase("x86.bundle", FileType.MachO, FileProperties.BundleType)]
     [TestCase("cat", FileType.MachO, FileProperties.ExecutableType | FileProperties.MultiArch | FileProperties.Signed)]
+    [TestCase("fsnotifier", FileType.MachO, FileProperties.ExecutableType | FileProperties.MultiArch)]
     [TestCase("tempfile.x64", FileType.Elf, FileProperties.ExecutableType)]
     [TestCase("libulockmgr.so.1.0.1.x64", FileType.Elf, FileProperties.SharedLibraryType)]
     [TestCase("catsay.ppc64", FileType.Elf, FileProperties.ExecutableType)]
