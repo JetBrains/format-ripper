@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28309.60
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.FormatRipper", "JetBrains.FormatRipper\JetBrains.FormatRipper.csproj", "{0972A24C-BF90-4299-B4A9-C2496E624F84}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.SignatureVerifier", "JetBrains.SignatureVerifier\src\JetBrains.SignatureVerifier.csproj", "{0972A24C-BF90-4299-B4A9-C2496E624F84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.FormatRipper.Tests", "JetBrains.FormatRipper.Tests\JetBrains.FormatRipper.Tests.csproj", "{F16D4F03-6C1D-4546-871D-16396510C6F7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.SignatureVerifier.Tests", "JetBrains.SignatureVerifier\tests\JetBrains.SignatureVerifier.Tests.csproj", "{F16D4F03-6C1D-4546-871D-16396510C6F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.FormatRipper", "JetBrains.FormatRipper\src\JetBrains.FormatRipper.csproj", "{DA96EAF7-5298-45D2-AD8F-CBB6C7B03254}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.FormatRipper.Tests", "JetBrains.FormatRipper\tests\JetBrains.FormatRipper.Tests.csproj", "{59C57C60-2CF9-4B5E-B291-12D76E093657}"
 EndProject
 	ProjectSection(SolutionItems) = preProject
 		doc\FAQ.md = doc\FAQ.md
@@ -35,5 +39,13 @@ Global
 		{F16D4F03-6C1D-4546-871D-16396510C6F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F16D4F03-6C1D-4546-871D-16396510C6F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F16D4F03-6C1D-4546-871D-16396510C6F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA96EAF7-5298-45D2-AD8F-CBB6C7B03254}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA96EAF7-5298-45D2-AD8F-CBB6C7B03254}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA96EAF7-5298-45D2-AD8F-CBB6C7B03254}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA96EAF7-5298-45D2-AD8F-CBB6C7B03254}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59C57C60-2CF9-4B5E-B291-12D76E093657}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59C57C60-2CF9-4B5E-B291-12D76E093657}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59C57C60-2CF9-4B5E-B291-12D76E093657}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59C57C60-2CF9-4B5E-B291-12D76E093657}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

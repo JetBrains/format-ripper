@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net20;netstandard1.0</TargetFrameworks>
+    <RootNamespace>JetBrains.FormatRipper</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../../key.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>latestmajor</LangVersion>
+    <Company>JetBrains s.r.o.</Company>
+    <Copyright>Copyright © 2021-$([System.DateTime]::Now.ToString('yyyy')) JetBrains s.r.o.</Copyright>
+    <Authors>Mikhail Pilin</Authors>
+    <Description>The cross platform open-source library for parsing executable files. It supports the ELF format, provides useful information about their internals.</Description>
+    <RepositoryUrl>https://github.com/JetBrains/format-ripper</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/JetBrains/format-ripper/blob/master/README.md</PackageProjectUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageTags>jetbrains elf parse format windows linux macos netstandard</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <Version>2.0.0-preview1</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../icon.png" Pack="true" Visible="false" PackagePath="" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>$(AssemblyName).Tests, PublicKey=0024000004800000140100000602000000240000525341310008000001000100819ed322584ebfa67a9849b24b05d08bddfcca36cb049c0c13a52b334be1b1af2202300751fad4150fb88c25b4b02383be018a1d300f90c1cec52f91418104e3f3b493539c903aad9f832ad91ef27d68872e2282837ca392a45ce37ed65c7c0d10a4ba909ec7ea37a0a189c4dd4575e5d9d89d1f5c6f8d031ee9a186c73749f13dfa918851ccaa50827ac8883000a128480660bd045a5b840dd0555f31cf6507072d77a4bccd659083d808af8a717ab05aefb505ecfc59a4270fc7d3a4f31e4115e0411295f68a5f53c3c31539fca437d7d2d2b9be52ef32c222c08e85dabb90fe6b686d308da740076c72215da74ccaec2e9ad34a91af23eb413a290e7bf582</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
