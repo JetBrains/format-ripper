@@ -3,11 +3,10 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <RootNamespace>JetBrains.SignatureVerifier</RootNamespace>
         <SignAssembly>true</SignAssembly>
-        <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
         <AssemblyOriginatorKeyFile>../key.snk</AssemblyOriginatorKeyFile>
         <LangVersion>latestmajor</LangVersion>
         <Company>JetBrains s.r.o.</Company>
-        <Copyright>Copyright © 2019-$([System.DateTime]::Now.ToString('yyyy')) JetBrains s.r.o.</Copyright>
+        <Copyright>Copyright © 2021-$([System.DateTime]::Now.ToString('yyyy')) JetBrains s.r.o.</Copyright>
         <Authors>Mikhail Pilin, Anton Vladimirov</Authors>
         <Description>The cross platform open-source library for parsing executable files. It supports the Portable executable, MSI, Mach-O, and Fat-Mach-O formats, provides useful information about their internals and can perform cryptography signature checks</Description>
         <RepositoryUrl>https://github.com/JetBrains/format-ripper</RepositoryUrl>
