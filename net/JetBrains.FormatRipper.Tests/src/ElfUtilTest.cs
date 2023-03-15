@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using JetBrains.SignatureVerifier.Elf;
+﻿using JetBrains.SignatureVerifier.Elf;
 using NUnit.Framework;
 
 namespace JetBrains.SignatureVerifier.Tests.Elf
@@ -59,15 +57,15 @@ namespace JetBrains.SignatureVerifier.Tests.Elf
     [Test]
     public void ElfInfoTest(string filename, ElfClass expectedClass, ElfData expectedData, ElfOsAbi expectedOsAbi, byte expectedOsAbiVersion, ElfType expectedType, ElfMachine expectedMachine, ElfFlags expectedFlags, string expectedInterpreter)
     {
-      var elfInfo = Utils.StreamFromResource(filename, stream => ElfUtil.GetElfInfo(stream));
+      var elfInfo = Utils.StreamFromResource(filename, ElfUtil.GetElfInfo);
       Assert.IsNotNull(elfInfo);
-      Assert.AreEqual(expectedClass, elfInfo.Class);
-      Assert.AreEqual(expectedData, elfInfo.Data);
-      Assert.AreEqual(expectedOsAbi, elfInfo.OsAbi);
-      Assert.AreEqual(expectedOsAbiVersion, elfInfo.OsAbiVersion);
-      Assert.AreEqual(expectedType, elfInfo.Type);
-      Assert.AreEqual(expectedMachine, elfInfo.Machine);
-      Assert.AreEqual(expectedFlags, elfInfo.Flags, $"Expected 0x{expectedFlags:X}, but was 0x{elfInfo.Flags:X}");
+      Assert.AreEqual(expectedClass, elfInfo.EiClass);
+      Assert.AreEqual(expectedData, elfInfo.EiData);
+      Assert.AreEqual(expectedOsAbi, elfInfo.EiOsAbi);
+      Assert.AreEqual(expectedOsAbiVersion, elfInfo.EiOsAbiVersion);
+      Assert.AreEqual(expectedType, elfInfo.EType);
+      Assert.AreEqual(expectedMachine, elfInfo.EMachine);
+      Assert.AreEqual(expectedFlags, elfInfo.EFlags, $"Expected 0x{expectedFlags:X}, but was 0x{elfInfo.EFlags:X}");
       Assert.AreEqual(expectedInterpreter, elfInfo.Interpreter);
     }
   }

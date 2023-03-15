@@ -4,26 +4,33 @@ namespace JetBrains.SignatureVerifier.Elf
 {
   public sealed class ElfInfo
   {
-    public readonly ElfClass Class;
-    public readonly ElfData Data;
-    public readonly ElfFlags Flags;
+    public readonly ElfFlags EFlags;
+    public readonly ElfClass EiClass;
+    public readonly ElfData EiData;
+    public readonly ElfOsAbi EiOsAbi;
+    public readonly byte EiOsAbiVersion;
+    public readonly ElfMachine EMachine;
+    public readonly ElfType EType;
 
-    [CanBeNull] public readonly string Interpreter;
+    [CanBeNull]
+    public readonly string Interpreter;
 
-    public readonly ElfMachine Machine;
-    public readonly ElfOsAbi OsAbi;
-    public readonly byte OsAbiVersion;
-    public readonly ElfType Type;
-
-    public ElfInfo(ElfClass @class, ElfData data, ElfOsAbi osAbi, byte osAbiVersion, ElfType type, ElfMachine machine, ElfFlags flags, [CanBeNull] string interpreter)
+    public ElfInfo(ElfClass eiClass,
+      ElfData eiData,
+      ElfOsAbi eiOsAbi,
+      byte eiOsAbiVersion,
+      ElfType eType,
+      ElfMachine eMachine,
+      ElfFlags eFlags,
+      [CanBeNull] string interpreter)
     {
-      Class = @class;
-      Data = data;
-      OsAbi = osAbi;
-      OsAbiVersion = osAbiVersion;
-      Type = type;
-      Machine = machine;
-      Flags = flags;
+      EiClass = eiClass;
+      EiData = eiData;
+      EiOsAbi = eiOsAbi;
+      EiOsAbiVersion = eiOsAbiVersion;
+      EType = eType;
+      EMachine = eMachine;
+      EFlags = eFlags;
       Interpreter = interpreter;
     }
   }

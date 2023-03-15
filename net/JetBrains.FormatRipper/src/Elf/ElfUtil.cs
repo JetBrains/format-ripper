@@ -1,146 +1,130 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using JetBrains.Annotations;
-using JetBrains.Util;
+using JetBrains.SignatureVerifier.Elf.Impl;
 
 namespace JetBrains.SignatureVerifier.Elf
 {
   public static class ElfUtil
   {
-    [NotNull]
-    public static ElfInfo GetElfInfo([NotNull] Stream stream)
+    public static unsafe ElfInfo GetElfInfo(Stream stream)
     {
-      using var reader = new BinaryReader(stream.Rewind(), Encoding.UTF8, true);
+      byte[] ReadBytes(int size)
+      {
+        var buf = new byte[size];
+        for (var n = 0; n < size;)
+        {
+          var read = stream.Read(buf, n, size - n);
+          if (read == 0)
+            throw new EndOfStreamException();
+          n += read;
+        }
+
+        return buf;
+      }
 
       try
       {
-        if (reader.ReadUInt32Be() != 0X7F454C46)
-          throw new FormatException("Invalid ELF magics");
+        var pos = stream.Position;
+        var eIdent = ReadBytes(ElfDeclaration.EI_NIDENT);
 
-        ElfClass ei_class;
+        var eiClass = (ElfClass)eIdent[ElfDeclaration.EI_CLASS];
+        var eiData = (ElfData)eIdent[ElfDeclaration.EI_DATA];
 
-        switch (reader.ReadByte()) // e_ident[EI_CLASS]
-        {
-        case 1:
-          ei_class = ElfClass.ELFCLASS32;
-          break;
-        case 2:
-          ei_class = ElfClass.ELFCLASS64;
-          break;
-        default: throw new FormatException("Inconsistent ELF class");
-        }
+        if (eIdent[ElfDeclaration.EI_MAG0] != ElfDeclaration.ELFMAG0 ||
+            eIdent[ElfDeclaration.EI_MAG1] != ElfDeclaration.ELFMAG1 ||
+            eIdent[ElfDeclaration.EI_MAG2] != ElfDeclaration.ELFMAG2 ||
+            eIdent[ElfDeclaration.EI_MAG3] != ElfDeclaration.ELFMAG3)
+          throw new FormatException("Invalid ELF magic numbers");
+        if ((ElfVersion)eIdent[ElfDeclaration.EI_VERSION] != ElfVersion.EV_CURRENT)
+          throw new FormatException("Invalid ELF file version");
 
-        bool isBe;
-        ElfData ei_data;
+        var needSwap = BitConverter.IsLittleEndian != eiData switch
+          {
+            ElfData.ELFDATA2LSB => true,
+            ElfData.ELFDATA2MSB => false,
+            _ => throw new FormatException("Invalid ELF data encoding")
+          };
 
-        switch (reader.ReadByte()) // e_ident[EI_DATA]
-        {
-        case 1:
-          isBe = false;
-          ei_data = ElfData.ELFDATA2LSB;
-          break;
-        case 2:
-          isBe = true;
-          ei_data = ElfData.ELFDATA2MSB;
-          break;
-        default: throw new FormatException("Inconsistent ELF data");
-        }
+        ushort SwapU2(ushort v) => needSwap ? (ushort)((v << 8) | (v >> 8)) : v;
+        uint SwapU4(uint v) => needSwap ? ((uint)SwapU2((ushort)v) << 16) | SwapU2((ushort)(v >> 16)) : v;
+        ulong SwapU8(ulong v) => needSwap ? ((ulong)SwapU4((uint)v) << 32) | SwapU4((uint)(v >> 32)) : v;
 
-        var version = (ElfVersion)reader.ReadByte();
-
-        if (version != ElfVersion.EV_CURRENT)
-          throw new FormatException("Inconsistent ELF version");
-
-        var osabi = (ElfOsAbi)reader.ReadByte();
-        var osAbiVersion = reader.ReadByte();
-
-        ElfType type;
-        ElfMachine machine;
-        ElfFlags flags;
-        string interpreter = null;
-
-        stream.Seek(7, SeekOrigin.Current); // skip EI_PAD
-
-        switch (ei_class)
+        switch (eiClass)
         {
         case ElfClass.ELFCLASS32:
-          type = (ElfType)reader.ReadUInt16(isBe);
-          machine = (ElfMachine)reader.ReadUInt16(isBe);
-          var e_version32 = reader.ReadUInt32(isBe);
-
-          if (e_version32 != (uint)ElfVersion.EV_CURRENT)
-            throw new FormatException("Invalid version of ELF32 program header");
-
-          stream.Seek(4, SeekOrigin.Current); // skip e_entry
-          var ePhOff32 = reader.ReadUInt32(isBe);
-          stream.Seek(4, SeekOrigin.Current); // skip e_shoff
-          flags = (ElfFlags)reader.ReadUInt32(isBe);
-          stream.Seek(2, SeekOrigin.Current); // skip e_ehsize
-          var e_phentsize32 = reader.ReadUInt16(isBe);
-          var ePhNum32 = reader.ReadUInt16(isBe);
-
-          stream.Seek(ePhOff32, SeekOrigin.Begin);
-
-          for (var phi = ePhNum32; phi-- > 0;)
           {
-            var p_type = (ElfSegmentType)reader.ReadUInt32(isBe);
+            Elf32_Ehdr ehdr;
+            fixed (byte* buf = ReadBytes(sizeof(Elf32_Ehdr)))
+              ehdr = *(Elf32_Ehdr*)buf;
 
-            if (p_type == ElfSegmentType.PT_INTERP)
+            if (SwapU4(ehdr.e_version) != 1u)
+              throw new FormatException("Invalid ELF object file version");
+
+            stream.Seek(pos + SwapU4(ehdr.e_phoff), SeekOrigin.Begin);
+
+            string interpreter = null;
+            var ePhEntSize = SwapU2(ehdr.e_phentsize);
+            for (var n = SwapU2(ehdr.e_phnum); n-- > 0;)
             {
-              var pOffset32 = reader.ReadUInt32(isBe);
-              stream.Seek(8, SeekOrigin.Current); //skip p_vaddr, p_paddr
-              var pFileSz32 = reader.ReadUInt32(isBe);
-              stream.Seek(pOffset32, SeekOrigin.Begin);
-              interpreter = new string(reader.ReadChars((int)(pFileSz32 - 1)));
-              break;
+              Elf32_Phdr phdr;
+              fixed (byte* buf = ReadBytes(Math.Max(sizeof(Elf32_Phdr), ePhEntSize)))
+                phdr = *(Elf32_Phdr*)buf;
+
+              if ((ElfSegmentType)SwapU4(phdr.p_type) == ElfSegmentType.PT_INTERP)
+              {
+                stream.Seek(pos + SwapU4(phdr.p_offset), SeekOrigin.Begin);
+                interpreter = new string(Encoding.UTF8.GetChars(ReadBytes(checked((int)SwapU4(phdr.p_filesz) - 1))));
+                break;
+              }
             }
 
-            stream.Seek(e_phentsize32 - 4, SeekOrigin.Current);
+            return new ElfInfo(eiClass, eiData,
+              (ElfOsAbi)eIdent[ElfDeclaration.EI_OSABI],
+              eIdent[ElfDeclaration.EI_ABIVERSION],
+              (ElfType)SwapU2(ehdr.e_type),
+              (ElfMachine)SwapU2(ehdr.e_machine),
+              (ElfFlags)SwapU4(ehdr.e_flags),
+              interpreter);
           }
-          break;
         case ElfClass.ELFCLASS64:
-          type = (ElfType)reader.ReadUInt16(isBe);
-          machine = (ElfMachine)reader.ReadUInt16(isBe);
-          var e_version64 = reader.ReadUInt32(isBe);
-
-          if (e_version64 != (uint)ElfVersion.EV_CURRENT)
-            throw new FormatException("Invalid version of ELF64 program header");
-
-          stream.Seek(8, SeekOrigin.Current); // skip e_entry
-          var ePhOff64 = reader.ReadUInt64(isBe);
-          stream.Seek(8, SeekOrigin.Current); // skip e_shoff
-          flags = (ElfFlags)reader.ReadUInt32(isBe);
-          stream.Seek(2, SeekOrigin.Current); // skip e_ehsize
-          var e_phentsize64 = reader.ReadUInt16(isBe);
-          var ePhNum64 = reader.ReadUInt16(isBe);
-
-          stream.Seek((long)ePhOff64, SeekOrigin.Begin);
-
-          for (var phi = ePhNum64; phi-- > 0;)
           {
-            var p_type = (ElfSegmentType)reader.ReadUInt32(isBe);
+            Elf64_Ehdr ehdr;
+            fixed (byte* buf = ReadBytes(sizeof(Elf64_Ehdr)))
+              ehdr = *(Elf64_Ehdr*)buf;
 
-            if (p_type == ElfSegmentType.PT_INTERP)
+            if (SwapU4(ehdr.e_version) != 1u)
+              throw new FormatException("Invalid ELF object file version");
+
+            stream.Seek(checked(pos + (long)SwapU8(ehdr.e_phoff)), SeekOrigin.Begin);
+
+            string interpreter = null;
+            var ePhEntSize = SwapU2(ehdr.e_phentsize);
+            for (var n = SwapU2(ehdr.e_phnum); n-- > 0;)
             {
-              stream.Seek(4, SeekOrigin.Current); //skip p_flags
-              var pOffset64 = reader.ReadUInt64(isBe);
-              stream.Seek(16, SeekOrigin.Current); //skip p_vaddr, p_paddr
-              var pFileSz64 = reader.ReadUInt64(isBe);
-              stream.Seek((long)pOffset64, SeekOrigin.Begin);
-              interpreter = new string(reader.ReadChars((int)(pFileSz64 - 1)));
-              break;
+              Elf64_Phdr phdr;
+              fixed (byte* buf = ReadBytes(Math.Max(sizeof(Elf64_Phdr), ePhEntSize)))
+                phdr = *(Elf64_Phdr*)buf;
+
+              if ((ElfSegmentType)SwapU4(phdr.p_type) == ElfSegmentType.PT_INTERP)
+              {
+                stream.Seek(checked(pos + (long)SwapU8(phdr.p_offset)), SeekOrigin.Begin);
+                interpreter = new string(Encoding.UTF8.GetChars(ReadBytes(checked((int)(SwapU8(phdr.p_filesz) - 1)))));
+                break;
+              }
             }
 
-            stream.Seek(e_phentsize64 - 4, SeekOrigin.Current);
+            return new ElfInfo(eiClass, eiData,
+              (ElfOsAbi)eIdent[ElfDeclaration.EI_OSABI],
+              eIdent[ElfDeclaration.EI_ABIVERSION],
+              (ElfType)SwapU2(ehdr.e_type),
+              (ElfMachine)SwapU2(ehdr.e_machine),
+              (ElfFlags)SwapU4(ehdr.e_flags),
+              interpreter);
           }
-          break;
-
         default:
-          throw new FormatException("Unknown ELF class");
+          throw new FormatException("Invalid ELF file encoding");
         }
-
-        return new ElfInfo(ei_class, ei_data, osabi, osAbiVersion, type, machine, flags, interpreter);
       }
       catch (IOException)
       {
