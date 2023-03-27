@@ -159,7 +159,7 @@ namespace JetBrains.FormatRipper.Tests
         Assert.AreEqual(expectedCmsSignatureBlobHash, HexUtil.ConvertToHexString(hash));
       }
       else
-        Assert.IsNull(expectedCmsSignatureBlobHash); 
+        Assert.IsNull(expectedCmsSignatureBlobHash);
 
       var fileExtractStreams = new List<CompoundFile.ExtractStream>(file.ExtractStreams);
       fileExtractStreams.Sort((x, y) =>
@@ -188,8 +188,6 @@ namespace JetBrains.FormatRipper.Tests
         Assert.AreEqual(expectedStreams[n].Hash, HexUtil.ConvertToHexString(hash));
       }
 
-      var format = file.ComputeHashInfo.ToString();
-      Console.WriteLine(format);
       Assert.AreEqual(expectedIncludeRanges, file.ComputeHashInfo.ToString());
     }
   }
