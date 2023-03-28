@@ -38,7 +38,7 @@ namespace JetBrains.SignatureVerifier.Tests
     {
       foreach (var section in GetMachOFile(machoResourceName).Sections)
       {
-        var action = () => SignedMessage.CreateInstance(section.SignatureData);
+        Action action = () => SignedMessage.CreateInstance(section.SignatureData);
         action.Should()
           .Throw<Exception>()
           .WithMessage("Invalid signature format");
