@@ -12,14 +12,15 @@ namespace JetBrains.SignatureVerifier.Tests
     [TestCase("2dac4b_not_signed.msi", "SHA1", "CBBE5C1017C8A65FFEB9219F465C949563A0E256")]
     // @formatter:on
     [Test]
-    public void ComputeHashTest(string resourceName, string alg, string expectedResult)
+    public void ComputeHashTest(string resourceName, string hashAlgorithmName, string expectedHash)
     {
-      var hash = ResourceUtil.OpenRead(resourceName, stream =>
+      var hash = ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
         {
-          var file = CompoundFile.Parse(stream);
-          return HashUtil.ComputeHash(stream, file.ComputeHashInfo, new HashAlgorithmName(alg));
+          var file = CompoundFile.Parse(stream, CompoundFile.Mode.ComputeHashInfo);
+          Assert.IsNotNull(file.ComputeHashInfo);
+          return HashUtil.ComputeHash(stream, file.ComputeHashInfo, new HashAlgorithmName(hashAlgorithmName));
         });
-      Assert.AreEqual(expectedResult, HexUtil.ConvertToHexString(hash));
+      Assert.AreEqual(expectedHash, HexUtil.ConvertToHexString(hash));
     }
   }
 }

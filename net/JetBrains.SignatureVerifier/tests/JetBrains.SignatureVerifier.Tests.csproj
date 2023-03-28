@@ -20,11 +20,8 @@
     <ProjectReference Include="..\src\JetBrains.SignatureVerifier.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\..\data\pe\*" LinkBase="Resources" />
-    <EmbeddedResource Include="..\..\..\data\mach-o\*" LinkBase="Resources" />
-    <EmbeddedResource Include="..\..\..\data\elf\*" LinkBase="Resources" />
-    <EmbeddedResource Include="..\..\..\data\msi\*" LinkBase="Resources" />
-    <EmbeddedResource Include="..\..\..\data\misc\*" LinkBase="Resources" />
-    <EmbeddedResource Include="..\..\..\data\sh\*" LinkBase="Resources" />
+    <EmbeddedResource Include="..\..\..\data\mach-o\*" LinkBase="Resources\MachO" />
+    <EmbeddedResource Include="..\..\..\data\msi\*" LinkBase="Resources\Msi" />
+    <EmbeddedResource Include="..\..\..\data\pe\*" LinkBase="Resources\Pe" />
   </ItemGroup>
 </Project>

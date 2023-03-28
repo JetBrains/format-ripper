@@ -31,7 +31,7 @@ namespace JetBrains.FormatRipper.Compound
       public readonly Guid Clsid;
       public readonly byte[] Blob;
 
-      public ExtractStream(string[] names, Guid clsid, byte[] blob)
+      internal ExtractStream(string[] names, Guid clsid, byte[] blob)
       {
         Names = names;
         Clsid = clsid;
@@ -41,15 +41,20 @@ namespace JetBrains.FormatRipper.Compound
 
     public readonly FileType Type;
     public readonly bool HasSignature;
-    public readonly byte[]? CmsSignatureBlob;
+    public readonly SignatureData SignatureData;
     public readonly ExtractStream[] ExtractStreams;
-    public readonly ComputeHashInfo ComputeHashInfo;
+    public readonly ComputeHashInfo? ComputeHashInfo;
 
-    private CompoundFile(FileType type, bool hasSignature, byte[]? cmsSignatureBlob, ExtractStream[] extractStreams, ComputeHashInfo computeHashInfo)
+    private CompoundFile(
+      FileType type,
+      bool hasSignature,
+      SignatureData signatureData,
+      ExtractStream[] extractStreams,
+      ComputeHashInfo? computeHashInfo)
     {
       Type = type;
       HasSignature = hasSignature;
-      CmsSignatureBlob = cmsSignatureBlob;
+      SignatureData = signatureData;
       ExtractStreams = extractStreams;
       ComputeHashInfo = computeHashInfo;
     }
@@ -65,8 +70,9 @@ namespace JetBrains.FormatRipper.Compound
     [Flags]
     public enum Mode : uint
     {
-      Default = 0,
-      ReadCodeSignature = 0x1
+      Default = 0x0,
+      SignatureData = 0x1,
+      ComputeHashInfo = 0x2
     }
 
     public delegate bool ExtractFilter(string[] namesFromRoot, Guid clsid, ulong size);
@@ -274,16 +280,6 @@ namespace JetBrains.FormatRipper.Compound
 
       var miniStreamCutoffSize = MemoryUtil.GetLeU4(cfh.MiniStreamCutoffSize);
 
-      bool hasSignature;
-      byte[]? cmsSignatureBlob;
-      {
-        var entry = TakeFirst(GetDirectoryEntryChildren(rootDirectoryEntry, _ => _ is { ObjectType: STGTY.STGTY_STREAM, Name: DigitalSignatureName }));
-        hasSignature = entry != null;
-        cmsSignatureBlob = entry != null && (mode & Mode.ReadCodeSignature) == Mode.ReadCodeSignature
-          ? Read(entry.StreamSize < miniStreamCutoffSize, entry.StartingSectorLocation, 0, entry.StreamSize)
-          : null;
-      }
-
       var extractBlobs = new List<ExtractStream>();
       if (extractFilter != null)
       {
@@ -299,7 +295,20 @@ namespace JetBrains.FormatRipper.Compound
         }
       }
 
-      var orderedIncludeRanges = new List<StreamRange>();
+      var hasSignature = false;
+      var signatureData = new SignatureData();
+      {
+        var entry = TakeFirst(GetDirectoryEntryChildren(rootDirectoryEntry, _ => _ is { ObjectType: STGTY.STGTY_STREAM, Name: DigitalSignatureName }));
+        if (entry != null)
+        {
+          hasSignature = true;
+          if ((mode & Mode.SignatureData) == Mode.SignatureData)
+            signatureData = new SignatureData(null, Read(entry.StreamSize < miniStreamCutoffSize, entry.StartingSectorLocation, 0, entry.StreamSize));
+        }
+      }
+
+      ComputeHashInfo? computeHashInfo = null;
+      if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
       {
         var sortedDirectoryEntries = new List<DirectoryEntry>();
         foreach (var entry in directoryEntries)
@@ -317,12 +326,16 @@ namespace JetBrains.FormatRipper.Compound
             return a.Length - b.Length;
             
           });
+
+        var orderedIncludeRanges = new List<StreamRange>();
         foreach (var entry in sortedDirectoryEntries)
           Walk(entry.StreamSize < miniStreamCutoffSize, entry.StartingSectorLocation, 0, entry.StreamSize, _ => orderedIncludeRanges.Add(_));
 
         CompoundFileDirectoryEntry cfde;
         orderedIncludeRanges.Add(new StreamRange(GetSectorPosition(firstDirectorySectorLocation) + ((byte*)&cfde.Clsid - (byte*)&cfde), sizeof(Guid)));
         StreamRangeUtil.MergeNeighbors(orderedIncludeRanges);
+
+        computeHashInfo = new ComputeHashInfo(0, orderedIncludeRanges, 0);
       }
 
       var type = GetDirectoryEntryChildren(rootDirectoryEntry, entry => entry is
@@ -337,7 +350,7 @@ namespace JetBrains.FormatRipper.Compound
         ? FileType.Msi
         : FileType.Unknown;
 
-      return new CompoundFile(type, hasSignature, cmsSignatureBlob, extractBlobs.ToArray(), new ComputeHashInfo(0, orderedIncludeRanges, 0));
+      return new CompoundFile(type, hasSignature, signatureData, extractBlobs.ToArray(), computeHashInfo);
     }
 
     private readonly struct StackWalk

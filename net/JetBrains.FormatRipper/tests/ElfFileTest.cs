@@ -61,7 +61,7 @@ namespace JetBrains.FormatRipper.Tests
     // @formatter:on
     [Test]
     public void Test(
-      string filename,
+      string resourceName,
       ELFCLASS expectedEiClass,
       ELFDATA expectedEiData,
       ELFOSABI expectedEiOsAbi,
@@ -71,7 +71,7 @@ namespace JetBrains.FormatRipper.Tests
       EF expectedEFlags,
       string? expectedInterpreter)
     {
-      var file = ResourceUtil.OpenRead("Elf." + filename, stream =>
+      var file = ResourceUtil.OpenRead(ResourceCategory.Elf, resourceName, stream =>
         {
           Assert.IsTrue(ElfFile.Is(stream));
           return ElfFile.Parse(stream);

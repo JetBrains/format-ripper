@@ -14,7 +14,7 @@ namespace JetBrains.SignatureVerifier.Tests
   {
     private const string apple_root = "apple_root.p7b";
 
-    private static MachOFile GetMachOFile(string machoResourceName) => ResourceUtil.OpenRead(machoResourceName, stream => MachOFile.Parse(stream, MachOFile.Mode.ReadCodeSignature));
+    private static MachOFile GetMachOFile(string resourceName) => ResourceUtil.OpenRead(ResourceCategory.MachO, resourceName, stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData));
 
     [TestCase(VerifySignatureStatus.Valid, "JetBrains.Profiler.PdbServer")]
     [TestCase(VerifySignatureStatus.Valid, "cat")]
@@ -26,7 +26,7 @@ namespace JetBrains.SignatureVerifier.Tests
       var verificationParams = new SignatureVerificationParams(buildChain: false, withRevocationCheck: false);
       foreach (var section in GetMachOFile(machoResourceName).Sections)
       {
-        var signedMessage = SignedMessage.CreateInstance(new SignatureData(section));
+        var signedMessage = SignedMessage.CreateInstance(section.SignatureData);
         var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
         var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
         Assert.AreEqual(expectedResult, result.Status);
@@ -38,7 +38,7 @@ namespace JetBrains.SignatureVerifier.Tests
     {
       foreach (var section in GetMachOFile(machoResourceName).Sections)
       {
-        Action action = () => SignedMessage.CreateInstance(new SignatureData(section));
+        var action = () => SignedMessage.CreateInstance(section.SignatureData);
         action.Should()
           .Throw<Exception>()
           .WithMessage("Invalid signature format");
@@ -53,15 +53,15 @@ namespace JetBrains.SignatureVerifier.Tests
     public void VerifySignWithChainTest(
       VerifySignatureStatus expectedResult,
       string codesignRootCertStoreResourceName,
-      string machoResourceName)
+      string machOResourceName)
     {
-      var results = ResourceUtil.OpenRead(codesignRootCertStoreResourceName, codeSignRootsStream =>
+      var results = ResourceUtil.OpenRead(ResourceCategory.MachO, codesignRootCertStoreResourceName, codeSignRootsStream =>
         {
           var verificationParams = new SignatureVerificationParams(codeSignRootsStream, withRevocationCheck: false);
-          return GetMachOFile(machoResourceName).Sections
+          return GetMachOFile(machOResourceName).Sections
             .Select(async section =>
               {
-                var signedMessage = SignedMessage.CreateInstance(new SignatureData(section));
+                var signedMessage = SignedMessage.CreateInstance(section.SignatureData);
                 var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
                 return await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
               })

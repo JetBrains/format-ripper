@@ -16,10 +16,9 @@ namespace JetBrains.FormatRipper.MachO
       public readonly CPU_SUBTYPE CpuSubType;
       public readonly MH_FileType MhFileType;
       public readonly MH_Flags MhFlags;
-      public readonly bool HasCodeSignature;
-      public readonly byte[]? CodeDirectoryBlob;
-      public readonly byte[]? CmsSignatureBlob;
-      public readonly ComputeHashInfo ComputeHashInfo;
+      public readonly bool HasSignature;
+      public readonly SignatureData SignatureData;
+      public readonly ComputeHashInfo? ComputeHashInfo;
 
       internal Section(
         bool isLittleEndian,
@@ -27,19 +26,17 @@ namespace JetBrains.FormatRipper.MachO
         CPU_SUBTYPE cpuSubType,
         MH_FileType mhFileType,
         MH_Flags mhFlags,
-        bool hasCodeSignature,
-        byte[]? codeDirectoryBlob,
-        byte[]? cmsSignatureBlob,
-        ComputeHashInfo computeHashInfo)
+        bool hasSignature,
+        SignatureData signatureData,
+        ComputeHashInfo? computeHashInfo)
       {
         IsLittleEndian = isLittleEndian;
         CpuType = cpuType;
         CpuSubType = cpuSubType;
         MhFileType = mhFileType;
         MhFlags = mhFlags;
-        HasCodeSignature = hasCodeSignature;
-        CodeDirectoryBlob = codeDirectoryBlob;
-        CmsSignatureBlob = cmsSignatureBlob;
+        HasSignature = hasSignature;
+        SignatureData = signatureData;
         ComputeHashInfo = computeHashInfo;
       }
     }
@@ -50,8 +47,9 @@ namespace JetBrains.FormatRipper.MachO
     [Flags]
     public enum Mode : uint
     {
-      Default = 0,
-      ReadCodeSignature = 0x1
+      Default = 0x0,
+      SignatureData = 0x1,
+      ComputeHashInfo = 0x2
     }
 
     private MachOFile(bool? isFatLittleEndian, Section[] sections)
@@ -62,12 +60,57 @@ namespace JetBrains.FormatRipper.MachO
 
     public static unsafe bool Is(Stream stream)
     {
+      static bool Check(MH magic) => magic is MH.MH_MAGIC or MH.MH_MAGIC_64 or MH.MH_CIGAM or MH.MH_CIGAM_64;
+
       stream.Position = 0;
       MH magic;
       StreamUtil.ReadBytes(stream, (byte*)&magic, sizeof(MH));
-      return magic is
-        MH.FAT_MAGIC or MH.FAT_MAGIC_64 or MH.FAT_CIGAM or MH.FAT_CIGAM_64 or
-        MH.MH_MAGIC or MH.MH_MAGIC_64 or MH.MH_CIGAM or MH.MH_CIGAM_64;
+
+      if (magic is MH.FAT_MAGIC or MH.FAT_MAGIC_64 or MH.FAT_CIGAM or MH.FAT_CIGAM_64)
+      {
+        var isFatLittleEndian = magic is MH.FAT_MAGIC or MH.FAT_MAGIC_64;
+        var needSwap = BitConverter.IsLittleEndian != isFatLittleEndian;
+
+        uint GetU4(uint v) => needSwap ? MemoryUtil.SwapU4(v) : v;
+        ulong GetU8(ulong v) => needSwap ? MemoryUtil.SwapU8(v) : v;
+
+        fat_header fh;
+        StreamUtil.ReadBytes(stream, (byte*)&fh, sizeof(fat_header));
+        var nFatArch = GetU4(fh.nfat_arch);
+
+        if (magic is MH.FAT_CIGAM_64 or MH.FAT_MAGIC_64)
+        {
+          var fatNodes = new fat_arch_64[checked((int)nFatArch)];
+          fixed (fat_arch_64* ptr = fatNodes)
+            StreamUtil.ReadBytes(stream, (byte*)ptr, checked((int)nFatArch * sizeof(fat_arch_64)));
+          for (var n = 0; n < nFatArch; n++)
+          {
+            stream.Position = checked((long)GetU8(fatNodes[n].offset));
+            MH subMagic;
+            StreamUtil.ReadBytes(stream, (byte*)&subMagic, sizeof(MH));
+            if (!Check(subMagic))
+              return false;
+          }
+        }
+        else
+        {
+          var fatNodes = new fat_arch[checked((int)nFatArch)];
+          fixed (fat_arch* ptr = fatNodes)
+            StreamUtil.ReadBytes(stream, (byte*)ptr, checked((int)nFatArch * sizeof(fat_arch)));
+          for (var n = 0; n < nFatArch; n++)
+          {
+            stream.Position = GetU4(fatNodes[n].offset);
+            MH subMagic;
+            StreamUtil.ReadBytes(stream, (byte*)&subMagic, sizeof(MH));
+            if (!Check(subMagic))
+              return false;
+          }
+        }
+
+        return true;
+      }
+
+      return Check(magic);
     }
 
     public static unsafe MachOFile Parse(Stream stream, Mode mode = Mode.Default)
@@ -86,7 +129,7 @@ namespace JetBrains.FormatRipper.MachO
 
         LoadCommandsInfo ReadLoadCommands(long cmdOffset, uint nCmds, uint sizeOfCmds)
         {
-          var hasCodeSignature = false;
+          var hasSignature = false;
           byte[]? codeDirectoryBlob = null;
           byte[]? cmsSignatureBlob = null;
           fixed (byte* buf = StreamUtil.ReadBytes(stream, checked((int)sizeOfCmds)))
@@ -100,6 +143,7 @@ namespace JetBrains.FormatRipper.MachO
               switch ((LC)GetU4(lc.cmd))
               {
               case LC.LC_SEGMENT:
+                if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
                 {
                   segment_command sc;
                   MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command));
@@ -113,6 +157,7 @@ namespace JetBrains.FormatRipper.MachO
                 }
                 break;
               case LC.LC_SEGMENT_64:
+                if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
                 {
                   segment_command_64 sc;
                   MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command_64));
@@ -129,10 +174,13 @@ namespace JetBrains.FormatRipper.MachO
                 {
                   linkedit_data_command ldc;
                   MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&ldc, sizeof(linkedit_data_command));
-                  excludeRanges.Add(new StreamRange(checked(cmdOffset + (cmdPtr - buf)), lc.cmdsize));
-                  excludeRanges.Add(new StreamRange(ldc.dataoff, ldc.datasize));
+                  if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+                  {
+                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (cmdPtr - buf)), lc.cmdsize));
+                    excludeRanges.Add(new StreamRange(ldc.dataoff, ldc.datasize));
+                  }
 
-                  if ((mode & Mode.ReadCodeSignature) == Mode.ReadCodeSignature)
+                  if ((mode & Mode.SignatureData) == Mode.SignatureData)
                   {
                     stream.Position = checked(imageRange.Position + GetU4(ldc.dataoff));
 
@@ -181,17 +229,19 @@ namespace JetBrains.FormatRipper.MachO
                     }
                   }
                 }
-                hasCodeSignature = true;
+                hasSignature = true;
                 break;
               }
 
               cmdPtr += GetU4(lc.cmdsize);
             }
-            if (!hasCodeSignature)
-              excludeRanges.Add(new StreamRange(checked(cmdOffset + sizeOfCmds), sizeof(load_command) + sizeof(linkedit_data_command)));
+            
+            if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+              if (!hasSignature)
+                excludeRanges.Add(new StreamRange(checked(cmdOffset + sizeOfCmds), sizeof(load_command) + sizeof(linkedit_data_command)));
           }
 
-          return new(hasCodeSignature, codeDirectoryBlob, cmsSignatureBlob);
+          return new(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob));
         }
 
         int GetZeroPadding(bool hasCodeSignature)
@@ -206,13 +256,22 @@ namespace JetBrains.FormatRipper.MachO
         {
           mach_header_64 mh;
           StreamUtil.ReadBytes(stream, (byte*)&mh, sizeof(mach_header_64));
-          excludeRanges.Add(new StreamRange(checked(sizeof(MH) + (byte*)&mh.ncmds - (byte*)&mh), sizeof(UInt32)));
-          excludeRanges.Add(new StreamRange(checked(sizeof(MH) + (byte*)&mh.sizeofcmds - (byte*)&mh), sizeof(UInt32)));
+          if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+          {
+            excludeRanges.Add(new StreamRange(checked(sizeof(MH) + (byte*)&mh.ncmds - (byte*)&mh), sizeof(UInt32)));
+            excludeRanges.Add(new StreamRange(checked(sizeof(MH) + (byte*)&mh.sizeofcmds - (byte*)&mh), sizeof(UInt32)));
+          }
 
           var loadCommands = ReadLoadCommands(sizeof(MH) + sizeof(mach_header_64), GetU4(mh.ncmds), GetU4(mh.sizeofcmds));
-          StreamRangeUtil.Sort(excludeRanges);
-          var sortedHashIncludeRanges = StreamRangeUtil.Invert(imageRange.Size, excludeRanges);
-          StreamRangeUtil.MergeNeighbors(sortedHashIncludeRanges);
+
+          ComputeHashInfo? computeHashInfo = null;
+          if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+          {
+            StreamRangeUtil.Sort(excludeRanges);
+            var sortedHashIncludeRanges = StreamRangeUtil.Invert(imageRange.Size, excludeRanges);
+            StreamRangeUtil.MergeNeighbors(sortedHashIncludeRanges);
+            computeHashInfo = new ComputeHashInfo(imageRange.Position, sortedHashIncludeRanges, GetZeroPadding(loadCommands.HasSignature));
+          }
 
           return new Section(
             isLittleEndian,
@@ -220,22 +279,30 @@ namespace JetBrains.FormatRipper.MachO
             (CPU_SUBTYPE)GetU4(mh.cpusubtype),
             (MH_FileType)GetU4(mh.filetype),
             (MH_Flags)GetU4(mh.flags),
-            loadCommands.HasCodeSignature,
-            loadCommands.CodeDirectoryBlob,
-            loadCommands.CmsSignatureBlob,
-            new ComputeHashInfo(imageRange.Position, sortedHashIncludeRanges, GetZeroPadding(loadCommands.HasCodeSignature)));
+            loadCommands.HasSignature,
+            loadCommands.SignatureData,
+            computeHashInfo);
         }
         else
         {
           mach_header mh;
           StreamUtil.ReadBytes(stream, (byte*)&mh, sizeof(mach_header));
-          excludeRanges.Add(new StreamRange(checked(sizeof(MH) + (byte*)&mh.ncmds - (byte*)&mh), sizeof(UInt32)));
-          excludeRanges.Add(new StreamRange(checked(sizeof(MH) + (byte*)&mh.sizeofcmds - (byte*)&mh), sizeof(UInt32)));
+          if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+          {
+            excludeRanges.Add(new StreamRange(checked(sizeof(MH) + (byte*)&mh.ncmds - (byte*)&mh), sizeof(UInt32)));
+            excludeRanges.Add(new StreamRange(checked(sizeof(MH) + (byte*)&mh.sizeofcmds - (byte*)&mh), sizeof(UInt32)));
+          }
 
           var loadCommands = ReadLoadCommands(sizeof(MH) + sizeof(mach_header), GetU4(mh.ncmds), GetU4(mh.sizeofcmds));
-          StreamRangeUtil.Sort(excludeRanges);
-          var sortedHashIncludeRanges = StreamRangeUtil.Invert(imageRange.Size, excludeRanges);
-          StreamRangeUtil.MergeNeighbors(sortedHashIncludeRanges);
+
+          ComputeHashInfo? computeHashInfo = null;
+          if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+          {
+            StreamRangeUtil.Sort(excludeRanges);
+            var sortedHashIncludeRanges = StreamRangeUtil.Invert(imageRange.Size, excludeRanges);
+            StreamRangeUtil.MergeNeighbors(sortedHashIncludeRanges);
+            computeHashInfo = new ComputeHashInfo(imageRange.Position, sortedHashIncludeRanges, GetZeroPadding(loadCommands.HasSignature));
+          }
 
           return new Section(
             isLittleEndian,
@@ -243,10 +310,9 @@ namespace JetBrains.FormatRipper.MachO
             (CPU_SUBTYPE)GetU4(mh.cpusubtype),
             (MH_FileType)GetU4(mh.filetype),
             (MH_Flags)GetU4(mh.flags),
-            loadCommands.HasCodeSignature,
-            loadCommands.CodeDirectoryBlob,
-            loadCommands.CmsSignatureBlob,
-            new ComputeHashInfo(imageRange.Position, sortedHashIncludeRanges, GetZeroPadding(loadCommands.HasCodeSignature)));
+            loadCommands.HasSignature,
+            loadCommands.SignatureData,
+            computeHashInfo);
         }
       }
 
@@ -274,11 +340,11 @@ namespace JetBrains.FormatRipper.MachO
             StreamUtil.ReadBytes(stream, (byte*)ptr, checked((int)nFatArch * sizeof(fat_arch_64)));
           for (var n = 0; n < nFatArch; n++)
           {
-            var imageRange = new StreamRange(checked((long)GetU8(fatNodes[n].offset)), checked((long)GetU8(fatNodes[n].size)));
-            stream.Position = imageRange.Position;
+            var position = checked((long)GetU8(fatNodes[n].offset));
+            stream.Position = position;
             MH subMagic;
             StreamUtil.ReadBytes(stream, (byte*)&subMagic, sizeof(MH));
-            sections[n] = Read(imageRange, subMagic);
+            sections[n] = Read(new StreamRange(position, checked((long)GetU8(fatNodes[n].size))), subMagic);
             if (sections[n].CpuType != (CPU_TYPE)GetU4(fatNodes[n].cputype))
               throw new FormatException("Inconsistent cpu type in fat header");
             if (sections[n].CpuSubType != (CPU_SUBTYPE)GetU4(fatNodes[n].cpusubtype))
@@ -292,11 +358,11 @@ namespace JetBrains.FormatRipper.MachO
             StreamUtil.ReadBytes(stream, (byte*)ptr, checked((int)nFatArch * sizeof(fat_arch)));
           for (var n = 0; n < nFatArch; n++)
           {
-            var imageRange = new StreamRange(GetU4(fatNodes[n].offset), GetU4(fatNodes[n].size));
-            stream.Position = imageRange.Position;
+            var position = GetU4(fatNodes[n].offset);
+            stream.Position = position;
             MH subMagic;
             StreamUtil.ReadBytes(stream, (byte*)&subMagic, sizeof(MH));
-            sections[n] = Read(imageRange, subMagic);
+            sections[n] = Read(new StreamRange(position, GetU4(fatNodes[n].size)), subMagic);
             if (sections[n].CpuType != (CPU_TYPE)GetU4(fatNodes[n].cputype))
               throw new FormatException("Inconsistent cpu type in fat header");
             if (sections[n].CpuSubType != (CPU_SUBTYPE)GetU4(fatNodes[n].cpusubtype))
@@ -312,15 +378,13 @@ namespace JetBrains.FormatRipper.MachO
 
     private readonly struct LoadCommandsInfo
     {
-      public readonly bool HasCodeSignature;
-      public readonly byte[]? CodeDirectoryBlob;
-      public readonly byte[]? CmsSignatureBlob;
+      public readonly bool HasSignature;
+      public readonly SignatureData SignatureData;
 
-      public LoadCommandsInfo(bool hasCodeSignature, byte[]? codeDirectoryBlob, byte[]? cmsSignatureBlob)
+      public LoadCommandsInfo(bool hasSignature, SignatureData signatureData)
       {
-        HasCodeSignature = hasCodeSignature;
-        CodeDirectoryBlob = codeDirectoryBlob;
-        CmsSignatureBlob = cmsSignatureBlob;
+        HasSignature = hasSignature;
+        SignatureData = signatureData;
       }
     }
   }

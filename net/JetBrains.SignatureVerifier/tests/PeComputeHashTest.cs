@@ -30,12 +30,13 @@ namespace JetBrains.SignatureVerifier.Tests
     [TestCase("wscadminui.x64.exe"                                , "SHA256", "1EDDACFA399B9287C5002D1E94AC8D44CC2F27FAEC29C30CDE84ED2B9E478B0A")]
     [TestCase("wscadminui.x86.exe"                                , "SHA256", "8989E8F8C9E81E18BBDA215F78C3DFBBFCAD8341B265AB3AE89D749E6D9349A8")]
     // @formatter:on
-    public void Test(string filename, string alg, string expectedResult)
+    public void Test(string resourceName, string hashAlgorithmName, string expectedResult)
     {
-      var result = ResourceUtil.OpenRead(filename, stream =>
+      var result = ResourceUtil.OpenRead(ResourceCategory.Pe, resourceName, stream =>
         {
-          var file = PeFile.Parse(stream);
-          return HashUtil.ComputeHash(stream, file.ComputeHashInfo, new HashAlgorithmName(alg));
+          var file = PeFile.Parse(stream, PeFile.Mode.ComputeHashInfo);
+          Assert.IsNotNull(file.ComputeHashInfo);
+          return HashUtil.ComputeHash(stream, file.ComputeHashInfo, new HashAlgorithmName(hashAlgorithmName));
         });
       Assert.AreEqual(expectedResult, HexUtil.ConvertToHexString(result));
     }

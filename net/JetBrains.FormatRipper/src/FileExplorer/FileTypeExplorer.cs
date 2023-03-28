@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using JetBrains.FormatRipper.Compound;
 using JetBrains.FormatRipper.Elf;
@@ -110,7 +111,7 @@ namespace JetBrains.FormatRipper.FileExplorer
           static bool IsAllHasCodeSignature(IEnumerable<MachOFile.Section> sections)
           {
             foreach (var section in sections)
-              if (!section.HasCodeSignature)
+              if (!section.HasSignature)
                 return false;
             return true;
           }

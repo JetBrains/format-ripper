@@ -9,9 +9,9 @@ namespace JetBrains.FormatRipper.Tests
     [TestCase("1.sh")]
     [TestCase("2.sh")]
     [Test]
-    public void Test(string filename)
+    public void Test(string resourceName)
     {
-      ResourceUtil.OpenRead("Sh." + filename, stream =>
+      ResourceUtil.OpenRead(ResourceCategory.Sh, resourceName, stream =>
         {
           Assert.IsTrue(ShFile.Is(stream));
           return false;

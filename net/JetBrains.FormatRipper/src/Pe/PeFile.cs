@@ -13,9 +13,9 @@ namespace JetBrains.FormatRipper.Pe
     public readonly IMAGE_SUBSYSTEM Subsystem;
     public readonly IMAGE_DLLCHARACTERISTICS DllCharacteristics;
     public readonly bool HasSignature;
+    public readonly SignatureData SignatureData;
+    public readonly ComputeHashInfo? ComputeHashInfo;
     public readonly bool HasMetadata;
-    public readonly byte[]? CmsSignatureBlob;
-    public readonly ComputeHashInfo ComputeHashInfo;
     public readonly StreamRange SecurityDataDirectoryRange;
 
     private PeFile(
@@ -24,17 +24,17 @@ namespace JetBrains.FormatRipper.Pe
       IMAGE_SUBSYSTEM subsystem,
       IMAGE_DLLCHARACTERISTICS dllCharacteristics,
       bool hasSignature,
-      byte[]? cmsSignatureBlob,
+      SignatureData signatureData,
       bool hasMetadata,
       StreamRange securityDataDirectoryRange,
-      ComputeHashInfo computeHashInfo)
+      ComputeHashInfo? computeHashInfo)
     {
       Machine = machine;
       Characteristics = characteristics;
       Subsystem = subsystem;
       DllCharacteristics = dllCharacteristics;
       HasSignature = hasSignature;
-      CmsSignatureBlob = cmsSignatureBlob;
+      SignatureData = signatureData;
       HasMetadata = hasMetadata;
       SecurityDataDirectoryRange = securityDataDirectoryRange;
       ComputeHashInfo = computeHashInfo;
@@ -59,7 +59,8 @@ namespace JetBrains.FormatRipper.Pe
     public enum Mode : uint
     {
       Default = 0,
-      ReadCodeSignature = 0x1
+      SignatureData = 0x1,
+      ComputeHashInfo = 0x2
     }
 
     public static unsafe PeFile Parse(Stream stream, Mode mode = Mode.Default)
@@ -187,7 +188,7 @@ namespace JetBrains.FormatRipper.Pe
       var sizeOfFile = stream.Length;
 
       var hasSignature = false;
-      byte[]? cmsSignatureBlob = null;
+      var signatureData = new SignatureData();
       if (securityIdd.VirtualAddress != 0 && securityIdd.Size != 0)
       {
         if (securityIdd.VirtualAddress < sizeOfFile)
@@ -201,21 +202,24 @@ namespace JetBrains.FormatRipper.Pe
 
         if (securityIdd.VirtualAddress + securityIdd.Size <= stream.Length)
         {
-          if ((mode & Mode.ReadCodeSignature) == Mode.ReadCodeSignature)
+          hasSignature = true;
+          if ((mode & Mode.SignatureData) == Mode.SignatureData)
           {
             stream.Position = securityIdd.VirtualAddress;
             WIN_CERTIFICATE wc;
             StreamUtil.ReadBytes(stream, (byte*)&wc, sizeof(WIN_CERTIFICATE));
             if (MemoryUtil.GetLeU2(wc.wCertificateType) != WinCertificate.WIN_CERT_TYPE_PKCS_SIGNED_DATA)
               throw new FormatException("Unsupported PE certificate type");
-            cmsSignatureBlob = StreamUtil.ReadBytes(stream, checked((int)(MemoryUtil.GetLeU4(wc.dwLength) - sizeof(WIN_CERTIFICATE))));
+            signatureData = new SignatureData(null, StreamUtil.ReadBytes(stream, checked((int)(MemoryUtil.GetLeU4(wc.dwLength) - sizeof(WIN_CERTIFICATE)))));
           }
-
-          hasSignature = true;
         }
       }
       else
         sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections, sizeOfFile - sizeOfSections));
+
+      ComputeHashInfo? computeHashInfo = null;
+      if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+        computeHashInfo = new ComputeHashInfo(0, sortedHashIncludeRanges, 0);
 
       var hasMetadata = TranslateVirtualAddress(ishs, ref corIdd) != 0;
 
@@ -223,8 +227,8 @@ namespace JetBrains.FormatRipper.Pe
       return new(
         (IMAGE_FILE_MACHINE)MemoryUtil.GetLeU2(ifh.Machine),
         (IMAGE_FILE)MemoryUtil.GetLeU2(ifh.Characteristics),
-        subsystem, dllCharacteristics, hasSignature, cmsSignatureBlob, hasMetadata, securityIddRange,
-        new ComputeHashInfo(0, sortedHashIncludeRanges, 0));
+        subsystem, dllCharacteristics, hasSignature, signatureData, hasMetadata, securityIddRange,
+        computeHashInfo);
     }
 
     private static uint TranslateVirtualAddress(IMAGE_SECTION_HEADER[] ishs, ref IMAGE_DATA_DIRECTORY idd)

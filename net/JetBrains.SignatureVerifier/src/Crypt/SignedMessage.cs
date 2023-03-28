@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using JetBrains.Annotations;
+using JetBrains.FormatRipper;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Cms;
@@ -17,12 +18,11 @@ namespace JetBrains.SignatureVerifier.Crypt
 
     public static SignedMessage CreateInstance(SignatureData signatureData)
     {
-      if (signatureData.IsEmpty)
+      if (signatureData.CmsBlob == null)
         throw new InvalidDataException($"{nameof(signatureData)} is empty");
-
-      if (signatureData.HasAttachedSignedData)
-        return new SignedMessage(signatureData.SignedData, signatureData.CmsData);
-      return new SignedMessage(signatureData.CmsData);
+      return signatureData.SignedBlob != null
+        ? new SignedMessage(signatureData.SignedBlob, signatureData.CmsBlob)
+        : new SignedMessage(signatureData.CmsBlob);
     }
 
     public SignedMessage([NotNull] byte[] pkcs7Data)

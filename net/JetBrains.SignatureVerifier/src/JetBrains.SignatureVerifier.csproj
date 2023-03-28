@@ -15,7 +15,7 @@
     <PackageTags>jetbrains pe mach-o macho msi netstandard signature verify parse format</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <Version>2.0.0-preview1</Version>
+    <Version>2.0.0-preview3</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>

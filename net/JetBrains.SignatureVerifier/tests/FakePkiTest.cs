@@ -32,9 +32,8 @@ namespace JetBrains.SignatureVerifier.Tests
 
       using var peStream = getPeStream(peResourceName);
       using var signedPeStream = signPe(peStream, keyPair.Private, cert, false);
-      var peFile = PeFile.Parse(signedPeStream, PeFile.Mode.ReadCodeSignature);
-      var signatureData = new SignatureData(null, peFile.CmsSignatureBlob);
-      var signedMessage = SignedMessage.CreateInstance(signatureData);
+      var peFile = PeFile.Parse(signedPeStream, PeFile.Mode.SignatureData);
+      var signedMessage = SignedMessage.CreateInstance(peFile.SignatureData);
       using var signRootCertStore = getRootStoreStream(pki.Certificate);
       var verificationParams = new SignatureVerificationParams(signRootCertStore, withRevocationCheck: false);
       var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
@@ -57,9 +56,8 @@ namespace JetBrains.SignatureVerifier.Tests
 
       pki.Revoke(cert, true);
 
-      var peFile = PeFile.Parse(signedPeStream, PeFile.Mode.ReadCodeSignature);
-      var signatureData = new SignatureData(null, peFile.CmsSignatureBlob);
-      var signedMessage = SignedMessage.CreateInstance(signatureData);
+      var peFile = PeFile.Parse(signedPeStream, PeFile.Mode.SignatureData);
+      var signedMessage = SignedMessage.CreateInstance(peFile.SignatureData);
       using var signRootCertStore = getRootStoreStream(pki.Certificate);
       var verificationParams = new SignatureVerificationParams(signRootCertStore);
 
@@ -92,9 +90,8 @@ namespace JetBrains.SignatureVerifier.Tests
 
       using var peStream = getPeStream(peResourceName);
       using var signedPeStream = signPe(peStream, keyPair.Private, cert);
-      var peFile = PeFile.Parse(signedPeStream, PeFile.Mode.ReadCodeSignature);
-      var signatureData = new SignatureData(null, peFile.CmsSignatureBlob);
-      var signedMessage = SignedMessage.CreateInstance(signatureData);
+      var peFile = PeFile.Parse(signedPeStream, PeFile.Mode.SignatureData);
+      var signedMessage = SignedMessage.CreateInstance(peFile.SignatureData);
       var verificationParams = new SignatureVerificationParams(buildChain: false);
       var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
 
@@ -112,7 +109,7 @@ namespace JetBrains.SignatureVerifier.Tests
       if (addSignerCert)
         cmsGen.AddCertificates(getStore(StoreType.CERTIFICATE, cert));
 
-      var peFile = PeFile.Parse(peStream);
+      var peFile = PeFile.Parse(peStream, PeFile.Mode.ComputeHashInfo);
       var hash = HashUtil.ComputeHash(peStream, peFile.ComputeHashInfo, HashAlgorithmName.SHA1);
       var content = createCmsSignedData(hash);
       var contentData = content.GetDerEncoded();
@@ -158,9 +155,9 @@ namespace JetBrains.SignatureVerifier.Tests
       return new MemoryStream(data);
     }
 
-    private static Stream getPeStream(string resourceName)
+    private static Stream getPeStream(string peResourceName)
     {
-      return ResourceUtil.OpenRead(resourceName, stream =>
+      return ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream =>
         {
           var ms = new MemoryStream();
           stream.CopyTo(ms);

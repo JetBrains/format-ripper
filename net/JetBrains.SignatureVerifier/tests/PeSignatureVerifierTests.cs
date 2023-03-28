@@ -32,11 +32,10 @@ namespace JetBrains.SignatureVerifier.Tests
     // @formatter:on
     public async Task VerifySignTest(VerifySignatureStatus expectedResult, string peResourceName)
     {
-      var file = ResourceUtil.OpenRead(peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.ReadCodeSignature));
+      var file = ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
       var verificationParams = new SignatureVerificationParams(null, null, false, false);
-      var signatureData = new SignatureData(null, file.CmsSignatureBlob);
-      var signedMessage = SignedMessage.CreateInstance(signatureData);
+      var signedMessage = SignedMessage.CreateInstance(file.SignatureData);
       var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
       var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 
@@ -52,10 +51,10 @@ namespace JetBrains.SignatureVerifier.Tests
       string timestampRootCertStoreResourceName,
       string peResourceName)
     {
-      var file = ResourceUtil.OpenRead(peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.ReadCodeSignature));
+      var file = ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
-      var result = await ResourceUtil.OpenRead(codesignRootCertStoreResourceName, codeSignRootsStream =>
-        ResourceUtil.OpenRead(timestampRootCertStoreResourceName, timeStampRootsStream =>
+      var result = await ResourceUtil.OpenRead(ResourceCategory.Pe, codesignRootCertStoreResourceName, codeSignRootsStream =>
+        ResourceUtil.OpenRead(ResourceCategory.Pe, timestampRootCertStoreResourceName, timeStampRootsStream =>
           {
             var verificationParams = new SignatureVerificationParams(
               codeSignRootsStream,
@@ -63,8 +62,7 @@ namespace JetBrains.SignatureVerifier.Tests
               buildChain: true,
               withRevocationCheck: false);
 
-            var signatureData = new SignatureData(null, file.CmsSignatureBlob);
-            var signedMessage = SignedMessage.CreateInstance(signatureData);
+            var signedMessage = SignedMessage.CreateInstance(file.SignatureData);
             var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
             return signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 
@@ -139,11 +137,11 @@ namespace JetBrains.SignatureVerifier.Tests
       string timestampRootCertStoreResourceName,
       DateTime time)
     {
-      var file = ResourceUtil.OpenRead(peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.ReadCodeSignature));
+      var file = ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
       return
-        ResourceUtil.OpenRead(codesignRootCertStoreResourceName, codeSignRootsStream =>
-          ResourceUtil.OpenRead(timestampRootCertStoreResourceName, timeStampRootsStream =>
+        ResourceUtil.OpenRead(ResourceCategory.Pe, codesignRootCertStoreResourceName, codeSignRootsStream =>
+          ResourceUtil.OpenRead(ResourceCategory.Pe, timestampRootCertStoreResourceName, timeStampRootsStream =>
             {
               var verificationParams = new SignatureVerificationParams(
                 codeSignRootsStream,
@@ -154,8 +152,7 @@ namespace JetBrains.SignatureVerifier.Tests
                 SignatureValidationTimeMode.SignValidationTime,
                 signatureValidationTime: time);
 
-              var signatureData = new SignatureData(null, file.CmsSignatureBlob);
-              var signedMessage = SignedMessage.CreateInstance(signatureData);
+              var signedMessage = SignedMessage.CreateInstance(file.SignatureData);
               var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
               return signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
             }));

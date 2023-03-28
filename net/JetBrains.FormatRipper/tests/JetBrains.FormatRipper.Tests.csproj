@@ -20,9 +20,9 @@
   <ItemGroup>
     <EmbeddedResource Include="..\..\..\data\elf\*" LinkBase="Resources\Elf" />
     <EmbeddedResource Include="..\..\..\data\mach-o\*" LinkBase="Resources\MachO" />
-    <EmbeddedResource Include="..\..\..\data\pe\*" LinkBase="Resources\Pe" />
     <EmbeddedResource Include="..\..\..\data\misc\*" LinkBase="Resources\Misc" />
-    <EmbeddedResource Include="..\..\..\data\sh\*" LinkBase="Resources\Sh" />
     <EmbeddedResource Include="..\..\..\data\msi\*" LinkBase="Resources\Msi" />
+    <EmbeddedResource Include="..\..\..\data\pe\*" LinkBase="Resources\Pe" />
+    <EmbeddedResource Include="..\..\..\data\sh\*" LinkBase="Resources\Sh" />
   </ItemGroup>
 </Project>
