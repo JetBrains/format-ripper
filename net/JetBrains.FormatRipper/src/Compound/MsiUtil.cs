@@ -1,27 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿using System.Text;
 
 namespace JetBrains.FormatRipper.Compound
 {
   public static class MsiUtil
   {
-    public const string MsiDigitalSignatureExName = "\x0005MsiDigitalSignatureEx";
-
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public const string 䡀_ColumnsName = "䡀㬿䏲䐸䖱";
-
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public const string 䡀_StringDataName = "䡀㼿䕷䑬㭪䗤䠤";
-
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public const string 䡀_StringPoolName = "䡀㼿䕷䑬㹪䒲䠯";
-
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public const string 䡀_TablesName = "䡀㽿䅤䈯䠶";
-
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public const string 䡀_ValidationName = "䡀㿿䏤䇬䗤䒬䠱";
-
     private static char MsiBase64Encode(byte v)
     {
       // 0-0x3F converted to '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz._'

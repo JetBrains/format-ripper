@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using JetBrains.FormatRipper.Compound.Impl;
@@ -16,6 +17,23 @@ namespace JetBrains.FormatRipper.Compound
     
     public const string DigitalSignatureName = "\x0005DigitalSignature";
     public const string SummaryInformationName = "\x0005SummaryInformation";
+    public const string MsiDigitalSignatureExName = "\x0005MsiDigitalSignatureEx";
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    public const string 䡀_ColumnsName = "䡀㬿䏲䐸䖱";
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    public const string 䡀_StringDataName = "䡀㼿䕷䑬㭪䗤䠤";
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    public const string 䡀_StringPoolName = "䡀㼿䕷䑬㹪䒲䠯";
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    public const string 䡀_TablesName = "䡀㽿䅤䈯䠶";
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    public const string 䡀_ValidationName = "䡀㿿䏤䇬䗤䒬䠱";
+
 
     private static readonly byte[] ourHeaderSignature = { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 };
 
@@ -312,7 +330,7 @@ namespace JetBrains.FormatRipper.Compound
       {
         var sortedDirectoryEntries = new List<DirectoryEntry>();
         foreach (var entry in directoryEntries)
-          if (entry is { ObjectType: STGTY.STGTY_STREAM, StreamSize: > 0, Name: not (DigitalSignatureName or MsiUtil.MsiDigitalSignatureExName) })
+          if (entry is { ObjectType: STGTY.STGTY_STREAM, StreamSize: > 0, Name: not (DigitalSignatureName or MsiDigitalSignatureExName) })
             sortedDirectoryEntries.Add(entry);
         sortedDirectoryEntries.Sort((x, y) =>
           {
@@ -338,15 +356,7 @@ namespace JetBrains.FormatRipper.Compound
         computeHashInfo = new ComputeHashInfo(0, orderedIncludeRanges, 0);
       }
 
-      var type = GetDirectoryEntryChildren(rootDirectoryEntry, entry => entry is
-        {
-          ObjectType: STGTY.STGTY_STREAM,
-          Name: MsiUtil.䡀_ValidationName or
-          MsiUtil.䡀_TablesName or
-          MsiUtil.䡀_ColumnsName or
-          MsiUtil.䡀_StringPoolName or
-          MsiUtil.䡀_StringDataName
-        }).Count >= 5
+      var type = GetDirectoryEntryChildren(rootDirectoryEntry, entry => entry is { ObjectType: STGTY.STGTY_STREAM, Name: 䡀_ValidationName or 䡀_TablesName or 䡀_ColumnsName or 䡀_StringPoolName or 䡀_StringDataName }).Count >= 5
         ? FileType.Msi
         : FileType.Unknown;
 
