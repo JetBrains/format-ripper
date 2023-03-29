@@ -18,7 +18,7 @@ namespace JetBrains.FormatRipper.FileExplorer
       TryParseMsi(stream, out properties) ? FileType.Msi :
       TryParseSh(stream, out properties) ? FileType.Sh : FileType.Unknown, properties);
 
-#if !NET20
+#if !(NET20 || NET30)
     public static Result DetectFileType(this Stream stream) => Detect(stream);
 #endif
 
