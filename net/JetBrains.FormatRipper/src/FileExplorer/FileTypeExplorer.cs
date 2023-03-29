@@ -11,12 +11,16 @@ namespace JetBrains.FormatRipper.FileExplorer
 {
   public static class FileTypeExplorer
   {
-    public static Result DetectFileType(Stream stream) => new(
+    public static Result Detect(Stream stream) => new(
       TryParsePe(stream, out var properties) ? FileType.Pe :
       TryParseElf(stream, out properties) ? FileType.Elf :
       TryParseMachO(stream, out properties) ? FileType.MachO :
       TryParseMsi(stream, out properties) ? FileType.Msi :
       TryParseSh(stream, out properties) ? FileType.Sh : FileType.Unknown, properties);
+
+#if !NET20
+    public static Result DetectFileType(this Stream stream) => Detect(stream);
+#endif
 
     public readonly struct Result
     {
