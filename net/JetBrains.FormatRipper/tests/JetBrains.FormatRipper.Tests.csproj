@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net35;net40;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net35;netcoreapp3.1</TargetFrameworks>
     <RootNamespace>JetBrains.FormatRipper.Tests</RootNamespace>
     <Nullable>enable</Nullable>
     <SignAssembly>true</SignAssembly>
