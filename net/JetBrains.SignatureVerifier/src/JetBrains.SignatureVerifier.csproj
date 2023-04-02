@@ -8,14 +8,14 @@
     <Company>JetBrains s.r.o.</Company>
     <Copyright>Copyright © 2021-$([System.DateTime]::Now.ToString('yyyy')) JetBrains s.r.o.</Copyright>
     <Authors>Mikhail Pilin, Anton Vladimirov</Authors>
-    <Description>The cross platform open-source library for parsing executable files. It supports the Portable executable, MSI, Mach-O, and Fat-Mach-O formats, provides useful information about their internals and can perform cryptography signature checks</Description>
+    <Description>The cross platform open-source library for performing cryptography signature checks</Description>
     <RepositoryUrl>https://github.com/JetBrains/format-ripper</RepositoryUrl>
     <PackageProjectUrl>https://github.com/JetBrains/format-ripper/blob/master/README.md</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageTags>jetbrains pe mach-o macho msi netstandard signature verify parse format</PackageTags>
+    <PackageTags>jetbrains signature verify netstandard</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <Version>2.0.0-preview4</Version>
+    <Version>2.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
