@@ -10,7 +10,7 @@
     <Company>JetBrains s.r.o.</Company>
     <Copyright>Copyright © 2021-$([System.DateTime]::Now.ToString('yyyy')) JetBrains s.r.o.</Copyright>
     <Authors>Mikhail Pilin</Authors>
-    <Description>The cross platform open-source library for parsing executable and shared-libary files. It supports the Compound, ELF, Mach-O, Fat Mach-O, MSI, PE formats, provides useful information about their internals.</Description>
+    <Description>The cross-platform open-source library for parsing executable and shared-library files. It supports the Compound, ELF, Mach-O, Fat Mach-O, MSI, and PE formats, providing useful information about their internals.</Description>
     <RepositoryUrl>https://github.com/JetBrains/format-ripper</RepositoryUrl>
     <PackageProjectUrl>https://github.com/JetBrains/format-ripper/blob/master/README.md</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
