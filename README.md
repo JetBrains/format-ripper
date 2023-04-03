@@ -1,9 +1,10 @@
-[![JetBrains incubator project](https://jb.gg/badges/incubator.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+# JetBrains format-ripper [![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+
+[![format-ripper-net](https://github.com/JetBrains/format-ripper/actions/workflows/build-format-ripper-net.yml/badge.svg)](https://github.com/JetBrains/format-ripper/actions/workflows/build-format-ripper-net.yml)
+
 [![NuGet Badge](https://buildstats.info/nuget/JetBrains.FormatRipper)](https://www.nuget.org/packages/JetBrains.FormatRipper)
+[![NuGet Badge](https://buildstats.info/nuget/JetBrains.SignatureVerifier)](https://www.nuget.org/packages/JetBrains.SignatureVerifier)
 [![Maven Central](https://img.shields.io/maven-central/v/com.jetbrains.format-ripper/format-ripper)](https://mvnrepository.com/artifact/com.jetbrains.format-ripper)
----
-JetBrains format-ripper
----
 
 JetBrains format-ripper library is applicable for:
 
