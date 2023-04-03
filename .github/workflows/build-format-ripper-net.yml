@@ -1,0 +1,34 @@
+name: format-ripper-net
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build_and_test:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        dotnet-version: [ '3.1.x' ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Install dependencies
+        working-directory: ./net
+        run: dotnet restore
+      - name: Build
+        working-directory: ./net
+        run: dotnet build --configuration Release --no-restore
+      - name: Test
+        working-directory: ./net
+        run: dotnet test --no-restore --verbosity normal
