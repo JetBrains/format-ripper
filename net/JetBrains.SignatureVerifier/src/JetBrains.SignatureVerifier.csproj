@@ -11,7 +11,6 @@
     <Authors>Mikhail Pilin, Anton Vladimirov</Authors>
     <Description>The cross-platform open-source library for performing cryptography signature checks.</Description>
     <RepositoryUrl>https://github.com/JetBrains/format-ripper</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/JetBrains/format-ripper/blob/master/README.md</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
     <PackageTags>jetbrains signature verify netstandard</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

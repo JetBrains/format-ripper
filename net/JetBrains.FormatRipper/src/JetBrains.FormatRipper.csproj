@@ -12,7 +12,6 @@
     <Authors>Mikhail Pilin</Authors>
     <Description>The cross-platform open-source library for parsing executable and shared-library files. It supports the Compound, ELF, Mach-O, Fat Mach-O, MSI, and PE formats, providing useful information about their internals.</Description>
     <RepositoryUrl>https://github.com/JetBrains/format-ripper</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/JetBrains/format-ripper/blob/master/README.md</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
     <PackageTags>jetbrains compound elf mach-o msi pe parse windows linux macos netstandard netframework</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
