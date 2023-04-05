@@ -1,4 +1,4 @@
-name: format-ripper-net
+name: net
 
 on:
   push:
