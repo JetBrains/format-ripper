@@ -23,9 +23,22 @@ namespace JetBrains.FormatRipper.Impl
     {
       Guid res;
       var src = (byte*)&v;
-      var dst = (byte*)&res + sizeof(Guid) - 1;
-      for (var n = sizeof(Guid); n-- > 0;)
-        *dst-- = *src++;
+      var dst = (byte*)&res;
+
+      dst[0] = src[3];
+      dst[1] = src[2];
+      dst[2] = src[1];
+      dst[3] = src[0];
+
+      dst[4] = src[5];
+      dst[5] = src[4];
+
+      dst[6] = src[7];
+      dst[7] = src[6];
+
+      for (var n = 8; n < 16; ++n)
+        dst[n] = src[n];
+
       return res;
     }
 

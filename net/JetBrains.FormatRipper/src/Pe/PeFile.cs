@@ -96,9 +96,7 @@ namespace JetBrains.FormatRipper.Pe
             throw new FormatException("Invalid 32-bit option header size");
 
           IMAGE_OPTIONAL_HEADER32 ioh;
-          checkSumRange = new StreamRange(
-            checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)),
-            sizeof(UInt32));
+          checkSumRange = new StreamRange(checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)), sizeof(uint));
           StreamUtil.ReadBytes(stream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER32));
           sizeOfHeaders = MemoryUtil.GetLeU4(ioh.SizeOfHeaders);
           subsystem = (IMAGE_SUBSYSTEM)MemoryUtil.GetLeU2(ioh.Subsystem);
@@ -111,9 +109,7 @@ namespace JetBrains.FormatRipper.Pe
           if (MemoryUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER64))
             throw new FormatException("Invalid 64-bit option header size");
           IMAGE_OPTIONAL_HEADER64 ioh;
-          checkSumRange = new StreamRange(
-            checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)),
-            sizeof(UInt32));
+          checkSumRange = new StreamRange(checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)), sizeof(uint));
           StreamUtil.ReadBytes(stream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER64));
           sizeOfHeaders = MemoryUtil.GetLeU4(ioh.SizeOfHeaders);
           subsystem = (IMAGE_SUBSYSTEM)MemoryUtil.GetLeU2(ioh.Subsystem);
@@ -137,11 +133,11 @@ namespace JetBrains.FormatRipper.Pe
         corIdd = iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR];
       }
 
-      var numberOfSections = MemoryUtil.GetLeU4(ifh.NumberOfSections);
+      var numberOfSections = MemoryUtil.GetLeU2(ifh.NumberOfSections);
       var ishs = new IMAGE_SECTION_HEADER[numberOfSections];
       fixed (IMAGE_SECTION_HEADER* ishsBuf = ishs)
       {
-        StreamUtil.ReadBytes(stream, (byte*)ishsBuf, checked((int)numberOfSections * sizeof(IMAGE_SECTION_HEADER)));
+        StreamUtil.ReadBytes(stream, (byte*)ishsBuf, checked(numberOfSections * sizeof(IMAGE_SECTION_HEADER)));
       }
 
       // Note(ww898): Taken from https://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/Authenticode_PE.docx
@@ -176,13 +172,13 @@ namespace JetBrains.FormatRipper.Pe
 
       Array.Sort(ishs, (x, y) =>
         {
-          if (x.PointerToRawData < y.PointerToRawData) return -1;
-          if (x.PointerToRawData > y.PointerToRawData) return 1;
+          if (MemoryUtil.GetLeU4(x.PointerToRawData) < MemoryUtil.GetLeU4(y.PointerToRawData)) return -1;
+          if (MemoryUtil.GetLeU4(x.PointerToRawData) > MemoryUtil.GetLeU4(y.PointerToRawData)) return 1;
           return 0;
         });
       foreach (var ish in ishs)
         if (ish.PointerToRawData != 0 && ish.SizeOfRawData != 0)
-          sortedHashIncludeRanges.Add(new StreamRange(ish.PointerToRawData, ish.SizeOfRawData));
+          sortedHashIncludeRanges.Add(new StreamRange(MemoryUtil.GetLeU4(ish.PointerToRawData), MemoryUtil.GetLeU4(ish.SizeOfRawData)));
       var sizeOfSections = sortedHashIncludeRanges[sortedHashIncludeRanges.Count - 1].Position +
                            sortedHashIncludeRanges[sortedHashIncludeRanges.Count - 1].Size;
       var sizeOfFile = stream.Length;
@@ -191,21 +187,23 @@ namespace JetBrains.FormatRipper.Pe
       var signatureData = new SignatureData();
       if (securityIdd.VirtualAddress != 0 && securityIdd.Size != 0)
       {
-        if (securityIdd.VirtualAddress < sizeOfFile)
+        if (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) < sizeOfFile)
         {
-          sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections, securityIdd.VirtualAddress - sizeOfSections));
-          if (securityIdd.VirtualAddress + securityIdd.Size < sizeOfFile)
-            sortedHashIncludeRanges.Add(new StreamRange(securityIdd.VirtualAddress + securityIdd.Size, sizeOfFile - (securityIdd.VirtualAddress + securityIdd.Size)));
+          sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections, MemoryUtil.GetLeU4(securityIdd.VirtualAddress) - sizeOfSections));
+          if (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size) < sizeOfFile)
+            sortedHashIncludeRanges.Add(new StreamRange(
+              MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size),
+              sizeOfFile - (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size))));
         }
         else
           sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections, sizeOfFile - sizeOfSections));
 
-        if (securityIdd.VirtualAddress + securityIdd.Size <= stream.Length)
+        if (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size) <= stream.Length)
         {
           hasSignature = true;
           if ((mode & Mode.SignatureData) == Mode.SignatureData)
           {
-            stream.Position = securityIdd.VirtualAddress;
+            stream.Position = MemoryUtil.GetLeU4(securityIdd.VirtualAddress);
             WIN_CERTIFICATE wc;
             StreamUtil.ReadBytes(stream, (byte*)&wc, sizeof(WIN_CERTIFICATE));
             if (MemoryUtil.GetLeU2(wc.wCertificateType) != WinCertificate.WIN_CERT_TYPE_PKCS_SIGNED_DATA)
@@ -234,8 +232,9 @@ namespace JetBrains.FormatRipper.Pe
     private static uint TranslateVirtualAddress(IMAGE_SECTION_HEADER[] ishs, ref IMAGE_DATA_DIRECTORY idd)
     {
       foreach (var ish in ishs)
-        if (ish.VirtualAddress <= idd.VirtualAddress && idd.VirtualAddress + idd.Size < ish.VirtualAddress + ish.VirtualSize)
-          return ish.PointerToRawData + (idd.VirtualAddress - ish.VirtualAddress);
+        if (MemoryUtil.GetLeU4(ish.VirtualAddress) <= MemoryUtil.GetLeU4(idd.VirtualAddress) &&
+            MemoryUtil.GetLeU4(idd.VirtualAddress) + MemoryUtil.GetLeU4(idd.Size) < MemoryUtil.GetLeU4(ish.VirtualAddress) + MemoryUtil.GetLeU4(ish.VirtualSize))
+          return MemoryUtil.GetLeU4(ish.PointerToRawData) + (MemoryUtil.GetLeU4(idd.VirtualAddress) - MemoryUtil.GetLeU4(ish.VirtualAddress));
 
       return 0;
     }

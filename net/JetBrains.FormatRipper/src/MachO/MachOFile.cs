@@ -63,8 +63,9 @@ namespace JetBrains.FormatRipper.MachO
       static bool Check(MH magic) => magic is MH.MH_MAGIC or MH.MH_MAGIC_64 or MH.MH_CIGAM or MH.MH_CIGAM_64;
 
       stream.Position = 0;
-      MH magic;
-      StreamUtil.ReadBytes(stream, (byte*)&magic, sizeof(MH));
+      uint rawMagic;
+      StreamUtil.ReadBytes(stream, (byte*)&rawMagic, sizeof(uint));
+      var magic = (MH)MemoryUtil.GetLeU4(rawMagic);
 
       if (magic is MH.FAT_MAGIC or MH.FAT_MAGIC_64 or MH.FAT_CIGAM or MH.FAT_CIGAM_64)
       {
@@ -86,8 +87,10 @@ namespace JetBrains.FormatRipper.MachO
           for (var n = 0; n < nFatArch; n++)
           {
             stream.Position = checked((long)GetU8(fatNodes[n].offset));
-            MH subMagic;
-            StreamUtil.ReadBytes(stream, (byte*)&subMagic, sizeof(MH));
+            uint rawSubMagic;
+            StreamUtil.ReadBytes(stream, (byte*)&rawSubMagic, sizeof(uint));
+            var subMagic = (MH)MemoryUtil.GetLeU4(rawSubMagic);
+
             if (!Check(subMagic))
               return false;
           }
@@ -100,8 +103,10 @@ namespace JetBrains.FormatRipper.MachO
           for (var n = 0; n < nFatArch; n++)
           {
             stream.Position = GetU4(fatNodes[n].offset);
-            MH subMagic;
-            StreamUtil.ReadBytes(stream, (byte*)&subMagic, sizeof(MH));
+            uint rawSubMagic;
+            StreamUtil.ReadBytes(stream, (byte*)&rawSubMagic, sizeof(uint));
+            var subMagic = (MH)MemoryUtil.GetLeU4(rawSubMagic);
+
             if (!Check(subMagic))
               return false;
           }
@@ -151,8 +156,8 @@ namespace JetBrains.FormatRipper.MachO
                   var segName = new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
                   if (segName == SEG.SEG_LINKEDIT)
                   {
-                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.vmsize - (byte*)&sc)), sizeof(UInt32)));
-                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.filesize - (byte*)&sc)), sizeof(UInt32)));
+                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.vmsize - (byte*)&sc)), sizeof(uint)));
+                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.filesize - (byte*)&sc)), sizeof(uint)));
                   }
                 }
                 break;
@@ -165,8 +170,8 @@ namespace JetBrains.FormatRipper.MachO
                   var segName = new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
                   if (segName == SEG.SEG_LINKEDIT)
                   {
-                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.vmsize - (byte*)&sc)), sizeof(UInt64)));
-                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.filesize - (byte*)&sc)), sizeof(UInt64)));
+                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.vmsize - (byte*)&sc)), sizeof(ulong)));
+                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.filesize - (byte*)&sc)), sizeof(ulong)));
                   }
                 }
                 break;
@@ -176,8 +181,8 @@ namespace JetBrains.FormatRipper.MachO
                   MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&ldc, sizeof(linkedit_data_command));
                   if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
                   {
-                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (cmdPtr - buf)), lc.cmdsize));
-                    excludeRanges.Add(new StreamRange(ldc.dataoff, ldc.datasize));
+                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (cmdPtr - buf)), GetU4(lc.cmdsize)));
+                    excludeRanges.Add(new StreamRange(GetU4(ldc.dataoff), GetU4(ldc.datasize)));
                   }
 
                   if ((mode & Mode.SignatureData) == Mode.SignatureData)
@@ -235,7 +240,7 @@ namespace JetBrains.FormatRipper.MachO
 
               cmdPtr += GetU4(lc.cmdsize);
             }
-            
+
             if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
               if (!hasSignature)
                 excludeRanges.Add(new StreamRange(checked(cmdOffset + sizeOfCmds), sizeof(load_command) + sizeof(linkedit_data_command)));
@@ -258,8 +263,8 @@ namespace JetBrains.FormatRipper.MachO
           StreamUtil.ReadBytes(stream, (byte*)&mh, sizeof(mach_header_64));
           if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
           {
-            excludeRanges.Add(new StreamRange(checked(sizeof(MH) + (byte*)&mh.ncmds - (byte*)&mh), sizeof(UInt32)));
-            excludeRanges.Add(new StreamRange(checked(sizeof(MH) + (byte*)&mh.sizeofcmds - (byte*)&mh), sizeof(UInt32)));
+            excludeRanges.Add(new StreamRange(checked(sizeof(MH) + ((byte*)&mh.ncmds - (byte*)&mh)), sizeof(uint)));
+            excludeRanges.Add(new StreamRange(checked(sizeof(MH) + ((byte*)&mh.sizeofcmds - (byte*)&mh)), sizeof(uint)));
           }
 
           var loadCommands = ReadLoadCommands(sizeof(MH) + sizeof(mach_header_64), GetU4(mh.ncmds), GetU4(mh.sizeofcmds));
@@ -289,8 +294,8 @@ namespace JetBrains.FormatRipper.MachO
           StreamUtil.ReadBytes(stream, (byte*)&mh, sizeof(mach_header));
           if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
           {
-            excludeRanges.Add(new StreamRange(checked(sizeof(MH) + (byte*)&mh.ncmds - (byte*)&mh), sizeof(UInt32)));
-            excludeRanges.Add(new StreamRange(checked(sizeof(MH) + (byte*)&mh.sizeofcmds - (byte*)&mh), sizeof(UInt32)));
+            excludeRanges.Add(new StreamRange(checked(sizeof(MH) + ((byte*)&mh.ncmds - (byte*)&mh)), sizeof(uint)));
+            excludeRanges.Add(new StreamRange(checked(sizeof(MH) + ((byte*)&mh.sizeofcmds - (byte*)&mh)), sizeof(uint)));
           }
 
           var loadCommands = ReadLoadCommands(sizeof(MH) + sizeof(mach_header), GetU4(mh.ncmds), GetU4(mh.sizeofcmds));
@@ -317,8 +322,9 @@ namespace JetBrains.FormatRipper.MachO
       }
 
       stream.Position = 0;
-      MH magic;
-      StreamUtil.ReadBytes(stream, (byte*)&magic, sizeof(MH));
+      uint rawMagic;
+      StreamUtil.ReadBytes(stream, (byte*)&rawMagic, sizeof(uint));
+      var magic = (MH)MemoryUtil.GetLeU4(rawMagic);
 
       if (magic is MH.FAT_MAGIC or MH.FAT_MAGIC_64 or MH.FAT_CIGAM or MH.FAT_CIGAM_64)
       {
@@ -342,8 +348,10 @@ namespace JetBrains.FormatRipper.MachO
           {
             var position = checked((long)GetU8(fatNodes[n].offset));
             stream.Position = position;
-            MH subMagic;
-            StreamUtil.ReadBytes(stream, (byte*)&subMagic, sizeof(MH));
+            uint rawSubMagic;
+            StreamUtil.ReadBytes(stream, (byte*)&rawSubMagic, sizeof(uint));
+            var subMagic = (MH)MemoryUtil.GetLeU4(rawSubMagic);
+
             sections[n] = Read(new StreamRange(position, checked((long)GetU8(fatNodes[n].size))), subMagic);
             if (sections[n].CpuType != (CPU_TYPE)GetU4(fatNodes[n].cputype))
               throw new FormatException("Inconsistent cpu type in fat header");
@@ -360,8 +368,10 @@ namespace JetBrains.FormatRipper.MachO
           {
             var position = GetU4(fatNodes[n].offset);
             stream.Position = position;
-            MH subMagic;
-            StreamUtil.ReadBytes(stream, (byte*)&subMagic, sizeof(MH));
+            uint rawSubMagic;
+            StreamUtil.ReadBytes(stream, (byte*)&rawSubMagic, sizeof(uint));
+            var subMagic = (MH)MemoryUtil.GetLeU4(rawSubMagic);
+
             sections[n] = Read(new StreamRange(position, GetU4(fatNodes[n].size)), subMagic);
             if (sections[n].CpuType != (CPU_TYPE)GetU4(fatNodes[n].cputype))
               throw new FormatException("Inconsistent cpu type in fat header");

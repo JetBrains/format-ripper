@@ -10,9 +10,9 @@ namespace JetBrains.FormatRipper
     internal StreamRange(long position, long size)
     {
       if (position < 0)
-        throw new ArgumentOutOfRangeException(nameof(position));
+        throw new ArgumentOutOfRangeException(nameof(position), position, null);
       if (size < 0)
-        throw new ArgumentOutOfRangeException(nameof(size));
+        throw new ArgumentOutOfRangeException(nameof(size), size, null);
       Position = position;
       Size = size;
     }
