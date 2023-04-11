@@ -83,7 +83,7 @@ namespace JetBrains.FormatRipper.Compound
         throw new FormatException("Invalid CF header signature");
       if (MemoryUtil.GetLeGuid(cfh.HeaderClsid) != Guid.Empty)
         throw new FormatException("Invalid CF header CLSID");
-      if (cfh.ByteOrder != Declarations.LittleEndianByteOrder)
+      if (MemoryUtil.GetLeU2(cfh.ByteOrder) != Declarations.LittleEndianByteOrder)
         throw new FormatException("Invalid CF header byte order");
       switch (MemoryUtil.GetLeU2(cfh.MajorVersion))
       {
@@ -321,7 +321,7 @@ namespace JetBrains.FormatRipper.Compound
               if (a[i] != b[i])
                 return (a[i] & 0xFF) - (b[i] & 0xFF);
             return a.Length - b.Length;
-            
+
           });
 
         var orderedIncludeRanges = new List<StreamRange>();
