@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace JetBrains.FormatRipper.Tests
 {
   [TestFixture]
-  public sealed class ElfUtilTest
+  public sealed class ElfFileTest
   {
     // Note(ww898): Some architectures don't have the difference in interpreters!!! See https://wiki.debian.org/ArchitectureSpecificsMemo for details.
     // @formatter:off
