@@ -23,7 +23,7 @@ Following types of software binaries files are supported:
 See further descriptions:
 
 - .NET
-https://github.com/JetBrains/format-ripper/tree/master/net/JetBrains.FormatRipper#readme
+https://github.com/JetBrains/format-ripper/tree/master/net#readme
 
 - Java
 https://github.com/JetBrains/format-ripper/tree/master/jvm#readme
