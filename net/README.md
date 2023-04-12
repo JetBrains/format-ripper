@@ -4,18 +4,18 @@ JetBrains.SignatureVerifier usage
 
 Following types of executable files are supported:
 
-- for Portable executable (PE) files use `JetBrains.SignatureVerifier.PeFile`
-- for MS Windows Installer compound (MSI) files use `JetBrains.SignatureVerifier.Cf.MsiFile`
-- for MachO use `JetBrains.SignatureVerifier.Macho.MachoFile`
-- for Fat-MachO use `JetBrains.SignatureVerifier.Macho.MachoArch` to extract containing MachOs
+- for Portable executable (PE) files use `JetBrains.FormatRipper.Pe.PeFile`
+- for Compound files or MS Windows Installer compound (MSI) files use `JetBrains.FormatRipper.Compound.CompoundFile`
+- for ELF files use `JetBrains.FormatRipper.Elf.ElfFile`
+- for Mach-O/Fat-Mach-O use `JetBrains.FormatRipper.MachO.MachOFile`
 
 The client code should detect the file type and create an appropriate object to use.
 
 # File type detection
 
-In order to detect the file type `JetBrains.Util.FileType.FileTypeDetector` can be used.
+In order to detect the file type `JetBrains.FormatRipper.FileExplorer.FileTypeExplorer` can be used.
 
-### C#
+### CSharp
 
 ```c#
 void printFileInfo(string path)
@@ -54,7 +54,7 @@ Certificate revocation status checking is performed when
 
 ## Example
 
-### C#
+### CSharp
 
 ```c#
 static async Task Main(string[] args)
@@ -134,7 +134,7 @@ In order to compute hash of the executable call the `ComputeHash` method.
 
 ## Example
 
-### C#
+### CSharp
 
 ```c#
 static void Main(string[] args)
@@ -150,7 +150,7 @@ static void Main(string[] args)
 
 ## Example of logger
 
-### C#
+### CSharp
 
 ```c#
 class SimpleConsoleLogger : ILogger
