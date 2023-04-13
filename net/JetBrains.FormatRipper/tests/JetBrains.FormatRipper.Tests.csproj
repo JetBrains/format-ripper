@@ -7,8 +7,6 @@
     <AssemblyOriginatorKeyFile>../../key.snk</AssemblyOriginatorKeyFile>
     <IsPackable>false</IsPackable>
     <LangVersion>10</LangVersion>
-    <Company>JetBrains s.r.o.</Company>
-    <Copyright>Copyright © 2021-$([System.DateTime]::Now.ToString('yyyy')) JetBrains s.r.o.</Copyright>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.13.3" />
