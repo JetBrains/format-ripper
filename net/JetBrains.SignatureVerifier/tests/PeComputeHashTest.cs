@@ -10,6 +10,7 @@ namespace JetBrains.SignatureVerifier.Tests
     // @formatter:off
     [TestCase("IntelAudioService.exe"                             , "SHA256", "160F2FE667A9252AB5B2E01749CD40B024E749B10B49AD276345875BA073A57E")]
     [TestCase("JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe", "SHA384", "0BF275099F6C5A3F86DC2C2F7396D0BA750345ED2947F79681919AA8B8CD030454E09AB5AC8D95EC9D8695A95B1DCB0E")]
+    [TestCase("JetBrains.ReSharper.TestResources.dll"             , "SHA384", "8216D6CA73079467F63E8F5822D425C48D5C415171E72F480AFFF4A1AD4BEC7750457BE0330EA28850C2CD44E72810C1")]
     [TestCase("ServiceModelRegUI.dll"                             , "SHA1"  , "D64EC6AEC642441554E7CBA0E0513E35683C87AE")]
     [TestCase("ServiceModelRegUI.dll"                             , "SHA256", "834394AC48C8AB8F6D21E64A2461BA196D28140558D36430C057E49ADF41967A")]
     [TestCase("ServiceModelRegUI_empty_sign.dll"                  , "SHA1"  , "D64EC6AEC642441554E7CBA0E0513E35683C87AE")]
