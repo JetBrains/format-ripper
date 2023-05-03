@@ -28,6 +28,7 @@ namespace JetBrains.SignatureVerifier.Tests
     [TestCase(VerifySignatureStatus.InvalidSignature, "libcrypto-1_1-x64.dll")]
     [TestCase(VerifySignatureStatus.InvalidSignature, "libssl-1_1-x64.dll")]
     [TestCase(VerifySignatureStatus.Valid           , "JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe")]
+    [TestCase(VerifySignatureStatus.Valid           , "JetBrains.ReSharper.TestResources.dll")]
     [TestCase(VerifySignatureStatus.InvalidTimestamp, "dotnet_broken_timestamp.exe")]
     // @formatter:on
     public async Task VerifySignTest(VerifySignatureStatus expectedResult, string peResourceName)
@@ -44,6 +45,7 @@ namespace JetBrains.SignatureVerifier.Tests
 
     [TestCase(VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root, "ServiceModelRegUI.dll")]
     [TestCase(VerifySignatureStatus.Valid, jb_codesign_roots, jb_timestamp_roots, "JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe")]
+    [TestCase(VerifySignatureStatus.Valid, jb_codesign_roots, jb_timestamp_roots, "JetBrains.ReSharper.TestResources.dll")]
     [TestCase(VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root, "dotnet.exe")]
     public async Task VerifySignWithChainTest(
       VerifySignatureStatus expectedResult,
