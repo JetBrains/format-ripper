@@ -54,6 +54,9 @@ class PeSignatureStoringTests {
     private const val pe_01_signed = "ServiceModelRegUI.dll"
     private const val pe_01_not_signed = "ServiceModelRegUI_no_sign.dll"
 
+    private const val pe_02_signed = "self_signed_test.exe"
+    private const val pe_02_not_signed = "self_signed_test_no_sign.exe"
+
     private const val pe_03_signed = "shell32.dll"
     private const val pe_03_not_signed = "shell32_no_sign.dll"
 
@@ -79,6 +82,9 @@ class PeSignatureStoringTests {
       return Stream.of(
         Arguments.of(
           pe_01_signed, pe_01_not_signed
+        ),
+        Arguments.of(
+          pe_02_signed, pe_02_not_signed
         ),
         Arguments.of(
           pe_03_signed, pe_03_not_signed
