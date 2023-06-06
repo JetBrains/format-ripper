@@ -48,8 +48,6 @@ class PeSignatureStoringTests {
       -1
     )
     tmpFile.deleteExisting()
-
-//    Assertions.assertEquals(expectedResult, result.ConvertToHexString().uppercase())
   }
 
   companion object {
