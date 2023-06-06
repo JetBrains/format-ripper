@@ -11,7 +11,6 @@ import java.util.Random
 import java.util.stream.Stream
 import kotlin.io.path.copyTo
 import kotlin.io.path.deleteExisting
-import kotlin.io.path.deleteIfExists
 
 class PeSignatureStoringTests {
 
@@ -29,7 +28,7 @@ class PeSignatureStoringTests {
     val json: String
     TestUtil.getTestByteChannel("pe", signedPeResourceName, write = true).use {
       val peFile = PeFile(it)
-      json = peFile.GetJsonMetadataDump()
+      json = peFile.getJsonMetadataDump()
     }
 
     val path = TestUtil.getTestDataFile("pe", unsignedPeResourceName)
@@ -38,7 +37,7 @@ class PeSignatureStoringTests {
     path.copyTo(tmpFile)
 
     TestUtil.getTestByteChannel("pe", tmpName, write = true).use {
-      PeFile.InsertSignature(it, json)
+      PeFile.insertSignature(it, json)
     }
 
     Assertions.assertEquals(
