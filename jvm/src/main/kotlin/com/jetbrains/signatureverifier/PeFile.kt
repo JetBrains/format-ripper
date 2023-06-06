@@ -159,8 +159,6 @@ class PeFile {
     return gson.toJson(_signatureMetadata)
   }
 
-  fun GetMetadataDump(): PeSignatureMetadata = _signatureMetadata
-
   private fun IntToBytes(value: Int): ByteArray =
     ByteBuffer.allocate(Int.SIZE_BYTES).putInt(value).array().reversedArray()
 
