@@ -1,18 +1,31 @@
 ﻿package com.jetbrains.signatureverifier
 
 import com.jetbrains.util.*
+import org.bouncycastle.util.test.FixedSecureRandom.Data
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
+import java.nio.ByteBuffer
 import java.nio.channels.SeekableByteChannel
 import java.security.MessageDigest
 
 /** Portable Executable file from the specified channel */
 class PeFile {
+  data class PeSignatureMetadata(
+    var ntHeaderOffset: DataValue = DataValue(),
+    var checkSum: DataValue = DataValue(),
+    var securityRva: DataValue = DataValue(),
+    var securitySize: DataValue = DataValue(),
+    var dotnetMetadataRva: DataValue = DataValue(),
+    var dotnetMetadataSize: DataValue = DataValue(),
+    var signature: DataValue = DataValue()
+  )
+
   private val _stream: SeekableByteChannel
   private val _checkSum: DataInfo
   private val _imageDirectoryEntrySecurity: DataInfo
   private val _signData: DataInfo
   private val _dotnetMetadata: DataInfo
+  private val _ntHeaderOffset: UInt
 
   private val RawPeData: ByteArray by lazy { rawPeData() }
 
@@ -25,6 +38,7 @@ class PeFile {
 
   /** Initializes a new instance of the PeFile */
   constructor(@NotNull stream: SeekableByteChannel) {
+    val metadata = PeSignatureMetadata()
     _stream = stream
     _stream.Rewind()
 
@@ -34,10 +48,13 @@ class PeFile {
       error("Unknown format")
 
     stream.Seek(0x3C, SeekOrigin.Begin)
-    val ntHeaderOffset = reader.ReadUInt32()
-    _checkSum = DataInfo(ntHeaderOffset.toInt() + 0x58, 4)
+    _ntHeaderOffset = reader.ReadUInt32()
 
-    stream.Seek(ntHeaderOffset.toLong(), SeekOrigin.Begin)
+    metadata.ntHeaderOffset = DataValue(DataInfo(0x3c, 4), IntToBytes(_ntHeaderOffset.toInt()))
+    _checkSum = DataInfo(_ntHeaderOffset.toInt() + 0x58, 4)
+    metadata.checkSum = DataValue(_checkSum, IntToBytes(reader.ReadInt32()))
+
+    stream.Seek(_ntHeaderOffset.toLong(), SeekOrigin.Begin)
 
     if (reader.ReadUInt32().toInt() != 0x00004550) //IMAGE_NT_SIGNATURE
       error("Unknown format")
@@ -50,7 +67,8 @@ class PeFile {
     if (characteristics != 0x2002 && characteristics != 0x0002)
       error("Unknown format")
 
-    when (reader.ReadUInt16().toInt()) // IMAGE_OPTIONAL_HEADER32::Magic / IMAGE_OPTIONAL_HEADER64::Magic
+    when (reader.ReadUInt16()
+      .toInt()) // IMAGE_OPTIONAL_HEADER32::Magic / IMAGE_OPTIONAL_HEADER64::Magic
     {
       // IMAGE_NT_OPTIONAL_HDR32_MAGIC
       0x10b -> stream.Seek(
@@ -65,17 +83,56 @@ class PeFile {
       else -> error("Unknown format")
     }
 
-    stream.Seek(Long.SIZE_BYTES * 4L, SeekOrigin.Current) // DataDirectory + IMAGE_DIRECTORY_ENTRY_SECURITY
+    stream.Seek(
+      Long.SIZE_BYTES * 4L,
+      SeekOrigin.Current
+    ) // DataDirectory + IMAGE_DIRECTORY_ENTRY_SECURITY
     _imageDirectoryEntrySecurity = DataInfo(stream.position().toInt(), 8)
     val securityRva = reader.ReadUInt32().toInt()
+    metadata.securityRva =
+      DataValue(DataInfo(_imageDirectoryEntrySecurity.Offset, 4), IntToBytes(securityRva))
+
+    var position = stream.position().toInt()
     val securitySize = reader.ReadUInt32().toInt()
+    metadata.securitySize =
+      DataValue(DataInfo(position, 4), IntToBytes(securitySize))
+
     _signData = DataInfo(securityRva, securitySize)
 
-    stream.Seek(Long.SIZE_BYTES * 9L, SeekOrigin.Current) // DataDirectory + IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+    stream.Seek(
+      Long.SIZE_BYTES * 9L,
+      SeekOrigin.Current
+    ) // DataDirectory + IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+    position = stream.position().toInt()
     val dotnetMetadataRva = reader.ReadUInt32().toInt()
+    metadata.dotnetMetadataRva = DataValue(
+      DataInfo(position, 4),
+      IntToBytes(dotnetMetadataRva)
+    )
+
+    position = stream.position().toInt()
     val dotnetMetadataSize = reader.ReadUInt32().toInt()
+    metadata.dotnetMetadataSize = DataValue(
+      DataInfo(position, 4),
+      IntToBytes(dotnetMetadataSize)
+    )
+
     _dotnetMetadata = DataInfo(dotnetMetadataRva, dotnetMetadataSize)
+
+    _stream.Seek(_signData.Offset.toLong(), SeekOrigin.Begin)
+    metadata.signature = DataValue(_signData, reader.ReadBytes(_signData.Size))
   }
+
+  fun GetJsonMetadataDump(): String {
+    TODO()
+  }
+
+  fun GetMetadataDump(a: Int): String {
+    TODO()
+  }
+
+  private fun IntToBytes(value: Int): ByteArray =
+    ByteBuffer.allocate(Int.SIZE_BYTES).putInt(value).array().reversedArray()
 
   /** Retrieve the signature data from PE */
   fun GetSignatureData(): SignatureData {
