@@ -37,33 +37,37 @@ class PeFile {
   val IsDotNet: Boolean
     get() = _dotnetMetadata.IsEmpty.not()
 
+  companion object {
+    fun InsertSignature(
+      @NotNull stream: SeekableByteChannel,
+      @NotNull signatureMetadataJson: String
+    ) {
+      val gson = Gson()
+      val signatureMetadata = gson.fromJson(signatureMetadataJson, PeSignatureMetadata::class.java)
+
+      listOf(
+        signatureMetadata.ntHeaderOffset,
+        signatureMetadata.checkSum,
+        signatureMetadata.securityRva,
+        signatureMetadata.securitySize,
+        signatureMetadata.signature,
+        signatureMetadata.dotnetMetadataRva,
+        signatureMetadata.dotnetMetadataSize
+      ).forEach {
+        stream.Seek(it.dataInfo.Offset.toLong(), SeekOrigin.Begin)
+        stream.write(ByteBuffer.wrap(it.value))
+      }
+      stream.Rewind()
+      stream.close()
+    }
+  }
+
   /** Initializes a new instance of the PeFile */
-  constructor(@NotNull stream: SeekableByteChannel, signatureMetadataJson: String? = null) {
+  constructor(@NotNull stream: SeekableByteChannel) {
     _stream = stream
     _stream.Rewind()
 
-    if (signatureMetadataJson != null) {
-      val gson = Gson()
-      _signatureMetadata = gson.fromJson(signatureMetadataJson, PeSignatureMetadata::class.java)
-
-      listOf(
-        _signatureMetadata.ntHeaderOffset,
-        _signatureMetadata.checkSum,
-        _signatureMetadata.securityRva,
-        _signatureMetadata.securitySize,
-        _signatureMetadata.signature,
-        _signatureMetadata.dotnetMetadataRva,
-        _signatureMetadata.dotnetMetadataSize
-      ).forEach {
-        _stream.Seek(it.dataInfo.Offset.toLong(), SeekOrigin.Begin)
-        _stream.write(ByteBuffer.wrap(it.value))
-      }
-      _stream.Rewind()
-      _stream.close()
-
-    } else {
-      _signatureMetadata = PeSignatureMetadata()
-    }
+    _signatureMetadata = PeSignatureMetadata()
 
     val reader = BinaryReader(_stream)
 
