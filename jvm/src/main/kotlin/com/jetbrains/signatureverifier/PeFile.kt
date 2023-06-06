@@ -1,7 +1,7 @@
 ﻿package com.jetbrains.signatureverifier
 
+import com.google.gson.Gson
 import com.jetbrains.util.*
-import org.bouncycastle.util.test.FixedSecureRandom.Data
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -26,6 +26,7 @@ class PeFile {
   private val _signData: DataInfo
   private val _dotnetMetadata: DataInfo
   private val _ntHeaderOffset: UInt
+  private val _signatureMetadata: PeSignatureMetadata
 
   private val RawPeData: ByteArray by lazy { rawPeData() }
 
@@ -37,10 +38,32 @@ class PeFile {
     get() = _dotnetMetadata.IsEmpty.not()
 
   /** Initializes a new instance of the PeFile */
-  constructor(@NotNull stream: SeekableByteChannel) {
-    val metadata = PeSignatureMetadata()
+  constructor(@NotNull stream: SeekableByteChannel, signatureMetadataJson: String? = null) {
     _stream = stream
     _stream.Rewind()
+
+    if (signatureMetadataJson != null) {
+      val gson = Gson()
+      _signatureMetadata = gson.fromJson(signatureMetadataJson, PeSignatureMetadata::class.java)
+
+      listOf(
+        _signatureMetadata.ntHeaderOffset,
+        _signatureMetadata.checkSum,
+        _signatureMetadata.securityRva,
+        _signatureMetadata.securitySize,
+        _signatureMetadata.signature,
+        _signatureMetadata.dotnetMetadataRva,
+        _signatureMetadata.dotnetMetadataSize
+      ).forEach {
+        _stream.Seek(it.dataInfo.Offset.toLong(), SeekOrigin.Begin)
+        _stream.write(ByteBuffer.wrap(it.value))
+      }
+      _stream.Rewind()
+      _stream.close()
+
+    } else {
+      _signatureMetadata = PeSignatureMetadata()
+    }
 
     val reader = BinaryReader(_stream)
 
@@ -50,9 +73,12 @@ class PeFile {
     stream.Seek(0x3C, SeekOrigin.Begin)
     _ntHeaderOffset = reader.ReadUInt32()
 
-    metadata.ntHeaderOffset = DataValue(DataInfo(0x3c, 4), IntToBytes(_ntHeaderOffset.toInt()))
+    _signatureMetadata.ntHeaderOffset =
+      DataValue(DataInfo(0x3c, 4), IntToBytes(_ntHeaderOffset.toInt()))
     _checkSum = DataInfo(_ntHeaderOffset.toInt() + 0x58, 4)
-    metadata.checkSum = DataValue(_checkSum, IntToBytes(reader.ReadInt32()))
+
+    stream.Seek(_checkSum.Offset.toLong(), SeekOrigin.Begin)
+    _signatureMetadata.checkSum = DataValue(_checkSum, reader.ReadBytes(4))
 
     stream.Seek(_ntHeaderOffset.toLong(), SeekOrigin.Begin)
 
@@ -89,12 +115,12 @@ class PeFile {
     ) // DataDirectory + IMAGE_DIRECTORY_ENTRY_SECURITY
     _imageDirectoryEntrySecurity = DataInfo(stream.position().toInt(), 8)
     val securityRva = reader.ReadUInt32().toInt()
-    metadata.securityRva =
+    _signatureMetadata.securityRva =
       DataValue(DataInfo(_imageDirectoryEntrySecurity.Offset, 4), IntToBytes(securityRva))
 
     var position = stream.position().toInt()
     val securitySize = reader.ReadUInt32().toInt()
-    metadata.securitySize =
+    _signatureMetadata.securitySize =
       DataValue(DataInfo(position, 4), IntToBytes(securitySize))
 
     _signData = DataInfo(securityRva, securitySize)
@@ -105,14 +131,14 @@ class PeFile {
     ) // DataDirectory + IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
     position = stream.position().toInt()
     val dotnetMetadataRva = reader.ReadUInt32().toInt()
-    metadata.dotnetMetadataRva = DataValue(
+    _signatureMetadata.dotnetMetadataRva = DataValue(
       DataInfo(position, 4),
       IntToBytes(dotnetMetadataRva)
     )
 
     position = stream.position().toInt()
     val dotnetMetadataSize = reader.ReadUInt32().toInt()
-    metadata.dotnetMetadataSize = DataValue(
+    _signatureMetadata.dotnetMetadataSize = DataValue(
       DataInfo(position, 4),
       IntToBytes(dotnetMetadataSize)
     )
@@ -120,16 +146,16 @@ class PeFile {
     _dotnetMetadata = DataInfo(dotnetMetadataRva, dotnetMetadataSize)
 
     _stream.Seek(_signData.Offset.toLong(), SeekOrigin.Begin)
-    metadata.signature = DataValue(_signData, reader.ReadBytes(_signData.Size))
+    _signatureMetadata.signature = DataValue(_signData, reader.ReadBytes(_signData.Size))
   }
+
 
   fun GetJsonMetadataDump(): String {
-    TODO()
+    val gson = Gson()
+    return gson.toJson(_signatureMetadata)
   }
 
-  fun GetMetadataDump(a: Int): String {
-    TODO()
-  }
+  fun GetMetadataDump(): PeSignatureMetadata = _signatureMetadata
 
   private fun IntToBytes(value: Int): ByteArray =
     ByteBuffer.allocate(Int.SIZE_BYTES).putInt(value).array().reversedArray()
