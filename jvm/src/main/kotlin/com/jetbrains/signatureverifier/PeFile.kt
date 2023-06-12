@@ -75,6 +75,7 @@ class PeFile {
   val IsDotNet: Boolean
     get() = _dotnetMetadata.IsEmpty.not()
 
+  fun getSignatureMetadata() = _signatureMetadata
 
   /** Initializes a new instance of the PeFile */
   constructor(@NotNull stream: SeekableByteChannel) {
