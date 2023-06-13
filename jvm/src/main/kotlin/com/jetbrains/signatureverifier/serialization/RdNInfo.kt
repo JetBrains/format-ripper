@@ -6,22 +6,14 @@ import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.DLSequence
 
 data class rdNInfo(
-  val type: String,
+  val type: StringInfo,
   val value: StringInfo
 ) : EncodableInfo {
-  override fun toPrimitive(): ASN1Primitive {
-    val sequense = ASN1EncodableVector()
-
-    val string = value.toPrimitive()
-
-
-    sequense.addAll(
+  override fun toPrimitive(): ASN1Primitive =
+    listToDLSequence(
       listOf(
-        ASN1ObjectIdentifier(type),
-        string
-      ).toTypedArray()
-    )
-    return DLSequence(sequense).toASN1Primitive()
-  }
-
+        type.toPrimitive(),
+        value.toPrimitive()
+      )
+    ).toASN1Primitive()
 }

@@ -13,21 +13,13 @@ fun serializeDigestAlgorithms(algorithmsSet: ASN1Set): List<SignatureAlgorithmIn
     val seq = it as DLSequence
     SignatureAlgorithmInfo(
       DefaultAlgorithmNameFinder().getAlgorithmName(it.first() as ASN1ObjectIdentifier),
-      if (seq.last() is ASN1Null) null else seq.last().toString(),
-      it.first().toString()
+      if (seq.last() is ASN1Null) null else StringInfo.getInstance(seq.last()),
+      StringInfo.getInstance(it.first())
     )
   }
 
-fun deserializeDigestAlgorithms(digestAlgorithms: List<SignatureAlgorithmInfo>): ASN1Set {
-  val algorithms = ASN1EncodableVector()
-  digestAlgorithms.forEach {
-    algorithms.add(
-      it.toPrimitive()
-    )
-  }
-
-  return DLSet(algorithms)
-}
+fun deserializeDigestAlgorithms(digestAlgorithms: List<SignatureAlgorithmInfo>): ASN1Set =
+  listToDLSet(digestAlgorithms.map { it.toPrimitive() })
 
 fun listToDLSequence(list: List<ASN1Encodable>): DLSequence {
   val vector = ASN1EncodableVector()
@@ -55,23 +47,8 @@ fun recreateContentInfoFromSignedData(signedData: SignedData): ContentInfo {
   return contentInfo
 }
 
-fun recreateSignerInfosFromSignerInformationStore(signerInfoStore: SignerInformationStore): ASN1Set {
-  val signerInfos = signerInfoStore.signers
-
-  // Create an ASN1EncodableVector to hold the SignerInfo objects
-  val signerInfoVector = ASN1EncodableVector()
-
-  // Iterate over the SignerInformation objects and create SignerInfo objects
-  for (signerInfo in signerInfos) {
-    val signerInfoASN1 = signerInfo.toASN1Structure() as SignerInfo
-    signerInfoVector.add(signerInfoASN1)
-  }
-
-  // Create an ASN1Set from the ASN1EncodableVector
-  val signerInfoSet = DERSet(signerInfoVector)
-
-  return signerInfoSet
-}
+fun recreateSignerInfosFromSignerInformationStore(signerInfoStore: SignerInformationStore): ASN1Set =
+  listToDLSet(signerInfoStore.signers.map { it.toASN1Structure() })
 
 public fun compareBytes(
   lhs: ByteArray,

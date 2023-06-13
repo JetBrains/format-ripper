@@ -11,28 +11,19 @@ data class IssuerInfo(
     issuer.rdNs.map {
       it.typesAndValues.map { tv ->
         rdNInfo(
-          tv.type.toString(),
+          StringInfo.getInstance(tv.type),
           StringInfo.getInstance(tv.value)
         )
       }
     })
 
-  private fun toDLSequence(): DLSequence {
-    val outerVector = ASN1EncodableVector()
-
-    val mapped = rdNs.map {
-      val innerVector = ASN1EncodableVector()
-      innerVector.addAll(
-        it.map { info ->
-          info.toPrimitive()
-        }.toTypedArray()
-      )
-      DLSet(innerVector)
+  private fun toDLSequence(): DLSequence = listToDLSequence(
+    rdNs.map {
+      listToDLSet(it.map { info ->
+        info.toPrimitive()
+      })
     }
-
-    outerVector.addAll(mapped.toTypedArray())
-    return DLSequence(outerVector)
-  }
+  )
 
   override fun toPrimitive(): ASN1Primitive = toDLSequence().toASN1Primitive()
 }

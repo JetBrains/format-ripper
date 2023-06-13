@@ -1,5 +1,6 @@
 package com.jetbrains.signatureverifier.serialization
 
+import TaggedObjectMetaInfo
 import com.google.gson.Gson
 import com.jetbrains.signatureverifier.PeFile
 import com.jetbrains.signatureverifier.crypt.SignatureVerificationParams
@@ -13,33 +14,23 @@ import org.bouncycastle.util.Store
 data class CertificateInfo(
   val tbsCertificateInfo: TBSCertificateInfo,
   val signatureAlgorithm: SignatureAlgorithmInfo,
-  val signatureData: ByteArray
-) : EncodableInfo{
-  private fun toDlSequence(): DLSequence {
-    val vector = ASN1EncodableVector()
-    vector.add(tbsCertificateInfo.toPrimitive())
-    vector.add(signatureAlgorithm.toPrimitive())
-    vector.add(DERBitString(signatureData))
-
-    return DLSequence(vector)
-  }
+  val signatureData: StringInfo
+) : EncodableInfo {
+  private fun toDlSequence(): DLSequence = listToDLSequence(
+    listOf(
+      tbsCertificateInfo.toPrimitive(),
+      signatureAlgorithm.toPrimitive(),
+      signatureData.toPrimitive()
+    )
+  )
 
   override fun toPrimitive(): ASN1Primitive =
     toDlSequence().toASN1Primitive()
 
 }
 
-fun recreateCertificatesFromStore(store: Store<X509CertificateHolder>): ASN1Set {
-  val certificateVector = ASN1EncodableVector()
-  val certificateList: List<X509CertificateHolder> = store.getMatches(null).toList()
-
-  for (certificateHolder in certificateList) {
-    val certificate = certificateHolder.toASN1Structure()
-    certificateVector.add(certificate)
-  }
-
-  return DERSet(certificateVector)
-}
+fun recreateCertificatesFromStore(store: Store<X509CertificateHolder>): ASN1Set =
+  listToDLSet(store.getMatches(null).toList().map { it.toASN1Structure() })
 
 fun testCertificateRecreation() {
   listOf(
@@ -76,7 +67,7 @@ fun testCertificateRecreation() {
         val extensionInfos = certificateHolder.extensions.extensionOIDs.map {
           val extension = certificateHolder.extensions.getExtension(it)
           ExtensionInfo(
-            extension.extnId.toString(),
+            StringInfo.getInstance(extension.extnId),
             criticalIds.contains(extension.extnId),
             StringInfo.getInstance(extension.extnValue)
           )
@@ -91,14 +82,14 @@ fun testCertificateRecreation() {
           certificateHolder.notAfter,
           IssuerInfo(certificateHolder.subject),
           SignatureAlgorithmInfo(certificateHolder.subjectPublicKeyInfo.algorithm),
-          certificateHolder.subjectPublicKeyInfo.publicKeyData.bytes,
+          StringInfo.getInstance(certificateHolder.subjectPublicKeyInfo.publicKeyData),
           extensionInfos
         )
 
         val certificateInfo = CertificateInfo(
           tbsInfo,
           SignatureAlgorithmInfo(certificateHolder.signatureAlgorithm),
-          certificateHolder.signature
+          StringInfo.getInstance(DERBitString(certificateHolder.signature))
         )
 
         val json = gson.toJson(certificateInfo)

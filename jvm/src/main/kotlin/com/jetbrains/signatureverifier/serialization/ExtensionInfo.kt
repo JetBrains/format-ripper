@@ -3,13 +3,13 @@ package com.jetbrains.signatureverifier.serialization
 import org.bouncycastle.asn1.*
 
 data class ExtensionInfo(
-  val key: String,
+  val key: StringInfo,
   val critical: Boolean,
   val value: StringInfo
 ) : EncodableInfo {
   private fun toDLSequence(): DLSequence {
     val vector = ASN1EncodableVector()
-    vector.add(ASN1ObjectIdentifier(key))
+    vector.add(key.toPrimitive())
     if (critical) {
       vector.add(ASN1Boolean.TRUE)
     }
