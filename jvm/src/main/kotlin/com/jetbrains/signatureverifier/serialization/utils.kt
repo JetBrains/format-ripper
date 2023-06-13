@@ -5,32 +5,41 @@ import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.cms.ContentInfo
 import org.bouncycastle.asn1.cms.SignedData
 import org.bouncycastle.asn1.cms.SignerInfo
-import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.operator.DefaultAlgorithmNameFinder
-import org.bouncycastle.util.Store
 import java.util.*
 
-fun serializeDigestAlgorithms(algorithmsSet: ASN1Set): List<SignatureAlgorithm> =
+fun serializeDigestAlgorithms(algorithmsSet: ASN1Set): List<SignatureAlgorithmInfo> =
   algorithmsSet.map {
     val seq = it as DLSequence
-    SignatureAlgorithm(
+    SignatureAlgorithmInfo(
       DefaultAlgorithmNameFinder().getAlgorithmName(it.first() as ASN1ObjectIdentifier),
       if (seq.last() is ASN1Null) null else seq.last().toString(),
       it.first().toString()
     )
   }
 
-fun deserializeDigestAlgorithms(digestAlgorithms: List<SignatureAlgorithm>): ASN1Set {
+fun deserializeDigestAlgorithms(digestAlgorithms: List<SignatureAlgorithmInfo>): ASN1Set {
   val algorithms = ASN1EncodableVector()
   digestAlgorithms.forEach {
     algorithms.add(
-      DLSequence(it.toEncodableVector())
+      it.toDLSequence()
     )
   }
 
   return DLSet(algorithms)
 }
 
+fun listToDLSequence(list: List<ASN1Encodable>): DLSequence {
+  val vector = ASN1EncodableVector()
+  vector.addAll(list.toTypedArray())
+  return DLSequence(vector)
+}
+
+fun listToDLSet(list: List<ASN1Encodable>): DLSet {
+  val vector = ASN1EncodableVector()
+  vector.addAll(list.toTypedArray())
+  return DLSet(vector)
+}
 
 fun recreateContentInfoFromSignedData(signedData: SignedData): ContentInfo {
   val signedDataBytes = signedData.encoded

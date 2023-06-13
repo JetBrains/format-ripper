@@ -10,26 +10,24 @@ import org.bouncycastle.asn1.cms.Attribute
 
 // 1.3.6.1.4.1.311.2.1.11
 data class MSCertExtensionsAttributeInfo(
-  val identifier: String,
-  val value: List<List<String>>
+  val identifier: StringInfo,
+  val value: List<List<StringInfo>>
 ) : AttributeValueInfo() {
-  override fun toAttribute(): Attribute {
-    val vector = ASN1EncodableVector()
-    vector.addAll(value.map {
-      val v = ASN1EncodableVector()
-      v.addAll(
-        it.map { s -> ASN1ObjectIdentifier(s) }.toTypedArray()
+  override fun toAttributeDLSequence(): DLSequence = listToDLSequence(
+    listOf(
+      identifier.toPrimitive(),
+      listToDLSet(
+        value.map {
+          listToDLSequence(
+            it.map { s -> s.toPrimitive() }
+          )
+        }
       )
-      DLSequence(v)
-    }.toTypedArray())
-    return Attribute(
-      ASN1ObjectIdentifier(identifier),
-      DLSet(vector)
     )
-  }
+  )
 
   constructor(attribute: Attribute) : this(
-    attribute.attrType.toString(),
-    attribute.attributeValues.map { (it as DLSequence).map { s -> s.toString() } }
+    StringInfo.getInstance(attribute.attrType),
+    attribute.attributeValues.map { (it as DLSequence).map { s -> StringInfo.getInstance(s) } }
   )
 }

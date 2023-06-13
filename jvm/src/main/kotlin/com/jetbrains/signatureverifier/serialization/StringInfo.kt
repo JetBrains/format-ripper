@@ -4,7 +4,7 @@ import org.bouncycastle.asn1.*
 import org.bouncycastle.util.encoders.Hex
 import java.lang.IllegalArgumentException
 
-data class DerStringInfo(val stringType: StringType, val content: String) {
+data class StringInfo(val stringType: StringType, val content: String) : EncodableInfo {
   companion object {
     // This is not exhaustive and may shoot you in the leg some day
     enum class StringType(val stringClass: Class<out Any>) {
@@ -16,7 +16,8 @@ data class DerStringInfo(val stringType: StringType, val content: String) {
       DERUniversalString(org.bouncycastle.asn1.DERUniversalString::class.java),
       DERNumericString(org.bouncycastle.asn1.DERNumericString::class.java),
       DERGeneralString(org.bouncycastle.asn1.DERGeneralString::class.java),
-      DEROctetString(org.bouncycastle.asn1.DEROctetString::class.java)
+      DEROctetString(org.bouncycastle.asn1.DEROctetString::class.java),
+      ASN1ObjectIdentifier(org.bouncycastle.asn1.ASN1ObjectIdentifier::class.java)
     }
 
     fun getStringType(value: ASN1Encodable) =
@@ -30,16 +31,17 @@ data class DerStringInfo(val stringType: StringType, val content: String) {
         is DERNumericString -> StringType.DERNumericString
         is DERGeneralString -> StringType.DERGeneralString
         is DEROctetString -> StringType.DEROctetString
+        is ASN1ObjectIdentifier -> StringType.ASN1ObjectIdentifier
         else -> throw IllegalArgumentException("This type of strings is not in list")
       }
 
-    fun getInstance(value: ASN1Encodable): DerStringInfo {
+    fun getInstance(value: ASN1Encodable): StringInfo {
       val type = getStringType(value)
       val content = when (type) {
         StringType.DEROctetString -> Hex.toHexString((value as DEROctetString).octets)
         else -> value.toString()
       }
-      return DerStringInfo(type, content)
+      return StringInfo(type, content)
     }
 
   }
@@ -60,4 +62,6 @@ data class DerStringInfo(val stringType: StringType, val content: String) {
 
     }
   }
+
+  override fun toPrimitive(): ASN1Primitive = toEncodableString().toASN1Primitive()
 }

@@ -1,16 +1,13 @@
 package com.jetbrains.signatureverifier.serialization
 
-import org.bouncycastle.asn1.ASN1Boolean
-import org.bouncycastle.asn1.ASN1EncodableVector
-import org.bouncycastle.asn1.ASN1ObjectIdentifier
-import org.bouncycastle.asn1.DEROctetString
+import org.bouncycastle.asn1.*
 
 data class ExtensionInfo(
   val key: String,
   val critical: Boolean,
-  val value: DerStringInfo
-) {
-  fun toEncodableVector(): ASN1EncodableVector {
+  val value: StringInfo
+) : EncodableInfo {
+  fun toDLSequence(): DLSequence {
     val vector = ASN1EncodableVector()
     vector.add(ASN1ObjectIdentifier(key))
     if (critical) {
@@ -18,6 +15,8 @@ data class ExtensionInfo(
     }
     vector.add(value.toEncodableString())
 
-    return vector
+    return DLSequence(vector)
   }
+
+  override fun toPrimitive(): ASN1Primitive = toDLSequence().toASN1Primitive()
 }

@@ -1,8 +1,9 @@
 package com.jetbrains.signatureverifier.serialization
 
+import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.cms.Attribute
 
-abstract class AttributeValueInfo {
+abstract class AttributeValueInfo: EncodableInfo {
   companion object {
     fun getInstance(attribute: Attribute): AttributeValueInfo {
       return when (attribute.attrType.id) {
@@ -15,5 +16,7 @@ abstract class AttributeValueInfo {
     }
   }
 
-  abstract fun toAttribute(): Attribute
+  abstract fun toAttributeDLSequence(): DLSequence
+
+  override fun toPrimitive(): ASN1Primitive = toAttributeDLSequence().toASN1Primitive()
 }

@@ -12,17 +12,21 @@ import org.bouncycastle.util.Store
 
 data class CertificateInfo(
   val tbsCertificateInfo: TBSCertificateInfo,
-  val signatureAlgorithm: SignatureAlgorithm,
+  val signatureAlgorithm: SignatureAlgorithmInfo,
   val signatureData: ByteArray
-) {
-  fun toDlSequence(): DLSequence {
+) : EncodableInfo{
+  private fun toDlSequence(): DLSequence {
     val vector = ASN1EncodableVector()
-    vector.add(tbsCertificateInfo.toDLSequence())
-    vector.add(DLSequence(signatureAlgorithm.toEncodableVector()))
+    vector.add(tbsCertificateInfo.toPrimitive())
+    vector.add(signatureAlgorithm.toPrimitive())
     vector.add(DERBitString(signatureData))
 
     return DLSequence(vector)
   }
+
+  override fun toPrimitive(): ASN1Primitive =
+    toDlSequence().toASN1Primitive()
+
 }
 
 fun recreateCertificatesFromStore(store: Store<X509CertificateHolder>): ASN1Set {
@@ -74,26 +78,26 @@ fun testCertificateRecreation() {
           ExtensionInfo(
             extension.extnId.toString(),
             criticalIds.contains(extension.extnId),
-            DerStringInfo.getInstance(extension.extnValue)
+            StringInfo.getInstance(extension.extnValue)
           )
         }
 
         val tbsInfo = TBSCertificateInfo(
           certificateHolder.versionNumber,
           certificateHolder.serialNumber.toString(),
-          SignatureAlgorithm(certificateHolder.signatureAlgorithm),
+          SignatureAlgorithmInfo(certificateHolder.signatureAlgorithm),
           IssuerInfo(certificateHolder.issuer),
           certificateHolder.notBefore,
           certificateHolder.notAfter,
           IssuerInfo(certificateHolder.subject),
-          SignatureAlgorithm(certificateHolder.subjectPublicKeyInfo.algorithm),
+          SignatureAlgorithmInfo(certificateHolder.subjectPublicKeyInfo.algorithm),
           certificateHolder.subjectPublicKeyInfo.publicKeyData.bytes,
           extensionInfos
         )
 
         val certificateInfo = CertificateInfo(
           tbsInfo,
-          SignatureAlgorithm(certificateHolder.signatureAlgorithm),
+          SignatureAlgorithmInfo(certificateHolder.signatureAlgorithm),
           certificateHolder.signature
         )
 
@@ -101,7 +105,7 @@ fun testCertificateRecreation() {
         val certificateInfoFromJson = gson.fromJson(json, certificateInfo::class.java)
 
         val recreatedCertificateHolder = X509CertificateHolder(
-          Certificate.getInstance(certificateInfoFromJson.toDlSequence())
+          Certificate.getInstance(certificateInfoFromJson.toPrimitive())
         )
 
         println(recreatedCertificateHolder.equals(certificateHolder))
