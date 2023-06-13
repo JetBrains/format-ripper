@@ -74,7 +74,7 @@ fun testCertificateRecreation() {
           ExtensionInfo(
             extension.extnId.toString(),
             criticalIds.contains(extension.extnId),
-            extension.extnValue.octets
+            DerStringInfo.getInstance(extension.extnValue)
           )
         }
 

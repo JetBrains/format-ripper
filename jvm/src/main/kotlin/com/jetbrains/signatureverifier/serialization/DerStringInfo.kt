@@ -1,10 +1,11 @@
 package com.jetbrains.signatureverifier.serialization
 
 import org.bouncycastle.asn1.*
+import org.bouncycastle.util.encoders.Hex
 import java.lang.IllegalArgumentException
 
 data class DerStringInfo(val stringType: StringType, val content: String) {
-  companion object{
+  companion object {
     // This is not exhaustive and may shoot you in the leg some day
     enum class StringType(val stringClass: Class<out Any>) {
       DERPrintableString(org.bouncycastle.asn1.DERPrintableString::class.java),
@@ -15,7 +16,7 @@ data class DerStringInfo(val stringType: StringType, val content: String) {
       DERUniversalString(org.bouncycastle.asn1.DERUniversalString::class.java),
       DERNumericString(org.bouncycastle.asn1.DERNumericString::class.java),
       DERGeneralString(org.bouncycastle.asn1.DERGeneralString::class.java),
-      DERGraphicString(org.bouncycastle.asn1.DERGraphicString::class.java),
+      DEROctetString(org.bouncycastle.asn1.DEROctetString::class.java)
     }
 
     fun getStringType(value: ASN1Encodable) =
@@ -28,15 +29,35 @@ data class DerStringInfo(val stringType: StringType, val content: String) {
         is DERUniversalString -> StringType.DERUniversalString
         is DERNumericString -> StringType.DERNumericString
         is DERGeneralString -> StringType.DERGeneralString
-        is DERGraphicString -> StringType.DERGraphicString
+        is DEROctetString -> StringType.DEROctetString
         else -> throw IllegalArgumentException("This type of strings is not in list")
       }
-  }
-  constructor(value: ASN1Encodable) : this(getStringType(value), value.toString())
 
-  fun toEncodableString(): ASN1Encodable{
+    fun getInstance(value: ASN1Encodable): DerStringInfo {
+      val type = getStringType(value)
+      val content = when (type) {
+        StringType.DEROctetString -> Hex.toHexString((value as DEROctetString).octets)
+        else -> value.toString()
+      }
+      return DerStringInfo(type, content)
+    }
+
+  }
+
+  fun toEncodableString(): ASN1Encodable {
     val stringClass = stringType.stringClass
-    val constructor = stringClass.getConstructor(String::class.java)
-    return constructor.newInstance(content) as ASN1Encodable
+
+    return when (stringType) {
+      StringType.DEROctetString -> {
+        val constructor = stringClass.getConstructor(ByteArray::class.java)
+        constructor.newInstance(Hex.decode(content)) as ASN1Encodable
+      }
+
+      else -> {
+        val constructor = stringClass.getConstructor(String::class.java)
+        constructor.newInstance(content) as ASN1Encodable
+      }
+
+    }
   }
 }

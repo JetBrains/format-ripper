@@ -12,7 +12,7 @@ data class IssuerInfo(
       it.typesAndValues.map { tv ->
         rdNInfo(
           tv.type.toString(),
-          DerStringInfo(tv.value)
+          DerStringInfo.getInstance(tv.value)
         )
       }
     })

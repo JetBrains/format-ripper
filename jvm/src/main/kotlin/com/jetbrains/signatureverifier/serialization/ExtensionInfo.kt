@@ -8,7 +8,7 @@ import org.bouncycastle.asn1.DEROctetString
 data class ExtensionInfo(
   val key: String,
   val critical: Boolean,
-  val value: ByteArray
+  val value: DerStringInfo
 ) {
   fun toEncodableVector(): ASN1EncodableVector {
     val vector = ASN1EncodableVector()
@@ -16,7 +16,7 @@ data class ExtensionInfo(
     if (critical) {
       vector.add(ASN1Boolean.TRUE)
     }
-    vector.add(DEROctetString(value))
+    vector.add(value.toEncodableString())
 
     return vector
   }

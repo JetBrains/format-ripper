@@ -1,46 +1,56 @@
 package com.jetbrains.signatureverifier.serialization
 
+import TaggedObjectMetaInfo
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.cms.Attribute
+
+class CustomDLTaggedObject(tagNo: Int, obj: ASN1Primitive?) :
+  DLTaggedObject(true, tagNo, obj) {
+  override fun isExplicit(): Boolean {
+    return true
+  }
+}
 
 // 1.3.6.1.4.1.311.2.1.12
 data class MSCertificateTemplateV2AttributeInfo(
   val identifier: String,
   val value: List<TaggedObjectInfo>
-) : AttributeValueInfo(identifier) {
+) : AttributeValueInfo() {
   companion object {
+
     data class TaggedObjectInfo(
-      val tagNo1: Int,
-      val tagNo2: Int,
+      val metaInfo1: TaggedObjectMetaInfo,
+      val metaInfo2: TaggedObjectMetaInfo,
       val content: DerStringInfo
     ) {
       constructor(value: DLTaggedObject) : this(
-        value.tagNo,
-        (value.baseObject as DLTaggedObject).tagNo,
-          DerStringInfo((value.baseObject as DLTaggedObject).baseObject)
+        TaggedObjectMetaInfo(value),
+        TaggedObjectMetaInfo(value.baseObject as DLTaggedObject),
+        DerStringInfo.getInstance((value.baseObject as DLTaggedObject).baseObject)
       )
-      fun toEncodable() = DLTaggedObject(
-          tagNo1,
-          DLTaggedObject(
-              tagNo2,
-              content.toEncodableString()
-          )
+
+      fun toEncodable() = TaggedObjectMetaInfo.getTaggedObjectWithMetaInfo(
+        metaInfo1,
+        TaggedObjectMetaInfo.getTaggedObjectWithMetaInfo(
+          metaInfo2,
+          content.toEncodableString()
+        )
       )
     }
   }
 
-  override fun toEncodable(): ASN1Encodable {
+  override fun toAttribute(): Attribute {
     val vector = ASN1EncodableVector()
     vector.addAll(value.map { it.toEncodable() }.toTypedArray())
     return Attribute(
-        ASN1ObjectIdentifier(identifier),
-        DERSet(DLSequence(vector))
+      ASN1ObjectIdentifier(identifier),
+      DLSet(DLSequence(vector))
     )
   }
 
   constructor(attribute: Attribute) : this(
     attribute.attrType.toString(),
-    attribute.attributeValues.map {
+    (attribute.attributeValues.first() as DLSequence).map {
       TaggedObjectInfo(it as DLTaggedObject)
     }
   )
