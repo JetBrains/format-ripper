@@ -16,7 +16,7 @@ abstract class AttributeValueInfo: EncodableInfo {
     }
   }
 
-  abstract fun toAttributeDLSequence(): DLSequence
+  protected abstract fun toAttributeDLSequence(): DLSequence
 
   override fun toPrimitive(): ASN1Primitive = toAttributeDLSequence().toASN1Primitive()
 }

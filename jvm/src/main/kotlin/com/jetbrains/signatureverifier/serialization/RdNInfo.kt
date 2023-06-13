@@ -12,7 +12,7 @@ data class rdNInfo(
   override fun toPrimitive(): ASN1Primitive {
     val sequense = ASN1EncodableVector()
 
-    val string = value.toEncodableString()
+    val string = value.toPrimitive()
 
 
     sequense.addAll(

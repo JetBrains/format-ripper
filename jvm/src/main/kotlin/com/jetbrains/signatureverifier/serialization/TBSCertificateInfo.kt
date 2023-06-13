@@ -15,7 +15,7 @@ data class TBSCertificateInfo(
   val subjectData: ByteArray,
   val extensions: List<ExtensionInfo>
 ) : EncodableInfo {
-  fun toDLSequence(): DLSequence {
+  private fun toDLSequence(): DLSequence {
     val sequence = ASN1EncodableVector()
 
 
@@ -28,8 +28,8 @@ data class TBSCertificateInfo(
     ) // -1 due to org.bouncycastle.asn1.x509.TBSCertificate.getVersionNumber
 
     sequence.add(ASN1Integer(serialNumber.toBigInteger()))
-    sequence.add(signatureAlgorithm.toDLSequence())
-    sequence.add(issuer.toDLSequence())
+    sequence.add(signatureAlgorithm.toPrimitive())
+    sequence.add(issuer.toPrimitive())
 
     val timeVector = ASN1EncodableVector()
     timeVector.addAll(
@@ -40,17 +40,17 @@ data class TBSCertificateInfo(
     )
     sequence.add(DLSequence(timeVector))
 
-    sequence.add(subject.toDLSequence())
+    sequence.add(subject.toPrimitive())
 
     val subjectKeyVector = ASN1EncodableVector()
-    subjectKeyVector.add(subjectAlgorithm.toDLSequence())
+    subjectKeyVector.add(subjectAlgorithm.toPrimitive())
     subjectKeyVector.add(DERBitString(subjectData))
     sequence.add(DLSequence(subjectKeyVector))
 
 
     val extensionsVector = ASN1EncodableVector()
     extensionsVector.addAll(extensions.map {
-      it.toDLSequence()
+      it.toPrimitive()
     }.toTypedArray())
     sequence.add(
       DLTaggedObject(

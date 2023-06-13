@@ -17,7 +17,7 @@ data class SignatureAlgorithmInfo(
     signatureAlgorithm.algorithm.toString()
   )
 
-  fun toDLSequence(): DLSequence {
+  private fun toDLSequence(): DLSequence {
     val algorithm = ASN1EncodableVector()
     algorithm.add(ASN1ObjectIdentifier(algorithmIdentifier))
     algorithm.add(

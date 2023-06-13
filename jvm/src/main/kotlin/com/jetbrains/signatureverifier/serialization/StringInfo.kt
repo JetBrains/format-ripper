@@ -46,7 +46,7 @@ data class StringInfo(val stringType: StringType, val content: String) : Encodab
 
   }
 
-  fun toEncodableString(): ASN1Encodable {
+  private fun toEncodableString(): ASN1Encodable {
     val stringClass = stringType.stringClass
 
     return when (stringType) {

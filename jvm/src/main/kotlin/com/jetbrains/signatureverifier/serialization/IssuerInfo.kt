@@ -17,7 +17,7 @@ data class IssuerInfo(
       }
     })
 
-  fun toDLSequence(): DLSequence {
+  private fun toDLSequence(): DLSequence {
     val outerVector = ASN1EncodableVector()
 
     val mapped = rdNs.map {

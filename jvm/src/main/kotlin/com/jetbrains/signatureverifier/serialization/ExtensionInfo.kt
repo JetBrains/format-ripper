@@ -7,13 +7,13 @@ data class ExtensionInfo(
   val critical: Boolean,
   val value: StringInfo
 ) : EncodableInfo {
-  fun toDLSequence(): DLSequence {
+  private fun toDLSequence(): DLSequence {
     val vector = ASN1EncodableVector()
     vector.add(ASN1ObjectIdentifier(key))
     if (critical) {
       vector.add(ASN1Boolean.TRUE)
     }
-    vector.add(value.toEncodableString())
+    vector.add(value.toPrimitive())
 
     return DLSequence(vector)
   }

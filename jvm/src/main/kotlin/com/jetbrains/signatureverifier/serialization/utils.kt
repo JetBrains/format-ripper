@@ -22,7 +22,7 @@ fun deserializeDigestAlgorithms(digestAlgorithms: List<SignatureAlgorithmInfo>):
   val algorithms = ASN1EncodableVector()
   digestAlgorithms.forEach {
     algorithms.add(
-      it.toDLSequence()
+      it.toPrimitive()
     )
   }
 
