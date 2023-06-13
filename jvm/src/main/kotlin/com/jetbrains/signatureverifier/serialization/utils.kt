@@ -50,7 +50,7 @@ fun recreateContentInfoFromSignedData(signedData: SignedData): ContentInfo {
 fun recreateSignerInfosFromSignerInformationStore(signerInfoStore: SignerInformationStore): ASN1Set =
   listToDLSet(signerInfoStore.signers.map { it.toASN1Structure() })
 
-public fun compareBytes(
+fun compareBytes(
   lhs: ByteArray,
   rhs: ByteArray,
 ): Boolean {

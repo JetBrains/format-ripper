@@ -108,7 +108,6 @@ fun testCertificateRecreation() {
       val recreatedCertificates = recreateCertificatesFromStore(recreatedStore)
 
       compareBytes(recreatedCertificates.getEncoded("DER"), ss.certificates.getEncoded("DER"))
-
       println()
     }
   }

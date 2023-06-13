@@ -11,7 +11,9 @@ abstract class AttributeValueInfo: EncodableInfo {
         "1.2.840.113549.1.9.4" -> MessageDigestAttributeInfo(attribute)
         "1.3.6.1.4.1.311.2.1.11" -> MSCertExtensionsAttributeInfo(attribute)
         "1.3.6.1.4.1.311.2.1.12" -> MSCertificateTemplateV2AttributeInfo(attribute)
-        else -> TODO("Make some default container")
+        "1.3.6.1.4.1.311.10.3.28" -> TimestampedDataAttributeInfo(attribute)
+        "1.2.840.113549.1.9.5" -> SigningTimeAttributeInfo(attribute)
+        else -> UnknownAttributeInfo(attribute)
       }
     }
   }
