@@ -16,6 +16,15 @@ data class CertificateInfo(
   val signatureAlgorithm: SignatureAlgorithmInfo,
   val signatureData: StringInfo
 ) : EncodableInfo {
+  companion object {
+    fun getInstance(certificateHolder: X509CertificateHolder) = CertificateInfo(
+      TBSCertificateInfo.getInstance(certificateHolder),
+      SignatureAlgorithmInfo(certificateHolder.signatureAlgorithm),
+      StringInfo.getInstance(DERBitString(certificateHolder.signature))
+    )
+
+  }
+
   private fun toDlSequence(): DLSequence = listToDLSequence(
     listOf(
       tbsCertificateInfo.toPrimitive(),
@@ -24,9 +33,12 @@ data class CertificateInfo(
     )
   )
 
+  fun toX509CertificateHolder() = X509CertificateHolder(
+    Certificate.getInstance(toPrimitive())
+  )
+
   override fun toPrimitive(): ASN1Primitive =
     toDlSequence().toASN1Primitive()
-
 }
 
 fun recreateCertificatesFromStore(store: Store<X509CertificateHolder>): ASN1Set =

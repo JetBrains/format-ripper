@@ -18,7 +18,7 @@ data class TaggedObjectInfo(
     /**
      * Hack to get same explicitness as in original
      */
-    private fun getTaggedObjectWithMetaInfo(
+    fun getTaggedObjectWithMetaInfo(
       metaInfo: TaggedObjectMetaInfo,
       content: ASN1Encodable
     ): DLTaggedObject = when (metaInfo.explicitness) {

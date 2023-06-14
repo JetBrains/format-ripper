@@ -12,18 +12,19 @@ data class SignatureAlgorithmInfo(
 ) : EncodableInfo {
   constructor(signatureAlgorithm: AlgorithmIdentifier) : this(
     DefaultAlgorithmNameFinder().getAlgorithmName(signatureAlgorithm.algorithm as ASN1ObjectIdentifier),
-    if (signatureAlgorithm.parameters is ASN1Null) null else StringInfo.getInstance(
+    if (signatureAlgorithm.parameters == null) null else StringInfo.getInstance(
       signatureAlgorithm.parameters
     ),
     StringInfo.getInstance(signatureAlgorithm.algorithm)
   )
 
-  private fun toDLSequence(): DLSequence = listToDLSequence(
-    listOf(
-      algorithmIdentifier.toPrimitive(),
-      additionalValue?.toPrimitive() ?: DERNull.INSTANCE
-    )
-  )
+  private fun toDLSequence(): DLSequence {
+    val list = mutableListOf(algorithmIdentifier.toPrimitive())
+    if (additionalValue != null) {
+      list.add(additionalValue.toPrimitive())
+    }
+    return listToDLSequence(list)
+  }
 
   override fun toPrimitive(): ASN1Primitive = toDLSequence().toASN1Primitive()
 }

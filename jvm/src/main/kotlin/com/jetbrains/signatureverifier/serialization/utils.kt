@@ -53,25 +53,32 @@ fun recreateSignerInfosFromSignerInformationStore(signerInfoStore: SignerInforma
 fun compareBytes(
   lhs: ByteArray,
   rhs: ByteArray,
+  verbose: Boolean = true
 ): Boolean {
-  println("—————")
-  println(
-    String.format(
-      Locale.ENGLISH,
-      "Comparing called from %s",
-      Thread.currentThread().stackTrace[2].toString()
+  if (verbose) {
+    println("—————")
+    println(
+      String.format(
+        Locale.ENGLISH,
+        "Comparing called from %s",
+        Thread.currentThread().stackTrace[3].toString()
+      )
     )
-  )
+  }
   var same = true
   var count = 0
   lhs.forEachIndexed { index, byte ->
     val other = if (index < rhs.size) rhs[index] else 0x0
     if (byte != other) {
       count++
-      println(String.format(Locale.ENGLISH, "%d %d %d", index, byte, other))
+      if (verbose) {
+        println(String.format(Locale.ENGLISH, "%d %d %d", index, byte, other))
+      }
       same = false
     }
   }
-  println(String.format(Locale.ENGLISH, "%d bytes differ", count))
+  if (verbose) {
+    println(String.format(Locale.ENGLISH, "%d bytes differ", count))
+  }
   return same
 }

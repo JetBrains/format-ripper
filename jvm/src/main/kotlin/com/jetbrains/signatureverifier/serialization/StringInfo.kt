@@ -18,7 +18,8 @@ data class StringInfo(val stringType: StringType, val content: String) : Encodab
       DERGeneralString(org.bouncycastle.asn1.DERGeneralString::class.java),
       DEROctetString(org.bouncycastle.asn1.DEROctetString::class.java),
       ASN1ObjectIdentifier(org.bouncycastle.asn1.ASN1ObjectIdentifier::class.java),
-      DERBitString(org.bouncycastle.asn1.DERBitString::class.java)
+      DERBitString(org.bouncycastle.asn1.DERBitString::class.java),
+      ASN1Null(org.bouncycastle.asn1.ASN1Null::class.java)
     }
 
     fun getStringType(value: ASN1Encodable) =
@@ -34,6 +35,7 @@ data class StringInfo(val stringType: StringType, val content: String) : Encodab
         is DEROctetString -> StringType.DEROctetString
         is ASN1ObjectIdentifier -> StringType.ASN1ObjectIdentifier
         is DERBitString -> StringType.DERBitString
+        is ASN1Null -> StringType.ASN1Null // Technically not a string, but we need for consistency
         else -> throw IllegalArgumentException("This type of strings is not in list")
       }
 
@@ -58,6 +60,8 @@ data class StringInfo(val stringType: StringType, val content: String) : Encodab
         val constructor = stringClass.getConstructor(ByteArray::class.java)
         constructor.newInstance(Hex.decode(content)) as ASN1Encodable
       }
+
+      StringType.ASN1Null -> DERNull.INSTANCE
 
       else -> {
         val constructor = stringClass.getConstructor(String::class.java)

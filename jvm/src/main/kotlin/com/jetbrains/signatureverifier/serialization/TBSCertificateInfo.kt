@@ -3,6 +3,7 @@ package com.jetbrains.signatureverifier.serialization
 import org.bouncycastle.asn1.*
 import java.util.*
 import org.bouncycastle.asn1.ASN1Encoding
+import org.bouncycastle.cert.X509CertificateHolder
 
 data class TBSCertificateInfo(
   val version: Int,
@@ -16,6 +17,29 @@ data class TBSCertificateInfo(
   val subjectData: StringInfo,
   val extensions: List<ExtensionInfo>
 ) : EncodableInfo {
+  companion object {
+    fun getInstance(certificateHolder: X509CertificateHolder): TBSCertificateInfo =
+      TBSCertificateInfo(
+        certificateHolder.versionNumber,
+        certificateHolder.serialNumber.toString(),
+        SignatureAlgorithmInfo(certificateHolder.signatureAlgorithm),
+        IssuerInfo(certificateHolder.issuer),
+        certificateHolder.notBefore,
+        certificateHolder.notAfter,
+        IssuerInfo(certificateHolder.subject),
+        SignatureAlgorithmInfo(certificateHolder.subjectPublicKeyInfo.algorithm),
+        StringInfo.getInstance(certificateHolder.subjectPublicKeyInfo.publicKeyData),
+        certificateHolder.extensions.extensionOIDs.map {
+          val extension = certificateHolder.extensions.getExtension(it)
+          ExtensionInfo(
+            StringInfo.getInstance(extension.extnId),
+            certificateHolder.extensions.criticalExtensionOIDs.contains(extension.extnId),
+            StringInfo.getInstance(extension.extnValue)
+          )
+        }
+      )
+  }
+
   private fun toDLSequence(): DLSequence =
     listToDLSequence(
       listOf(
