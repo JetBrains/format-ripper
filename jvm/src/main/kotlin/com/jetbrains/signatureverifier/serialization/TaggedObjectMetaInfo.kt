@@ -1,3 +1,4 @@
+import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1TaggedObject
 import org.bouncycastle.asn1.DLTaggedObject
@@ -10,6 +11,7 @@ import org.bouncycastle.asn1.DLTaggedObject
  * We, of course, need this value to recreate byte-identical instance of DLTaggedObject
  * from serialized data.
  */
+@Serializable
 data class TaggedObjectMetaInfo(
   val tagNo: Int,
   val explicitness: Int

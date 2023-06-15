@@ -1,10 +1,12 @@
 package com.jetbrains.signatureverifier.serialization
 
+import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier
 import org.bouncycastle.operator.DefaultAlgorithmNameFinder
 
-// additionalValue is to be investigated, for now it is just null
+// additionalValue is to be investigated, for now it is just StringInfo or null
+@Serializable
 data class SignatureAlgorithmInfo(
   val name: String,
   val additionalValue: StringInfo? = null,

@@ -17,7 +17,7 @@ import java.util.stream.Stream
 class SignatureRecreationTests {
 
   /**
-   * Tests, that we can recreate `certificates` field of `SignedData` from serialized data
+   * Tests, that we can recreate original signature
    */
   @ParameterizedTest
   @MethodSource("RecreateSignatureTestProvider")

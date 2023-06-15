@@ -4,7 +4,6 @@ import com.jetbrains.signatureverifier.bouncycastle.cms.SignerInformationStore
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.cms.ContentInfo
 import org.bouncycastle.asn1.cms.SignedData
-import org.bouncycastle.asn1.cms.SignerInfo
 import org.bouncycastle.operator.DefaultAlgorithmNameFinder
 import java.util.*
 

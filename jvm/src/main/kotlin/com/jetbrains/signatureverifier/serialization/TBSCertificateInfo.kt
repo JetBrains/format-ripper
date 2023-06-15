@@ -1,16 +1,19 @@
 package com.jetbrains.signatureverifier.serialization
 
+import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
 import java.util.*
 import org.bouncycastle.asn1.ASN1Encoding
 import org.bouncycastle.cert.X509CertificateHolder
-
+@Serializable
 data class TBSCertificateInfo(
   val version: Int,
   val serialNumber: String,
   val signatureAlgorithm: SignatureAlgorithmInfo,
   val issuer: IssuerInfo,
+  @Serializable(DateSerializer::class)
   val startDate: Date,
+  @Serializable(DateSerializer::class)
   val endDate: Date,
   val subject: IssuerInfo,
   val subjectAlgorithm: SignatureAlgorithmInfo,

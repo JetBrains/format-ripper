@@ -1,8 +1,9 @@
 package com.jetbrains.signatureverifier.serialization
 
+import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.x500.X500Name
-
+@Serializable
 data class IssuerInfo(
   val name: String,
   val rdNs: List<List<rdNInfo>>

@@ -1,10 +1,12 @@
 package com.jetbrains.signatureverifier.serialization
 
 import TaggedObjectMetaInfo
+import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.DLTaggedObject
 
+@Serializable
 data class TaggedObjectInfo(
   val metaInfo: TaggedObjectMetaInfo,
   val content: EncodableInfo

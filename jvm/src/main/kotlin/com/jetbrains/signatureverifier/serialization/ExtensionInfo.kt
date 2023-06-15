@@ -1,7 +1,8 @@
 package com.jetbrains.signatureverifier.serialization
 
+import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
-
+@Serializable
 data class ExtensionInfo(
   val key: StringInfo,
   val critical: Boolean,

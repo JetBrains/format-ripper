@@ -1,10 +1,11 @@
 package com.jetbrains.signatureverifier.tests.serialization
 
-import com.google.gson.Gson
 import com.jetbrains.signatureverifier.PeFile
 import com.jetbrains.signatureverifier.crypt.SignatureVerificationParams
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.serialization.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.bouncycastle.asn1.DERBitString
 import org.bouncycastle.asn1.x509.Certificate
 import org.bouncycastle.cert.X509CertificateHolder
@@ -22,7 +23,7 @@ class CertificateSerializationests {
    * Tests, that we can recreate `certificates` field of `SignedData` from serialized data
    */
   @ParameterizedTest
-  @MethodSource("RecreateCertificatesTestProvider")
+  @MethodSource("SignedPEProvider")
   fun RecreateCertificatesTest(signedPeResourceName: String) {
     getTestByteChannel("pe", signedPeResourceName).use {
       val peFile = PeFile(it)
@@ -38,9 +39,13 @@ class CertificateSerializationests {
 
         val certificateInfo = CertificateInfo.getInstance(certificateHolder)
 
-        val gson = Gson()
-        val json = gson.toJson(certificateInfo)
-        val certificateInfoFromJson = gson.fromJson(json, certificateInfo::class.java)
+        val json = Json.encodeToString(certificateInfo)
+        val certificateInfoFromJson = Json.decodeFromString<CertificateInfo>(json)
+
+        Assertions.assertEquals(
+          true,
+          certificateInfo == certificateInfoFromJson
+        )
 
         val recreatedCertificateHolder = certificateInfoFromJson.toX509CertificateHolder()
 
@@ -89,7 +94,7 @@ class CertificateSerializationests {
 
 
     @JvmStatic
-    fun RecreateCertificatesTestProvider(): Stream<Arguments> {
+    fun SignedPEProvider(): Stream<Arguments> {
       return Stream.of(
         Arguments.of(
           pe_01_signed

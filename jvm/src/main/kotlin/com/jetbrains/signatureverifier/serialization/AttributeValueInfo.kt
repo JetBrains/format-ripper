@@ -1,9 +1,11 @@
 package com.jetbrains.signatureverifier.serialization
 
+import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.cms.Attribute
 
-abstract class AttributeValueInfo: EncodableInfo {
+@Serializable
+sealed class AttributeValueInfo: EncodableInfo {
   companion object {
     fun getInstance(attribute: Attribute): AttributeValueInfo {
       return when (attribute.attrType.id) {
