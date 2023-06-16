@@ -7,22 +7,22 @@ import org.bouncycastle.asn1.cms.SignedData
 import org.bouncycastle.operator.DefaultAlgorithmNameFinder
 import java.util.*
 
-fun serializeDigestAlgorithms(algorithmsSet: ASN1Set): List<SignatureAlgorithmInfo> =
+fun serializeDigestAlgorithms(algorithmsSet: ASN1Set): List<AlgorithmInfo> =
   algorithmsSet.map {
     val seq = it as DLSequence
-    SignatureAlgorithmInfo(
+    AlgorithmInfo(
       DefaultAlgorithmNameFinder().getAlgorithmName(it.first() as ASN1ObjectIdentifier),
       if (seq.last() is ASN1Null) null else StringInfo.getInstance(seq.last()),
       StringInfo.getInstance(it.first())
     )
   }
 
-fun deserializeDigestAlgorithms(digestAlgorithms: List<SignatureAlgorithmInfo>): ASN1Set =
+fun deserializeDigestAlgorithms(digestAlgorithms: List<AlgorithmInfo>): ASN1Set =
   listToDLSet(digestAlgorithms.map { it.toPrimitive() })
 
-fun listToDLSequence(list: List<ASN1Encodable>): DLSequence {
+fun listToDLSequence(list: List<ASN1Encodable?>): DLSequence {
   val vector = ASN1EncodableVector()
-  vector.addAll(list.toTypedArray())
+  vector.addAll(list.filterNotNull().toTypedArray())
   return DLSequence(vector)
 }
 

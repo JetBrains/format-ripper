@@ -3,20 +3,19 @@ package com.jetbrains.signatureverifier.serialization
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
 import java.util.*
-import org.bouncycastle.asn1.ASN1Encoding
 import org.bouncycastle.cert.X509CertificateHolder
 @Serializable
 data class TBSCertificateInfo(
   val version: Int,
   val serialNumber: String,
-  val signatureAlgorithm: SignatureAlgorithmInfo,
+  val signatureAlgorithm: AlgorithmInfo,
   val issuer: IssuerInfo,
   @Serializable(DateSerializer::class)
   val startDate: Date,
   @Serializable(DateSerializer::class)
   val endDate: Date,
   val subject: IssuerInfo,
-  val subjectAlgorithm: SignatureAlgorithmInfo,
+  val subjectAlgorithm: AlgorithmInfo,
   val subjectData: StringInfo,
   val extensions: List<ExtensionInfo>
 ) : EncodableInfo {
@@ -25,12 +24,12 @@ data class TBSCertificateInfo(
       TBSCertificateInfo(
         certificateHolder.versionNumber,
         certificateHolder.serialNumber.toString(),
-        SignatureAlgorithmInfo(certificateHolder.signatureAlgorithm),
+        AlgorithmInfo(certificateHolder.signatureAlgorithm),
         IssuerInfo(certificateHolder.issuer),
         certificateHolder.notBefore,
         certificateHolder.notAfter,
         IssuerInfo(certificateHolder.subject),
-        SignatureAlgorithmInfo(certificateHolder.subjectPublicKeyInfo.algorithm),
+        AlgorithmInfo(certificateHolder.subjectPublicKeyInfo.algorithm),
         StringInfo.getInstance(certificateHolder.subjectPublicKeyInfo.publicKeyData),
         certificateHolder.extensions.extensionOIDs.map {
           val extension = certificateHolder.extensions.getExtension(it)

@@ -10,7 +10,7 @@ import org.bouncycastle.asn1.cms.Attribute
 data class MSCertificateTemplateV2AttributeInfo(
   val identifier: StringInfo,
   val value: List<TaggedObjectInfo>
-) : AttributeValueInfo() {
+) : AttributeInfo() {
 
   override fun toAttributeDLSequence(): DLSequence = listToDLSequence(
     listOf(

@@ -1,26 +1,20 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
-import com.google.gson.Gson
-import com.jetbrains.signatureverifier.PeFile
-import com.jetbrains.signatureverifier.crypt.SignatureVerificationParams
-import com.jetbrains.signatureverifier.crypt.SignedMessage
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.x509.Certificate
 import org.bouncycastle.cert.X509CertificateHolder
-import org.bouncycastle.util.CollectionStore
 import org.bouncycastle.util.Store
 @Serializable
 data class CertificateInfo(
   val tbsCertificateInfo: TBSCertificateInfo,
-  val signatureAlgorithm: SignatureAlgorithmInfo,
+  val signatureAlgorithm: AlgorithmInfo,
   val signatureData: StringInfo
 ) : EncodableInfo {
   companion object {
     fun getInstance(certificateHolder: X509CertificateHolder) = CertificateInfo(
       TBSCertificateInfo.getInstance(certificateHolder),
-      SignatureAlgorithmInfo(certificateHolder.signatureAlgorithm),
+      AlgorithmInfo(certificateHolder.signatureAlgorithm),
       StringInfo.getInstance(DERBitString(certificateHolder.signature))
     )
 

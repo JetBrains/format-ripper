@@ -50,7 +50,7 @@ class SignerInformation {
   private var resultDigest: ByteArray?
   protected val info: SignerInfo
   val digestAlgorithmID: AlgorithmIdentifier
-  protected var encryptionAlgorithm: AlgorithmIdentifier
+  var encryptionAlgorithm: AlgorithmIdentifier
   protected var signedAttributeSet: ASN1Set?
   protected var unsignedAttributeSet: ASN1Set?
 

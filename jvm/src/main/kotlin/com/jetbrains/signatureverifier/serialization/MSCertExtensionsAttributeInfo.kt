@@ -9,7 +9,7 @@ import org.bouncycastle.asn1.cms.Attribute
 data class MSCertExtensionsAttributeInfo(
   val identifier: StringInfo,
   val value: List<List<StringInfo>>
-) : AttributeValueInfo() {
+) : AttributeInfo() {
   override fun toAttributeDLSequence(): DLSequence = listToDLSequence(
     listOf(
       identifier.toPrimitive(),
