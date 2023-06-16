@@ -1,13 +1,18 @@
 package com.jetbrains.signatureverifier.tests
 
 import com.jetbrains.signatureverifier.PeFile
+import com.jetbrains.signatureverifier.crypt.SignedMessage
+import com.jetbrains.signatureverifier.serialization.SignedDataInfo
+import com.jetbrains.signatureverifier.serialization.compareBytes
+import com.jetbrains.signatureverifier.serialization.recreateContentInfoFromSignedData
 import com.jetbrains.util.TestUtil
+import org.bouncycastle.asn1.cms.SignedData
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.nio.file.Files
-import java.util.Random
+import java.util.*
 import java.util.stream.Stream
 import kotlin.io.path.copyTo
 import kotlin.io.path.deleteExisting
@@ -25,10 +30,28 @@ class PeSignatureStoringTests {
       -1
     )
 
-    val json: String
+    val signatureMetadata: PeFile.Companion.PeSignatureMetadata
+    val signature: ByteArray
+
     TestUtil.getTestByteChannel("pe", signedPeResourceName, write = true).use {
       val peFile = PeFile(it)
-      json = peFile.getJsonMetadataDump()
+      signatureMetadata = peFile.getSignatureMetadata()
+
+      val signatureData = peFile.GetSignatureData()
+      val signedMessage = SignedMessage.CreateInstance(signatureData)
+
+      val signedData = signedMessage.SignedData
+
+      val signedDataInfo = SignedDataInfo(signedData)
+
+      val recreatedSignedData = SignedData.getInstance(signedDataInfo.toPrimitive())
+      val recreatedInfo = recreateContentInfoFromSignedData(recreatedSignedData)
+      signature = recreatedInfo.getEncoded("DER")
+
+      Assertions.assertEquals(
+        true,
+        compareBytes(signature, peFile.GetSignatureData().CmsData!!, verbose = false)
+      )
     }
 
     val path = TestUtil.getTestDataFile("pe", unsignedPeResourceName)
@@ -36,8 +59,9 @@ class PeSignatureStoringTests {
     val tmpFile = path.parent.resolve(tmpName)
     path.copyTo(tmpFile)
 
+
     TestUtil.getTestByteChannel("pe", tmpName, write = true).use {
-      PeFile.insertSignature(it, json)
+      PeFile.insertSignature(it, signatureMetadata, signature)
     }
 
     Assertions.assertEquals(

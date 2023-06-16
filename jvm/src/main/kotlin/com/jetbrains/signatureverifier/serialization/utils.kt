@@ -81,3 +81,14 @@ fun compareBytes(
   }
   return same
 }
+
+fun byteArrayToHexString(byteArray: ByteArray): String {
+  val hexChars = "0123456789ABCDEF"
+  val result = StringBuilder(byteArray.size * 2)
+  for (byte in byteArray) {
+    val value = byte.toInt() and 0xFF
+    result.append(hexChars[value ushr 4])
+    result.append(hexChars[value and 0x0F])
+  }
+  return result.toString()
+}

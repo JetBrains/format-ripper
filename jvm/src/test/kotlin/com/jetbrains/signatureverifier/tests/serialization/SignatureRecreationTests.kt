@@ -56,9 +56,7 @@ class SignatureRecreationTests {
         )
       )
 
-      var originalSignature = peFile.getSignatureMetadata().signature.value
-      originalSignature =
-        originalSignature.slice(8 until originalSignature.size).toByteArray() // first 8 — metainfo
+      val originalSignature = peFile.GetSignatureData().CmsData!!
 
       val encoded = recreatedInfo.getEncoded("DER")
 

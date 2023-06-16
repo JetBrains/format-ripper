@@ -24,7 +24,9 @@ class PeFile {
       var securitySize: DataValue = DataValue(),
       var dotnetMetadataRva: DataValue = DataValue(),
       var dotnetMetadataSize: DataValue = DataValue(),
-      var signature: DataValue = DataValue()
+      var dwLength: DataValue = DataValue(),
+      var wRevision: DataValue = DataValue(),
+      var signaturePosition: DataInfo = DataInfo(0, 0)
     )
 
     /**
@@ -33,23 +35,27 @@ class PeFile {
      */
     fun insertSignature(
       @NotNull stream: SeekableByteChannel,
-      @NotNull signatureMetadataJson: String
+      @NotNull signatureMetadata: PeSignatureMetadata,
+      @NotNull signatureBytes: ByteArray
     ) {
-      val gson = Gson()
-      val signatureMetadata = gson.fromJson(signatureMetadataJson, PeSignatureMetadata::class.java)
 
       listOf(
         signatureMetadata.ntHeaderOffset,
         signatureMetadata.checkSum,
         signatureMetadata.securityRva,
         signatureMetadata.securitySize,
-        signatureMetadata.signature,
+        signatureMetadata.dwLength,
+        signatureMetadata.wRevision,
         signatureMetadata.dotnetMetadataRva,
         signatureMetadata.dotnetMetadataSize
       ).forEach {
         stream.Seek(it.dataInfo.Offset.toLong(), SeekOrigin.Begin)
         stream.write(ByteBuffer.wrap(it.value))
       }
+      stream.Seek(signatureMetadata.signaturePosition.Offset.toLong(), SeekOrigin.Begin)
+      stream.write(ByteBuffer.wrap(signatureBytes))
+      val alignment = (8 - stream.position() % 8) % 8
+      stream.write(ByteBuffer.wrap(ByteArray(alignment.toInt())))
       stream.Rewind()
       stream.close()
     }
@@ -136,7 +142,10 @@ class PeFile {
 
     val securityRva = reader.ReadUInt32().toInt()
     _signatureMetadata.securityRva =
-      DataValue(DataInfo(_imageDirectoryEntrySecurity.Offset, Int.SIZE_BYTES), intToBytes(securityRva))
+      DataValue(
+        DataInfo(_imageDirectoryEntrySecurity.Offset, Int.SIZE_BYTES),
+        intToBytes(securityRva)
+      )
 
     var position = stream.position().toInt()
     val securitySize = reader.ReadUInt32().toInt()
@@ -166,7 +175,19 @@ class PeFile {
     _dotnetMetadata = DataInfo(dotnetMetadataRva, dotnetMetadataSize)
 
     _stream.Seek(_signData.Offset.toLong(), SeekOrigin.Begin)
-    _signatureMetadata.signature = DataValue(_signData, reader.ReadBytes(_signData.Size))
+
+    _signatureMetadata.dwLength = DataValue(
+      DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
+      intToBytes(reader.ReadInt32())
+    )
+
+    _signatureMetadata.wRevision =
+      DataValue(
+        DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
+        intToBytes(reader.ReadInt32())
+      )
+
+    _signatureMetadata.signaturePosition = DataInfo(stream.position().toInt(), _signData.Size)
   }
 
   /** Retrieve the signature data from PE */
