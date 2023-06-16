@@ -18,6 +18,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.*
 import java.util.stream.Stream
+import com.jetbrains.signatureverifier.serialization.SignerInfo as SerializableSignerInfo
 
 class SignerInformationSerializationTests {
 
@@ -91,12 +92,9 @@ class SignerInformationSerializationTests {
     }
   }
 
-  /**
-   * Tests, that we can recreate `sid` field of `SignerInfo` from serialized data
-   */
   @ParameterizedTest
   @MethodSource("SignedPEProvider")
-  fun SignerSetializaionTest(signedPeResourceName: String) {
+  fun SignersSetializaionTest(signedPeResourceName: String) {
     getTestByteChannel("pe", signedPeResourceName).use {
       val verificationParams = SignatureVerificationParams(null, null, false, false)
       val peFile = PeFile(it)
@@ -109,12 +107,12 @@ class SignerInformationSerializationTests {
       val signers = signedData.signerInfos.signers
       signers.forEach { signer ->
         val primitive = signer.toASN1Structure()
-        val signerInfo = SignerInformation(signer)
+        val signerInfo = SerializableSignerInfo(signer)
 
         val json = Json.encodeToString(signerInfo)
 
         val recreatedSignerInfo =
-          SignerInfo.getInstance(Json.decodeFromString<SignerInformation>(json).toPrimitive())
+          SignerInfo.getInstance(Json.decodeFromString<SerializableSignerInfo>(json).toPrimitive())
 
         Assertions.assertEquals(
           true,
@@ -125,8 +123,27 @@ class SignerInformationSerializationTests {
           )
         )
       }
+
+      val signerInfos = signers.map { SerializableSignerInfo(it) }
+      val json = Json.encodeToString(signerInfos)
+
+
+      val recreatedSignerInfos =
+        listToDLSet(
+          Json.decodeFromString<List<SerializableSignerInfo>>(json).map { it.toPrimitive() })
+
+      Assertions.assertEquals(
+        true,
+        compareBytes(
+          signedData.signedData.signerInfos.getEncoded("DER"),
+          recreatedSignerInfos.getEncoded("DER"),
+          verbose = false
+        )
+      )
+
     }
   }
+
 
   companion object {
     private const val pe_01_signed = "ServiceModelRegUI.dll"

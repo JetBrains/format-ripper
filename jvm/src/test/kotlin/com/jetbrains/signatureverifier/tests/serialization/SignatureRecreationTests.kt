@@ -1,12 +1,11 @@
 package com.jetbrains.signatureverifier.tests.serialization
 
-import TaggedObjectMetaInfo
 import com.jetbrains.signatureverifier.PeFile
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.serialization.*
-import org.bouncycastle.asn1.ASN1Null
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.bouncycastle.asn1.cms.SignedData
-import org.bouncycastle.util.CollectionStore
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -31,65 +30,11 @@ class SignatureRecreationTests {
       val innerSignedData = signedData.signedData
 
       val contentInfo = signedData.contentInfo
+      val signedDataInfo = SignedDataInfo(signedData)
+      val json = Json.encodeToString(signedDataInfo)
+      val deserializedSignedDataInfo = Json.decodeFromString<SignedDataInfo>(json)
 
-      // Digest Algorithms
-      val serializedDigestAlgorithms = DigestAlgorithmsInfo.getInstance(signedData.digestAlgorithmIDs)
-      val deserializedDigestAlgorithms = serializedDigestAlgorithms.toPrimitive()
-
-      Assertions.assertEquals(
-        true,
-        compareBytes(
-          innerSignedData.digestAlgorithms.getEncoded("DER"),
-          deserializedDigestAlgorithms.getEncoded("DER"), verbose = false
-        )
-      )
-
-      // Certificates
-      val beautifiedCertificates = signedData.certificates
-      val certificateInfos =
-        beautifiedCertificates.getMatches(null).toList().map { CertificateInfo.getInstance(it) }
-
-      val recreatedHolders = certificateInfos.map { it.toX509CertificateHolder() }
-      val recreatedStore = CollectionStore(recreatedHolders)
-      val recreatedCertificates = recreateCertificatesFromStore(recreatedStore)
-
-      Assertions.assertEquals(
-        true,
-        compareBytes(
-          recreatedCertificates.getEncoded("DER"),
-          innerSignedData.certificates.getEncoded("DER"),
-          verbose = false
-        )
-      )
-
-      val originalSignerInfos = innerSignedData.signerInfos
-      val recreatedSignerInfos =
-        recreateSignerInfosFromSignerInformationStore(signedData.signerInfos)
-      Assertions.assertEquals(
-        true,
-        compareBytes(
-          originalSignerInfos.getEncoded("DER"),
-          recreatedSignerInfos.getEncoded("DER"),
-          verbose = false
-        )
-      )
-
-      val version = innerSignedData.version
-
-      val signedDataSequence = listToDLSequence(
-        listOf(
-          version,
-          deserializedDigestAlgorithms.toASN1Primitive(),
-          innerSignedData.encapContentInfo,
-          TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-            TaggedObjectMetaInfo(0, 2),
-            recreatedCertificates.toASN1Primitive()
-          ),
-          recreatedSignerInfos.toASN1Primitive()
-        )
-      )
-
-      val copy = SignedData.getInstance(signedDataSequence)
+      val copy = SignedData.getInstance(deserializedSignedDataInfo.toPrimitive())
 
       Assertions.assertEquals(
         true,
@@ -115,7 +60,7 @@ class SignatureRecreationTests {
       originalSignature =
         originalSignature.slice(8 until originalSignature.size).toByteArray() // first 8 — metainfo
 
-      val encoded = recreatedInfo.getEncoded("DER")//
+      val encoded = recreatedInfo.getEncoded("DER")
 
       Assertions.assertEquals(
         true,

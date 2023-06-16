@@ -1,8 +1,9 @@
 package com.jetbrains.signatureverifier.serialization
 
-import org.bouncycastle.asn1.*
+import kotlinx.serialization.Serializable
+import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier
-
+@Serializable
 data class DigestAlgorithmsInfo(
   val content: List<AlgorithmInfo>
 ) : EncodableInfo {

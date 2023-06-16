@@ -1,14 +1,10 @@
 package com.jetbrains.signatureverifier.tests.serialization
 
 import com.jetbrains.signatureverifier.PeFile
-import com.jetbrains.signatureverifier.crypt.SignatureVerificationParams
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.serialization.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.bouncycastle.asn1.DERBitString
-import org.bouncycastle.asn1.x509.Certificate
-import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.util.CollectionStore
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
@@ -47,7 +43,7 @@ class CertificateSerializationests {
           certificateInfo == certificateInfoFromJson
         )
 
-        val recreatedCertificateHolder = certificateInfoFromJson.toX509CertificateHolder()
+        val recreatedCertificateHolder = certificateInfo.toX509CertificateHolder()
 
         Assertions.assertEquals(
           true,
