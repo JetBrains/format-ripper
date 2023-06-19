@@ -7,7 +7,6 @@ import org.bouncycastle.asn1.cms.Attribute
 @Serializable
 data class UnknownAttributeInfo(
   val identifier: StringInfo,
-//  @Serializable(with = ByteArraySerializer::class)
   val content: String
 ) : AttributeInfo {
 

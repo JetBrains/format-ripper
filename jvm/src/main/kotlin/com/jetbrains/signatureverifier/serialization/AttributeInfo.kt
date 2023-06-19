@@ -18,7 +18,9 @@ sealed interface AttributeInfo : EncodableInfo {
         "1.2.840.113549.1.9.5" -> SigningTimeAttributeInfo(attribute)
         "1.2.840.113635.100.9.2" -> CertificationAuthorityAttributeInfo(attribute)
         "1.2.840.113549.1.9.6" -> CounterSignatureAttributeInfo.getInstance(attribute)
-        else -> UnknownAttributeInfo(attribute)//throw Exception("Attribute ${attribute.attrType.id}")
+        "1.2.840.113635.100.9.1" -> AppleDeveloperCertificateAttribute(attribute)
+//        else -> UnknownAttributeInfo(attribute)
+        else -> throw Exception("Attribute ${attribute.attrType.id}")
       }
     }
   }

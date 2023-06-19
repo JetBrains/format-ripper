@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 object DateSerializer : KSerializer<Date> {
-  private val df: DateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS")
+  private val df: DateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS")
 
   override fun serialize(encoder: Encoder, value: Date) =
     encoder.encodeString(df.format(value))
