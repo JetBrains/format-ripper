@@ -3,7 +3,7 @@ package com.jetbrains.signatureverifier.serialization
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
 import org.bouncycastle.util.encoders.Hex
-import java.lang.IllegalArgumentException
+
 @Serializable
 data class StringInfo(val stringType: StringType, val content: String) : EncodableInfo {
   companion object {
@@ -36,7 +36,8 @@ data class StringInfo(val stringType: StringType, val content: String) : Encodab
         is DEROctetString -> StringType.DEROctetString
         is ASN1ObjectIdentifier -> StringType.ASN1ObjectIdentifier
         is DERBitString -> StringType.DERBitString
-        is ASN1Null -> StringType.ASN1Null // Technically not a string, but we need for consistency
+        // Technically not a string, but we need it for consistency
+        is ASN1Null -> StringType.ASN1Null
         else -> throw IllegalArgumentException("This type of strings is not in list")
       }
 

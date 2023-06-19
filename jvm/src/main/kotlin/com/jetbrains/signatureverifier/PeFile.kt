@@ -5,6 +5,7 @@ import com.jetbrains.signatureverifier.serialization.hexStringToByteArray
 import com.jetbrains.signatureverifier.serialization.toHexString
 import com.jetbrains.util.*
 import org.jetbrains.annotations.NotNull
+import java.io.EOFException
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.SeekableByteChannel
@@ -181,16 +182,22 @@ class PeFile {
 
     _stream.Seek(_signData.Offset.toLong(), SeekOrigin.Begin)
 
-    _signatureMetadata.dwLength = DataValue(
-      DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
-      intToHexString(reader.ReadInt32())
-    )
-
-    _signatureMetadata.wRevision =
-      DataValue(
+    try {
+      _signatureMetadata.dwLength = DataValue(
         DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
         intToHexString(reader.ReadInt32())
       )
+    } catch (_: EOFException) { // this can happen because of empty signature
+    }
+
+    try {
+      _signatureMetadata.wRevision =
+        DataValue(
+          DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
+          intToHexString(reader.ReadInt32())
+        )
+    } catch (_: EOFException) {
+    }
 
     _signatureMetadata.signaturePosition = DataInfo(stream.position().toInt(), _signData.Size)
   }
