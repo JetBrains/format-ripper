@@ -131,12 +131,10 @@ class CertificateSerializationTests {
     private const val pe_08_not_signed = "dotnet_no_sign.exe"
 
 
-    private const val msi_01_signed = "2dac4b.msi";
-
     @JvmStatic
     fun SignedMsiProvider(): Stream<Arguments> {
       return Stream.of(
-        Arguments.of(msi_01_signed, VerifySignatureStatus.Valid),
+        Arguments.of("2dac4b.msi", VerifySignatureStatus.Valid),
       )
     }
 
