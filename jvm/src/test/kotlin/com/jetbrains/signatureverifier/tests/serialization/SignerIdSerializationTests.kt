@@ -2,14 +2,14 @@ package com.jetbrains.signatureverifier.tests.serialization
 
 import com.jetbrains.signatureverifier.PeFile
 import com.jetbrains.signatureverifier.cf.MsiFile
+import com.jetbrains.signatureverifier.crypt.SignatureVerificationParams
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.crypt.VerifySignatureStatus
 import com.jetbrains.signatureverifier.macho.MachoArch
-import com.jetbrains.signatureverifier.serialization.*
+import com.jetbrains.signatureverifier.serialization.SignerIdentifierInfo
+import com.jetbrains.signatureverifier.serialization.compareBytes
+import com.jetbrains.signatureverifier.serialization.getTestByteChannel
 import com.jetbrains.util.TestUtil
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import org.bouncycastle.asn1.cms.SignedData
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -18,7 +18,7 @@ import java.nio.file.Files
 import java.nio.file.StandardOpenOption
 import java.util.stream.Stream
 
-class SignatureRecreationTests {
+class SignerIdSerializationTests {
 
   @ParameterizedTest
   @MethodSource("SignedPEProvider")
@@ -28,7 +28,7 @@ class SignatureRecreationTests {
       val signatureData = peFile.GetSignatureData()
       val signedMessage = SignedMessage.CreateInstance(signatureData)
 
-      RecreateSignatureTest(signedMessage, peFile.GetSignatureData().CmsData!!)
+      SignerIdSerializaionTest(signedMessage)
     }
   }
 
@@ -48,7 +48,7 @@ class SignatureRecreationTests {
     for (machoFile in machoFiles) {
       val signatureData = machoFile.GetSignatureData()
       val signedMessage = SignedMessage.CreateInstance(signatureData)
-      RecreateSignatureTest(signedMessage, machoFile.GetSignatureData().CmsData!!, isMacho = true)
+      SignerIdSerializaionTest(signedMessage)
     }
   }
 
@@ -56,80 +56,29 @@ class SignatureRecreationTests {
   @MethodSource("SignedMsiProvider")
   fun Msi_Test(signedResourceName: String) {
     val result = TestUtil.getTestByteChannel("msi", signedResourceName).use {
+      val verificationParams = SignatureVerificationParams(null, null, false, false)
       val msiFile = MsiFile(it)
       val signatureData = msiFile.GetSignatureData()
       val signedMessage = SignedMessage.CreateInstance(signatureData)
-      RecreateSignatureTest(signedMessage, msiFile.GetSignatureData().CmsData!!)
+      SignerIdSerializaionTest(signedMessage)
     }
   }
 
   /**
-   * Tests, that we can recreate original signature
+   * Tests, that we can recreate `sid` field of `SignerInfo` from serialized data
    */
-  fun RecreateSignatureTest(
-    signedMessage: SignedMessage,
-    originalSignature: ByteArray,
-    isMacho: Boolean = false
-  ) {
+  fun SignerIdSerializaionTest(signedMessage: SignedMessage) {
     val signedData = signedMessage.SignedData
-    val innerSignedData = signedData.signedData
-
-    val contentInfo = signedData.contentInfo
-    val signedDataInfo = SignedDataInfo(signedData)
-    val json = Json.encodeToString(signedDataInfo)
-    val deserializedSignedDataInfo = Json.decodeFromString<SignedDataInfo>(json)
-
-    val copy = SignedData.getInstance(deserializedSignedDataInfo.toPrimitive())
-
-    if (isMacho) {
-      Assertions.assertEquals(
-        true,
-        compareBytes(
-          innerSignedData.getEncoded("DER"),
-          copy.getEncoded("DER"),
-          verbose = true
-        )
-      )
-
-      val recreatedInfo = recreateContentInfoFromSignedData(copy)
+    val signers = signedData.signerInfos.signers
+    signers.forEach { signer ->
+      val primitive = signer.toASN1Structure()
+      val signerIdentifierInfo = SignerIdentifierInfo(signer.sID)
 
       Assertions.assertEquals(
         true,
         compareBytes(
-          contentInfo.getEncoded("BER"),
-          recreatedInfo.getEncoded("BER"),
-          verbose = true
-        )
-      )
-    } else {
-
-      Assertions.assertEquals(
-        true,
-        compareBytes(
-          innerSignedData.getEncoded("DER"),
-          copy.getEncoded("DER"),
-          verbose = true
-        )
-      )
-
-      val recreatedInfo = recreateContentInfoFromSignedData(copy)
-
-      Assertions.assertEquals(
-        true,
-        compareBytes(
-          contentInfo.getEncoded("DER"),
-          recreatedInfo.getEncoded("DER"),
-          verbose = true
-        )
-      )
-
-      val encoded = recreatedInfo.getEncoded("DER")
-
-      Assertions.assertEquals(
-        true,
-        compareBytes(
-          originalSignature,
-          encoded,
+          signerIdentifierInfo.toPrimitive().getEncoded("DER"),
+          primitive.sid.getEncoded("DER"),
           verbose = false
         )
       )
@@ -203,4 +152,5 @@ class SignatureRecreationTests {
       )
     }
   }
+
 }

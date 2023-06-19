@@ -9,7 +9,7 @@ import org.bouncycastle.asn1.cms.Attribute
 data class MessageDigestAttributeInfo(
   val identifier: StringInfo,
   val value: StringInfo,
-) : AttributeInfo() {
+) : AttributeInfo {
   override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),

@@ -29,9 +29,11 @@ fun List<ASN1Encodable?>.toDLSet(): DLSet {
   return DLSet(vector)
 }
 
-
-fun recreateContentInfoFromSignedData(signedData: SignedData): ContentInfo {
-  val signedDataBytes = signedData.encoded
+fun recreateContentInfoFromSignedData(
+  signedData: SignedData,
+  encoding: String = "BER"
+): ContentInfo {
+  val signedDataBytes = signedData.getEncoded(encoding)
   val inputStream = ASN1InputStream(signedDataBytes)
   val asn1Object = inputStream.readObject() as ASN1Primitive
 
@@ -45,10 +47,15 @@ fun recreateContentInfoFromSignedData(signedData: SignedData): ContentInfo {
 }
 
 fun compareBytes(
-  lhs: ByteArray,
-  rhs: ByteArray,
+  first: ByteArray,
+  second: ByteArray,
   verbose: Boolean = true
 ): Boolean {
+  var lhs = first
+  var rhs = second
+  if (lhs.size < second.size) {
+    lhs = second.also { rhs = lhs }
+  }
   if (verbose) {
     println("—————")
     println(

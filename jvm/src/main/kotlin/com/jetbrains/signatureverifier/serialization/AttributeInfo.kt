@@ -6,7 +6,7 @@ import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.cms.Attribute
 
 @Serializable
-sealed class AttributeInfo : EncodableInfo {
+sealed interface AttributeInfo : EncodableInfo {
   companion object {
     fun getInstance(attribute: Attribute): AttributeInfo {
       return when (attribute.attrType.id) {
@@ -16,14 +16,13 @@ sealed class AttributeInfo : EncodableInfo {
         "1.3.6.1.4.1.311.2.1.12" -> MSCertificateTemplateV2AttributeInfo(attribute)
         "1.3.6.1.4.1.311.10.3.28" -> TimestampedDataAttributeInfo(attribute)
         "1.2.840.113549.1.9.5" -> SigningTimeAttributeInfo(attribute)
-        // TODO: Appears in Macho signature
-        "1.2.840.113635.100.9.2" -> UnknownAttributeInfo(attribute)
+        "1.2.840.113635.100.9.2" -> CertificationAuthorityAttributeInfo(attribute)
         else -> UnknownAttributeInfo(attribute)
       }
     }
   }
 
-  protected abstract fun toAttributeDLSequence(): DLSequence
+  fun toAttributeDLSequence(): DLSequence
 
   override fun toPrimitive(): ASN1Primitive = toAttributeDLSequence().toASN1Primitive()
 }

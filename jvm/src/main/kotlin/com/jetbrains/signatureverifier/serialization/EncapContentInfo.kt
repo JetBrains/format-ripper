@@ -1,42 +1,17 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
 import kotlinx.serialization.Serializable
-import org.bouncycastle.asn1.ASN1Primitive
-import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.cms.ContentInfo
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier
 
 @Serializable
-data class EncapContentInfo(
-  val contentType: StringInfo,
-  val imageDataObjIdInfo: ImageDataObjIdInfo,
-  val hashAlgorithmInfo: AlgorithmInfo,
-  val contentHash: StringInfo
-) : EncodableInfo {
-  override fun toPrimitive(): ASN1Primitive =
-    listOf(
-      contentType.toPrimitive(),
-      TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-        TaggedObjectMetaInfo(0, 1),
-        listOf(
-          imageDataObjIdInfo.toPrimitive(),
-          listOf(
-            hashAlgorithmInfo.toPrimitive(),
-            contentHash.toPrimitive()
-          ).toDLSequence()
-        ).toDLSequence()
-      ),
-    ).toDLSequence()
-
-  constructor(contentInfo: ContentInfo) : this(
-    StringInfo.getInstance(contentInfo.contentType),
-    ImageDataObjIdInfo.getInstance((contentInfo.content as DLSequence).first() as DLSequence),
-    AlgorithmInfo(
-      (AlgorithmIdentifier.getInstance(
-        ((contentInfo.content as DLSequence).last() as DLSequence).first()
-      ))
-    ),
-    StringInfo.getInstance(((contentInfo.content as DLSequence).last() as DLSequence).last())
-  )
+sealed interface EncapContentInfo : EncodableInfo {
+  companion object {
+    fun getInstance(contentInfo: ContentInfo): EncapContentInfo {
+      return when (contentInfo.contentType.id) {
+        "1.3.6.1.4.1.311.2.1.4" -> PeEncapContentInfo(contentInfo)
+        "1.2.840.113549.1.7.1" -> RsaEncapContentInfo(contentInfo)
+        else -> throw Exception("Unknown encap content attribute type ${contentInfo.contentType.id}")
+      }
+    }
+  }
 }

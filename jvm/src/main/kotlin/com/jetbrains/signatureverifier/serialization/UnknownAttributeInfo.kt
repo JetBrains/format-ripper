@@ -8,7 +8,7 @@ import org.bouncycastle.asn1.cms.Attribute
 data class UnknownAttributeInfo(
   val identifier: StringInfo,
   val content: ByteArray
-) : AttributeInfo() {
+) : AttributeInfo {
 
   override fun toAttributeDLSequence(): DLSequence = DLSequence.getInstance(content) as DLSequence
 

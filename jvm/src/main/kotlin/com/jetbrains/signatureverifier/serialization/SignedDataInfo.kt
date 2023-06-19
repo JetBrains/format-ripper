@@ -36,7 +36,7 @@ data class SignedDataInfo(
   constructor(signedData: CMSSignedData) : this(
     signedData.signedData.version.value,
     DigestAlgorithmsInfo.getInstance(signedData.digestAlgorithmIDs),
-    EncapContentInfo(signedData.signedData.encapContentInfo),
+    EncapContentInfo.getInstance(signedData.signedData.encapContentInfo),
     signedData.certificates.getMatches(null).toList().map { certificateHolder ->
       CertificateInfo.getInstance(certificateHolder)
     },

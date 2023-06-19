@@ -12,7 +12,7 @@ class SigningTimeAttributeInfo(
   val identifier: StringInfo,
   @Serializable(OffsetDateTimeSerializer::class)
   val content: OffsetDateTime
-) : AttributeInfo() {
+) : AttributeInfo {
 
   override fun toAttributeDLSequence(): DLSequence =
     listOf(

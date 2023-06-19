@@ -9,7 +9,7 @@ import org.bouncycastle.asn1.cms.Attribute
 data class TimestampedDataAttributeInfo(
   val identifier: StringInfo,
   val content: StringInfo
-): AttributeInfo() {
+): AttributeInfo {
 
   override fun toAttributeDLSequence(): DLSequence =
     listOf(
