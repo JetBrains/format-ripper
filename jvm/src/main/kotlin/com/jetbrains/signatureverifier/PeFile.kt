@@ -1,6 +1,8 @@
 ﻿package com.jetbrains.signatureverifier
 
 import com.google.gson.Gson
+import com.jetbrains.signatureverifier.serialization.hexStringToByteArray
+import com.jetbrains.signatureverifier.serialization.toHexString
 import com.jetbrains.util.*
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
@@ -36,7 +38,7 @@ class PeFile {
     fun insertSignature(
       @NotNull stream: SeekableByteChannel,
       @NotNull signatureMetadata: PeSignatureMetadata,
-      @NotNull signatureBytes: ByteArray
+      @NotNull signatureHex: String
     ) {
 
       listOf(
@@ -50,18 +52,20 @@ class PeFile {
         signatureMetadata.dotnetMetadataSize
       ).forEach {
         stream.Seek(it.dataInfo.Offset.toLong(), SeekOrigin.Begin)
-        stream.write(ByteBuffer.wrap(it.value))
+        stream.write(ByteBuffer.wrap(hexStringToByteArray(it.value)))
       }
+
       stream.Seek(signatureMetadata.signaturePosition.Offset.toLong(), SeekOrigin.Begin)
-      stream.write(ByteBuffer.wrap(signatureBytes))
+      stream.write(ByteBuffer.wrap(hexStringToByteArray(signatureHex)))
       val alignment = (8 - stream.position() % 8) % 8
       stream.write(ByteBuffer.wrap(ByteArray(alignment.toInt())))
+
       stream.Rewind()
       stream.close()
     }
 
-    private fun intToBytes(value: Int): ByteArray =
-      ByteBuffer.allocate(Int.SIZE_BYTES).putInt(value).array().reversedArray()
+    private fun intToHexString(value: Int): String =
+      ByteBuffer.allocate(Int.SIZE_BYTES).putInt(value).array().reversedArray().toHexString()
   }
 
   private val _stream: SeekableByteChannel
@@ -98,11 +102,12 @@ class PeFile {
     stream.Seek(0x3C, SeekOrigin.Begin)
     _ntHeaderOffset = reader.ReadUInt32()
     _signatureMetadata.ntHeaderOffset =
-      DataValue(DataInfo(0x3c, Int.SIZE_BYTES), intToBytes(_ntHeaderOffset.toInt()))
+      DataValue(DataInfo(0x3c, Int.SIZE_BYTES), intToHexString(_ntHeaderOffset.toInt()))
 
     _checkSum = DataInfo(_ntHeaderOffset.toInt() + 0x58, Int.SIZE_BYTES)
     stream.Seek(_checkSum.Offset.toLong(), SeekOrigin.Begin)
-    _signatureMetadata.checkSum = DataValue(_checkSum, reader.ReadBytes(Int.SIZE_BYTES))
+    _signatureMetadata.checkSum =
+      DataValue(_checkSum, reader.ReadBytes(Int.SIZE_BYTES).toHexString())
 
     stream.Seek(_ntHeaderOffset.toLong(), SeekOrigin.Begin)
 
@@ -144,13 +149,13 @@ class PeFile {
     _signatureMetadata.securityRva =
       DataValue(
         DataInfo(_imageDirectoryEntrySecurity.Offset, Int.SIZE_BYTES),
-        intToBytes(securityRva)
+        intToHexString(securityRva)
       )
 
     var position = stream.position().toInt()
     val securitySize = reader.ReadUInt32().toInt()
     _signatureMetadata.securitySize =
-      DataValue(DataInfo(position, Int.SIZE_BYTES), intToBytes(securitySize))
+      DataValue(DataInfo(position, Int.SIZE_BYTES), intToHexString(securitySize))
     _signData = DataInfo(securityRva, securitySize)
 
     stream.Seek(
@@ -162,14 +167,14 @@ class PeFile {
     val dotnetMetadataRva = reader.ReadUInt32().toInt()
     _signatureMetadata.dotnetMetadataRva = DataValue(
       DataInfo(position, Int.SIZE_BYTES),
-      intToBytes(dotnetMetadataRva)
+      intToHexString(dotnetMetadataRva)
     )
 
     position = stream.position().toInt()
     val dotnetMetadataSize = reader.ReadUInt32().toInt()
     _signatureMetadata.dotnetMetadataSize = DataValue(
       DataInfo(position, Int.SIZE_BYTES),
-      intToBytes(dotnetMetadataSize)
+      intToHexString(dotnetMetadataSize)
     )
 
     _dotnetMetadata = DataInfo(dotnetMetadataRva, dotnetMetadataSize)
@@ -178,13 +183,13 @@ class PeFile {
 
     _signatureMetadata.dwLength = DataValue(
       DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
-      intToBytes(reader.ReadInt32())
+      intToHexString(reader.ReadInt32())
     )
 
     _signatureMetadata.wRevision =
       DataValue(
         DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
-        intToBytes(reader.ReadInt32())
+        intToHexString(reader.ReadInt32())
       )
 
     _signatureMetadata.signaturePosition = DataInfo(stream.position().toInt(), _signData.Size)

@@ -5,6 +5,7 @@ import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.serialization.SignedDataInfo
 import com.jetbrains.signatureverifier.serialization.compareBytes
 import com.jetbrains.signatureverifier.serialization.recreateContentInfoFromSignedData
+import com.jetbrains.signatureverifier.serialization.toHexString
 import com.jetbrains.util.TestUtil
 import org.bouncycastle.asn1.cms.SignedData
 import org.junit.jupiter.api.Assertions
@@ -61,7 +62,7 @@ class PeSignatureStoringTests {
 
 
     TestUtil.getTestByteChannel("pe", tmpName, write = true).use {
-      PeFile.insertSignature(it, signatureMetadata, signature)
+      PeFile.insertSignature(it, signatureMetadata, signature.toHexString())
     }
 
     Assertions.assertEquals(
