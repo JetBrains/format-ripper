@@ -10,36 +10,55 @@ import org.bouncycastle.asn1.DLTaggedObject
 data class ImageDataObjIdInfo(
   val identifier: StringInfo,
   val hexCode: StringInfo,
-  val content: TaggedObjectInfo
+  val content: EncodableInfo
 ) : EncodableInfo {
   companion object {
     fun getInstance(sequence: DLSequence): ImageDataObjIdInfo {
       val id = StringInfo.getInstance(sequence.first())
       val seq = sequence.last() as DLSequence
-      val hexCode = StringInfo.getInstance(seq.first())
 
-      val taggedObject = seq.last() as DLTaggedObject
-      val secondLevelTaggedObject = taggedObject.baseObject as DLTaggedObject
-      val thirdLevelObject = when (secondLevelTaggedObject.baseObject) {
-        is DLTaggedObject -> TaggedObjectInfo(
-          TaggedObjectMetaInfo(secondLevelTaggedObject.baseObject as DLTaggedObject),
-          StringInfo.getInstance((secondLevelTaggedObject.baseObject as DLTaggedObject).baseObject)
-        )
+      val iterator = seq.iterator()
 
-        else -> SequenceInfo((secondLevelTaggedObject.baseObject as DLSequence).map {
-          StringInfo.getInstance(
-            it
+      val hexCode = StringInfo.getInstance(iterator.next())
+
+      val next = iterator.next()
+      val content = when (next) {
+        // PE
+        is DLTaggedObject -> {
+          val taggedObject = seq.last() as DLTaggedObject
+          val secondLevelTaggedObject = taggedObject.baseObject as DLTaggedObject
+          val thirdLevelObject = when (secondLevelTaggedObject.baseObject) {
+            is DLTaggedObject -> TaggedObjectInfo(
+              TaggedObjectMetaInfo(secondLevelTaggedObject.baseObject as DLTaggedObject),
+              StringInfo.getInstance((secondLevelTaggedObject.baseObject as DLTaggedObject).baseObject)
+            )
+
+            else -> SequenceInfo((secondLevelTaggedObject.baseObject as DLSequence).map {
+              StringInfo.getInstance(
+                it
+              )
+            })
+          }
+
+          TaggedObjectInfo(
+            TaggedObjectMetaInfo(taggedObject),
+            TaggedObjectInfo(
+              TaggedObjectMetaInfo(secondLevelTaggedObject),
+              thirdLevelObject
+            )
           )
-        })
+        }
+
+        else -> {
+          val list = mutableListOf<EncodableInfo>(StringInfo.getInstance(next))
+          while (iterator.hasNext()) {
+            list.add(StringInfo.getInstance(iterator.next()))
+          }
+          SequenceInfo(list)
+        }
       }
 
-      val content = TaggedObjectInfo(
-        TaggedObjectMetaInfo(taggedObject),
-        TaggedObjectInfo(
-          TaggedObjectMetaInfo(secondLevelTaggedObject),
-          thirdLevelObject
-        )
-      )
+
       return ImageDataObjIdInfo(id, hexCode, content)
     }
   }
@@ -47,10 +66,15 @@ data class ImageDataObjIdInfo(
   override fun toPrimitive(): ASN1Primitive =
     listOf(
       identifier.toPrimitive(),
-      listOf(
-        hexCode.toPrimitive(),
-        content.toPrimitive()
-      ).toDLSequence()
+
+      (if (content is SequenceInfo)
+        (mutableListOf(hexCode.toPrimitive()) + content.toPrimitiveList()).toDLSequence()
+      else
+        listOf(
+          hexCode.toPrimitive(),
+          content.toPrimitive()
+        ).toDLSequence()
+        )
     ).toDLSequence()
 
 }
