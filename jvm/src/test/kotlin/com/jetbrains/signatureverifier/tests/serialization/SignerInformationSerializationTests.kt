@@ -1,11 +1,14 @@
 package com.jetbrains.signatureverifier.tests.serialization
 
 import com.jetbrains.signatureverifier.PeFile
+import com.jetbrains.signatureverifier.cf.MsiFile
 import com.jetbrains.signatureverifier.crypt.SignatureVerificationParams
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.crypt.SignedMessageVerifier
 import com.jetbrains.signatureverifier.crypt.VerifySignatureStatus
+import com.jetbrains.signatureverifier.macho.MachoArch
 import com.jetbrains.signatureverifier.serialization.*
+import com.jetbrains.util.TestUtil
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -14,6 +17,8 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import java.nio.file.Files
+import java.nio.file.StandardOpenOption
 import java.util.*
 import java.util.stream.Stream
 import com.jetbrains.signatureverifier.serialization.SignerInfo as SerializableSignerInfo
@@ -22,53 +27,88 @@ class SignerInformationSerializationTests {
 
   @ParameterizedTest
   @MethodSource("SignedPEProvider")
-  fun SignersSerializaionTest(signedPeResourceName: String) {
+  fun PE_Test(signedPeResourceName: String) {
     getTestByteChannel("pe", signedPeResourceName).use {
-      val verificationParams = SignatureVerificationParams(null, null, false, false)
       val peFile = PeFile(it)
       val signatureData = peFile.GetSignatureData()
       val signedMessage = SignedMessage.CreateInstance(signatureData)
-      val signedMessageVerifier = SignedMessageVerifier(ConsoleLogger.Instance)
-      runBlocking { signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams) }
 
-      val signedData = signedMessage.SignedData
-      val signers = signedData.signerInfos.signers
-      signers.forEach { signer ->
-        val primitive = signer.toASN1Structure()
-        val signerInfo = SerializableSignerInfo(signer)
+      SignersSerializaionTest(signedMessage)
+    }
+  }
 
-        val json = Json.encodeToString(signerInfo)
-
-        val recreatedSignerInfo =
-          SignerInfo.getInstance(Json.decodeFromString<SerializableSignerInfo>(json).toPrimitive())
-
-        Assertions.assertEquals(
-          true,
-          compareBytes(
-            primitive.getEncoded("DER"),
-            recreatedSignerInfo.getEncoded("DER"),
-            verbose = false
-          )
-        )
+  @ParameterizedTest
+  @MethodSource("SignedMachoProvider")
+  fun Macho_Test(signedResourceName: String) {
+    val machoFiles =
+      Files.newByteChannel(
+        TestUtil.getTestDataFile(
+          "mach-o",
+          signedResourceName
+        ), StandardOpenOption.READ
+      ).use {
+        MachoArch(it).Extract()
       }
 
-      val signerInfos = signers.map { SerializableSignerInfo(it) }
-      val json = Json.encodeToString(signerInfos)
+    for (machoFile in machoFiles) {
+      val signatureData = machoFile.GetSignatureData()
+      val signedMessage = SignedMessage.CreateInstance(signatureData)
+      SignersSerializaionTest(signedMessage)
+    }
+  }
 
+  @ParameterizedTest
+  @MethodSource("SignedMsiProvider")
+  fun Msi_Test(signedResourceName: String) {
+    val result = TestUtil.getTestByteChannel("msi", signedResourceName).use {
+      val msiFile = MsiFile(it)
+      val signatureData = msiFile.GetSignatureData()
+      val signedMessage = SignedMessage.CreateInstance(signatureData)
+      SignersSerializaionTest(signedMessage)
+    }
+  }
 
-      val recreatedSignerInfos =
-        Json.decodeFromString<List<SerializableSignerInfo>>(json).map { it.toPrimitive() }.toDLSet()
+  fun SignersSerializaionTest(signedMessage: SignedMessage) {
+    val verificationParams = SignatureVerificationParams(null, null, false, false)
+    val signedMessageVerifier = SignedMessageVerifier(ConsoleLogger.Instance)
+    runBlocking { signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams) }
+
+    val signedData = signedMessage.SignedData
+    val signers = signedData.signerInfos.signers
+    signers.forEach { signer ->
+      val primitive = signer.toASN1Structure()
+      val signerInfo = SerializableSignerInfo(signer)
+
+      val json = Json.encodeToString(signerInfo)
+
+      val recreatedSignerInfo =
+        SignerInfo.getInstance(Json.decodeFromString<SerializableSignerInfo>(json).toPrimitive())
 
       Assertions.assertEquals(
         true,
         compareBytes(
-          signedData.signedData.signerInfos.getEncoded("DER"),
-          recreatedSignerInfos.getEncoded("DER"),
+          primitive.getEncoded("DER"),
+          recreatedSignerInfo.getEncoded("DER"),
           verbose = false
         )
       )
-
     }
+
+    val signerInfos = signers.map { SerializableSignerInfo(it) }
+    val json = Json.encodeToString(signerInfos)
+
+
+    val recreatedSignerInfos =
+      Json.decodeFromString<List<SerializableSignerInfo>>(json).map { it.toPrimitive() }.toDLSet()
+
+    Assertions.assertEquals(
+      true,
+      compareBytes(
+        signedData.signedData.signerInfos.getEncoded("DER"),
+        recreatedSignerInfos.getEncoded("DER"),
+        verbose = false
+      )
+    )
   }
 
 
