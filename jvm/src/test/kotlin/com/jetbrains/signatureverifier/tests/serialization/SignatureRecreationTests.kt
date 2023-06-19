@@ -101,6 +101,17 @@ class SignatureRecreationTests {
           verbose = true
         )
       )
+
+      val encoded = recreatedInfo.getEncoded("BER")
+
+      Assertions.assertEquals(
+        true,
+        compareBytes(
+          originalSignature,
+          encoded,
+          verbose = false
+        )
+      )
     } else {
 
       Assertions.assertEquals(
