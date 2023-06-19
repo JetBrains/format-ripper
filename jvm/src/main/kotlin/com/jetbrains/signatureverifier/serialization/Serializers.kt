@@ -52,3 +52,16 @@ object BigIntegerSerializer : KSerializer<BigInteger> {
 
   override fun deserialize(decoder: Decoder): BigInteger = decoder.decodeString().toBigInteger()
 }
+
+object ByteArraySerializer : KSerializer<ByteArray> {
+  override fun serialize(encoder: Encoder, value: ByteArray) =
+    encoder.encodeString(value.toHexString())
+
+
+  override fun deserialize(decoder: Decoder): ByteArray =
+    hexStringToByteArray(decoder.decodeString())
+
+
+  override val descriptor: SerialDescriptor =
+    PrimitiveSerialDescriptor("ByteArray", PrimitiveKind.STRING)
+}

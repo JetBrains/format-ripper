@@ -7,13 +7,15 @@ import org.bouncycastle.asn1.cms.Attribute
 @Serializable
 data class UnknownAttributeInfo(
   val identifier: StringInfo,
-  val content: ByteArray
+//  @Serializable(with = ByteArraySerializer::class)
+  val content: String
 ) : AttributeInfo {
 
-  override fun toAttributeDLSequence(): DLSequence = DLSequence.getInstance(content) as DLSequence
+  override fun toAttributeDLSequence(): DLSequence =
+    DLSequence.getInstance(hexStringToByteArray(content)) as DLSequence
 
   constructor(attribute: Attribute) : this(
     StringInfo.getInstance(attribute.attrType),
-    attribute.getEncoded("DER")
+    attribute.getEncoded("DER").toHexString()
   )
 }
