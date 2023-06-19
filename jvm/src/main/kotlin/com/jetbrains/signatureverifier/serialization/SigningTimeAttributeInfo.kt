@@ -14,16 +14,13 @@ class SigningTimeAttributeInfo(
   val content: OffsetDateTime
 ) : AttributeInfo() {
 
-  override fun toAttributeDLSequence(): DLSequence = listToDLSequence(
+  override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
-      listToDLSet(
         listOf(
           ASN1UTCTime(content.format(DateTimeFormatter.ofPattern("yyMMddHHmmssX")))
-        )
-      )
-    )
-  )
+        ).toDLSet()
+    ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
     StringInfo.getInstance(attribute.attrType),

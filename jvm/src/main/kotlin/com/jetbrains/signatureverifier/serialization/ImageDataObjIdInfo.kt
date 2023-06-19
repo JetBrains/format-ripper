@@ -44,16 +44,13 @@ data class ImageDataObjIdInfo(
     }
   }
 
-  override fun toPrimitive(): ASN1Primitive = listToDLSequence(
+  override fun toPrimitive(): ASN1Primitive =
     listOf(
       identifier.toPrimitive(),
-      listToDLSequence(
-        listOf(
-          hexCode.toPrimitive(),
-          content.toPrimitive()
-        )
-      )
-    )
-  )
+      listOf(
+        hexCode.toPrimitive(),
+        content.toPrimitive()
+      ).toDLSequence()
+    ).toDLSequence()
 
 }

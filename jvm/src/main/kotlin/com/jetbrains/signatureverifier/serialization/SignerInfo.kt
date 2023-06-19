@@ -19,14 +19,14 @@ data class SignerInfo(
   val encryptedDigest: StringInfo,
   val unauthenticatedAttributes: List<AttributeInfo>?
 ) : EncodableInfo {
-  override fun toPrimitive(): ASN1Primitive = listToDLSequence(
+  override fun toPrimitive(): ASN1Primitive =
     listOf(
       ASN1Integer(version.toLong()),
       sid.toPrimitive(),
       digestAlgorithm.toPrimitive(),
       TaggedObjectInfo.getTaggedObjectWithMetaInfo(
         TaggedObjectMetaInfo(0, 2),
-        listToDLSet(authenticatedAttributes.map { it.toPrimitive() })
+        authenticatedAttributes.map { it.toPrimitive() }.toDLSet()
       ),
       digestEncryptionAlgorithm.toPrimitive(),
       encryptedDigest.toPrimitive(),
@@ -35,10 +35,9 @@ data class SignerInfo(
       } else
         TaggedObjectInfo.getTaggedObjectWithMetaInfo(
           TaggedObjectMetaInfo(1, 2),
-          listToDLSet(unauthenticatedAttributes.map { it.toPrimitive() })
+          unauthenticatedAttributes.map { it.toPrimitive() }.toDLSet()
         )),
-    )
-  )
+    ).toDLSequence()
 
   constructor(signer: SignerInformation) : this(
     signer.version,

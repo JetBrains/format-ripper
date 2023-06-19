@@ -1,8 +1,10 @@
 package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
-import org.bouncycastle.asn1.*
+import org.bouncycastle.asn1.ASN1Primitive
+import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.x500.X500Name
+
 @Serializable
 data class IssuerInfo(
   val name: String,
@@ -18,13 +20,12 @@ data class IssuerInfo(
       }
     })
 
-  private fun toDLSequence(): DLSequence = listToDLSequence(
+  private fun toDLSequence(): DLSequence =
     rdNs.map {
-      listToDLSet(it.map { info ->
+      it.map { info ->
         info.toPrimitive()
-      })
-    }
-  )
+      }.toDLSet()
+    }.toDLSequence()
 
   override fun toPrimitive(): ASN1Primitive = toDLSequence().toASN1Primitive()
 }

@@ -11,12 +11,11 @@ data class TimestampedDataAttributeInfo(
   val content: StringInfo
 ): AttributeInfo() {
 
-  override fun toAttributeDLSequence(): DLSequence = listToDLSequence(
+  override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
-      listToDLSet(listOf(content.toPrimitive()))
-    )
-  )
+      listOf(content.toPrimitive()).toDLSet()
+    ).toDLSequence()
 
   constructor(attribute: Attribute): this(
     StringInfo.getInstance(attribute.attrType),

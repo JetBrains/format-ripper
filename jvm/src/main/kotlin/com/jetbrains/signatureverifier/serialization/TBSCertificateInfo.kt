@@ -2,8 +2,9 @@ package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
-import java.util.*
 import org.bouncycastle.cert.X509CertificateHolder
+import java.util.*
+
 @Serializable
 data class TBSCertificateInfo(
   val version: Int,
@@ -43,36 +44,32 @@ data class TBSCertificateInfo(
   }
 
   private fun toDLSequence(): DLSequence =
-    listToDLSequence(
+
+    listOf(
+      DLTaggedObject(
+        true, 0, ASN1Integer(version.toLong() - 1)
+      ),
+      ASN1Integer(serialNumber.toBigInteger()),
+      signatureAlgorithm.toPrimitive(),
+      issuer.toPrimitive(),
+
       listOf(
-        DLTaggedObject(
-          true, 0, ASN1Integer(version.toLong() - 1)
-        ),
-        ASN1Integer(serialNumber.toBigInteger()),
-        signatureAlgorithm.toPrimitive(),
-        issuer.toPrimitive(),
-        listToDLSequence(
-          listOf(
-            ASN1UTCTime(startDate),
-            ASN1UTCTime(endDate)
-          )
-        ),
-        subject.toPrimitive(),
-        listToDLSequence(
-          listOf(
-            subjectAlgorithm.toPrimitive(),
-            subjectData.toPrimitive()
-          )
-        ),
-        DLTaggedObject(
-          true,
-          3,
-          listToDLSequence(extensions.map {
-            it.toPrimitive()
-          })
-        )
+        ASN1UTCTime(startDate),
+        ASN1UTCTime(endDate)
+      ).toDLSequence(),
+      subject.toPrimitive(),
+      listOf(
+        subjectAlgorithm.toPrimitive(),
+        subjectData.toPrimitive()
+      ).toDLSequence(),
+      DLTaggedObject(
+        true,
+        3,
+        extensions.map {
+          it.toPrimitive()
+        }.toDLSequence()
       )
-    )
+    ).toDLSequence()
 
   override fun toPrimitive(): ASN1Primitive = toDLSequence().toASN1Primitive()
 }

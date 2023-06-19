@@ -10,14 +10,11 @@ data class MessageDigestAttributeInfo(
   val identifier: StringInfo,
   val value: StringInfo,
 ) : AttributeInfo() {
-  override fun toAttributeDLSequence(): DLSequence = listToDLSequence(
+  override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
-      listToDLSet(
-        listOf(value.toPrimitive())
-      )
-    )
-  )
+      listOf(value.toPrimitive()).toDLSet()
+    ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
     StringInfo.getInstance(attribute.attrType),

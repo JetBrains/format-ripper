@@ -17,6 +17,6 @@ data class DigestAlgorithmsInfo(
       )
   }
 
-  override fun toPrimitive(): ASN1Primitive = listToDLSet(content.map { it.toPrimitive() })
+  override fun toPrimitive(): ASN1Primitive = content.map { it.toPrimitive() }.toDLSet()
 
 }

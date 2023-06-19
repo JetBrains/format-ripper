@@ -17,7 +17,7 @@ data class SignedDataInfo(
   val certificates: List<CertificateInfo>,
   val signerInfos: List<SignerInfo>
 ) : EncodableInfo {
-  override fun toPrimitive(): ASN1Primitive = listToDLSequence(
+  override fun toPrimitive(): ASN1Primitive =
     listOf(
       ASN1Integer(version),
       digestAlgorithmsInfo.toPrimitive(),
@@ -30,9 +30,8 @@ data class SignedDataInfo(
           })
         ).toASN1Primitive()
       ),
-      listToDLSet(signerInfos.map { it.toPrimitive() }).toASN1Primitive()
-    )
-  )
+      signerInfos.map { it.toPrimitive() }.toDLSet().toASN1Primitive()
+    ).toDLSequence()
 
   constructor(signedData: CMSSignedData) : this(
     signedData.signedData.version.value,

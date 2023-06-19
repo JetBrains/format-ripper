@@ -47,9 +47,9 @@ class SignerInformationSerializationTests {
           )
         }
 
-        val recreatedSet = listToDLSet(attributeInfos.map { attr ->
+        val recreatedSet = attributeInfos.map { attr ->
           attr.toPrimitive()
-        })
+        }.toDLSet()
 
         Assertions.assertEquals(
           true,
@@ -129,8 +129,7 @@ class SignerInformationSerializationTests {
 
 
       val recreatedSignerInfos =
-        listToDLSet(
-          Json.decodeFromString<List<SerializableSignerInfo>>(json).map { it.toPrimitive() })
+        Json.decodeFromString<List<SerializableSignerInfo>>(json).map { it.toPrimitive() }.toDLSet()
 
       Assertions.assertEquals(
         true,

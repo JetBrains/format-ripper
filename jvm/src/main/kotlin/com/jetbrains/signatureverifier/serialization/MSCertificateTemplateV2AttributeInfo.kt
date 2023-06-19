@@ -2,7 +2,8 @@ package com.jetbrains.signatureverifier.serialization
 
 import TaggedObjectMetaInfo
 import kotlinx.serialization.Serializable
-import org.bouncycastle.asn1.*
+import org.bouncycastle.asn1.DLSequence
+import org.bouncycastle.asn1.DLTaggedObject
 import org.bouncycastle.asn1.cms.Attribute
 
 // 1.3.6.1.4.1.311.2.1.12
@@ -12,16 +13,13 @@ data class MSCertificateTemplateV2AttributeInfo(
   val value: List<TaggedObjectInfo>
 ) : AttributeInfo() {
 
-  override fun toAttributeDLSequence(): DLSequence = listToDLSequence(
+  override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
-      listToDLSet(
         listOf(
-          listToDLSequence(value.map { it.toPrimitive() })
-        )
-      )
-    )
-  )
+          value.map { it.toPrimitive() }.toDLSequence()
+        ).toDLSet()
+    ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
     StringInfo.getInstance(attribute.attrType),

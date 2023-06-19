@@ -1,10 +1,14 @@
 package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
-import org.bouncycastle.asn1.*
+import org.bouncycastle.asn1.ASN1Primitive
+import org.bouncycastle.asn1.ASN1Set
+import org.bouncycastle.asn1.DERBitString
+import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.x509.Certificate
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.util.Store
+
 @Serializable
 data class CertificateInfo(
   val tbsCertificateInfo: TBSCertificateInfo,
@@ -20,13 +24,12 @@ data class CertificateInfo(
 
   }
 
-  private fun toDlSequence(): DLSequence = listToDLSequence(
+  private fun toDlSequence(): DLSequence =
     listOf(
       tbsCertificateInfo.toPrimitive(),
       signatureAlgorithm.toPrimitive(),
       signatureData.toPrimitive()
-    )
-  )
+    ).toDLSequence()
 
   fun toX509CertificateHolder() = X509CertificateHolder(
     Certificate.getInstance(toPrimitive())
@@ -37,4 +40,4 @@ data class CertificateInfo(
 }
 
 fun recreateCertificatesFromStore(store: Store<X509CertificateHolder>): ASN1Set =
-  listToDLSet(store.getMatches(null).toList().map { it.toASN1Structure() })
+  store.getMatches(null).toList().map { it.toASN1Structure() }.toDLSet()

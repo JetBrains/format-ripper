@@ -1,7 +1,7 @@
 package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
-import org.bouncycastle.asn1.*
+import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.cms.Attribute
 
 // 1.2.840.113549.1.9.3
@@ -10,12 +10,11 @@ data class ContentTypeAttributeInfo(
   val identifier: StringInfo,
   val value: StringInfo
 ) : AttributeInfo() {
-  override fun toAttributeDLSequence(): DLSequence = listToDLSequence(
+  override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
-      listToDLSet(listOf(value.toPrimitive()))
-    )
-  )
+      listOf(value.toPrimitive()).toDLSet()
+    ).toDLSequence()
 
 
   constructor(attribute: Attribute) : this(

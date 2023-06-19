@@ -1,9 +1,10 @@
 package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
-import org.bouncycastle.asn1.*
+import org.bouncycastle.asn1.ASN1ObjectIdentifier
+import org.bouncycastle.asn1.ASN1Primitive
+import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier
-import org.bouncycastle.operator.AlgorithmNameFinder
 import org.bouncycastle.operator.DefaultAlgorithmNameFinder
 
 // additionalValue is to be investigated, for now it is just StringInfo or null
@@ -26,7 +27,7 @@ data class AlgorithmInfo(
     if (additionalValue != null) {
       list.add(additionalValue.toPrimitive())
     }
-    return listToDLSequence(list)
+    return list.toDLSequence()
   }
 
   override fun toPrimitive(): ASN1Primitive = toDLSequence().toASN1Primitive()

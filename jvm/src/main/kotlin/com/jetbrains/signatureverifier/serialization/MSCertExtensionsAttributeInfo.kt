@@ -10,18 +10,13 @@ data class MSCertExtensionsAttributeInfo(
   val identifier: StringInfo,
   val value: List<List<StringInfo>>
 ) : AttributeInfo() {
-  override fun toAttributeDLSequence(): DLSequence = listToDLSequence(
+  override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
-      listToDLSet(
         value.map {
-          listToDLSequence(
-            it.map { s -> s.toPrimitive() }
-          )
-        }
-      )
-    )
-  )
+          it.map { s -> s.toPrimitive() }.toDLSequence()
+        }.toDLSet()
+    ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
     StringInfo.getInstance(attribute.attrType),

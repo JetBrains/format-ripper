@@ -14,21 +14,20 @@ data class EncapContentInfo(
   val hashAlgorithmInfo: AlgorithmInfo,
   val contentHash: StringInfo
 ) : EncodableInfo {
-  override fun toPrimitive(): ASN1Primitive = listToDLSequence(
+  override fun toPrimitive(): ASN1Primitive =
     listOf(
       contentType.toPrimitive(),
       TaggedObjectInfo.getTaggedObjectWithMetaInfo(
         TaggedObjectMetaInfo(0, 1),
-        listToDLSequence(listOf(
+        listOf(
           imageDataObjIdInfo.toPrimitive(),
-          listToDLSequence(listOf(
+          listOf(
             hashAlgorithmInfo.toPrimitive(),
             contentHash.toPrimitive()
-          ))
-        ))
+          ).toDLSequence()
+        ).toDLSequence()
       ),
-    )
-  )
+    ).toDLSequence()
 
   constructor(contentInfo: ContentInfo) : this(
     StringInfo.getInstance(contentInfo.contentType),
