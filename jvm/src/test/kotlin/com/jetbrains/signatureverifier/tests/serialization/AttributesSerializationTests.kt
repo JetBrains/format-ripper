@@ -97,6 +97,29 @@ class AttributesSerializationTests {
           verbose = false
         )
       )
+
+      if (primitive.unauthenticatedAttributes != null) {
+        val unsignedAttributeInfos = primitive.unauthenticatedAttributes.map {
+          (it as DLSequence).first()
+        }.map {
+          AttributeInfo.getInstance(
+            signer.unsignedAttributes?.get(it as ASN1ObjectIdentifier) as Attribute
+          )
+        }
+
+        val recreatedUnsignedSet = unsignedAttributeInfos.map { attr ->
+          attr.toPrimitive()
+        }.toDLSet()
+
+        Assertions.assertEquals(
+          true,
+          compareBytes(
+            primitive.unauthenticatedAttributes.getEncoded("DER"),
+            recreatedUnsignedSet.getEncoded("DER"),
+            verbose = false
+          )
+        )
+      }
     }
   }
 

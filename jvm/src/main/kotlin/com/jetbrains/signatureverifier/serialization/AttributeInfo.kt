@@ -17,7 +17,8 @@ sealed interface AttributeInfo : EncodableInfo {
         "1.3.6.1.4.1.311.10.3.28" -> TimestampedDataAttributeInfo(attribute)
         "1.2.840.113549.1.9.5" -> SigningTimeAttributeInfo(attribute)
         "1.2.840.113635.100.9.2" -> CertificationAuthorityAttributeInfo(attribute)
-        else -> UnknownAttributeInfo(attribute)
+        "1.2.840.113549.1.9.6" -> CounterSignatureAttributeInfo.getInstance(attribute)
+        else -> UnknownAttributeInfo(attribute)//throw Exception("Attribute ${attribute.attrType.id}")
       }
     }
   }
