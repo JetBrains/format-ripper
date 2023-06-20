@@ -116,7 +116,7 @@ class AttributesSerializationTests {
           compareBytes(
             primitive.unauthenticatedAttributes.getEncoded("DER"),
             recreatedUnsignedSet.getEncoded("DER"),
-            verbose = false
+            verbose = true
           )
         )
       }

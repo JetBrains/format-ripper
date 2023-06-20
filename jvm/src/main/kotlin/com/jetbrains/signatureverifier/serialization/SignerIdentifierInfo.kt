@@ -8,7 +8,7 @@ import java.math.BigInteger
 
 @Serializable
 data class SignerIdentifierInfo(
-  val issuerInfo: IssuerInfo,
+  val issuerInfo: X500NameInfo,
   @Serializable(BigIntegerSerializer::class)
   val serialNumber: BigInteger
 ) : EncodableInfo {
@@ -19,7 +19,7 @@ data class SignerIdentifierInfo(
     ).toDLSequence()
 
   constructor(sid: SignerId) : this(
-    IssuerInfo(sid.issuer),
+    X500NameInfo(sid.issuer),
     sid.serialNumber
   )
 }

@@ -6,7 +6,7 @@ import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.x500.X500Name
 
 @Serializable
-data class IssuerInfo(
+data class X500NameInfo(
   val name: String,
   val rdNs: List<List<rdNInfo>>
 ) : EncodableInfo {

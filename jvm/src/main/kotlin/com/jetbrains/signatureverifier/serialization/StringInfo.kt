@@ -2,6 +2,7 @@ package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
+import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.util.encoders.Hex
 
 @Serializable
@@ -21,7 +22,8 @@ data class StringInfo(val stringType: StringType, val content: String) : Encodab
       ASN1ObjectIdentifier(org.bouncycastle.asn1.ASN1ObjectIdentifier::class.java),
       DERBitString(org.bouncycastle.asn1.DERBitString::class.java),
       ASN1Null(org.bouncycastle.asn1.ASN1Null::class.java),
-      Integer(org.bouncycastle.asn1.ASN1Integer::class.java)
+      Integer(org.bouncycastle.asn1.ASN1Integer::class.java),
+      X500Name(org.bouncycastle.asn1.x500.X500Name::class.java)
     }
 
     fun getStringType(value: ASN1Encodable) =
@@ -37,9 +39,9 @@ data class StringInfo(val stringType: StringType, val content: String) : Encodab
         is DEROctetString -> StringType.DEROctetString
         is ASN1ObjectIdentifier -> StringType.ASN1ObjectIdentifier
         is DERBitString -> StringType.DERBitString
-        is ASN1Integer -> StringType.Integer
         // Technically not a string, but we need it for consistency
         is ASN1Null -> StringType.ASN1Null
+        is ASN1Integer -> StringType.Integer
         else -> throw IllegalArgumentException("This type of strings is not in list: ${value::class}")
       }
 

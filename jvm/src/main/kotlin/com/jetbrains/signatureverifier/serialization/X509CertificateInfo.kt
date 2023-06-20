@@ -6,45 +6,46 @@ import org.bouncycastle.cert.X509CertificateHolder
 import java.util.*
 
 @Serializable
-data class TBSCertificateInfo(
+data class X509CertificateInfo(
   val version: Int,
   val serialNumber: String,
   val signatureAlgorithm: AlgorithmInfo,
-  val issuer: IssuerInfo,
+  val issuer: X500NameInfo,
   @Serializable(DateSerializer::class)
   val startDate: Date,
   @Serializable(DateSerializer::class)
   val endDate: Date,
-  val subject: IssuerInfo,
+  val subject: X500NameInfo,
   val subjectAlgorithm: AlgorithmInfo,
   val subjectData: StringInfo,
-  val extensions: List<ExtensionInfo>
-) : EncodableInfo {
+  val extensions: List<ExtensionInfo>?
+) : XCertificateInfo {
   companion object {
-    fun getInstance(certificateHolder: X509CertificateHolder): TBSCertificateInfo =
-      TBSCertificateInfo(
+    fun getInstance(certificateHolder: X509CertificateHolder): X509CertificateInfo =
+      X509CertificateInfo(
         certificateHolder.versionNumber,
         certificateHolder.serialNumber.toString(),
         AlgorithmInfo(certificateHolder.signatureAlgorithm),
-        IssuerInfo(certificateHolder.issuer),
+        X500NameInfo(certificateHolder.issuer),
         certificateHolder.notBefore,
         certificateHolder.notAfter,
-        IssuerInfo(certificateHolder.subject),
+        X500NameInfo(certificateHolder.subject),
         AlgorithmInfo(certificateHolder.subjectPublicKeyInfo.algorithm),
         StringInfo.getInstance(certificateHolder.subjectPublicKeyInfo.publicKeyData),
-        certificateHolder.extensions.extensionOIDs.map {
-          val extension = certificateHolder.extensions.getExtension(it)
-          ExtensionInfo(
-            StringInfo.getInstance(extension.extnId),
-            certificateHolder.extensions.criticalExtensionOIDs.contains(extension.extnId),
-            StringInfo.getInstance(extension.extnValue)
-          )
+        certificateHolder.extensions?.let {
+          it.extensionOIDs.map {
+            val extension = certificateHolder.extensions.getExtension(it)
+            ExtensionInfo(
+              StringInfo.getInstance(extension.extnId),
+              certificateHolder.extensions.criticalExtensionOIDs.contains(extension.extnId),
+              StringInfo.getInstance(extension.extnValue)
+            )
+          }
         }
       )
   }
 
   private fun toDLSequence(): DLSequence =
-
     listOf(
       DLTaggedObject(
         true, 0, ASN1Integer(version.toLong() - 1)
@@ -62,13 +63,15 @@ data class TBSCertificateInfo(
         subjectAlgorithm.toPrimitive(),
         subjectData.toPrimitive()
       ).toDLSequence(),
-      DLTaggedObject(
-        true,
-        3,
-        extensions.map {
-          it.toPrimitive()
-        }.toDLSequence()
-      )
+      extensions?.let {
+        DLTaggedObject(
+          true,
+          3,
+          it.map {
+            it.toPrimitive()
+          }.toDLSequence()
+        )
+      }
     ).toDLSequence()
 
   override fun toPrimitive(): ASN1Primitive = toDLSequence().toASN1Primitive()

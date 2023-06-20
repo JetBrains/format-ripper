@@ -46,6 +46,8 @@ fun recreateContentInfoFromSignedData(
   return contentInfo
 }
 
+//X500Name.getInstance((value as X500Name).getStyle(), X500Name(value.rdNs)).getEncoded("DER").contentEquals(value.getEncoded("DER"))
+
 fun compareBytes(
   first: ByteArray,
   second: ByteArray,
