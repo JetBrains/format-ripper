@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.DLTaggedObject
+import java.rmi.UnexpectedException
 
 @Serializable
 data class ImageDataObjIdInfo(
@@ -21,23 +22,26 @@ data class ImageDataObjIdInfo(
 
       val hexCode = StringInfo.getInstance(iterator.next())
 
-      val next = iterator.next()
-      val content = when (next) {
+      val content = when (val next = iterator.next()) {
         // PE
         is DLTaggedObject -> {
           val taggedObject = seq.last() as DLTaggedObject
           val secondLevelTaggedObject = taggedObject.baseObject as DLTaggedObject
-          val thirdLevelObject = when (secondLevelTaggedObject.baseObject) {
-            is DLTaggedObject -> TaggedObjectInfo(
-              TaggedObjectMetaInfo(secondLevelTaggedObject.baseObject as DLTaggedObject),
-              StringInfo.getInstance((secondLevelTaggedObject.baseObject as DLTaggedObject).baseObject)
-            )
-
-            else -> SequenceInfo((secondLevelTaggedObject.baseObject as DLSequence).map {
-              StringInfo.getInstance(
-                it
+          val thirdLevelObject = secondLevelTaggedObject.baseObject.let { obj ->
+            when (obj) {
+              is DLTaggedObject -> TaggedObjectInfo(
+                TaggedObjectMetaInfo(obj),
+                StringInfo.getInstance(obj.baseObject)
               )
-            })
+
+              is DLSequence -> SequenceInfo(obj.map {
+                StringInfo.getInstance(
+                  it
+                )
+              })
+
+              else -> throw UnexpectedException("Unexpected object type ${obj.javaClass}")
+            }
           }
 
           TaggedObjectInfo(
@@ -50,7 +54,7 @@ data class ImageDataObjIdInfo(
         }
 
         else -> {
-          val list = mutableListOf<EncodableInfo>(StringInfo.getInstance(next))
+          val list = mutableListOf(StringInfo.getInstance(next))
           while (iterator.hasNext()) {
             list.add(StringInfo.getInstance(iterator.next()))
           }
@@ -66,7 +70,6 @@ data class ImageDataObjIdInfo(
   override fun toPrimitive(): ASN1Primitive =
     listOf(
       identifier.toPrimitive(),
-
       (if (content is SequenceInfo)
         (mutableListOf(hexCode.toPrimitive()) + content.toPrimitiveList()).toDLSequence()
       else

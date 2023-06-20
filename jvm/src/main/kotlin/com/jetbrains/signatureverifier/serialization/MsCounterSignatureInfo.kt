@@ -75,7 +75,6 @@ data class MsCounterSignatureInfo(
         CounterSignatureInfo.getInstance(it as DLSequence)
       }
 
-      println()
       return MsCounterSignatureInfo(
         version,
         algorithms,

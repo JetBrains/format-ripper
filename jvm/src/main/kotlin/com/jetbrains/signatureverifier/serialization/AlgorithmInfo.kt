@@ -16,9 +16,11 @@ data class AlgorithmInfo(
 ) : EncodableInfo {
   constructor(signatureAlgorithm: AlgorithmIdentifier) : this(
     DefaultAlgorithmNameFinder().getAlgorithmName(signatureAlgorithm.algorithm as ASN1ObjectIdentifier),
-    if (signatureAlgorithm.parameters == null) null else StringInfo.getInstance(
-      signatureAlgorithm.parameters
-    ),
+    signatureAlgorithm.parameters?.let {
+      StringInfo.getInstance(
+        it
+      )
+    },
     StringInfo.getInstance(signatureAlgorithm.algorithm)
   )
 

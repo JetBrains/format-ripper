@@ -14,9 +14,6 @@ data class RsaEncapContentInfo(
 
   constructor(contentInfo: ContentInfo) : this(
     StringInfo.getInstance(contentInfo.contentType),
-    (if (contentInfo.content == null) {
-      null
-    } else
-      StringInfo.getInstance(contentInfo.content))
+    contentInfo.content?.let { StringInfo.getInstance(it) }
   )
 }

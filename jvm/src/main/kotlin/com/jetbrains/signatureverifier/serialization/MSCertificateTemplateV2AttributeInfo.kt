@@ -23,17 +23,20 @@ data class MSCertificateTemplateV2AttributeInfo(
 
   constructor(attribute: Attribute) : this(
     StringInfo.getInstance(attribute.attrType),
-    attribute.attributeValues.map {
-      (it as DLSequence).map {
-        TaggedObjectInfo(
-          TaggedObjectMetaInfo(it as DLTaggedObject),
+    attribute.attributeValues.map { attributeValue ->
+      (attributeValue as DLSequence).map {
+        (it as DLTaggedObject).let { outer ->
           TaggedObjectInfo(
-            TaggedObjectMetaInfo(it.baseObject as DLTaggedObject),
-            StringInfo.getInstance((it.baseObject as DLTaggedObject).baseObject)
+            TaggedObjectMetaInfo(outer),
+            (outer.baseObject as DLTaggedObject).let { inner ->
+              TaggedObjectInfo(
+                TaggedObjectMetaInfo(inner),
+                StringInfo.getInstance(inner.baseObject)
+              )
+            }
           )
-        )
+        }
       }
     }
   )
-
 }

@@ -8,8 +8,8 @@ import org.bouncycastle.asn1.cms.Attribute
 @Serializable
 sealed interface AttributeInfo : EncodableInfo {
   companion object {
-    fun getInstance(attribute: Attribute): AttributeInfo {
-      return when (attribute.attrType.id) {
+    fun getInstance(attribute: Attribute): AttributeInfo =
+      when (attribute.attrType.id) {
         "1.2.840.113549.1.9.3" -> ContentTypeAttributeInfo(attribute)
         "1.2.840.113549.1.9.4" -> MessageDigestAttributeInfo(attribute)
         "1.3.6.1.4.1.311.2.1.11" -> MSCertExtensionsAttributeInfo(attribute)
@@ -23,8 +23,8 @@ sealed interface AttributeInfo : EncodableInfo {
         else -> UnknownAttributeInfo(attribute)
 //        else -> throw Exception("Attribute ${attribute.attrType.id}")
       }
-    }
   }
+  
 
   fun toAttributeDLSequence(): DLSequence
 

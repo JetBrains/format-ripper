@@ -14,6 +14,24 @@ data class PeEncapContentInfo(
   val hashAlgorithmInfo: AlgorithmInfo,
   val contentHash: StringInfo
 ) : EncapContentInfo {
+  companion object {
+    fun getInstance(contentInfo: ContentInfo): PeEncapContentInfo =
+      (contentInfo.content as DLSequence).let { contentSequence ->
+        (contentSequence.getObjectAt(1) as DLSequence).let { algorithmSequence ->
+          PeEncapContentInfo(
+            StringInfo.getInstance(contentInfo.contentType),
+            ImageDataObjIdInfo.getInstance(contentSequence.first() as DLSequence),
+            AlgorithmInfo(
+              (AlgorithmIdentifier.getInstance(
+                algorithmSequence.first()
+              ))
+            ),
+            StringInfo.getInstance(algorithmSequence.getObjectAt(1))
+          )
+        }
+      }
+  }
+
   override fun toPrimitive(): ASN1Primitive =
     listOf(
       contentType.toPrimitive(),
@@ -28,15 +46,4 @@ data class PeEncapContentInfo(
         ).toDLSequence()
       ),
     ).toDLSequence()
-
-  constructor(contentInfo: ContentInfo) : this(
-    StringInfo.getInstance(contentInfo.contentType),
-    ImageDataObjIdInfo.getInstance((contentInfo.content as DLSequence).first() as DLSequence),
-    AlgorithmInfo(
-      (AlgorithmIdentifier.getInstance(
-        ((contentInfo.content as DLSequence).last() as DLSequence).first()
-      ))
-    ),
-    StringInfo.getInstance(((contentInfo.content as DLSequence).last() as DLSequence).last())
-  )
 }
