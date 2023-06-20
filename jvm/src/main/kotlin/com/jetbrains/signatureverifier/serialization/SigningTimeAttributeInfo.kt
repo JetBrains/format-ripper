@@ -10,23 +10,24 @@ import java.time.format.DateTimeFormatter
 @Serializable
 class SigningTimeAttributeInfo(
   val identifier: StringInfo,
-  @Serializable(OffsetDateTimeSerializer::class)
-  val content: OffsetDateTime
+  val content: List<@Serializable(OffsetDateTimeSerializer::class) OffsetDateTime>
 ) : AttributeInfo {
 
   override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
-        listOf(
-          ASN1UTCTime(content.format(DateTimeFormatter.ofPattern("yyMMddHHmmssX")))
-        ).toDLSet()
+      content.map {
+        ASN1UTCTime(it.format(DateTimeFormatter.ofPattern("yyMMddHHmmssX")))
+      }.toDLSet()
     ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
     StringInfo.getInstance(attribute.attrType),
-    OffsetDateTime.parse(
-      attribute.attributeValues.first().toString(),
-      DateTimeFormatter.ofPattern("yyMMddHHmmssX")
-    )
+    attribute.attributeValues.map {
+      OffsetDateTime.parse(
+        it.toString(),
+        DateTimeFormatter.ofPattern("yyMMddHHmmssX")
+      )
+    }
   )
 }

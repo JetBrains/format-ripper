@@ -8,17 +8,17 @@ import org.bouncycastle.asn1.cms.Attribute
 @Serializable
 data class ContentTypeAttributeInfo(
   val identifier: StringInfo,
-  val value: StringInfo
+  val content: List<StringInfo>
 ) : AttributeInfo {
   override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
-      listOf(value.toPrimitive()).toDLSet()
+      content.map { it.toPrimitive() }.toDLSet()
     ).toDLSequence()
 
 
   constructor(attribute: Attribute) : this(
     StringInfo.getInstance(attribute.attrType),
-    StringInfo.getInstance(attribute.attributeValues.first())
+    attribute.attributeValues.map { StringInfo.getInstance(it) }
   )
 }

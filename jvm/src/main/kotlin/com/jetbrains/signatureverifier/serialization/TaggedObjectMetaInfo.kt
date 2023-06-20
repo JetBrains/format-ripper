@@ -1,4 +1,5 @@
 
+import com.jetbrains.signatureverifier.serialization.getExplicitness
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1TaggedObject
 
@@ -15,13 +16,6 @@ data class TaggedObjectMetaInfo(
   val tagNo: Int,
   val explicitness: Int
 ) {
-  companion object {
-    fun getExplicitness(obj: ASN1TaggedObject): Int {
-      val explicitnessField = ASN1TaggedObject::class.java.getDeclaredField("explicitness")
-      explicitnessField.isAccessible = true
-      return explicitnessField.get(obj) as Int
-    }
-  }
 
-  constructor(obj: ASN1TaggedObject) : this(obj.tagNo, getExplicitness(obj))
+  constructor(obj: ASN1TaggedObject) : this(obj.tagNo, obj.getExplicitness())
 }

@@ -10,27 +10,29 @@ import org.bouncycastle.asn1.cms.Attribute
 @Serializable
 data class MSCertificateTemplateV2AttributeInfo(
   val identifier: StringInfo,
-  val value: List<TaggedObjectInfo>
+  val content: List<List<TaggedObjectInfo>>
 ) : AttributeInfo {
 
   override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
-        listOf(
-          value.map { it.toPrimitive() }.toDLSequence()
-        ).toDLSet()
+      content.map {
+        it.map { it.toPrimitive() }.toDLSequence()
+      }.toDLSet()
     ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
     StringInfo.getInstance(attribute.attrType),
-    (attribute.attributeValues.first() as DLSequence).map {
-      TaggedObjectInfo(
-        TaggedObjectMetaInfo(it as DLTaggedObject),
+    attribute.attributeValues.map {
+      (it as DLSequence).map {
         TaggedObjectInfo(
-          TaggedObjectMetaInfo(it.baseObject as DLTaggedObject),
-          StringInfo.getInstance((it.baseObject as DLTaggedObject).baseObject)
+          TaggedObjectMetaInfo(it as DLTaggedObject),
+          TaggedObjectInfo(
+            TaggedObjectMetaInfo(it.baseObject as DLTaggedObject),
+            StringInfo.getInstance((it.baseObject as DLTaggedObject).baseObject)
+          )
         )
-      )
+      }
     }
   )
 

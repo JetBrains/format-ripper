@@ -8,12 +8,12 @@ import org.bouncycastle.asn1.cms.Attribute
 @Serializable
 data class MSCertExtensionsAttributeInfo(
   val identifier: StringInfo,
-  val value: List<List<StringInfo>>
+  val content: List<List<StringInfo>>
 ) : AttributeInfo {
   override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
-        value.map {
+        content.map {
           it.map { s -> s.toPrimitive() }.toDLSequence()
         }.toDLSet()
     ).toDLSequence()

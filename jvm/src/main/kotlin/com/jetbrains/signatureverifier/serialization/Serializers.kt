@@ -27,6 +27,7 @@ object DateSerializer : KSerializer<Date> {
     PrimitiveSerialDescriptor("Date", PrimitiveKind.STRING)
 }
 
+
 object OffsetDateTimeSerializer : KSerializer<OffsetDateTime> {
   override val descriptor: SerialDescriptor =
     PrimitiveSerialDescriptor("OffsetDateTime", PrimitiveKind.STRING)

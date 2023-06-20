@@ -3,19 +3,7 @@ package com.jetbrains.signatureverifier.serialization
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.cms.ContentInfo
 import org.bouncycastle.asn1.cms.SignedData
-import org.bouncycastle.operator.DefaultAlgorithmNameFinder
 import java.util.*
-
-fun serializeDigestAlgorithms(algorithmsSet: ASN1Set): List<AlgorithmInfo> =
-  algorithmsSet.map {
-    val seq = it as DLSequence
-    AlgorithmInfo(
-      DefaultAlgorithmNameFinder().getAlgorithmName(it.first() as ASN1ObjectIdentifier),
-      if (seq.last() is ASN1Null) null else StringInfo.getInstance(seq.last()),
-      StringInfo.getInstance(it.first())
-    )
-  }
-
 
 fun List<ASN1Encodable?>.toDLSequence(): DLSequence {
   val vector = ASN1EncodableVector()
@@ -45,8 +33,6 @@ fun recreateContentInfoFromSignedData(
 
   return contentInfo
 }
-
-//X500Name.getInstance((value as X500Name).getStyle(), X500Name(value.rdNs)).getEncoded("DER").contentEquals(value.getEncoded("DER"))
 
 fun compareBytes(
   first: ByteArray,
@@ -84,6 +70,12 @@ fun compareBytes(
     println(String.format(Locale.ENGLISH, "%d bytes differ", count))
   }
   return same
+}
+
+fun ASN1TaggedObject.getExplicitness(): Int {
+  val explicitnessField = ASN1TaggedObject::class.java.getDeclaredField("explicitness")
+  explicitnessField.isAccessible = true
+  return explicitnessField.get(this) as Int
 }
 
 fun ByteArray.toHexString(): String {
