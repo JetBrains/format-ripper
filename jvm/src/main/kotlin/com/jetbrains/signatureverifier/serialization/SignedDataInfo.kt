@@ -15,6 +15,7 @@ data class SignedDataInfo(
   val digestAlgorithmsInfo: DigestAlgorithmsInfo,
   val encapContentInfo: EncapContentInfo,
   val certificates: List<CertificateInfo>,
+  val crls: List<EncodableInfo>?,
   val signerInfos: List<SignerInfo>
 ) : EncodableInfo {
   override fun toPrimitive(): ASN1Primitive =
@@ -30,6 +31,7 @@ data class SignedDataInfo(
           })
         ).toASN1Primitive()
       ),
+      crls?.map { it.toPrimitive() }?.toDLSet()?.toASN1Primitive(),
       signerInfos.map { it.toPrimitive() }.toDLSet().toASN1Primitive()
     ).toDLSequence()
 
@@ -40,6 +42,7 @@ data class SignedDataInfo(
     signedData.certificates.getMatches(null).toList().map { certificateHolder ->
       CertificateInfo.getInstance(certificateHolder)
     },
+    signedData.signedData.crLs?.map { it.toASN1Primitive().toEncodableInfo() },
     signedData.signerInfos.signers.map { SignerInfo(it) }
   )
 

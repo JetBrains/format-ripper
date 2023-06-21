@@ -7,20 +7,15 @@ import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier
 import org.bouncycastle.operator.DefaultAlgorithmNameFinder
 
-// additionalValue is to be investigated, for now it is just StringInfo or null
 @Serializable
 data class AlgorithmInfo(
   val name: String,
-  val additionalValue: TextualInfo? = null,
+  val additionalValue: EncodableInfo? = null,
   val algorithmIdentifier: TextualInfo
 ) : EncodableInfo {
   constructor(signatureAlgorithm: AlgorithmIdentifier) : this(
     DefaultAlgorithmNameFinder().getAlgorithmName(signatureAlgorithm.algorithm as ASN1ObjectIdentifier),
-    signatureAlgorithm.parameters?.let {
-      TextualInfo.getInstance(
-        it
-      )
-    },
+    signatureAlgorithm.parameters?.toASN1Primitive()?.toEncodableInfo(),
     TextualInfo.getInstance(signatureAlgorithm.algorithm)
   )
 
