@@ -19,7 +19,8 @@ data class CounterSignatureInfo(
   val digestAlgorithm: AlgorithmInfo,
   val authenticatedAttributes: List<AttributeInfo>,
   val digestEncryptionAlgorithm: AlgorithmInfo,
-  val encryptedDigest: TextualInfo
+  val encryptedDigest: TextualInfo,
+  val counterSignature: TaggedObjectInfo?,
 ) : EncodableInfo {
 
   companion object {
@@ -52,13 +53,24 @@ data class CounterSignatureInfo(
 
       val encryptedDigest = TextualInfo.getInstance(iterator.next())
 
+      val counterSignature: TaggedObjectInfo? = if (iterator.hasNext()) {
+        val obj = iterator.next()
+        TaggedObjectInfo(
+          TaggedObjectMetaInfo(obj as DLTaggedObject),
+          AttributeInfo.getInstance(Attribute.getInstance(obj.baseObject))
+        )
+      } else {
+        null
+      }
+
       return CounterSignatureInfo(
         version,
         signerIdentifierInfo,
         digestAlgorithm,
         attributes,
         encryptionAlgorithm,
-        encryptedDigest
+        encryptedDigest,
+        counterSignature
       )
     }
   }
@@ -74,5 +86,6 @@ data class CounterSignatureInfo(
       ),
       digestEncryptionAlgorithm.toPrimitive(),
       encryptedDigest.toPrimitive(),
+      counterSignature?.toPrimitive(),
     ).toDLSequence()
 }

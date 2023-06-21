@@ -14,7 +14,9 @@ data class AlgorithmInfo(
   val algorithmIdentifier: TextualInfo
 ) : EncodableInfo {
   constructor(signatureAlgorithm: AlgorithmIdentifier) : this(
-    DefaultAlgorithmNameFinder().getAlgorithmName(signatureAlgorithm.algorithm as ASN1ObjectIdentifier),
+    DefaultAlgorithmNameFinder().getAlgorithmName(
+      signatureAlgorithm.algorithm as ASN1ObjectIdentifier
+    ),
     signatureAlgorithm.parameters?.toASN1Primitive()?.toEncodableInfo(),
     TextualInfo.getInstance(signatureAlgorithm.algorithm)
   )

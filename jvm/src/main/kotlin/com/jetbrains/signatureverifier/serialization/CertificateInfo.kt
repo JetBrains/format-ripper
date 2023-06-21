@@ -12,7 +12,7 @@ import org.bouncycastle.util.Store
 
 @Serializable
 data class CertificateInfo(
-  val x509CertificateInfo: XCertificateInfo,
+  val xCertificateInfo: XCertificateInfo,
   val signatureAlgorithm: AlgorithmInfo,
   val signatureData: TextualInfo
 ) : EncodableInfo {
@@ -33,7 +33,7 @@ data class CertificateInfo(
 
   private fun toDlSequence(): DLSequence =
     listOf(
-      x509CertificateInfo.toPrimitive(),
+      xCertificateInfo.toPrimitive(),
       signatureAlgorithm.toPrimitive(),
       signatureData.toPrimitive()
     ).toDLSequence()
