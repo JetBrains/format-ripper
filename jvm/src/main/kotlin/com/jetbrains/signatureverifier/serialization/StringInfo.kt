@@ -2,13 +2,12 @@ package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
-import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.util.encoders.Hex
 
 @Serializable
 data class StringInfo(val stringType: StringType, val content: String) : EncodableInfo {
   companion object {
-    // This is not exhaustive and may shoot you in the leg some day
+    // This is not exhaustive
     enum class StringType(val stringClass: Class<out Any>) {
       DERPrintableString(org.bouncycastle.asn1.DERPrintableString::class.java),
       DERUTF8String(org.bouncycastle.asn1.DERUTF8String::class.java),
@@ -22,8 +21,7 @@ data class StringInfo(val stringType: StringType, val content: String) : Encodab
       ASN1ObjectIdentifier(org.bouncycastle.asn1.ASN1ObjectIdentifier::class.java),
       DERBitString(org.bouncycastle.asn1.DERBitString::class.java),
       ASN1Null(org.bouncycastle.asn1.ASN1Null::class.java),
-      Integer(org.bouncycastle.asn1.ASN1Integer::class.java),
-      X500Name(org.bouncycastle.asn1.x500.X500Name::class.java)
+      Integer(org.bouncycastle.asn1.ASN1Integer::class.java)
     }
 
     fun getStringType(value: ASN1Encodable) =

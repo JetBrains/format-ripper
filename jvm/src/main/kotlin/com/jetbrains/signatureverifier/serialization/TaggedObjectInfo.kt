@@ -38,6 +38,7 @@ data class TaggedObjectInfo(
       else -> throw Exception("Tagged object explicitness can only be 1, 2, 3 or 4")
     }
   }
+
   override fun toPrimitive(): ASN1Primitive =
     getTaggedObjectWithMetaInfo(metaInfo, content.toPrimitive()).toASN1Primitive()
 

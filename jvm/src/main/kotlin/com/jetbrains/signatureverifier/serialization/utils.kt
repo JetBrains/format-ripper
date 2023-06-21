@@ -26,12 +26,10 @@ fun recreateContentInfoFromSignedData(
   val asn1Object = inputStream.readObject() as ASN1Primitive
 
   // Wrap the ASN1Primitive object in a ContentInfo structure
-  val contentInfo = ContentInfo(
+  return ContentInfo(
     ContentInfo.signedData,
     asn1Object
   )
-
-  return contentInfo
 }
 
 fun compareBytes(
@@ -46,14 +44,8 @@ fun compareBytes(
   }
   if (verbose) {
     println("—————")
-    println(
-      String.format(
-        Locale.ENGLISH,
-        "Comparing called from %s",
-        Thread.currentThread().stackTrace[3].toString()
-      )
-    )
   }
+
   var same = true
   var count = 0
   lhs.forEachIndexed { index, byte ->
@@ -72,6 +64,14 @@ fun compareBytes(
   return same
 }
 
+/**
+ * This method exists, because org.bouncycastle.asn1.ASN1TaggedObject
+ * has different explicitness types for different modes,
+ * yet you can not access neither the explicitness field itself, nor isParsed() method
+ * needed to reproduce the same value.
+ * We, of course, need this value to recreate byte-identical instance of DLTaggedObject
+ * from serialized data.
+ */
 fun ASN1TaggedObject.getExplicitness(): Int {
   val explicitnessField = ASN1TaggedObject::class.java.getDeclaredField("explicitness")
   explicitnessField.isAccessible = true
@@ -89,11 +89,11 @@ fun ByteArray.toHexString(): String {
   return result.toString()
 }
 
-fun hexStringToByteArray(hexString: String): ByteArray {
-  val result = ByteArray(hexString.length / 2)
-  for (i in 0 until hexString.length step 2) {
-    val firstDigit = Character.digit(hexString[i], 16)
-    val secondDigit = Character.digit(hexString[i + 1], 16)
+fun String.toByteArray(): ByteArray {
+  val result = ByteArray(length / 2)
+  for (i in indices step 2) {
+    val firstDigit = Character.digit(this[i], 16)
+    val secondDigit = Character.digit(this[i + 1], 16)
     val value = (firstDigit shl 4) + secondDigit
     result[i / 2] = value.toByte()
   }

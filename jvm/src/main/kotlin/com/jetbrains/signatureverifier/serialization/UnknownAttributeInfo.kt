@@ -11,7 +11,7 @@ data class UnknownAttributeInfo(
 ) : AttributeInfo {
 
   override fun toAttributeDLSequence(): DLSequence =
-    DLSequence.getInstance(hexStringToByteArray(content)) as DLSequence
+    DLSequence.getInstance(content.toByteArray()) as DLSequence
 
   constructor(attribute: Attribute) : this(
     StringInfo.getInstance(attribute.attrType),

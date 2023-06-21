@@ -12,12 +12,17 @@ class SigningTimeAttributeInfo(
   val identifier: StringInfo,
   val content: List<@Serializable(OffsetDateTimeSerializer::class) OffsetDateTime>
 ) : AttributeInfo {
+  companion object {
+    val dateTimeFormatter = DateTimeFormatter.ofPattern("yyMMddHHmmssX")
+  }
 
   override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
       content.map {
-        ASN1UTCTime(it.format(DateTimeFormatter.ofPattern("yyMMddHHmmssX")))
+        ASN1UTCTime(
+          it.format(dateTimeFormatter)
+        )
       }.toDLSet()
     ).toDLSequence()
 
@@ -26,7 +31,7 @@ class SigningTimeAttributeInfo(
     attribute.attributeValues.map {
       OffsetDateTime.parse(
         it.toString(),
-        DateTimeFormatter.ofPattern("yyMMddHHmmssX")
+        dateTimeFormatter
       )
     }
   )

@@ -30,13 +30,12 @@ data class SignerInfo(
       ),
       digestEncryptionAlgorithm.toPrimitive(),
       encryptedDigest.toPrimitive(),
-      (if (unauthenticatedAttributes == null) {
-        null
-      } else
+      unauthenticatedAttributes?.let { attributes ->
         TaggedObjectInfo.getTaggedObjectWithMetaInfo(
           TaggedObjectMetaInfo(1, 2),
-          unauthenticatedAttributes.map { it.toPrimitive() }.toDLSet()
-        )),
+          attributes.map { it.toPrimitive() }.toDLSet()
+        )
+      }
     ).toDLSequence()
 
   constructor(signer: SignerInformation) : this(
@@ -44,19 +43,19 @@ data class SignerInfo(
     SignerIdentifierInfo(signer.sID),
     AlgorithmInfo(signer.digestAlgorithmID),
     signer.toASN1Structure().authenticatedAttributes.map {
-      (it as DLSequence).first()
-    }.map {
       AttributeInfo.getInstance(
-        signer.signedAttributes?.get(it as ASN1ObjectIdentifier) as Attribute
+        signer.signedAttributes?.get(
+          (it as DLSequence).first() as ASN1ObjectIdentifier
+        ) as Attribute
       )
     },
     AlgorithmInfo(signer.encryptionAlgorithm),
     StringInfo.getInstance(signer.toASN1Structure().encryptedDigest),
     signer.toASN1Structure().unauthenticatedAttributes?.map {
-      (it as DLSequence).first()
-    }?.map {
       AttributeInfo.getInstance(
-        signer.unsignedAttributes?.get(it as ASN1ObjectIdentifier) as Attribute
+        signer.unsignedAttributes?.get(
+          (it as DLSequence).first() as ASN1ObjectIdentifier
+        ) as Attribute
       )
     }
   )

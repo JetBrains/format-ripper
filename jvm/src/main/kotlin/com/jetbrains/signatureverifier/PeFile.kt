@@ -1,7 +1,7 @@
 ﻿package com.jetbrains.signatureverifier
 
 import com.google.gson.Gson
-import com.jetbrains.signatureverifier.serialization.hexStringToByteArray
+import com.jetbrains.signatureverifier.serialization.toByteArray
 import com.jetbrains.signatureverifier.serialization.toHexString
 import com.jetbrains.util.*
 import org.jetbrains.annotations.NotNull
@@ -53,11 +53,11 @@ class PeFile {
         signatureMetadata.dotnetMetadataSize
       ).forEach {
         stream.Seek(it.dataInfo.Offset.toLong(), SeekOrigin.Begin)
-        stream.write(ByteBuffer.wrap(hexStringToByteArray(it.value)))
+        stream.write(ByteBuffer.wrap(it.value.toByteArray()))
       }
 
       stream.Seek(signatureMetadata.signaturePosition.Offset.toLong(), SeekOrigin.Begin)
-      stream.write(ByteBuffer.wrap(hexStringToByteArray(signatureHex)))
+      stream.write(ByteBuffer.wrap(signatureHex.toByteArray()))
       val alignment = (8 - stream.position() % 8) % 8
       stream.write(ByteBuffer.wrap(ByteArray(alignment.toInt())))
 

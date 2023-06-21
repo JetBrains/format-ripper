@@ -60,7 +60,7 @@ object ByteArraySerializer : KSerializer<ByteArray> {
 
 
   override fun deserialize(decoder: Decoder): ByteArray =
-    hexStringToByteArray(decoder.decodeString())
+    decoder.decodeString().toByteArray()
 
 
   override val descriptor: SerialDescriptor =

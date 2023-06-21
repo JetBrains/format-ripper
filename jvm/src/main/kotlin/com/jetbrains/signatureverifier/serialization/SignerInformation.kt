@@ -11,11 +11,11 @@ import org.bouncycastle.asn1.cms.SignerInfo as BouncySignerInfo
 data class SignerInformation(
   val signerInfo: SignerInfo,
   val contentType: StringInfo,
-  @Serializable(with = ByteArraySerializer::class)
+  @Serializable(ByteArraySerializer::class)
   val content: ByteArray
 ) : EncodableInfo {
 
-  fun toBouncySignerInformation() = BouncySignerInformation(
+  private fun toBouncySignerInformation() = BouncySignerInformation(
     BouncySignerInfo.getInstance(signerInfo.toPrimitive()),
     ASN1ObjectIdentifier.getInstance(contentType.toPrimitive()),
     CMSProcessableByteArray(content),
