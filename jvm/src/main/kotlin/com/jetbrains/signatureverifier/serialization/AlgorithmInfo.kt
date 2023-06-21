@@ -11,17 +11,17 @@ import org.bouncycastle.operator.DefaultAlgorithmNameFinder
 @Serializable
 data class AlgorithmInfo(
   val name: String,
-  val additionalValue: StringInfo? = null,
-  val algorithmIdentifier: StringInfo
+  val additionalValue: TextualInfo? = null,
+  val algorithmIdentifier: TextualInfo
 ) : EncodableInfo {
   constructor(signatureAlgorithm: AlgorithmIdentifier) : this(
     DefaultAlgorithmNameFinder().getAlgorithmName(signatureAlgorithm.algorithm as ASN1ObjectIdentifier),
     signatureAlgorithm.parameters?.let {
-      StringInfo.getInstance(
+      TextualInfo.getInstance(
         it
       )
     },
-    StringInfo.getInstance(signatureAlgorithm.algorithm)
+    TextualInfo.getInstance(signatureAlgorithm.algorithm)
   )
 
   private fun toDLSequence(): DLSequence {

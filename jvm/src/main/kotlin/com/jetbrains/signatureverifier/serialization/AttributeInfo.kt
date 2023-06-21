@@ -21,10 +21,9 @@ sealed interface AttributeInfo : EncodableInfo {
         "1.2.840.113635.100.9.1" -> AppleDeveloperCertificateAttribute(attribute)
         "1.3.6.1.4.1.311.3.3.1" -> MsCounterSignAttributeInfo(attribute)
         else -> UnknownAttributeInfo(attribute)
-//        else -> throw Exception("Attribute ${attribute.attrType.id}")
       }
   }
-  
+
 
   fun toAttributeDLSequence(): DLSequence
 

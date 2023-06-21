@@ -14,19 +14,19 @@ import org.bouncycastle.util.Store
 data class CertificateInfo(
   val x509CertificateInfo: XCertificateInfo,
   val signatureAlgorithm: AlgorithmInfo,
-  val signatureData: StringInfo
+  val signatureData: TextualInfo
 ) : EncodableInfo {
   companion object {
     fun getInstance(certificateHolder: X509CertificateHolder) = CertificateInfo(
       XCertificateInfo.getInstance(certificateHolder),
       AlgorithmInfo(certificateHolder.signatureAlgorithm),
-      StringInfo.getInstance(DERBitString(certificateHolder.signature))
+      TextualInfo.getInstance(DERBitString(certificateHolder.signature))
     )
 
     fun getInstance(certificateHolder: X509AttributeCertificateHolder) = CertificateInfo(
       XCertificateInfo.getInstance(certificateHolder),
       AlgorithmInfo(certificateHolder.signatureAlgorithm),
-      StringInfo.getInstance(DERBitString(certificateHolder.signature))
+      TextualInfo.getInstance(DERBitString(certificateHolder.signature))
     )
 
   }

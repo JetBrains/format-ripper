@@ -6,14 +6,14 @@ import org.bouncycastle.asn1.cms.Attribute
 
 @Serializable
 data class CounterSignatureAttributeInfo(
-  val identifier: StringInfo,
+  val identifier: TextualInfo,
   val content: List<CounterSignatureInfo>
 ) : AttributeInfo {
 
   companion object {
     fun getInstance(attribute: Attribute): CounterSignatureAttributeInfo {
       return CounterSignatureAttributeInfo(
-        StringInfo.getInstance(attribute.attrType),
+        TextualInfo.getInstance(attribute.attrType),
         attribute.attributeValues.map { CounterSignatureInfo.getInstance(it as DLSequence) }
       )
     }

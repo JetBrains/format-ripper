@@ -7,7 +7,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier
 
 @Serializable
 data class CertificationAuthorityAttributeInfo(
-  val identifier: StringInfo,
+  val identifier: TextualInfo,
   val content: List<AlgorithmInfo>
 ) : AttributeInfo {
   override fun toAttributeDLSequence(): DLSequence = listOf(
@@ -16,7 +16,7 @@ data class CertificationAuthorityAttributeInfo(
   ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
-    StringInfo.getInstance(attribute.attrType),
+    TextualInfo.getInstance(attribute.attrType),
     attribute.attributeValues.map { AlgorithmInfo(AlgorithmIdentifier.getInstance(it)) }
   )
 }

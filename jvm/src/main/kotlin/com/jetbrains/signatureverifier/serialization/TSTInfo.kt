@@ -8,16 +8,16 @@ import org.bouncycastle.asn1.DLTaggedObject
 
 @Serializable
 data class TSTInfo(
-  val identifier: StringInfo,
+  val identifier: TextualInfo,
   val content: TaggedObjectInfo
 ) : EncodableInfo {
 
   constructor(sequence: DLSequence) : this(
-    StringInfo.getInstance(sequence.first()),
+    TextualInfo.getInstance(sequence.first()),
     sequence.last().let {
       TaggedObjectInfo(
         TaggedObjectMetaInfo(it as DLTaggedObject),
-        StringInfo.getInstance(it.baseObject)
+        TextualInfo.getInstance(it.baseObject)
       )
     }
   )

@@ -10,7 +10,7 @@ import org.bouncycastle.asn1.cms.SignerInfo as BouncySignerInfo
 @Serializable
 data class SignerInformation(
   val signerInfo: SignerInfo,
-  val contentType: StringInfo,
+  val contentType: TextualInfo,
   @Serializable(ByteArraySerializer::class)
   val content: ByteArray
 ) : EncodableInfo {

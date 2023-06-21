@@ -9,18 +9,18 @@ import java.rmi.UnexpectedException
 
 @Serializable
 data class ImageDataObjIdInfo(
-  val identifier: StringInfo,
-  val hexCode: StringInfo,
+  val identifier: TextualInfo,
+  val hexCode: TextualInfo,
   val content: EncodableInfo
 ) : EncodableInfo {
   companion object {
     fun getInstance(sequence: DLSequence): ImageDataObjIdInfo {
-      val id = StringInfo.getInstance(sequence.first())
+      val id = TextualInfo.getInstance(sequence.first())
       val seq = sequence.last() as DLSequence
 
       val iterator = seq.iterator()
 
-      val hexCode = StringInfo.getInstance(iterator.next())
+      val hexCode = TextualInfo.getInstance(iterator.next())
 
       val content = when (val next = iterator.next()) {
         // PE
@@ -31,11 +31,11 @@ data class ImageDataObjIdInfo(
             when (obj) {
               is DLTaggedObject -> TaggedObjectInfo(
                 TaggedObjectMetaInfo(obj),
-                StringInfo.getInstance(obj.baseObject)
+                TextualInfo.getInstance(obj.baseObject)
               )
 
               is DLSequence -> SequenceInfo(obj.map {
-                StringInfo.getInstance(
+                TextualInfo.getInstance(
                   it
                 )
               })
@@ -54,9 +54,9 @@ data class ImageDataObjIdInfo(
         }
 
         else -> {
-          val list = mutableListOf(StringInfo.getInstance(next))
+          val list = mutableListOf(TextualInfo.getInstance(next))
           while (iterator.hasNext()) {
-            list.add(StringInfo.getInstance(iterator.next()))
+            list.add(TextualInfo.getInstance(iterator.next()))
           }
           SequenceInfo(list)
         }

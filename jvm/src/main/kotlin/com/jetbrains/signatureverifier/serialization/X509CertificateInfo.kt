@@ -17,7 +17,7 @@ data class X509CertificateInfo(
   val endDate: Date,
   val subject: X500NameInfo,
   val subjectAlgorithm: AlgorithmInfo,
-  val subjectData: StringInfo,
+  val subjectData: TextualInfo,
   val extensions: List<ExtensionInfo>?
 ) : XCertificateInfo {
   companion object {
@@ -31,14 +31,14 @@ data class X509CertificateInfo(
         certificateHolder.notAfter,
         X500NameInfo(certificateHolder.subject),
         AlgorithmInfo(certificateHolder.subjectPublicKeyInfo.algorithm),
-        StringInfo.getInstance(certificateHolder.subjectPublicKeyInfo.publicKeyData),
+        TextualInfo.getInstance(certificateHolder.subjectPublicKeyInfo.publicKeyData),
         certificateHolder.extensions?.let {
           it.extensionOIDs.map {
             val extension = certificateHolder.extensions.getExtension(it)
             ExtensionInfo(
-              StringInfo.getInstance(extension.extnId),
+              TextualInfo.getInstance(extension.extnId),
               certificateHolder.extensions.criticalExtensionOIDs.contains(extension.extnId),
-              StringInfo.getInstance(extension.extnValue)
+              TextualInfo.getInstance(extension.extnValue)
             )
           }
         }

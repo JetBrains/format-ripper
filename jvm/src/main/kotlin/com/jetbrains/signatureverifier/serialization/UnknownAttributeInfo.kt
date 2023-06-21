@@ -6,15 +6,15 @@ import org.bouncycastle.asn1.cms.Attribute
 
 @Serializable
 data class UnknownAttributeInfo(
-  val identifier: StringInfo,
-  val content: String
+  val identifier: TextualInfo,
+  val content: EncodableInfo
 ) : AttributeInfo {
 
   override fun toAttributeDLSequence(): DLSequence =
-    DLSequence.getInstance(content.toByteArray()) as DLSequence
+    listOf(identifier.toPrimitive(), content.toPrimitive()).toDLSequence()
 
   constructor(attribute: Attribute) : this(
-    StringInfo.getInstance(attribute.attrType),
-    attribute.getEncoded("DER").toHexString()
+    TextualInfo.getInstance(attribute.attrType),
+    attribute.attrValues.toEncodableInfo()
   )
 }

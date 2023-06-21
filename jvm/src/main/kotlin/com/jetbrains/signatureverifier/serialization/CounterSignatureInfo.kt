@@ -19,7 +19,7 @@ data class CounterSignatureInfo(
   val digestAlgorithm: AlgorithmInfo,
   val authenticatedAttributes: List<AttributeInfo>,
   val digestEncryptionAlgorithm: AlgorithmInfo,
-  val encryptedDigest: StringInfo
+  val encryptedDigest: TextualInfo
 ) : EncodableInfo {
 
   companion object {
@@ -50,7 +50,7 @@ data class CounterSignatureInfo(
         AlgorithmIdentifier.getInstance(iterator.next())
       )
 
-      val encryptedDigest = StringInfo.getInstance(iterator.next())
+      val encryptedDigest = TextualInfo.getInstance(iterator.next())
 
       return CounterSignatureInfo(
         version,

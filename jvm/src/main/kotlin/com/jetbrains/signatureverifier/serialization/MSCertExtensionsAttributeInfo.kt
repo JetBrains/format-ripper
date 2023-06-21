@@ -7,8 +7,8 @@ import org.bouncycastle.asn1.cms.Attribute
 // 1.3.6.1.4.1.311.2.1.11
 @Serializable
 data class MSCertExtensionsAttributeInfo(
-  val identifier: StringInfo,
-  val content: List<List<StringInfo>>
+  val identifier: TextualInfo,
+  val content: List<List<TextualInfo>>
 ) : AttributeInfo {
   override fun toAttributeDLSequence(): DLSequence =
     listOf(
@@ -19,7 +19,7 @@ data class MSCertExtensionsAttributeInfo(
     ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
-    StringInfo.getInstance(attribute.attrType),
-    attribute.attributeValues.map { (it as DLSequence).map { s -> StringInfo.getInstance(s) } }
+    TextualInfo.getInstance(attribute.attrType),
+    attribute.attributeValues.map { (it as DLSequence).map { s -> TextualInfo.getInstance(s) } }
   )
 }

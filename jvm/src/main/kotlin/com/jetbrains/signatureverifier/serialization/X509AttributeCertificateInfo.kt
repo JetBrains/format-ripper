@@ -24,7 +24,7 @@ data class X509AttributeCertificateInfo(
   @Serializable(DateSerializer::class)
   val endDate: Date,
   val attributes: List<AttributeInfo>,
-  val issuerUniqueId: StringInfo?,
+  val issuerUniqueId: TextualInfo?,
   val extensions: List<ExtensionInfo>?
 ) : XCertificateInfo {
   companion object {
@@ -40,14 +40,14 @@ data class X509AttributeCertificateInfo(
           acinfo.attrCertValidityPeriod.notBeforeTime.date,
           acinfo.attrCertValidityPeriod.notAfterTime.date,
           acinfo.attributes.map { AttributeInfo.getInstance(Attribute.getInstance(it)) },
-          acinfo.issuerUniqueID?.let { StringInfo.getInstance(it) },
+          acinfo.issuerUniqueID?.let { TextualInfo.getInstance(it) },
           acinfo.extensions?.let {
             it.extensionOIDs.map {
               val extension = acinfo.extensions.getExtension(it)
               ExtensionInfo(
-                StringInfo.getInstance(extension.extnId),
+                TextualInfo.getInstance(extension.extnId),
                 certificateHolder.extensions.criticalExtensionOIDs.contains(extension.extnId),
-                StringInfo.getInstance(extension.extnValue)
+                TextualInfo.getInstance(extension.extnValue)
               )
             }
           }

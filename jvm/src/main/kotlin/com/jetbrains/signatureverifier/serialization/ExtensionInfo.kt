@@ -6,9 +6,9 @@ import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.DLSequence
 @Serializable
 data class ExtensionInfo(
-  val key: StringInfo,
+  val key: TextualInfo,
   val critical: Boolean,
-  val value: StringInfo
+  val value: TextualInfo
 ) : EncodableInfo {
   private fun toDLSequence(): DLSequence = listOf(
     key.toPrimitive(),

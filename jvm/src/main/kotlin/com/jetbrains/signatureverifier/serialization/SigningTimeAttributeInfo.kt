@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter
 
 @Serializable
 class SigningTimeAttributeInfo(
-  val identifier: StringInfo,
+  val identifier: TextualInfo,
   val content: List<@Serializable(OffsetDateTimeSerializer::class) OffsetDateTime>
 ) : AttributeInfo {
   companion object {
@@ -27,7 +27,7 @@ class SigningTimeAttributeInfo(
     ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
-    StringInfo.getInstance(attribute.attrType),
+    TextualInfo.getInstance(attribute.attrType),
     attribute.attributeValues.map {
       OffsetDateTime.parse(
         it.toString(),

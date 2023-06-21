@@ -14,8 +14,8 @@ data class X500NameInfo(
     issuer.rdNs.map {
       it.typesAndValues.map { tv ->
         rdNInfo(
-          StringInfo.getInstance(tv.type),
-          StringInfo.getInstance(tv.value)
+          TextualInfo.getInstance(tv.type),
+          TextualInfo.getInstance(tv.value)
         )
       }
     })

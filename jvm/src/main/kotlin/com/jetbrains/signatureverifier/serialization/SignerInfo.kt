@@ -16,7 +16,7 @@ data class SignerInfo(
   val digestAlgorithm: AlgorithmInfo,
   val authenticatedAttributes: List<AttributeInfo>,
   val digestEncryptionAlgorithm: AlgorithmInfo,
-  val encryptedDigest: StringInfo,
+  val encryptedDigest: TextualInfo,
   val unauthenticatedAttributes: List<AttributeInfo>?
 ) : EncodableInfo {
   override fun toPrimitive(): ASN1Primitive =
@@ -50,7 +50,7 @@ data class SignerInfo(
       )
     },
     AlgorithmInfo(signer.encryptionAlgorithm),
-    StringInfo.getInstance(signer.toASN1Structure().encryptedDigest),
+    TextualInfo.getInstance(signer.toASN1Structure().encryptedDigest),
     signer.toASN1Structure().unauthenticatedAttributes?.map {
       AttributeInfo.getInstance(
         signer.unsignedAttributes?.get(

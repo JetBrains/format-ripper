@@ -1,29 +1,26 @@
 package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
-import org.bouncycastle.asn1.ASN1Enumerated
 import org.bouncycastle.asn1.ASN1Primitive
-import java.math.BigInteger
 
 @Serializable
 data class ObjectDigestInfo(
-  @Serializable(BigIntegerSerializer::class)
-  val digestedObjectType: BigInteger,
-  val otherObjectTypeID: StringInfo?,
+  val digestedObjectType: TextualInfo,
+  val otherObjectTypeID: TextualInfo?,
   val digestAlgorithmInfo: AlgorithmInfo,
-  val objectDigest: StringInfo
+  val objectDigest: TextualInfo
 ) : EncodableInfo {
   override fun toPrimitive(): ASN1Primitive = listOf(
-    ASN1Enumerated(digestedObjectType),
+    digestedObjectType.toPrimitive(),
     otherObjectTypeID?.toPrimitive(),
     digestAlgorithmInfo.toPrimitive(),
     objectDigest.toPrimitive()
   ).toDLSequence()
 
   constructor(info: org.bouncycastle.asn1.x509.ObjectDigestInfo) : this(
-    info.digestedObjectType.value,
-    info.otherObjectTypeID?.let { StringInfo.getInstance(it) },
+    TextualInfo.getInstance(info.digestedObjectType),
+    info.otherObjectTypeID?.let { TextualInfo.getInstance(it) },
     AlgorithmInfo(info.digestAlgorithm),
-    StringInfo.getInstance(info.objectDigest)
+    TextualInfo.getInstance(info.objectDigest)
   )
 }

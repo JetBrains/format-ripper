@@ -11,7 +11,7 @@ data class IssuerSerialInfo(
   val generalNames: List<GeneralNameInfo>,
   @Serializable(BigIntegerSerializer::class)
   val serial: BigInteger,
-  val issuerUID: StringInfo?
+  val issuerUID: TextualInfo?
 ) : EncodableInfo {
   override fun toPrimitive(): ASN1Primitive =
     listOf(
@@ -23,6 +23,6 @@ data class IssuerSerialInfo(
   constructor(issuer: IssuerSerial) : this(
     issuer.issuer.names.map { GeneralNameInfo(it) },
     issuer.serial.value,
-    issuer.issuerUID?.let { StringInfo.getInstance(it) }
+    issuer.issuerUID?.let { TextualInfo.getInstance(it) }
   )
 }

@@ -1,5 +1,6 @@
 package com.jetbrains.signatureverifier.serialization
 
+import TaggedObjectMetaInfo
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.cms.ContentInfo
 import org.bouncycastle.asn1.cms.SignedData
@@ -99,3 +100,4 @@ fun String.toByteArray(): ByteArray {
   }
   return result
 }
+

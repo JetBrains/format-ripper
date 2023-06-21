@@ -6,8 +6,8 @@ import org.bouncycastle.asn1.cms.Attribute
 
 @Serializable
 data class AppleDeveloperCertificateAttribute(
-  val identifier: StringInfo,
-  val content: List<StringInfo>
+  val identifier: TextualInfo,
+  val content: List<TextualInfo>
 ) : AttributeInfo {
   override fun toAttributeDLSequence(): DLSequence = listOf(
     identifier.toPrimitive(),
@@ -15,9 +15,9 @@ data class AppleDeveloperCertificateAttribute(
   ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
-    StringInfo.getInstance(attribute.attrType),
+    TextualInfo.getInstance(attribute.attrType),
     attribute.attributeValues.map {
-      StringInfo.getInstance(it)
+      TextualInfo.getInstance(it)
     }
   )
 }

@@ -8,8 +8,8 @@ import org.bouncycastle.asn1.cms.Attribute
 
 @Serializable
 data class MsCounterSignAttributeInfo(
-  val identifier: StringInfo,
-  val contentIdentifier: List<StringInfo>,
+  val identifier: TextualInfo,
+  val contentIdentifier: List<TextualInfo>,
   val content: List<TaggedObjectInfo>
 ) : AttributeInfo {
 
@@ -26,9 +26,9 @@ data class MsCounterSignAttributeInfo(
   ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
-    StringInfo.getInstance(attribute.attrType),
+    TextualInfo.getInstance(attribute.attrType),
     attribute.attributeValues.map {
-      StringInfo.getInstance((it as DLSequence).first())
+      TextualInfo.getInstance((it as DLSequence).first())
     },
     attribute.attributeValues.map {
       (it as DLSequence).last().let { sequence ->

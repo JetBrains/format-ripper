@@ -5,8 +5,8 @@ import org.bouncycastle.asn1.ASN1Primitive
 
 @Serializable
 data class rdNInfo(
-  val type: StringInfo,
-  val value: StringInfo
+  val type: TextualInfo,
+  val value: TextualInfo
 ) : EncodableInfo {
   override fun toPrimitive(): ASN1Primitive =
     listOf(

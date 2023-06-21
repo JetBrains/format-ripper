@@ -9,7 +9,7 @@ import org.bouncycastle.asn1.cms.Attribute
 // 1.3.6.1.4.1.311.2.1.12
 @Serializable
 data class MSCertificateTemplateV2AttributeInfo(
-  val identifier: StringInfo,
+  val identifier: TextualInfo,
   val content: List<List<TaggedObjectInfo>>
 ) : AttributeInfo {
 
@@ -22,7 +22,7 @@ data class MSCertificateTemplateV2AttributeInfo(
     ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
-    StringInfo.getInstance(attribute.attrType),
+    TextualInfo.getInstance(attribute.attrType),
     attribute.attributeValues.map { attributeValue ->
       (attributeValue as DLSequence).map {
         (it as DLTaggedObject).let { outer ->
@@ -31,7 +31,7 @@ data class MSCertificateTemplateV2AttributeInfo(
             (outer.baseObject as DLTaggedObject).let { inner ->
               TaggedObjectInfo(
                 TaggedObjectMetaInfo(inner),
-                StringInfo.getInstance(inner.baseObject)
+                TextualInfo.getInstance(inner.baseObject)
               )
             }
           )

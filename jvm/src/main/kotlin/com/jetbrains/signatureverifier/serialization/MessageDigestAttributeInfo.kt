@@ -7,8 +7,8 @@ import org.bouncycastle.asn1.cms.Attribute
 // 1.2.840.113549.1.9.4
 @Serializable
 data class MessageDigestAttributeInfo(
-  val identifier: StringInfo,
-  val content: List<StringInfo>,
+  val identifier: TextualInfo,
+  val content: List<TextualInfo>,
 ) : AttributeInfo {
   override fun toAttributeDLSequence(): DLSequence =
     listOf(
@@ -17,7 +17,7 @@ data class MessageDigestAttributeInfo(
     ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
-    StringInfo.getInstance(attribute.attrType),
-    attribute.attributeValues.map { StringInfo.getInstance(it) }
+    TextualInfo.getInstance(attribute.attrType),
+    attribute.attributeValues.map { TextualInfo.getInstance(it) }
   )
 }
