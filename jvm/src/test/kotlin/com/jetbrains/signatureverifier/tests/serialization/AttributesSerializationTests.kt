@@ -11,6 +11,8 @@ import com.jetbrains.signatureverifier.serialization.compareBytes
 import com.jetbrains.signatureverifier.serialization.getTestByteChannel
 import com.jetbrains.signatureverifier.serialization.toDLSet
 import com.jetbrains.util.TestUtil
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.bouncycastle.asn1.ASN1ObjectIdentifier
 import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.cms.Attribute
@@ -106,7 +108,7 @@ class AttributesSerializationTests {
             signer.unsignedAttributes?.get(it as ASN1ObjectIdentifier) as Attribute
           )
         }
-
+        val json = Json.encodeToString(unsignedAttributeInfos)
         val recreatedUnsignedSet = unsignedAttributeInfos.map { attr ->
           attr.toPrimitive()
         }.toDLSet()

@@ -12,7 +12,7 @@ import java.math.BigInteger
 data class SignedDataInfo(
   @Serializable(BigIntegerSerializer::class)
   val version: BigInteger,
-  val digestAlgorithmsInfo: DigestAlgorithmsInfo,
+  val digestAlgorithmsInfo: List<AlgorithmInfo>,
   val encapContentInfo: EncapContentInfo,
   val certificates: List<CertificateInfo>,
   val crls: List<EncodableInfo>?,
@@ -21,7 +21,7 @@ data class SignedDataInfo(
   override fun toPrimitive(): ASN1Primitive =
     listOf(
       ASN1Integer(version),
-      digestAlgorithmsInfo.toPrimitive(),
+      digestAlgorithmsInfo.map { it.toPrimitive() }.toDLSet(),
       encapContentInfo.toPrimitive(),
       TaggedObjectInfo.getTaggedObjectWithMetaInfo(
         TaggedObjectMetaInfo(0, 2),
@@ -37,7 +37,7 @@ data class SignedDataInfo(
 
   constructor(signedData: CMSSignedData) : this(
     signedData.signedData.version.value,
-    DigestAlgorithmsInfo.getInstance(signedData.digestAlgorithmIDs),
+    signedData.digestAlgorithmIDs.map { AlgorithmInfo(it) },
     EncapContentInfo.getInstance(signedData.signedData.encapContentInfo),
     signedData.certificates.getMatches(null).toList().map { certificateHolder ->
       CertificateInfo.getInstance(certificateHolder)

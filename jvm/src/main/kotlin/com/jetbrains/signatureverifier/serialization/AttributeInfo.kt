@@ -23,8 +23,8 @@ sealed interface AttributeInfo : EncodableInfo {
         "1.2.840.113549.1.9.52" -> CMSAlgorithmProtectionAttributeInfo(attribute)
         "1.2.840.113549.1.9.16.2.47" -> V2CertificateAttributeInfo(attribute)
         "1.2.840.113549.1.9.16.2.12" -> PublicKeyInfrastructureAttributeInfo(attribute)
-        "1.2.840.113549.1.9.16.2.14" -> UnknownAttributeInfo(attribute) // TODO
-        "1.3.6.1.4.1.311.2.4.1" -> UnknownAttributeInfo(attribute) // TODO
+        "1.2.840.113549.1.9.16.2.14" -> SignatureTimeStampAttributeInfo(attribute)
+        "1.3.6.1.4.1.311.2.4.1" -> MSSpcNestedSignatureInfo(attribute)
         else -> UnknownAttributeInfo(attribute)
       }
   }

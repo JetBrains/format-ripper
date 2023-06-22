@@ -1,10 +1,11 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.cms.ContentInfo
 import org.bouncycastle.asn1.cms.SignedData
 import java.util.*
+
+fun List<EncodableInfo>.toPrimitiveList(): List<ASN1Encodable?> = this.map { it.toPrimitive() }
 
 fun List<ASN1Encodable?>.toDLSequence(): DLSequence {
   val vector = ASN1EncodableVector()
