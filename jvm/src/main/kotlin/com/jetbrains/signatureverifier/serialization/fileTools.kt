@@ -35,14 +35,6 @@ fun getTestDataFile(dir: String, name: String): Path {
   return testDataFile
 }
 
-fun getFileOrCreate(dir: String, name: String): Path {
-  val testDataFile = getTestDataDir().resolve(dir).resolve(name)
-  if (Files.notExists(testDataFile)) {
-      Files.createFile(testDataFile)
-  }
-  return testDataFile
-}
-
 fun getTestByteChannel(dir: String, name: String): SeekableByteChannel {
   return Files.newByteChannel(
       getTestDataFile(dir, name),

@@ -10,16 +10,17 @@ data class MSCertExtensionsAttributeInfo(
   val identifier: TextualInfo,
   val content: List<List<TextualInfo>>
 ) : AttributeInfo {
-  override fun toAttributeDLSequence(): DLSequence =
-    listOf(
-      identifier.toPrimitive(),
-        content.map {
-          it.map { s -> s.toPrimitive() }.toDLSequence()
-        }.toDLSet()
-    ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
     TextualInfo.getInstance(attribute.attrType),
     attribute.attributeValues.map { (it as DLSequence).map { s -> TextualInfo.getInstance(s) } }
   )
+
+  override fun toAttributeDLSequence(): DLSequence =
+    listOf(
+      identifier.toPrimitive(),
+      content.map {
+        it.map { s -> s.toPrimitive() }.toDLSequence()
+      }.toDLSet()
+    ).toDLSequence()
 }

@@ -1,6 +1,5 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.DLTaggedObject
@@ -12,18 +11,6 @@ data class MsCounterSignAttributeInfo(
   val contentIdentifier: List<TextualInfo>,
   val content: List<TaggedObjectInfo>
 ) : AttributeInfo {
-
-  override fun toAttributeDLSequence(): DLSequence = listOf(
-    identifier.toPrimitive(),
-
-    contentIdentifier.zip(content).map {
-      listOf(
-        it.first.toPrimitive(),
-        it.second.toPrimitive()
-      ).toDLSequence()
-    }.toDLSet()
-
-  ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
     TextualInfo.getInstance(attribute.attrType),
@@ -39,4 +26,16 @@ data class MsCounterSignAttributeInfo(
       }
     }
   )
+
+  override fun toAttributeDLSequence(): DLSequence = listOf(
+    identifier.toPrimitive(),
+
+    contentIdentifier.zip(content).map {
+      listOf(
+        it.first.toPrimitive(),
+        it.second.toPrimitive()
+      ).toDLSequence()
+    }.toDLSet()
+
+  ).toDLSequence()
 }

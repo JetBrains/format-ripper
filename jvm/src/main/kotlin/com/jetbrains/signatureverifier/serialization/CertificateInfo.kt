@@ -1,6 +1,5 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.x509.AttributeCertificate

@@ -15,7 +15,6 @@ data class TextualInfo(val contentType: ContentType, val content: String) :
   companion object {
     val dateFormat: DateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS")
 
-    // This is not exhaustive
     enum class ContentType(val contentClass: Class<out Any>) {
       DERPrintableString(org.bouncycastle.asn1.DERPrintableString::class.java),
       DERUTF8String(org.bouncycastle.asn1.DERUTF8String::class.java),

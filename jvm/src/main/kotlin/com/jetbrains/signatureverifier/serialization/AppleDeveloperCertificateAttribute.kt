@@ -9,10 +9,6 @@ data class AppleDeveloperCertificateAttribute(
   val identifier: TextualInfo,
   val content: List<TextualInfo>
 ) : AttributeInfo {
-  override fun toAttributeDLSequence(): DLSequence = listOf(
-    identifier.toPrimitive(),
-    content.map { it.toPrimitive() }.toDLSet()
-  ).toDLSequence()
 
   constructor(attribute: Attribute) : this(
     TextualInfo.getInstance(attribute.attrType),
@@ -20,4 +16,9 @@ data class AppleDeveloperCertificateAttribute(
       TextualInfo.getInstance(it)
     }
   )
+
+  override fun toAttributeDLSequence(): DLSequence = listOf(
+    identifier.toPrimitive(),
+    content.toPrimitiveList().toDLSet()
+  ).toDLSequence()
 }

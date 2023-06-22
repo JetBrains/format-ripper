@@ -12,14 +12,15 @@ data class SignerIdentifierInfo(
   @Serializable(BigIntegerSerializer::class)
   val serialNumber: BigInteger
 ) : EncodableInfo {
-  override fun toPrimitive(): ASN1Primitive =
-    listOf(
-      issuerInfo.toPrimitive(),
-      ASN1Integer(serialNumber)
-    ).toDLSequence()
 
   constructor(sid: SignerId) : this(
     X500NameInfo(sid.issuer),
     sid.serialNumber
   )
+
+  override fun toPrimitive(): ASN1Primitive =
+    listOf(
+      issuerInfo.toPrimitive(),
+      ASN1Integer(serialNumber)
+    ).toDLSequence()
 }

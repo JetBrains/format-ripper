@@ -10,12 +10,6 @@ data class ObjectDigestInfo(
   val digestAlgorithmInfo: AlgorithmInfo,
   val objectDigest: TextualInfo
 ) : EncodableInfo {
-  override fun toPrimitive(): ASN1Primitive = listOf(
-    digestedObjectType.toPrimitive(),
-    otherObjectTypeID?.toPrimitive(),
-    digestAlgorithmInfo.toPrimitive(),
-    objectDigest.toPrimitive()
-  ).toDLSequence()
 
   constructor(info: org.bouncycastle.asn1.x509.ObjectDigestInfo) : this(
     TextualInfo.getInstance(info.digestedObjectType),
@@ -23,4 +17,11 @@ data class ObjectDigestInfo(
     AlgorithmInfo(info.digestAlgorithm),
     TextualInfo.getInstance(info.objectDigest)
   )
+
+  override fun toPrimitive(): ASN1Primitive = listOf(
+    digestedObjectType.toPrimitive(),
+    otherObjectTypeID?.toPrimitive(),
+    digestAlgorithmInfo.toPrimitive(),
+    objectDigest.toPrimitive()
+  ).toDLSequence()
 }

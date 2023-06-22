@@ -9,16 +9,16 @@ import org.bouncycastle.asn1.cms.Attribute
 data class TimestampedDataAttributeInfo(
   val identifier: TextualInfo,
   val content: List<TextualInfo>
-): AttributeInfo {
+) : AttributeInfo {
+
+  constructor(attribute: Attribute) : this(
+    TextualInfo.getInstance(attribute.attrType),
+    attribute.attributeValues.map { TextualInfo.getInstance(it) }
+  )
 
   override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
-      content.map { it.toPrimitive() }.toDLSet()
+      content.toPrimitiveList().toDLSet()
     ).toDLSequence()
-
-  constructor(attribute: Attribute): this(
-    TextualInfo.getInstance(attribute.attrType),
-    attribute.attributeValues.map { TextualInfo.getInstance(it) }
-  )
 }

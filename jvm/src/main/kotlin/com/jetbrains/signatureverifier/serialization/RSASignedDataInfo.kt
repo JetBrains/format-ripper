@@ -1,6 +1,5 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.cms.ContentInfo
@@ -32,6 +31,7 @@ data class RSASignedDataInfo(
       val encapContentInfo = EncapContentInfo.getInstance(
         ContentInfo.getInstance(iterator.next())
       )
+
       val certificates = iterator.next().let {
         TaggedObjectInfo(
           TaggedObjectMetaInfo(it as DLTaggedObject),

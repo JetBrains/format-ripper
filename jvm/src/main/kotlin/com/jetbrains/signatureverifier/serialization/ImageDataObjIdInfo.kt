@@ -1,11 +1,9 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.DLTaggedObject
-import java.rmi.UnexpectedException
 
 @Serializable
 data class ImageDataObjIdInfo(
@@ -40,7 +38,7 @@ data class ImageDataObjIdInfo(
                 )
               })
 
-              else -> throw UnexpectedException("Unexpected object type ${obj.javaClass}")
+              else -> throw IllegalArgumentException("Unexpected object type ${obj.javaClass}")
             }
           }
 
@@ -71,7 +69,7 @@ data class ImageDataObjIdInfo(
     listOf(
       identifier.toPrimitive(),
       (if (content is SequenceInfo)
-        (mutableListOf(hexCode.toPrimitive()) + content.toPrimitiveList()).toDLSequence()
+        (mutableListOf(hexCode.toPrimitive()) + content.content.toPrimitiveList()).toDLSequence()
       else
         listOf(
           hexCode.toPrimitive(),

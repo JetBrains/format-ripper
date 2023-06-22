@@ -13,16 +13,17 @@ data class IssuerSerialInfo(
   val serial: BigInteger,
   val issuerUID: TextualInfo?
 ) : EncodableInfo {
-  override fun toPrimitive(): ASN1Primitive =
-    listOf(
-      generalNames.map { it.toPrimitive() }.toDLSequence(),
-      ASN1Integer(serial),
-      issuerUID?.toPrimitive()
-    ).toDLSequence()
 
   constructor(issuer: IssuerSerial) : this(
     issuer.issuer.names.map { GeneralNameInfo(it) },
     issuer.serial.value,
     issuer.issuerUID?.let { TextualInfo.getInstance(it) }
   )
+
+  override fun toPrimitive(): ASN1Primitive =
+    listOf(
+      generalNames.toPrimitiveList().toDLSequence(),
+      ASN1Integer(serial),
+      issuerUID?.toPrimitive()
+    ).toDLSequence()
 }

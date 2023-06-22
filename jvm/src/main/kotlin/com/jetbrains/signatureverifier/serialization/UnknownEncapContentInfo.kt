@@ -9,11 +9,12 @@ data class UnknownEncapContentInfo(
   val contentType: TextualInfo,
   val content: EncodableInfo?
 ) : EncapContentInfo {
-  override fun toPrimitive(): ASN1Primitive =
-    listOf(contentType.toPrimitive(), content?.toPrimitive()).toDLSequence()
 
   constructor(contentInfo: ContentInfo) : this(
     TextualInfo.getInstance(contentInfo.contentType),
-    contentInfo.content?.let { it.toASN1Primitive().toEncodableInfo() }
+    contentInfo.content?.toASN1Primitive()?.toEncodableInfo()
   )
+
+  override fun toPrimitive(): ASN1Primitive =
+    listOf(contentType.toPrimitive(), content?.toPrimitive()).toDLSequence()
 }

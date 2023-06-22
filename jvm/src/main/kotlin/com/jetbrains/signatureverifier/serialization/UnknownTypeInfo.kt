@@ -7,7 +7,8 @@ import org.bouncycastle.asn1.ASN1Primitive
 data class UnknownTypeInfo<T : ASN1Primitive>(
   val content: String
 ) : EncodableInfo {
+  constructor(obj: T) : this(obj.encoded.toHexString())
+
   override fun toPrimitive(): ASN1Primitive = ASN1Primitive.fromByteArray(content.toByteArray())
 
-  constructor(obj: T) : this(obj.encoded.toHexString())
 }

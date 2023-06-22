@@ -8,12 +8,12 @@ import org.bouncycastle.asn1.x500.X500Name
 @Serializable
 data class X500NameInfo(
   val name: String,
-  val rdNs: List<List<rdNInfo>>
+  val rdNs: List<List<RdNInfo>>
 ) : EncodableInfo {
   constructor(issuer: X500Name) : this(issuer.toString(),
     issuer.rdNs.map {
       it.typesAndValues.map { tv ->
-        rdNInfo(
+        RdNInfo(
           TextualInfo.getInstance(tv.type),
           TextualInfo.getInstance(tv.value)
         )

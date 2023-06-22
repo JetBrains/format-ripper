@@ -1,6 +1,5 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Primitive
@@ -35,7 +34,7 @@ data class TaggedObjectInfo(
         DLTaggedObject(false, metaInfo.tagNo, content).encoded
       ) as DLTaggedObject
 
-      else -> throw Exception("Tagged object explicitness can only be 1, 2, 3 or 4")
+      else -> throw IllegalArgumentException("Tagged object explicitness can only be 1, 2, 3 or 4")
     }
   }
 

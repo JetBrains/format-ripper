@@ -7,9 +7,6 @@ import org.bouncycastle.asn1.ASN1Primitive
 data class SequenceInfo(
   val content: List<EncodableInfo>
 ) : EncodableInfo {
-
-  fun toPrimitiveList() = content.map { it.toPrimitive() }
-
   override fun toPrimitive(): ASN1Primitive =
-    toPrimitiveList().toDLSequence()
+    content.toPrimitiveList().toDLSequence()
 }

@@ -1,6 +1,5 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
 import com.jetbrains.signatureverifier.bouncycastle.cms.CMSSignedData
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1Integer
@@ -18,22 +17,6 @@ data class SignedDataInfo(
   val crls: List<EncodableInfo>?,
   val signerInfos: List<SignerInfo>
 ) : EncodableInfo {
-  override fun toPrimitive(): ASN1Primitive =
-    listOf(
-      ASN1Integer(version),
-      digestAlgorithmsInfo.map { it.toPrimitive() }.toDLSet(),
-      encapContentInfo.toPrimitive(),
-      TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-        TaggedObjectMetaInfo(0, 2),
-        recreateCertificatesFromStore(
-          CollectionStore(certificates.map {
-            it.toX509CertificateHolder()
-          })
-        ).toASN1Primitive()
-      ),
-      crls?.map { it.toPrimitive() }?.toDLSet()?.toASN1Primitive(),
-      signerInfos.map { it.toPrimitive() }.toDLSet().toASN1Primitive()
-    ).toDLSequence()
 
   constructor(signedData: CMSSignedData) : this(
     signedData.signedData.version.value,
@@ -46,4 +29,20 @@ data class SignedDataInfo(
     signedData.signerInfos.signers.map { SignerInfo(it) }
   )
 
+  override fun toPrimitive(): ASN1Primitive =
+    listOf(
+      ASN1Integer(version),
+      digestAlgorithmsInfo.toPrimitiveList().toDLSet(),
+      encapContentInfo.toPrimitive(),
+      TaggedObjectInfo.getTaggedObjectWithMetaInfo(
+        TaggedObjectMetaInfo(0, 2),
+        recreateCertificatesFromStore(
+          CollectionStore(certificates.map {
+            it.toX509CertificateHolder()
+          })
+        ).toASN1Primitive()
+      ),
+      crls?.toPrimitiveList()?.toDLSet()?.toASN1Primitive(),
+      signerInfos.toPrimitiveList().toDLSet().toASN1Primitive()
+    ).toDLSequence()
 }

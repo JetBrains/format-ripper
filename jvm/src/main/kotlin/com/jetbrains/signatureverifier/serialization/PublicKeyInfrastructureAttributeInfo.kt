@@ -10,11 +10,11 @@ data class PublicKeyInfrastructureAttributeInfo(
   val content: EncodableInfo
 ) : AttributeInfo {
 
-  override fun toAttributeDLSequence(): DLSequence =
-    listOf(identifier.toPrimitive(), content.toPrimitive()).toDLSequence()
-
   constructor(attribute: Attribute) : this(
     TextualInfo.getInstance(attribute.attrType),
     attribute.attrValues.toEncodableInfo()
   )
+
+  override fun toAttributeDLSequence(): DLSequence =
+    listOf(identifier.toPrimitive(), content.toPrimitive()).toDLSequence()
 }

@@ -1,10 +1,8 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.x509.Holder
-import java.rmi.UnexpectedException
 
 @Serializable
 data class HolderInfo(
@@ -13,6 +11,14 @@ data class HolderInfo(
   val objectDigestInfo: ObjectDigestInfo?,
   val version: Int
 ) : EncodableInfo {
+
+  constructor(holder: Holder) : this(
+    holder.baseCertificateID?.let { IssuerSerialInfo(it) },
+    holder.entityName?.let { it.names.map { name -> GeneralNameInfo(name) } },
+    holder.objectDigestInfo?.let { ObjectDigestInfo(it) },
+    holder.version
+  )
+
   override fun toPrimitive(): ASN1Primitive = when (version) {
     0 -> when (entityName) {
       null ->
@@ -24,7 +30,7 @@ data class HolderInfo(
       else ->
         TaggedObjectInfo.getTaggedObjectWithMetaInfo(
           TaggedObjectMetaInfo(1, 1),
-          entityName.map { it.toPrimitive() }.toDLSequence()
+          entityName.toPrimitiveList().toDLSequence()
         ).toASN1Primitive()
     }
 
@@ -38,7 +44,7 @@ data class HolderInfo(
       entityName?.let {
         TaggedObjectInfo.getTaggedObjectWithMetaInfo(
           TaggedObjectMetaInfo(1, 2),
-          it.map { it.toPrimitive() }.toDLSequence()
+          it.toPrimitiveList().toDLSequence()
         )
       },
       objectDigestInfo?.let {
@@ -49,13 +55,6 @@ data class HolderInfo(
       },
     ).toDLSequence()
 
-    else -> throw UnexpectedException("Unexpected version $version")
+    else -> throw IllegalArgumentException("Unexpected version $version")
   }
-
-  constructor(holder: Holder) : this(
-    holder.baseCertificateID?.let { IssuerSerialInfo(it) },
-    holder.entityName?.let { it.names.map { GeneralNameInfo(it) } },
-    holder.objectDigestInfo?.let { ObjectDigestInfo(it) },
-    holder.version
-  )
 }

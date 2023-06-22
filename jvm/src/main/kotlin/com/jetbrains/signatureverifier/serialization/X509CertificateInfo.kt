@@ -33,8 +33,8 @@ data class X509CertificateInfo(
         AlgorithmInfo(certificateHolder.subjectPublicKeyInfo.algorithm),
         TextualInfo.getInstance(certificateHolder.subjectPublicKeyInfo.publicKeyData),
         certificateHolder.extensions?.let {
-          it.extensionOIDs.map {
-            val extension = certificateHolder.extensions.getExtension(it)
+          it.extensionOIDs.map {oid->
+            val extension = certificateHolder.extensions.getExtension(oid)
             ExtensionInfo(
               TextualInfo.getInstance(extension.extnId),
               certificateHolder.extensions.criticalExtensionOIDs.contains(extension.extnId),
@@ -67,9 +67,7 @@ data class X509CertificateInfo(
         DLTaggedObject(
           true,
           3,
-          it.map {
-            it.toPrimitive()
-          }.toDLSequence()
+          it.toPrimitiveList().toDLSequence()
         )
       }
     ).toDLSequence()

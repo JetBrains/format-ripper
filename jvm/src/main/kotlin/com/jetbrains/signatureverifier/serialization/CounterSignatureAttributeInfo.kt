@@ -22,6 +22,6 @@ data class CounterSignatureAttributeInfo(
   override fun toAttributeDLSequence(): DLSequence =
     listOf(
       identifier.toPrimitive(),
-      content.map { it.toPrimitive() }.toDLSet()
+      content.toPrimitiveList().toDLSet()
     ).toDLSequence()
 }

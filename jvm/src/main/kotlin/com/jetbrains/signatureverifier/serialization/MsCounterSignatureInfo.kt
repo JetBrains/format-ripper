@@ -1,13 +1,8 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier
-import org.bouncycastle.asn1.x509.AttributeCertificate
-import org.bouncycastle.asn1.x509.Certificate
-import org.bouncycastle.cert.X509AttributeCertificateHolder
-import org.bouncycastle.cert.X509CertificateHolder
 
 @Serializable
 data class MsCounterSignatureInfo(
@@ -32,43 +27,15 @@ data class MsCounterSignatureInfo(
 
       val tstInfo = TSTInfo(iterator.next() as DLSequence)
 
-      val wtf = iterator.next()
-      val taggedCertificateInfo = wtf.let {
+      val taggedCertificateInfo = iterator.next().let {
         TaggedObjectInfo(
           TaggedObjectMetaInfo(it as DLTaggedObject),
           SequenceInfo(
             (it.baseObject as DLSequence).map { certificateSequence ->
-              when (certificateSequence) {
-                is DLSequence -> {
-                  CertificateInfo.getInstance(
-                    X509CertificateHolder(
-                      Certificate.getInstance(
-                        certificateSequence
-                      )
-                    )
-                  )
-                }
-
-                is DLTaggedObject -> {
-                  TaggedObjectInfo(
-                    TaggedObjectMetaInfo(certificateSequence),
-                    CertificateInfo.getInstance(
-                      X509AttributeCertificateHolder(
-                        AttributeCertificate.getInstance(
-                          certificateSequence.baseObject
-                        )
-                      )
-                    )
-                  )
-                }
-
-                else -> throw Exception("Unexpected certificate primitive")
-              }
-
+              CertificateInfo.getInstance(certificateSequence.toASN1Primitive())
             }
           )
         )
-
       }
 
       val counterSignatures = (iterator.next() as DLSet).map {
@@ -88,9 +55,9 @@ data class MsCounterSignatureInfo(
 
   override fun toPrimitive(): ASN1Primitive = listOf(
     ASN1Integer(version.toLong()),
-    algorithms.map { it.toPrimitive() }.toDLSet(),
+    algorithms.toPrimitiveList().toDLSet(),
     tstInfo.toPrimitive(),
     taggedCertificateInfo.toPrimitive(),
-    counterSignatures.map { it.toPrimitive() }.toDLSet()
+    counterSignatures.toPrimitiveList().toDLSet()
   ).toDLSequence()
 }

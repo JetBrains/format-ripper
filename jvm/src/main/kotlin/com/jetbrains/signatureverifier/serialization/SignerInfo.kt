@@ -1,6 +1,5 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
 import com.jetbrains.signatureverifier.bouncycastle.cms.SignerInformation
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1Integer
@@ -19,24 +18,6 @@ data class SignerInfo(
   val encryptedDigest: TextualInfo,
   val unauthenticatedAttributes: List<AttributeInfo>?
 ) : EncodableInfo {
-  override fun toPrimitive(): ASN1Primitive =
-    listOf(
-      ASN1Integer(version.toLong()),
-      sid.toPrimitive(),
-      digestAlgorithm.toPrimitive(),
-      TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-        TaggedObjectMetaInfo(0, 2),
-        authenticatedAttributes.map { it.toPrimitive() }.toDLSet()
-      ),
-      digestEncryptionAlgorithm.toPrimitive(),
-      encryptedDigest.toPrimitive(),
-      unauthenticatedAttributes?.let { attributes ->
-        TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-          TaggedObjectMetaInfo(1, 2),
-          attributes.map { it.toPrimitive() }.toDLSet()
-        )
-      }
-    ).toDLSequence()
 
   constructor(signer: SignerInformation) : this(
     signer.version,
@@ -59,6 +40,25 @@ data class SignerInfo(
       )
     }
   )
+
+  override fun toPrimitive(): ASN1Primitive =
+    listOf(
+      ASN1Integer(version.toLong()),
+      sid.toPrimitive(),
+      digestAlgorithm.toPrimitive(),
+      TaggedObjectInfo.getTaggedObjectWithMetaInfo(
+        TaggedObjectMetaInfo(0, 2),
+        authenticatedAttributes.toPrimitiveList().toDLSet()
+      ),
+      digestEncryptionAlgorithm.toPrimitive(),
+      encryptedDigest.toPrimitive(),
+      unauthenticatedAttributes?.let { attributes ->
+        TaggedObjectInfo.getTaggedObjectWithMetaInfo(
+          TaggedObjectMetaInfo(1, 2),
+          attributes.toPrimitiveList().toDLSet()
+        )
+      }
+    ).toDLSequence()
 }
 
 

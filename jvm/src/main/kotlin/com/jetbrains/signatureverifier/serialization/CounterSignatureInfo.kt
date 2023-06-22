@@ -1,6 +1,5 @@
 package com.jetbrains.signatureverifier.serialization
 
-import TaggedObjectMetaInfo
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.ASN1Primitive
@@ -82,7 +81,7 @@ data class CounterSignatureInfo(
       digestAlgorithm.toPrimitive(),
       TaggedObjectInfo.getTaggedObjectWithMetaInfo(
         TaggedObjectMetaInfo(0, 4),
-        authenticatedAttributes.map { it.toPrimitive() }.toDLSet()
+        authenticatedAttributes.toPrimitiveList().toDLSet()
       ),
       digestEncryptionAlgorithm.toPrimitive(),
       encryptedDigest.toPrimitive(),

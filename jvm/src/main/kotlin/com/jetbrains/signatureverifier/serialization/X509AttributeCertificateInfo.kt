@@ -42,8 +42,8 @@ data class X509AttributeCertificateInfo(
           acinfo.attributes.map { AttributeInfo.getInstance(Attribute.getInstance(it)) },
           acinfo.issuerUniqueID?.let { TextualInfo.getInstance(it) },
           acinfo.extensions?.let {
-            it.extensionOIDs.map {
-              val extension = acinfo.extensions.getExtension(it)
+            it.extensionOIDs.map {oid->
+              val extension = acinfo.extensions.getExtension(oid)
               ExtensionInfo(
                 TextualInfo.getInstance(extension.extnId),
                 certificateHolder.extensions.criticalExtensionOIDs.contains(extension.extnId),
@@ -65,8 +65,8 @@ data class X509AttributeCertificateInfo(
       ASN1GeneralizedTime(startDate),
       ASN1GeneralizedTime(endDate)
     ),
-    attributes.map { it.toPrimitive() }.toDLSequence(),
+    attributes.toPrimitiveList().toDLSequence(),
     issuerUniqueId?.toPrimitive(),
-    extensions?.map { it.toPrimitive() }?.toDLSequence()
+    extensions?.toPrimitiveList()?.toDLSequence()
   ).toDLSequence()
 }

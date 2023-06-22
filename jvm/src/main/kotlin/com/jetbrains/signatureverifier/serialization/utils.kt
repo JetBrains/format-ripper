@@ -27,7 +27,6 @@ fun recreateContentInfoFromSignedData(
   val inputStream = ASN1InputStream(signedDataBytes)
   val asn1Object = inputStream.readObject() as ASN1Primitive
 
-  // Wrap the ASN1Primitive object in a ContentInfo structure
   return ContentInfo(
     ContentInfo.signedData,
     asn1Object

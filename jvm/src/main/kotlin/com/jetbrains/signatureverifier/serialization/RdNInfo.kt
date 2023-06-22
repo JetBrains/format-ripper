@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1Primitive
 
 @Serializable
-data class rdNInfo(
+data class RdNInfo(
   val type: TextualInfo,
   val value: TextualInfo
 ) : EncodableInfo {
