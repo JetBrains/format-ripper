@@ -4,7 +4,6 @@ import com.jetbrains.signatureverifier.PeFile
 import com.jetbrains.signatureverifier.cf.MsiFile
 import com.jetbrains.signatureverifier.crypt.SignatureVerificationParams
 import com.jetbrains.signatureverifier.crypt.SignedMessage
-import com.jetbrains.signatureverifier.crypt.VerifySignatureStatus
 import com.jetbrains.signatureverifier.macho.MachoArch
 import com.jetbrains.signatureverifier.serialization.AttributeInfo
 import com.jetbrains.signatureverifier.serialization.compareBytes
@@ -146,7 +145,8 @@ class AttributesSerializationTests {
     @JvmStatic
     fun SignedMsiProvider(): Stream<Arguments> {
       return Stream.of(
-        Arguments.of("2dac4b.msi", VerifySignatureStatus.Valid),
+        Arguments.of("2dac4b.msi"),
+        Arguments.of("firefox.msi"),
       )
     }
 
