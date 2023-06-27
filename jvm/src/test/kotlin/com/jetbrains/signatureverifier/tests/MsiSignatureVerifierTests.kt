@@ -48,10 +48,13 @@ class MsiSignatureVerifierTests {
 
     private const val msi_01_sha1 = "CBBE5C1017C8A65FFEB9219F465C949563A0E256";
 
+    private const val msi_02_signed = "firefox.msi";
+
     @JvmStatic
     fun VerifySignTestProvider(): Stream<Arguments> {
       return Stream.of(
         Arguments.of(msi_01_signed, VerifySignatureStatus.Valid),
+        Arguments.of(msi_02_signed, VerifySignatureStatus.Valid),
         Arguments.of(msi_01_broken_hash, VerifySignatureStatus.InvalidSignature),
         Arguments.of(msi_01_broken_sign, VerifySignatureStatus.InvalidSignature),
         Arguments.of(msi_01_broken_timestamp, VerifySignatureStatus.InvalidSignature)
