@@ -1,9 +1,11 @@
 package com.jetbrains.signatureverifier.serialization
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.nullable
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.math.BigInteger
@@ -53,6 +55,21 @@ object BigIntegerSerializer : KSerializer<BigInteger> {
 
   override fun deserialize(decoder: Decoder): BigInteger = decoder.decodeString().toBigInteger()
 }
+
+object NullableByteArraySerializer : KSerializer<ByteArray?> {
+  @OptIn(ExperimentalSerializationApi::class)
+  override fun serialize(encoder: Encoder, value: ByteArray?) =
+    value?.let { encoder.encodeString(it.toHexString()) } ?: encoder.encodeNull()
+
+
+  @OptIn(ExperimentalSerializationApi::class)
+  override fun deserialize(decoder: Decoder): ByteArray? =
+    if (decoder.decodeNotNullMark()) decoder.decodeString().toByteArray() else decoder.decodeNull()
+  
+  override val descriptor: SerialDescriptor =
+    PrimitiveSerialDescriptor("NullableByteArray", PrimitiveKind.STRING).nullable
+}
+
 
 object ByteArraySerializer : KSerializer<ByteArray> {
   override fun serialize(encoder: Encoder, value: ByteArray) =
