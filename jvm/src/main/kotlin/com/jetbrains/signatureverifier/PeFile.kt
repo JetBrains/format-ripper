@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.jetbrains.signatureverifier.serialization.toByteArray
 import com.jetbrains.signatureverifier.serialization.toHexString
 import com.jetbrains.util.*
+import kotlinx.serialization.Serializable
 import org.jetbrains.annotations.NotNull
 import java.io.EOFException
 import java.io.IOException
@@ -20,6 +21,7 @@ class PeFile {
     /**
      * Contains all information required to insert extracted signature back to file
      */
+    @Serializable
     data class PeSignatureMetadata(
       var ntHeaderOffset: DataValue = DataValue(),
       var checkSum: DataValue = DataValue(),
@@ -39,7 +41,7 @@ class PeFile {
     fun insertSignature(
       @NotNull stream: SeekableByteChannel,
       @NotNull signatureMetadata: PeSignatureMetadata,
-      @NotNull signatureHex: String
+      @NotNull signature: ByteArray
     ) {
 
       listOf(
@@ -57,7 +59,7 @@ class PeFile {
       }
 
       stream.Seek(signatureMetadata.signaturePosition.Offset.toLong(), SeekOrigin.Begin)
-      stream.write(ByteBuffer.wrap(signatureHex.toByteArray()))
+      stream.write(ByteBuffer.wrap(signature))
       val alignment = (8 - stream.position() % 8) % 8
       stream.write(ByteBuffer.wrap(ByteArray(alignment.toInt())))
 

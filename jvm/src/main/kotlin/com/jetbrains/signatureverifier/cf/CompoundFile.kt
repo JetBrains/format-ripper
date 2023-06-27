@@ -658,14 +658,14 @@ class DirectoryEntry {
 
     if (EntryType == DirectoryEntryType.STGTY_ROOT) {
 //      stream.Skip(13)
-      metaBytes.add(reader.ReadBytes(13))
+      metaBytes.add(reader.ReadBytes(13).copyOf(13))
       Clsid = reader.ReadBytes(16)
 //      stream.Skip(20)
-      metaBytes.add(reader.ReadBytes(20))
+      metaBytes.add(reader.ReadBytes(20).copyOf(20))
     } else {
       Clsid = null
 //      stream.Skip(49)
-      metaBytes.add(reader.ReadBytes(49))
+      metaBytes.add(reader.ReadBytes(49).copyOf(49))
     }
 
     StartSect = reader.ReadUInt32()

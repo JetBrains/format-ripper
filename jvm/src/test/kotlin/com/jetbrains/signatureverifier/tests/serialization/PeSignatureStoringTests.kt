@@ -29,6 +29,7 @@ class PeSignatureStoringTests {
 
     val signatureMetadata: PeFile.Companion.PeSignatureMetadata
     val signature: ByteArray
+    val peFileInfo: PEFileInfo
 
     TestUtil.getTestByteChannel("pe", signedPeResourceName, write = true).use {
       val peFile = PeFile(it)
@@ -40,6 +41,9 @@ class PeSignatureStoringTests {
       val signedData = signedMessage.SignedData
 
       val signedDataInfo = SignedDataInfo(signedData)
+
+      peFileInfo = PEFileInfo(signedDataInfo, signatureMetadata)
+
       signature = signedDataInfo.toSignature()
 
       Assertions.assertEquals(
@@ -55,7 +59,7 @@ class PeSignatureStoringTests {
 
 
     TestUtil.getTestByteChannel("pe", tmpName, write = true).use {
-      PeFile.insertSignature(it, signatureMetadata, signature)
+      peFileInfo.modifyFile(it)
     }
 
     Assertions.assertEquals(

@@ -43,15 +43,15 @@ class MSISignatureStoringTests {
       val signedEntriesData = signedFile.getEntries().filter { entry -> entry.second.isNotEmpty() }//.map { it.first }
       val signedEntriesDataMap = signedEntriesData.associateBy { it.first.Name.toHexString() }
 
-      val msiInfo = MSIInfo(
+      val msiFileInfo = MsiFileInfo(
         signedDataInfo,
         cfMetaInfo,
         signedEntriesData.map { it.first },
         signedEntriesDataMap[MsiFile.rootEntryName.toHexString()]?.second,
         signedEntriesDataMap[MsiFile.msiDigitalSignatureExEntryName.toHexString()]?.second
       )
-      val json = Json.encodeToString(msiInfo)
-      val decoded: MSIInfo = Json.decodeFromString(json)
+      val json = Json.encodeToString(msiFileInfo)
+      val decoded: MsiFileInfo = Json.decodeFromString(json)
 
       val path = TestUtil.getTestDataFile("msi", unsignedResourceName)
       val tmpName = "tmp" + Random().nextInt().toString()

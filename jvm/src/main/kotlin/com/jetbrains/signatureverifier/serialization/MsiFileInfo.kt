@@ -16,7 +16,7 @@ class MsiFileInfo(
   @Serializable(ByteArraySerializer::class)
   val digitalSignatureExData: ByteArray?,
 ) {
-  fun insertSignature(stream: SeekableByteChannel) {
+  fun modifyFile(stream: SeekableByteChannel) {
     val signature = signedDataInfo.toSignature()
 
     val unsignedEntries =
