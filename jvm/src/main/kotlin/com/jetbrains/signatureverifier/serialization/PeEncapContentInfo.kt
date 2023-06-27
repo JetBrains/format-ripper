@@ -8,7 +8,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier
 
 @Serializable
 data class PeEncapContentInfo(
-  val contentType: TextualInfo,
+  override val contentType: TextualInfo,
   val imageDataObjIdInfo: ImageDataObjIdInfo,
   val hashAlgorithmInfo: AlgorithmInfo,
   val contentHash: TextualInfo

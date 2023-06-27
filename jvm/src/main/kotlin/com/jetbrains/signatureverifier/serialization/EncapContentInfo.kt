@@ -15,4 +15,6 @@ sealed interface EncapContentInfo : EncodableInfo {
       }
     }
   }
+
+  val contentType: TextualInfo
 }

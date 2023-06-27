@@ -6,7 +6,7 @@ import org.bouncycastle.asn1.cms.ContentInfo
 
 @Serializable
 data class UnknownEncapContentInfo(
-  val contentType: TextualInfo,
+  override val contentType: TextualInfo,
   val content: EncodableInfo?
 ) : EncapContentInfo {
 
