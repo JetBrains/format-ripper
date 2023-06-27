@@ -4,6 +4,7 @@ import com.jetbrains.signatureverifier.bouncycastle.cms.CMSSignedData
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.ASN1Primitive
+import org.bouncycastle.asn1.cms.SignedData
 import org.bouncycastle.util.CollectionStore
 import java.math.BigInteger
 
@@ -45,4 +46,7 @@ data class SignedDataInfo(
       crls?.toPrimitiveList()?.toDLSet()?.toASN1Primitive(),
       signerInfos.toPrimitiveList().toDLSet().toASN1Primitive()
     ).toDLSequence()
+
+  fun toSignature(encoding: String = "DER") =
+    SignedData.getInstance(toPrimitive()).toContentInfo().getEncoded(encoding)
 }

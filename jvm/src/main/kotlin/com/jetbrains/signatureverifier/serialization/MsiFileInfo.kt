@@ -4,11 +4,10 @@ import com.jetbrains.signatureverifier.cf.CompoundFile
 import com.jetbrains.signatureverifier.cf.DirectoryEntry
 import com.jetbrains.signatureverifier.cf.MsiFile
 import kotlinx.serialization.Serializable
-import org.bouncycastle.asn1.cms.SignedData
 import java.nio.channels.SeekableByteChannel
 
 @Serializable
-class MSIInfo(
+class MsiFileInfo(
   val signedDataInfo: SignedDataInfo,
   val compoundFileMetaInfo: CompoundFile.Companion.CompoundFileMetaInfo,
   val entries: List<DirectoryEntry>,
@@ -17,9 +16,8 @@ class MSIInfo(
   @Serializable(ByteArraySerializer::class)
   val digitalSignatureExData: ByteArray?,
 ) {
-  fun modifyFile(stream: SeekableByteChannel) {
-    val signedData = SignedData.getInstance(signedDataInfo.toPrimitive())
-    val signature = signedData.toContentInfo().getEncoded("DER")
+  fun insertSignature(stream: SeekableByteChannel) {
+    val signature = signedDataInfo.toSignature()
 
     val unsignedEntries =
       MsiFile(stream).getEntries()
