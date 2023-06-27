@@ -8,15 +8,15 @@ import java.nio.channels.SeekableByteChannel
 
 @Serializable
 class MsiFileInfo(
-  val signedDataInfo: SignedDataInfo,
+  override val signedDataInfo: SignedDataInfo,
   val compoundFileMetaInfo: CompoundFile.Companion.CompoundFileMetaInfo,
   val entries: List<DirectoryEntry>,
   @Serializable(ByteArraySerializer::class)
   val rootEntryData: ByteArray?,
   @Serializable(ByteArraySerializer::class)
   val digitalSignatureExData: ByteArray?,
-) {
-  fun modifyFile(stream: SeekableByteChannel) {
+) : FileInfo {
+  override fun modifyFile(stream: SeekableByteChannel) {
     val signature = signedDataInfo.toSignature()
 
     val unsignedEntries =
