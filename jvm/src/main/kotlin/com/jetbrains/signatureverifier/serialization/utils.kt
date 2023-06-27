@@ -3,6 +3,7 @@ package com.jetbrains.signatureverifier.serialization
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.cms.ContentInfo
 import org.bouncycastle.asn1.cms.SignedData
+import java.nio.ByteBuffer
 import java.util.*
 
 fun List<EncodableInfo>.toPrimitiveList(): List<ASN1Encodable?> = this.map { it.toPrimitive() }
@@ -19,11 +20,8 @@ fun List<ASN1Encodable?>.toDLSet(): DLSet {
   return DLSet(vector)
 }
 
-fun recreateContentInfoFromSignedData(
-  signedData: SignedData,
-  encoding: String = "BER"
-): ContentInfo {
-  val signedDataBytes = signedData.getEncoded(encoding)
+fun SignedData.toContentInfo(encoding: String = "BER"): ContentInfo {
+  val signedDataBytes = this.getEncoded(encoding)
   val inputStream = ASN1InputStream(signedDataBytes)
   val asn1Object = inputStream.readObject() as ASN1Primitive
 
@@ -32,6 +30,7 @@ fun recreateContentInfoFromSignedData(
     asn1Object
   )
 }
+
 
 fun compareBytes(
   first: ByteArray,
@@ -100,4 +99,16 @@ fun String.toByteArray(): ByteArray {
   }
   return result
 }
+
+fun Int.toByteArray(): ByteArray =
+  ByteBuffer.allocate(Int.SIZE_BYTES).putInt(this).array().reversedArray()
+
+fun Int.toHexString(): String =
+  toByteArray().toHexString()
+
+fun Long.toByteArray(): ByteArray =
+  ByteBuffer.allocate(Long.SIZE_BYTES).putLong(this).array().reversedArray()
+
+fun Long.toHexString(): String =
+  toByteArray().toHexString()
 

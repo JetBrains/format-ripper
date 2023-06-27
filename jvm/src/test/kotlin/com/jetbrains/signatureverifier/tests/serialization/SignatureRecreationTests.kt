@@ -90,7 +90,7 @@ class SignatureRecreationTests {
         )
       )
 
-      val recreatedInfo = recreateContentInfoFromSignedData(copy)
+      val recreatedInfo = copy.toContentInfo()
 
       Assertions.assertEquals(
         true,
@@ -122,7 +122,7 @@ class SignatureRecreationTests {
         )
       )
 
-      val recreatedInfo = recreateContentInfoFromSignedData(copy)
+      val recreatedInfo = copy.toContentInfo()
 
       Assertions.assertEquals(
         true,

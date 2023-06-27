@@ -2,10 +2,7 @@ package com.jetbrains.signatureverifier.tests.serialization
 
 import com.jetbrains.signatureverifier.PeFile
 import com.jetbrains.signatureverifier.crypt.SignedMessage
-import com.jetbrains.signatureverifier.serialization.SignedDataInfo
-import com.jetbrains.signatureverifier.serialization.compareBytes
-import com.jetbrains.signatureverifier.serialization.recreateContentInfoFromSignedData
-import com.jetbrains.signatureverifier.serialization.toHexString
+import com.jetbrains.signatureverifier.serialization.*
 import com.jetbrains.util.TestUtil
 import org.bouncycastle.asn1.cms.SignedData
 import org.junit.jupiter.api.Assertions
@@ -46,7 +43,7 @@ class PeSignatureStoringTests {
       val signedDataInfo = SignedDataInfo(signedData)
 
       val recreatedSignedData = SignedData.getInstance(signedDataInfo.toPrimitive())
-      val recreatedInfo = recreateContentInfoFromSignedData(recreatedSignedData)
+      val recreatedInfo = recreatedSignedData.toContentInfo()
       signature = recreatedInfo.getEncoded("DER")
 
       Assertions.assertEquals(

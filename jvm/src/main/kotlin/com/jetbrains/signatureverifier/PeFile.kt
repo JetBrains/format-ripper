@@ -64,9 +64,6 @@ class PeFile {
       stream.Rewind()
       stream.close()
     }
-
-    private fun intToHexString(value: Int): String =
-      ByteBuffer.allocate(Int.SIZE_BYTES).putInt(value).array().reversedArray().toHexString()
   }
 
   private val _stream: SeekableByteChannel
@@ -103,7 +100,7 @@ class PeFile {
     stream.Seek(0x3C, SeekOrigin.Begin)
     _ntHeaderOffset = reader.ReadUInt32()
     _signatureMetadata.ntHeaderOffset =
-      DataValue(DataInfo(0x3c, Int.SIZE_BYTES), intToHexString(_ntHeaderOffset.toInt()))
+      DataValue(DataInfo(0x3c, Int.SIZE_BYTES), _ntHeaderOffset.toInt().toHexString())
 
     _checkSum = DataInfo(_ntHeaderOffset.toInt() + 0x58, Int.SIZE_BYTES)
     stream.Seek(_checkSum.Offset.toLong(), SeekOrigin.Begin)
@@ -150,13 +147,13 @@ class PeFile {
     _signatureMetadata.securityRva =
       DataValue(
         DataInfo(_imageDirectoryEntrySecurity.Offset, Int.SIZE_BYTES),
-        intToHexString(securityRva)
+        securityRva.toHexString()
       )
 
     var position = stream.position().toInt()
     val securitySize = reader.ReadUInt32().toInt()
     _signatureMetadata.securitySize =
-      DataValue(DataInfo(position, Int.SIZE_BYTES), intToHexString(securitySize))
+      DataValue(DataInfo(position, Int.SIZE_BYTES), securitySize.toHexString())
     _signData = DataInfo(securityRva, securitySize)
 
     stream.Seek(
@@ -168,14 +165,14 @@ class PeFile {
     val dotnetMetadataRva = reader.ReadUInt32().toInt()
     _signatureMetadata.dotnetMetadataRva = DataValue(
       DataInfo(position, Int.SIZE_BYTES),
-      intToHexString(dotnetMetadataRva)
+      dotnetMetadataRva.toHexString()
     )
 
     position = stream.position().toInt()
     val dotnetMetadataSize = reader.ReadUInt32().toInt()
     _signatureMetadata.dotnetMetadataSize = DataValue(
       DataInfo(position, Int.SIZE_BYTES),
-      intToHexString(dotnetMetadataSize)
+      dotnetMetadataSize.toHexString()
     )
 
     _dotnetMetadata = DataInfo(dotnetMetadataRva, dotnetMetadataSize)
@@ -185,7 +182,7 @@ class PeFile {
     try {
       _signatureMetadata.dwLength = DataValue(
         DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
-        intToHexString(reader.ReadInt32())
+        reader.ReadInt32().toHexString()
       )
     } catch (_: EOFException) { // this can happen because of empty signature
     }
@@ -194,7 +191,7 @@ class PeFile {
       _signatureMetadata.wRevision =
         DataValue(
           DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
-          intToHexString(reader.ReadInt32())
+          reader.ReadInt32().toHexString()
         )
     } catch (_: EOFException) {
     }
