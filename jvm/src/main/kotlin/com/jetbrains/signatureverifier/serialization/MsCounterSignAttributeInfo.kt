@@ -7,7 +7,7 @@ import org.bouncycastle.asn1.cms.Attribute
 
 @Serializable
 data class MsCounterSignAttributeInfo(
-  val identifier: TextualInfo,
+  override val identifier: TextualInfo,
   val contentIdentifier: List<TextualInfo>,
   val content: List<TaggedObjectInfo>
 ) : AttributeInfo {

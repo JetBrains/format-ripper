@@ -29,6 +29,7 @@ sealed interface AttributeInfo : EncodableInfo {
       }
   }
 
+  val identifier: TextualInfo
 
   fun toAttributeDLSequence(): DLSequence
 

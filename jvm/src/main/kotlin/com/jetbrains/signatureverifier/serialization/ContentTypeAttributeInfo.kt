@@ -7,7 +7,7 @@ import org.bouncycastle.asn1.cms.Attribute
 // 1.2.840.113549.1.9.3
 @Serializable
 data class ContentTypeAttributeInfo(
-  val identifier: TextualInfo,
+  override val identifier: TextualInfo,
   val content: List<TextualInfo>
 ) : AttributeInfo {
 

@@ -7,7 +7,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier
 
 @Serializable
 data class CertificationAuthorityAttributeInfo(
-  val identifier: TextualInfo,
+  override val identifier: TextualInfo,
   val content: List<AlgorithmInfo>
 ) : AttributeInfo {
 

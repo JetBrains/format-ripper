@@ -7,7 +7,7 @@ import org.bouncycastle.asn1.cms.Attribute
 // 1.3.6.1.4.1.311.10.3.28
 @Serializable
 data class TimestampedDataAttributeInfo(
-  val identifier: TextualInfo,
+  override val identifier: TextualInfo,
   val content: List<TextualInfo>
 ) : AttributeInfo {
 

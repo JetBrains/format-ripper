@@ -7,7 +7,7 @@ import org.bouncycastle.asn1.cms.Attribute
 // 1.2.840.113549.1.9.4
 @Serializable
 data class MessageDigestAttributeInfo(
-  val identifier: TextualInfo,
+  override val identifier: TextualInfo,
   val content: List<TextualInfo>,
 ) : AttributeInfo {
 

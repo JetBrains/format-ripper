@@ -8,7 +8,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier
 
 @Serializable
 data class CMSAlgorithmProtectionAttributeInfo(
-  val identifier: TextualInfo,
+  override val identifier: TextualInfo,
   val content: List<List<EncodableInfo>>
 ) : AttributeInfo {
 
