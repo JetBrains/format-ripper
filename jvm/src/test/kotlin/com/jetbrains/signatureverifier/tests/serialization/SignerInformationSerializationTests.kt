@@ -6,7 +6,10 @@ import com.jetbrains.signatureverifier.crypt.SignatureVerificationParams
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.crypt.SignedMessageVerifier
 import com.jetbrains.signatureverifier.macho.MachoArch
-import com.jetbrains.signatureverifier.serialization.*
+import com.jetbrains.signatureverifier.serialization.ConsoleLogger
+import com.jetbrains.signatureverifier.serialization.compareBytes
+import com.jetbrains.signatureverifier.serialization.getTestByteChannel
+import com.jetbrains.signatureverifier.serialization.toDLSet
 import com.jetbrains.util.TestUtil
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
@@ -18,7 +21,6 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
-import java.util.*
 import java.util.stream.Stream
 import com.jetbrains.signatureverifier.serialization.SignerInfo as SerializableSignerInfo
 
@@ -134,6 +136,7 @@ class SignerInformationSerializationTests {
       return Stream.of(
         Arguments.of("2dac4b.msi"),
         Arguments.of("firefox.msi"),
+        Arguments.of("sumatra.msi"),
       )
     }
 

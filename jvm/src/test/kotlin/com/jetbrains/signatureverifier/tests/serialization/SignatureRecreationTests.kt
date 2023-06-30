@@ -4,7 +4,10 @@ import com.jetbrains.signatureverifier.PeFile
 import com.jetbrains.signatureverifier.cf.MsiFile
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.macho.MachoArch
-import com.jetbrains.signatureverifier.serialization.*
+import com.jetbrains.signatureverifier.serialization.SignedDataInfo
+import com.jetbrains.signatureverifier.serialization.compareBytes
+import com.jetbrains.signatureverifier.serialization.getTestByteChannel
+import com.jetbrains.signatureverifier.serialization.toContentInfo
 import com.jetbrains.util.TestUtil
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -169,6 +172,7 @@ class SignatureRecreationTests {
       return Stream.of(
         Arguments.of("2dac4b.msi"),
         Arguments.of("firefox.msi"),
+        Arguments.of("sumatra.msi"),
       )
     }
 

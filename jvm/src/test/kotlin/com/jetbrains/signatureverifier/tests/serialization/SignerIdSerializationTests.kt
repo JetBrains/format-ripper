@@ -107,6 +107,7 @@ class SignerIdSerializationTests {
       return Stream.of(
         Arguments.of("2dac4b.msi"),
         Arguments.of("firefox.msi"),
+        Arguments.of("sumatra.msi"),
       )
     }
 
