@@ -598,7 +598,7 @@ open class CompoundFileHeader {
         metaInfo.sectDifCount
       ).forEach {
         stream.Seek(it.dataInfo.Offset.toLong(), SeekOrigin.Begin)
-        stream.write(ByteBuffer.wrap(it.value.toByteArray()))
+        stream.write(ByteBuffer.wrap(it.value))
       }
     }
   }
@@ -628,77 +628,77 @@ open class CompoundFileHeader {
     metaInfo = CompoundFileHeaderMetaInfo()
 
     metaInfo.CLSID =
-      DataValue(DataInfo(stream.position().toInt(), 16), reader.ReadBytes(16).toHexString())
+      DataValue(DataInfo(stream.position().toInt(), 16), reader.ReadBytes(16))
 
     metaInfo.minorVersion =
-      DataValue(DataInfo(stream.position().toInt(), UShort.SIZE_BYTES), reader.ReadUInt16().toInt().toHexString())
+      DataValue(DataInfo(stream.position().toInt(), UShort.SIZE_BYTES), reader.ReadUInt16().toInt().toByteArray())
 
     var position = stream.position().toInt()
     val version = reader.ReadUInt16().toInt()
-    metaInfo.version = DataValue(DataInfo(position, UShort.SIZE_BYTES), version.toHexString())
+    metaInfo.version = DataValue(DataInfo(position, UShort.SIZE_BYTES), version.toByteArray())
 
     position = stream.position().toInt()
     val byteOrder = reader.ReadUInt16().toInt()
-    metaInfo.byteOrder = DataValue(DataInfo(position, UShort.SIZE_BYTES), byteOrder.toHexString())
+    metaInfo.byteOrder = DataValue(DataInfo(position, UShort.SIZE_BYTES), byteOrder.toByteArray())
 
     if (byteOrder != 0xFFFE)
       throw InvalidDataException("Invalid format. Only Little endian is expected")
 
     position = stream.position().toInt()
     SectorShift = reader.ReadUInt16().toInt()
-    metaInfo.sectorShift = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectorShift.toHexString())
+    metaInfo.sectorShift = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectorShift.toByteArray())
 
     if (!(version == 3 && SectorShift == 9 || version == 4 && SectorShift == 0xC))
       throw InvalidDataException("Invalid format. Version and sector size are incompatible")
 
     position = stream.position().toInt()
     MiniSectorShift = reader.ReadUInt16().toInt()
-    metaInfo.miniSectorShift = DataValue(DataInfo(position, UShort.SIZE_BYTES), MiniSectorShift.toHexString())
+    metaInfo.miniSectorShift = DataValue(DataInfo(position, UShort.SIZE_BYTES), MiniSectorShift.toByteArray())
 
     if (MiniSectorShift != 6)
       throw InvalidDataException("Invalid format. Mini Stream Sector Size must be equal 6")
 
     metaInfo.reserved = DataValue(
       DataInfo(stream.position().toInt(), 6),
-      reader.ReadBytes(6).copyOf(6).toHexString()
+      reader.ReadBytes(6).copyOf(6)
     )
 
     position = stream.position().toInt()
     SectDirCount = reader.ReadUInt32()
-    metaInfo.sectDirCount = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectDirCount.toInt().toHexString())
+    metaInfo.sectDirCount = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectDirCount.toInt().toByteArray())
 
     position = stream.position().toInt()
     SectFatCount = reader.ReadUInt32()
-    metaInfo.sectFatCount = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectFatCount.toInt().toHexString())
+    metaInfo.sectFatCount = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectFatCount.toInt().toByteArray())
 
     position = stream.position().toInt()
     SectDirStart = reader.ReadUInt32()
-    metaInfo.sectDirStart = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectDirStart.toInt().toHexString())
+    metaInfo.sectDirStart = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectDirStart.toInt().toByteArray())
 
     metaInfo.reserved2 = DataValue(
       DataInfo(stream.position().toInt(), 4),
-      reader.ReadBytes(4).copyOf(4).toHexString()
+      reader.ReadBytes(4).copyOf(4)
     )
 
     position = stream.position().toInt()
     MiniSectorCutoff = reader.ReadUInt32()
-    metaInfo.miniSectorCutoff = DataValue(DataInfo(position, UShort.SIZE_BYTES), MiniSectorCutoff.toInt().toHexString())
+    metaInfo.miniSectorCutoff = DataValue(DataInfo(position, UShort.SIZE_BYTES), MiniSectorCutoff.toInt().toByteArray())
 
     position = stream.position().toInt()
     SectMiniFatStart = reader.ReadUInt32()
-    metaInfo.sectMiniFatStart = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectMiniFatStart.toInt().toHexString())
+    metaInfo.sectMiniFatStart = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectMiniFatStart.toInt().toByteArray())
 
     position = stream.position().toInt()
     SectMiniFatCount = reader.ReadUInt32()
-    metaInfo.sectMiniFatCount = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectMiniFatCount.toInt().toHexString())
+    metaInfo.sectMiniFatCount = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectMiniFatCount.toInt().toByteArray())
 
     position = stream.position().toInt()
     SectDifStart = reader.ReadUInt32()
-    metaInfo.sectDifStart = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectDifStart.toInt().toHexString())
+    metaInfo.sectDifStart = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectDifStart.toInt().toByteArray())
 
     position = stream.position().toInt()
     SectDifCount = reader.ReadUInt32()
-    metaInfo.sectDifCount = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectDifCount.toInt().toHexString())
+    metaInfo.sectDifCount = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectDifCount.toInt().toByteArray())
   }
 
   val SectorSize: UInt

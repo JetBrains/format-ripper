@@ -2,7 +2,6 @@
 
 import com.google.gson.Gson
 import com.jetbrains.signatureverifier.serialization.toByteArray
-import com.jetbrains.signatureverifier.serialization.toHexString
 import com.jetbrains.util.*
 import kotlinx.serialization.Serializable
 import org.jetbrains.annotations.NotNull
@@ -55,7 +54,7 @@ class PeFile {
         signatureMetadata.dotnetMetadataSize
       ).forEach {
         stream.Seek(it.dataInfo.Offset.toLong(), SeekOrigin.Begin)
-        stream.write(ByteBuffer.wrap(it.value.toByteArray()))
+        stream.write(ByteBuffer.wrap(it.value))
       }
 
       stream.Seek(signatureMetadata.signaturePosition.Offset.toLong(), SeekOrigin.Begin)
@@ -102,12 +101,12 @@ class PeFile {
     stream.Seek(0x3C, SeekOrigin.Begin)
     _ntHeaderOffset = reader.ReadUInt32()
     _signatureMetadata.ntHeaderOffset =
-      DataValue(DataInfo(0x3c, Int.SIZE_BYTES), _ntHeaderOffset.toInt().toHexString())
+      DataValue(DataInfo(0x3c, Int.SIZE_BYTES), _ntHeaderOffset.toInt().toByteArray())
 
     _checkSum = DataInfo(_ntHeaderOffset.toInt() + 0x58, Int.SIZE_BYTES)
     stream.Seek(_checkSum.Offset.toLong(), SeekOrigin.Begin)
     _signatureMetadata.checkSum =
-      DataValue(_checkSum, reader.ReadBytes(Int.SIZE_BYTES).toHexString())
+      DataValue(_checkSum, reader.ReadBytes(Int.SIZE_BYTES))
 
     stream.Seek(_ntHeaderOffset.toLong(), SeekOrigin.Begin)
 
@@ -149,13 +148,13 @@ class PeFile {
     _signatureMetadata.securityRva =
       DataValue(
         DataInfo(_imageDirectoryEntrySecurity.Offset, Int.SIZE_BYTES),
-        securityRva.toHexString()
+        securityRva.toByteArray()
       )
 
     var position = stream.position().toInt()
     val securitySize = reader.ReadUInt32().toInt()
     _signatureMetadata.securitySize =
-      DataValue(DataInfo(position, Int.SIZE_BYTES), securitySize.toHexString())
+      DataValue(DataInfo(position, Int.SIZE_BYTES), securitySize.toByteArray())
     _signData = DataInfo(securityRva, securitySize)
 
     stream.Seek(
@@ -167,14 +166,14 @@ class PeFile {
     val dotnetMetadataRva = reader.ReadUInt32().toInt()
     _signatureMetadata.dotnetMetadataRva = DataValue(
       DataInfo(position, Int.SIZE_BYTES),
-      dotnetMetadataRva.toHexString()
+      dotnetMetadataRva.toByteArray()
     )
 
     position = stream.position().toInt()
     val dotnetMetadataSize = reader.ReadUInt32().toInt()
     _signatureMetadata.dotnetMetadataSize = DataValue(
       DataInfo(position, Int.SIZE_BYTES),
-      dotnetMetadataSize.toHexString()
+      dotnetMetadataSize.toByteArray()
     )
 
     _dotnetMetadata = DataInfo(dotnetMetadataRva, dotnetMetadataSize)
@@ -184,7 +183,7 @@ class PeFile {
     try {
       _signatureMetadata.dwLength = DataValue(
         DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
-        reader.ReadInt32().toHexString()
+        reader.ReadInt32().toByteArray()
       )
     } catch (_: EOFException) { // this can happen because of empty signature
     }
@@ -193,7 +192,7 @@ class PeFile {
       _signatureMetadata.wRevision =
         DataValue(
           DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
-          reader.ReadInt32().toHexString()
+          reader.ReadInt32().toByteArray()
         )
     } catch (_: EOFException) {
     }
