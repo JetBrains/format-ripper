@@ -88,47 +88,77 @@ open class CompoundFile {
 
   fun getMetaInfo(): CompoundFileMetaInfo = _metaInfo
 
-  fun setStreamData(entryName: ByteArray, data: ByteArray) {
-    val reader = BinaryReader(_stream)
-    val dirEntry = findStreamByName(reader, entryName)
 
-    if (dirEntry != null)
-      writeStreamData(reader, dirEntry, data)
-  }
-
-  fun putEntries(data: List<Pair<DirectoryEntry, ByteArray>>) {
+  fun putEntries(
+    data: List<Pair<DirectoryEntry, ByteArray>>,
+    miniStreamStartSector: Int,
+    dirIndex: Int = 0,
+    wipe: Boolean = false
+  ): Int {
     val reader = BinaryReader(_stream)
     var nextSect = _header.SectDirStart
+    var i = dirIndex
+
     while (nextSect.toLong() != SpecialSectors.ENDOFCHAIN) {
       _stream.Jump(_header.GetSectorOffset(nextSect))
-      data.forEach {
-        writeDirectoryEntry(it.first)
-      }
-      data.forEach {
-        writeStreamData(reader, it.first, it.second)
+
+      repeat((_header.SectorSize / DirectoryEntrySize).toInt().coerceAtMost(data.size - i)) {
+        val entry = data[i]
+        if (wipe) {
+          wipeDirectoryEntry()
+        } else {
+          writeDirectoryEntry(entry.first)
+        }
+
+        i++
       }
 
       nextSect = _fat[nextSect.toInt()]
     }
-  }
 
-  fun getEntries(): List<Pair<DirectoryEntry, ByteArray>> {
-    val reader = BinaryReader(_stream)
-
-    val res: MutableList<Pair<DirectoryEntry, ByteArray>> = mutableListOf()
-
-    var nextSect = _header.SectDirStart
-
+    nextSect = _header.SectDirStart
+    i = dirIndex
     while (nextSect.toLong() != SpecialSectors.ENDOFCHAIN) {
       _stream.Jump(_header.GetSectorOffset(nextSect))
-      res.addAll(
-        (0 until (_header.SectorSize / DirectoryEntrySize).toInt()).map {
-          readDirectoryEntry(reader)
-        }.map {
-          Pair(it, readStreamData(reader, it))
+
+      repeat((_header.SectorSize / DirectoryEntrySize).toInt().coerceAtMost(data.size - i)) {
+        val entry = data[i]
+        if (wipe) {
+//          if (entry.first.Name.contentEquals(MsiFile.rootEntryName)) {
+//            val offset = _header.GetSectorOffset(entry.first.StartSect)
+//            _stream.Jump(offset)
+//            _stream.write(
+//              ByteBuffer.wrap(
+//                ByteArray(entry.first.SizeLow.toInt())
+//              )
+//            )
+//          } else {
+          writeStreamData(reader, entry.first, ByteArray(entry.second.size), miniStreamStartSector)
+//          }
+        } else if (entry.second.isNotEmpty() && entry.first.Name.toHexString() != MsiFile.rootEntryName.toHexString()) {
+          writeStreamData(reader, entry.first, entry.second, miniStreamStartSector)
         }
-      )
+        i++
+      }
+
       nextSect = _fat[nextSect.toInt()]
+    }
+
+    return i
+  }
+
+  fun getRootEntry(visitedSectors: MutableList<Pair<Int, Int>>? = null) = BinaryReader(_stream).let { reader ->
+    findRootDirectoryEntry(reader)!!.let {
+      Pair(it, readStreamData(reader, it, it.Name.toHexString(), visitedSectors))
+    }
+  }
+
+  fun getEntries(visitedSectors: MutableList<Pair<Int, Int>>? = null): List<Pair<DirectoryEntry, ByteArray>> {
+    val res = BinaryReader(_stream).let { reader ->
+      GetStreamDirectoryEntries(addAll = true)
+        .map {
+          Pair(it, readStreamData(reader, it, it.Name.toHexString(), visitedSectors))
+        }
     }
     return res
   }
@@ -148,7 +178,7 @@ open class CompoundFile {
     return readStreamData(reader, entry)
   }
 
-  fun GetStreamDirectoryEntries(): List<DirectoryEntry> {
+  fun GetStreamDirectoryEntries(addAll: Boolean = false): List<DirectoryEntry> {
     val reader = BinaryReader(_stream)
     val res = mutableListOf<DirectoryEntry>()
     var nextSect = _header.SectDirStart
@@ -159,11 +189,12 @@ open class CompoundFile {
       for (dirIndex in 0 until (_header.SectorSize / DirectoryEntrySize).toInt()) {
         val dirEntry = readDirectoryEntry(reader)
 
-        if (dirEntry.EntryType == DirectoryEntryType.STGTY_STREAM)
+        if (dirEntry.EntryType == DirectoryEntryType.STGTY_STREAM || addAll)
           res.add(dirEntry)
       }
       nextSect = _fat[nextSect.toInt()]
     }
+
     return res
   }
 
@@ -200,6 +231,10 @@ open class CompoundFile {
       _stream.write(ByteBuffer.wrap(it.toInt().toByteArray().copyOf(UInt.SIZE_BYTES)))
     }
 
+    _sectFatMetaInfo.freeSect?.let {
+      _stream.write(ByteBuffer.wrap(it.toInt().toByteArray().copyOf(UInt.SIZE_BYTES)))
+    }
+
     var nextSect = _header.SectDifStart
     val difatSectorsCount = (_header.SectorSize shr 2) - 1u
     var cursor = metaInfo.splitIndex
@@ -207,14 +242,12 @@ open class CompoundFile {
     while (cursor < sectFat.size) {
       _stream.Jump(_header.GetSectorOffset(nextSect))
 
-      for (i in 0 until difatSectorsCount.toInt()) {
+      for (i in 0 until Math.min(difatSectorsCount.toInt(), sectFat.size - cursor)) {
         _stream.write(ByteBuffer.wrap(sectFat[cursor++].toInt().toByteArray().copyOf(UInt.SIZE_BYTES)))
       }
 
-      _sectFatMetaInfo.freeSect?.let {
-        _stream.write(ByteBuffer.wrap(it.toInt().toByteArray().copyOf(UInt.SIZE_BYTES)))
-      }
-
+      if (!sectorIterator.hasNext())
+        break
       nextSect = sectorIterator.next()
       _stream.write(ByteBuffer.wrap(nextSect.toInt().toByteArray().copyOf(UInt.SIZE_BYTES)))
     }
@@ -227,37 +260,40 @@ open class CompoundFile {
 
   private fun readSectFat(reader: BinaryReader): MutableList<UInt> {
     val res = mutableListOf<UInt>()
-    for (i in 0 until 109) {
-      val sector = reader.ReadUInt32()
-
-      if (sector.toLong() == SpecialSectors.FREESECT) {
-        _sectFatMetaInfo.splitIndex = i
-        _sectFatMetaInfo.freeSect = sector
-        break
-      }
-
-      res.add(sector)
-    }
-
-    var nextSect = _header.SectDifStart
-    val difatSectorsCount = (_header.SectorSize shr 2) - 1u
-
-    while (nextSect.toLong() != SpecialSectors.ENDOFCHAIN) {
-      _stream.Jump(_header.GetSectorOffset(nextSect))
-
-      for (i in 0 until difatSectorsCount.toInt()) {
+    _sectFatMetaInfo.splitIndex = 109
+    repeat(1) {
+      for (i in 0 until 109) {
         val sector = reader.ReadUInt32()
 
-        if (sector.toLong() == SpecialSectors.FREESECT || sector.toLong() == SpecialSectors.ENDOFCHAIN) {
-          _sectFatMetaInfo.last = sector
-          return res
+        if (sector.toLong() == SpecialSectors.FREESECT) {
+          _sectFatMetaInfo.splitIndex = i
+          _sectFatMetaInfo.freeSect = sector
+          break
         }
 
         res.add(sector)
       }
-      //next sector in the difat chain
-      nextSect = reader.ReadUInt32()
-      _sectFatMetaInfo.sectors.add(nextSect)
+
+      var nextSect = _header.SectDifStart
+      val difatSectorsCount = (_header.SectorSize shr 2) - 1u
+
+      while (nextSect.toLong() != SpecialSectors.ENDOFCHAIN) {
+        _stream.Jump(_header.GetSectorOffset(nextSect))
+
+        for (i in 0 until difatSectorsCount.toInt()) {
+          val sector = reader.ReadUInt32()
+
+          if (sector.toLong() == SpecialSectors.FREESECT || sector.toLong() == SpecialSectors.ENDOFCHAIN) {
+            _sectFatMetaInfo.last = sector
+            return res
+          }
+
+          res.add(sector)
+        }
+        //next sector in the difat chain
+        nextSect = reader.ReadUInt32()
+        _sectFatMetaInfo.sectors.add(nextSect)
+      }
     }
     return res
   }
@@ -287,7 +323,12 @@ open class CompoundFile {
     return null
   }
 
-  private fun readStreamData(reader: BinaryReader, dirEntry: DirectoryEntry): ByteArray {
+  private fun readStreamData(
+    reader: BinaryReader,
+    dirEntry: DirectoryEntry,
+    name: String = "",
+    visitedSectors: MutableList<Pair<Int, Int>>? = null
+  ): ByteArray {
     if (dirEntry.SizeLow <= _header.MiniSectorCutoff) {
       val rootDirectoryEntry = findRootDirectoryEntry(reader)
 
@@ -302,10 +343,21 @@ open class CompoundFile {
         dirEntry.SizeLow,
         dirEntry.StartSect,
         _header.MiniSectorSize,
-        miniStreamSectorOffset
+        miniStreamSectorOffset,
+        visitedSectors,
+        name
       )
     }
-    return readStreamData(reader, _fat, dirEntry.SizeLow, dirEntry.StartSect, _header.SectorSize, 0u)
+    return readStreamData(
+      reader,
+      _fat,
+      dirEntry.SizeLow,
+      dirEntry.StartSect,
+      _header.SectorSize,
+      0u,
+      visitedSectors,
+      name
+    )
   }
 
   private fun readStreamData(
@@ -314,7 +366,9 @@ open class CompoundFile {
     size: UInt,
     startSect: UInt,
     sectorSize: UInt,
-    baseOffset: UInt
+    baseOffset: UInt,
+    visitedSectors: MutableList<Pair<Int, Int>>? = null,
+    name: String = "",
   ): ByteArray {
     val res = ByteArray(size.toInt())
     var read = 0
@@ -333,20 +387,32 @@ open class CompoundFile {
       val data = reader.ReadBytes(toRead)
       data.copyInto(res, read)
       read += data.count()
+      visitedSectors?.add(streamOffset.toInt() to _stream.position().toInt())
+
+      if (nextSect.toInt() >= fat.size || nextSect.toInt() < 0) {
+        println()
+        break
+      }
+
       nextSect = fat[nextSect.toInt()]
     }
     return res
   }
 
-  private fun writeStreamData(reader: BinaryReader, dirEntry: DirectoryEntry, data: ByteArray) {
+  private fun writeStreamData(
+    reader: BinaryReader,
+    dirEntry: DirectoryEntry,
+    data: ByteArray,
+    miniStreamStartSector: Int
+  ) {
     if (dirEntry.SizeLow <= _header.MiniSectorCutoff) {
-      val rootDirectoryEntry = findRootDirectoryEntry(reader)
+//      val rootDirectoryEntry = findRootDirectoryEntry(reader)
+//
+//      if (rootDirectoryEntry?.EntryType != DirectoryEntryType.STGTY_ROOT)
+//        throw InvalidDataException("Invalid format. Root directory entry not found")
 
-      if (rootDirectoryEntry?.EntryType != DirectoryEntryType.STGTY_ROOT)
-        throw InvalidDataException("Invalid format. Root directory entry not found")
-
-      val miniStreamStartSector = rootDirectoryEntry.StartSect
-      val miniStreamSectorOffset = _header.GetSectorOffset(miniStreamStartSector)
+//      val miniStreamStartSector = rootDirectoryEntry.StartSect
+      val miniStreamSectorOffset = _header.GetSectorOffset(miniStreamStartSector.toUInt())
       return writeStreamData(
         _miniFat,
         dirEntry.SizeLow,
@@ -379,6 +445,7 @@ open class CompoundFile {
         streamOffset = _header.GetSectorOffset(nextSect)
 
       _stream.Jump(streamOffset)
+
       val toWrite = Math.min(size.toInt() - cursor, sectorSize.toInt())
       _stream.write(
         ByteBuffer.wrap(
@@ -425,6 +492,10 @@ open class CompoundFile {
     return DirectoryEntry(_stream, reader)
   }
 
+  private fun wipeDirectoryEntry() {
+    _stream.write(ByteBuffer.wrap(ByteArray(128)))
+  }
+
   private fun writeDirectoryEntry(entry: DirectoryEntry) {
     _stream.write(ByteBuffer.wrap(entry.Name.copyOf(64)))
     _stream.write(
@@ -436,10 +507,13 @@ open class CompoundFile {
     _stream.write(ByteBuffer.wrap(listOf(entry.EntryType).toByteArray()))
 
     if (entry.EntryType == DirectoryEntryType.STGTY_ROOT) {
+      assert(entry.metaBytes[0].size == 13)
+      assert(entry.metaBytes[1].size == 20)
       _stream.write(ByteBuffer.wrap(entry.metaBytes[0]))
       _stream.write(ByteBuffer.wrap(entry.Clsid!!.copyOf(16)))
       _stream.write(ByteBuffer.wrap(entry.metaBytes[1]))
     } else {
+      assert(entry.metaBytes[0].size == 49)
       _stream.write(ByteBuffer.wrap(entry.metaBytes[0]))
     }
 
@@ -512,10 +586,11 @@ open class CompoundFileHeader {
       var byteOrder: DataValue = DataValue(),
       var sectorShift: DataValue = DataValue(),
       var miniSectorShift: DataValue = DataValue(),
-//      var reserved: DataValue = DataValue(),
+      var reserved: DataValue = DataValue(),
       var sectDirCount: DataValue = DataValue(),
       var sectFatCount: DataValue = DataValue(),
       var sectDirStart: DataValue = DataValue(),
+      var reserved2: DataValue = DataValue(),
       var miniSectorCutoff: DataValue = DataValue(),
       var sectMiniFatStart: DataValue = DataValue(),
       var sectMiniFatCount: DataValue = DataValue(),
@@ -531,9 +606,11 @@ open class CompoundFileHeader {
         metaInfo.byteOrder,
         metaInfo.sectorShift,
         metaInfo.miniSectorShift,
+        metaInfo.reserved,
         metaInfo.sectDirCount,
         metaInfo.sectFatCount,
         metaInfo.sectDirStart,
+        metaInfo.reserved2,
         metaInfo.miniSectorCutoff,
         metaInfo.sectMiniFatStart,
         metaInfo.sectMiniFatCount,
@@ -544,6 +621,23 @@ open class CompoundFileHeader {
         stream.write(ByteBuffer.wrap(it.value.toByteArray()))
       }
     }
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is CompoundFileHeader) return false
+
+    return SectorShift == other.SectorShift &&
+      MiniSectorShift == other.MiniSectorShift &&
+      SectDirCount == other.SectDirCount &&
+      SectFatCount == other.SectFatCount &&
+      SectDirStart == other.SectDirStart &&
+      MiniSectorCutoff == other.MiniSectorCutoff &&
+      SectMiniFatStart == other.SectMiniFatStart &&
+      SectMiniFatCount == other.SectMiniFatCount &&
+      SectDifStart == other.SectDifStart &&
+      SectDifCount == other.SectDifCount &&
+      metaInfo == other.metaInfo
   }
 
   constructor(stream: SeekableByteChannel, reader: BinaryReader) {
@@ -584,7 +678,11 @@ open class CompoundFileHeader {
     if (MiniSectorShift != 6)
       throw InvalidDataException("Invalid format. Mini Stream Sector Size must be equal 6")
 
-    stream.Skip(6)//skip "Reserved"
+    //stream.Skip(6)//skip "Reserved"
+    metaInfo.reserved = DataValue(
+      DataInfo(stream.position().toInt(), 6),
+      reader.ReadBytes(6).copyOf(6).toHexString()
+    )
 
     position = stream.position().toInt()
     SectDirCount = reader.ReadUInt32()
@@ -598,7 +696,11 @@ open class CompoundFileHeader {
     SectDirStart = reader.ReadUInt32()
     metaInfo.sectDirStart = DataValue(DataInfo(position, UShort.SIZE_BYTES), SectDirStart.toInt().toHexString())
 
-    stream.Skip(4)
+    metaInfo.reserved2 = DataValue(
+      DataInfo(stream.position().toInt(), 4),
+      reader.ReadBytes(4).copyOf(4).toHexString()
+    )
+
     position = stream.position().toInt()
     MiniSectorCutoff = reader.ReadUInt32()
     metaInfo.miniSectorCutoff = DataValue(DataInfo(position, UShort.SIZE_BYTES), MiniSectorCutoff.toInt().toHexString())
@@ -639,7 +741,7 @@ class DirectoryEntry {
   @Serializable(ByteArraySerializer::class)
   val Clsid: ByteArray?
   val StartSect: UInt
-  val SizeLow: UInt
+  var SizeLow: UInt
   val SizeHigh: UInt
   val metaBytes: MutableList<@Serializable(ByteArraySerializer::class) ByteArray> = mutableListOf()
 

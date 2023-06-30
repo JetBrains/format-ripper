@@ -59,9 +59,16 @@ open class MsiFile {
 
   fun getCFMetaInfo() = _cf.getMetaInfo()
 
-  fun getEntries() = _cf.getEntries()
+  fun getEntries(visitedSectors: MutableList<Pair<Int, Int>>? = null) = _cf.getEntries(visitedSectors)
+  fun getRootEntry(visitedSectors: MutableList<Pair<Int, Int>>? = null) = _cf.getRootEntry(visitedSectors)
 
-  fun putEntries(data: List<Pair<DirectoryEntry, ByteArray>>) = _cf.putEntries(data)
+  fun putEntries(
+    data: List<Pair<DirectoryEntry, ByteArray>>,
+    miniStreamStartSector: Int,
+    dirIndex: Int = 0,
+    wipe: Boolean = false
+  ): Int =
+    _cf.putEntries(data, miniStreamStartSector, dirIndex, wipe)
 
   /**
    * Retrieve the signature data from MSI
@@ -89,7 +96,8 @@ open class MsiFile {
 
     for (entry in entries) {
       if (entry.Name.contentEquals(digitalSignatureEntryName) ||
-        (skipMsiDigitalSignatureExEntry && entry.Name.contentEquals(msiDigitalSignatureExEntryName)))
+        (skipMsiDigitalSignatureExEntry && entry.Name.contentEquals(msiDigitalSignatureExEntryName))
+      )
         continue
 
       val data = _cf.GetStreamData(entry)
