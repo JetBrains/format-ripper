@@ -13,8 +13,8 @@ class MsiFileInfo(
   override val signedDataInfo: SignedDataInfo,
   private val compoundFileMetaInfo: CompoundFile.Companion.CompoundFileMetaInfo,
   private val entries: List<DirectoryEntry>,
-  private val specialEntries: List<Pair<String, ByteArray>>,
-  private val specialSegments: List<Pair<Int, ByteArray>>,
+  private val specialEntries: List<Pair<String, @Serializable(ByteArraySerializer::class) ByteArray>>,
+  private val specialSegments: List<Pair<Int, @Serializable(ByteArraySerializer::class) ByteArray>>,
   @Serializable(ByteArraySerializer::class)
   val digitalSignatureExData: ByteArray?,
   private val miniStreamStartSector: Int
