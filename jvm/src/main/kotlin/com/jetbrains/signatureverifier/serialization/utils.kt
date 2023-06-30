@@ -64,6 +64,45 @@ fun compareBytes(
   return same
 }
 
+fun mergeSegments(segments: MutableList<Pair<Int, Int>>): MutableList<Pair<Int, Int>> {
+  if (segments.size <= 1) return segments
+
+  // Sort the segments by first element of pair.
+  segments.sortBy { it.first }
+
+  val result = mutableListOf<Pair<Int, Int>>()
+  result.add(segments[0])
+
+  for (i in 1 until segments.size) {
+    // If current segment's start is less than or equal to previous segment's end, then update previous segment's end
+    if (result.last().second >= segments[i].first) {
+      val lastElement = result.removeLast()
+      result.add(Pair(lastElement.first, lastElement.second.coerceAtLeast(segments[i].second)))
+    } else {
+      result.add(segments[i]) // Otherwise, add current segment as separate.
+    }
+  }
+  return result
+}
+
+fun findGaps(start: Int, end: Int, segments: List<Pair<Int, Int>>): List<Pair<Int, Int>> {
+  val gaps = mutableListOf<Pair<Int, Int>>()
+  var currStart = start
+
+  for ((segStart, segEnd) in segments) {
+    if (segStart > currStart) {
+      gaps.add(Pair(currStart - 1, segStart))
+    }
+    currStart = (segEnd).coerceAtLeast(currStart)
+  }
+
+  if (currStart <= end) {
+    gaps.add(Pair(currStart, end))
+  }
+
+  return gaps
+}
+
 /**
  * This method exists, because org.bouncycastle.asn1.ASN1TaggedObject
  * has different explicitness types for different modes,

@@ -65,10 +65,9 @@ open class MsiFile {
   fun putEntries(
     data: List<Pair<DirectoryEntry, ByteArray>>,
     miniStreamStartSector: Int,
-    dirIndex: Int = 0,
     wipe: Boolean = false
-  ): Int =
-    _cf.putEntries(data, miniStreamStartSector, dirIndex, wipe)
+  ) =
+    _cf.putEntries(data, miniStreamStartSector, wipe)
 
   /**
    * Retrieve the signature data from MSI
