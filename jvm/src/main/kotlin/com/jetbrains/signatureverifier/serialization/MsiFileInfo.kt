@@ -10,6 +10,7 @@ import java.nio.channels.SeekableByteChannel
 
 @Serializable
 class MsiFileInfo(
+  val fileSize: Long,
   override val signedDataInfo: SignedDataInfo,
   private val compoundFileMetaInfo: CompoundFile.Companion.CompoundFileMetaInfo,
   private val entries: List<DirectoryEntry>,
@@ -63,6 +64,12 @@ class MsiFileInfo(
     specialSegments.forEach {
       stream.Jump(it.first.toUInt())
       stream.write(ByteBuffer.wrap(it.second))
+    }
+
+    if (fileSize < stream.size()) {
+      stream.truncate(fileSize)
+    } else if (fileSize > stream.size()) {
+      stream.write(ByteBuffer.wrap(ByteArray((stream.size() - fileSize).toInt())))
     }
   }
 }

@@ -65,6 +65,7 @@ class MSISignatureStoringTests {
       val signedEntriesDataMap = signedEntriesData.associateBy { it.first.Name.toHexString() }
 
       val msiFileInfo = MsiFileInfo(
+        it.size(),
         signedDataInfo,
         cfMetaInfo,
         signedEntriesData.map { it.first },
@@ -87,6 +88,7 @@ class MSISignatureStoringTests {
       TestUtil.getTestByteChannel("msi", tmpName, write = true).use { unsignedStream ->
         decoded.modifyFile(unsignedStream)
 
+        println(tmpFile)
         Assertions.assertEquals(
           -1,
           Files.mismatch(
@@ -104,6 +106,7 @@ class MSISignatureStoringTests {
     fun MsiProvider(): Stream<Arguments> {
       return Stream.of(
         Arguments.of("2dac4b.msi", "2dac4b_not_signed.msi"),
+        Arguments.of("2dac4b_signed2.msi", "2dac4b_not_signed.msi"),
         Arguments.of("firefox.msi", "firefox_not_signed.msi"),
         Arguments.of("sumatra.msi", "sumatra_not_signed.msi"),
       )
