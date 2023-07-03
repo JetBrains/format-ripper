@@ -5,6 +5,7 @@ import java.nio.channels.SeekableByteChannel
 
 @Serializable
 sealed interface FileInfo {
+  val fileMetaInfo: FileMetaInfo
   val signedDataInfo: SignedDataInfo
-  fun modifyFile(stream: SeekableByteChannel)
+  fun modifyFile(stream: SeekableByteChannel) = fileMetaInfo.modifyFile(stream, signedDataInfo.toSignature())
 }

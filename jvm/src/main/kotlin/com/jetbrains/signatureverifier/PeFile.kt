@@ -1,13 +1,12 @@
 ﻿package com.jetbrains.signatureverifier
 
 import com.google.gson.Gson
+import com.jetbrains.signatureverifier.serialization.PeFileMetaInfo
 import com.jetbrains.signatureverifier.serialization.toByteArray
 import com.jetbrains.util.*
-import kotlinx.serialization.Serializable
 import org.jetbrains.annotations.NotNull
 import java.io.EOFException
 import java.io.IOException
-import java.nio.ByteBuffer
 import java.nio.channels.SeekableByteChannel
 import java.security.MessageDigest
 
@@ -15,65 +14,13 @@ import java.security.MessageDigest
 /** Portable Executable file from the specified channel */
 class PeFile {
 
-  companion object {
-
-    /**
-     * Contains all information required to insert extracted signature back to file
-     */
-    @Serializable
-    data class PeSignatureMetadata(
-      var ntHeaderOffset: DataValue = DataValue(),
-      var checkSum: DataValue = DataValue(),
-      var securityRva: DataValue = DataValue(),
-      var securitySize: DataValue = DataValue(),
-      var dotnetMetadataRva: DataValue = DataValue(),
-      var dotnetMetadataSize: DataValue = DataValue(),
-      var dwLength: DataValue = DataValue(),
-      var wRevision: DataValue = DataValue(),
-      var signaturePosition: DataInfo = DataInfo(0, 0)
-    )
-
-    /**
-     * Inserts signature into stream using dumped signature metadata
-     * signatureMetadataJson: json of PeSignatureMetadata
-     */
-    fun insertSignature(
-      @NotNull stream: SeekableByteChannel,
-      @NotNull signatureMetadata: PeSignatureMetadata,
-      @NotNull signature: ByteArray
-    ) {
-
-      listOf(
-        signatureMetadata.ntHeaderOffset,
-        signatureMetadata.checkSum,
-        signatureMetadata.securityRva,
-        signatureMetadata.securitySize,
-        signatureMetadata.dwLength,
-        signatureMetadata.wRevision,
-        signatureMetadata.dotnetMetadataRva,
-        signatureMetadata.dotnetMetadataSize
-      ).forEach {
-        stream.Seek(it.dataInfo.Offset.toLong(), SeekOrigin.Begin)
-        stream.write(ByteBuffer.wrap(it.value))
-      }
-
-      stream.Seek(signatureMetadata.signaturePosition.Offset.toLong(), SeekOrigin.Begin)
-      stream.write(ByteBuffer.wrap(signature))
-      val alignment = (8 - stream.position() % 8) % 8
-      stream.write(ByteBuffer.wrap(ByteArray(alignment.toInt())))
-
-      stream.Rewind()
-      stream.close()
-    }
-  }
-
   private val _stream: SeekableByteChannel
   private val _checkSum: DataInfo
   private val _imageDirectoryEntrySecurity: DataInfo
   private val _signData: DataInfo
   private val _dotnetMetadata: DataInfo
   private val _ntHeaderOffset: UInt
-  private val _signatureMetadata: PeSignatureMetadata
+  private val _signatureMetadata: PeFileMetaInfo
 
   private val RawPeData: ByteArray by lazy { rawPeData() }
 
@@ -84,14 +31,14 @@ class PeFile {
   val IsDotNet: Boolean
     get() = _dotnetMetadata.IsEmpty.not()
 
-  fun getSignatureMetadata() = _signatureMetadata
+  fun getSignatureMetainfo() = _signatureMetadata
 
   /** Initializes a new instance of the PeFile */
   constructor(@NotNull stream: SeekableByteChannel) {
     _stream = stream
     _stream.Rewind()
 
-    _signatureMetadata = PeSignatureMetadata()
+    _signatureMetadata = PeFileMetaInfo()
 
     val reader = BinaryReader(_stream)
 
