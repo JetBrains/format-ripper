@@ -1,6 +1,9 @@
 package com.jetbrains.signatureverifier.macho
 
-import com.jetbrains.util.*
+import com.jetbrains.util.BinaryReader
+import com.jetbrains.util.ReadUInt32Le
+import com.jetbrains.util.Seek
+import com.jetbrains.util.SeekOrigin
 import java.nio.channels.SeekableByteChannel
 
 open class MachoUtils {
@@ -20,7 +23,7 @@ open class MachoUtils {
       return reader.ReadBytes(length.toInt())
     }
 
-    fun ReadCodeDirectoryBlob(reader: BinaryReader): ByteArray? {
+    fun ReadCodeDirectoryBlob(reader: BinaryReader): ByteArray {
       val magic = reader.ReadUInt32Le(true)
       val length = reader.ReadUInt32Le(true)
       (reader.BaseStream as SeekableByteChannel).Seek(-8, SeekOrigin.Current)

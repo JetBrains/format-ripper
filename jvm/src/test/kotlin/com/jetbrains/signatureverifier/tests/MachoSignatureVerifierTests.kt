@@ -58,6 +58,7 @@ class MachoSignatureVerifierTests {
     @JvmStatic
     fun VerifySignTestProvider(): Stream<Arguments> {
       return Stream.of(
+        Arguments.of("nosigned_resigned", VerifySignatureStatus.Valid),
         Arguments.of("env-wrapper.x64", VerifySignatureStatus.Valid),
         Arguments.of("libMonoSupportW.x64.dylib", VerifySignatureStatus.Valid),
         Arguments.of("cat", VerifySignatureStatus.Valid),

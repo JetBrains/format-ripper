@@ -66,7 +66,7 @@ class MsiFileMetaInfo(
     if (fileSize < stream.size()) {
       stream.truncate(fileSize)
     } else if (fileSize > stream.size()) {
-      stream.write(ByteBuffer.wrap(ByteArray((stream.size() - fileSize).toInt())))
+      stream.write(ByteBuffer.wrap(ByteArray((fileSize - stream.size()).toInt())))
     }
   }
 }

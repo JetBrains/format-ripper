@@ -139,15 +139,32 @@ fun String.toByteArray(): ByteArray {
   return result
 }
 
-fun Int.toByteArray(): ByteArray =
-  ByteBuffer.allocate(Int.SIZE_BYTES).putInt(this).array().reversedArray()
+fun Int.toByteArray(isBe: Boolean = false): ByteArray =
+  ByteBuffer.allocate(Int.SIZE_BYTES).putInt(this).array().let {
+    if (isBe)
+      it
+    else
+      it.reversedArray()
+  }
+
+fun UInt.toByteArray(isBe: Boolean = false): ByteArray =
+  ByteBuffer.allocate(UInt.SIZE_BYTES).putInt(this.toInt()).array().let {
+    if (isBe)
+      it
+    else
+      it.reversedArray()
+  }
 
 fun Int.toHexString(): String =
   toByteArray().toHexString()
 
-fun Long.toByteArray(): ByteArray =
-  ByteBuffer.allocate(Long.SIZE_BYTES).putLong(this).array().reversedArray()
+fun Long.toByteArray(isBe: Boolean = false): ByteArray =
+  ByteBuffer.allocate(Long.SIZE_BYTES).putLong(this).array().let {
+    if (isBe)
+      it
+    else
+      it.reversedArray()
+  }
 
 fun Long.toHexString(): String =
   toByteArray().toHexString()
-

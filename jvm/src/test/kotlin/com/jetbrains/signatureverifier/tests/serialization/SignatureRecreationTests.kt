@@ -179,6 +179,7 @@ class SignatureRecreationTests {
     @JvmStatic
     fun SignedMachoProvider(): Stream<Arguments> {
       return Stream.of(
+        Arguments.of("nosigned_resigned"),
         Arguments.of("env-wrapper.x64"),
         Arguments.of("libMonoSupportW.x64.dylib"),
         Arguments.of("cat"),
