@@ -3,6 +3,9 @@ package com.jetbrains.signatureverifier.macho
 import com.jetbrains.signatureverifier.DataInfo
 import com.jetbrains.signatureverifier.InvalidDataException
 import com.jetbrains.signatureverifier.SignatureData
+import com.jetbrains.signatureverifier.serialization.Blob
+import com.jetbrains.signatureverifier.serialization.LoadCommandLinkeditInfo
+import com.jetbrains.signatureverifier.serialization.LoadCommandSignatureInfo
 import com.jetbrains.signatureverifier.serialization.MachoFileMetaInfo
 import com.jetbrains.util.*
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel
@@ -207,7 +210,7 @@ open class MachoFile {
         val name = reader.ReadBytes(16)
         if (name.contentEquals(MachoConsts.LINKEDIT_SEGMENT_NAME)) {
           metaInfo.loadCommands.add(
-            MachoFileMetaInfo.LoadCommandLinkeditInfo(
+            LoadCommandLinkeditInfo(
               cmdStreamPosition,
               cmd,
               cmdsize,
@@ -227,7 +230,7 @@ open class MachoFile {
         val dataOff = reader.ReadUInt32Le(isBe32 || isBe64)
         val dataSize = reader.ReadUInt32Le(isBe32 || isBe64)
         metaInfo.loadCommands.add(
-          MachoFileMetaInfo.LoadCommandSignatureInfo(
+          LoadCommandSignatureInfo(
             cmdStreamPosition,
             cmd,
             cmdsize,
@@ -262,7 +265,7 @@ open class MachoFile {
               _stream.Seek(position, SeekOrigin.Begin)
 
               metaInfo.codeSignatureInfo.blobs.add(
-                MachoFileMetaInfo.Blob(
+                Blob(
                   CS_BlobIndex_type,
                   CS_BlobIndex_offset,
                   MachoConsts.CSMAGIC_CODEDIRECTORY.toUInt(),
@@ -278,7 +281,7 @@ open class MachoFile {
               _stream.Seek(position, SeekOrigin.Begin)
 
               metaInfo.codeSignatureInfo.blobs.add(
-                MachoFileMetaInfo.Blob(
+                Blob(
                   CS_BlobIndex_type,
                   CS_BlobIndex_offset,
                   isSignature = true
@@ -294,7 +297,7 @@ open class MachoFile {
               _stream.Seek(position, SeekOrigin.Begin)
 
               metaInfo.codeSignatureInfo.blobs.add(
-                MachoFileMetaInfo.Blob(
+                Blob(
                   CS_BlobIndex_type,
                   CS_BlobIndex_offset,
                   MachoConsts.CSMAGIC_REQUIREMENTS.toUInt(),
