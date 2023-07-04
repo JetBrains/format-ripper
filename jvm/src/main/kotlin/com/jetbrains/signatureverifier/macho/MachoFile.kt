@@ -258,7 +258,8 @@ open class MachoFile {
             MachoConsts.CSSLOT_CODEDIRECTORY -> {
               _stream.Seek(CS_SuperBlob_start, SeekOrigin.Begin)
               _stream.Seek(CS_BlobIndex_offset.toLong(), SeekOrigin.Current)
-              val (blobMagic, signedData) = MachoUtils.ReadCodeDirectoryBlob(reader)
+              val (blobMagic, data) = MachoUtils.ReadCodeDirectoryBlob(reader)
+              signedData = data
               _stream.Seek(position, SeekOrigin.Begin)
 
               metaInfo.codeSignatureInfo.blobs.add(
