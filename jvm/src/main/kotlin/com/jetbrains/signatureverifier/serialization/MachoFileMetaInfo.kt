@@ -1,5 +1,6 @@
 package com.jetbrains.signatureverifier.serialization
 
+import com.jetbrains.signatureverifier.macho.CSMAGIC
 import com.jetbrains.signatureverifier.macho.MachoConsts
 import com.jetbrains.util.Jump
 import com.jetbrains.util.Rewind
@@ -34,8 +35,8 @@ data class MachoFileMetaInfo(
       stream.Seek(codeSignatureInfo.superBlobStart, SeekOrigin.Begin)
       stream.Seek(it.offset.toLong(), SeekOrigin.Current)
 
-      if (it.isSignature) {
-        it.magic = MachoConsts.CSMAGIC_CMS_SIGNATURE.toUInt()
+      if (it.magic == CSMAGIC.CMS_SIGNATURE) {
+//        it.magic = MachoConsts.CSMAGIC_CMS_SIGNATURE.toUInt()
         it.length = signature.size + 8
         it.content = signature
       }

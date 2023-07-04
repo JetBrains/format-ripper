@@ -24,3 +24,10 @@ object MachoConsts {
   ).toByteArray()
 }
 
+enum class CSMAGIC(val code: UInt) {
+  CODEDIRECTORY((0xfade0c02).toUInt()),
+  REQUIREMENTS((0xfade0c01).toUInt()),
+  CMS_SIGNATURE((0xfade0b01).toUInt()),
+  UNKNOWN(0u)
+}
+

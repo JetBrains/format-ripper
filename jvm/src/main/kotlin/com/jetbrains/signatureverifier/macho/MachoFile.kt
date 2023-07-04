@@ -3,10 +3,7 @@ package com.jetbrains.signatureverifier.macho
 import com.jetbrains.signatureverifier.DataInfo
 import com.jetbrains.signatureverifier.InvalidDataException
 import com.jetbrains.signatureverifier.SignatureData
-import com.jetbrains.signatureverifier.serialization.Blob
-import com.jetbrains.signatureverifier.serialization.LoadCommandLinkeditInfo
-import com.jetbrains.signatureverifier.serialization.LoadCommandSignatureInfo
-import com.jetbrains.signatureverifier.serialization.MachoFileMetaInfo
+import com.jetbrains.signatureverifier.serialization.*
 import com.jetbrains.util.*
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel
 import org.jetbrains.annotations.NotNull
@@ -89,7 +86,7 @@ open class MachoFile {
     val flags = reader.ReadUInt32Le(isBe)
     val reserved = reader.ReadUInt32Le(isBe)
 
-    metaInfo.headerMetaInfo = MachoFileMetaInfo.MachoHeaderMetaInfo(
+    metaInfo.headerMetaInfo = MachoHeaderMetaInfo(
       Magic.toUInt(),
       cpuType,
       cpuSubType,
@@ -268,7 +265,7 @@ open class MachoFile {
                 Blob(
                   CS_BlobIndex_type,
                   CS_BlobIndex_offset,
-                  MachoConsts.CSMAGIC_CODEDIRECTORY.toUInt(),
+                  CSMAGIC.CODEDIRECTORY,
                   signedData
                 )
               )
@@ -284,7 +281,7 @@ open class MachoFile {
                 Blob(
                   CS_BlobIndex_type,
                   CS_BlobIndex_offset,
-                  isSignature = true
+                  CSMAGIC.CMS_SIGNATURE
                 )
               )
 
@@ -300,7 +297,7 @@ open class MachoFile {
                 Blob(
                   CS_BlobIndex_type,
                   CS_BlobIndex_offset,
-                  MachoConsts.CSMAGIC_REQUIREMENTS.toUInt(),
+                  CSMAGIC.REQUIREMENTS,
                   requirementsData
                 )
               )
