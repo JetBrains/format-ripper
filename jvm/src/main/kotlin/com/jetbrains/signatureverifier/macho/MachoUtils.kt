@@ -17,17 +17,17 @@ open class MachoUtils {
     fun IsMacho(magic: Long): Boolean =
       magic == MachoConsts.MH_MAGIC || magic == MachoConsts.MH_MAGIC_64 || magic == MachoConsts.MH_CIGAM || magic == MachoConsts.MH_CIGAM_64
 
-    fun ReadBlob(reader: BinaryReader): ByteArray {
+    fun ReadBlob(reader: BinaryReader): Pair<UInt, ByteArray> {
       val magic = reader.ReadUInt32Le(true)
       val length = reader.ReadUInt32Le(true)
-      return reader.ReadBytes(length.toInt())
+      return magic to reader.ReadBytes(length.toInt())
     }
 
-    fun ReadCodeDirectoryBlob(reader: BinaryReader): ByteArray {
+    fun ReadCodeDirectoryBlob(reader: BinaryReader): Pair<UInt, ByteArray> {
       val magic = reader.ReadUInt32Le(true)
       val length = reader.ReadUInt32Le(true)
       (reader.BaseStream as SeekableByteChannel).Seek(-8, SeekOrigin.Current)
-      return reader.ReadBytes(length.toInt())
+      return magic to reader.ReadBytes(length.toInt())
     }
   }
 }

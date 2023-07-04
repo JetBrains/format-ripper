@@ -57,16 +57,17 @@ open class MachoFile {
    *      in which data is stored in this computer architecture is not Little Endian.
    * @exception InvalidDataException  If the input data not contain MachO
    */
-  constructor(@NotNull data: ByteArray) {
+  constructor(@NotNull data: ByteArray, fileSize: Long, offset: Long = 0) {
     if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN))
       throw ParseException("Only Little endian is expected", 0)
     _stream = SeekableInMemoryByteChannel(data)
+    metaInfo.machoOffset = offset
+    metaInfo.fileSize = fileSize
     setMagic()
   }
 
   private fun setMagic() {
     val reader = BinaryReader(_stream.Rewind())
-    metaInfo.fileSize = _stream.size()
     Magic = reader.ReadUInt32().toLong() // mach_header::magic / mach_header64::magic
 
     metaInfo.isBe = isBe
@@ -203,7 +204,7 @@ open class MachoFile {
       // load_command::cmd
       val cmdsize = reader.ReadUInt32Le(isBe32 || isBe64)
       // load_command::cmdsize
-      if (cmd.toInt() == MachoConsts.LC_SEGMENT_64) {
+      if (cmd.toInt() == MachoConsts.LC_SEGMENT_64 || cmd.toInt() == MachoConsts.LC_SEGMENT) {
         val name = reader.ReadBytes(16)
         if (name.contentEquals(MachoConsts.LINKEDIT_SEGMENT_NAME)) {
           metaInfo.loadCommands.add(
@@ -253,12 +254,11 @@ open class MachoFile {
           val CS_BlobIndex_type = reader.ReadUInt32Le(true)
           val CS_BlobIndex_offset = reader.ReadUInt32Le(true)
           val position = _stream.position()
-
           when (CS_BlobIndex_type.toLong()) {
             MachoConsts.CSSLOT_CODEDIRECTORY -> {
               _stream.Seek(CS_SuperBlob_start, SeekOrigin.Begin)
               _stream.Seek(CS_BlobIndex_offset.toLong(), SeekOrigin.Current)
-              signedData = MachoUtils.ReadCodeDirectoryBlob(reader)
+              val (blobMagic, signedData) = MachoUtils.ReadCodeDirectoryBlob(reader)
               _stream.Seek(position, SeekOrigin.Begin)
 
               metaInfo.codeSignatureInfo.blobs.add(
@@ -266,39 +266,30 @@ open class MachoFile {
                   CS_BlobIndex_type,
                   CS_BlobIndex_offset,
                   CSMAGIC.CODEDIRECTORY,
+                  blobMagic,
                   signedData
                 )
               )
             }
 
-            MachoConsts.CSSLOT_CMS_SIGNATURE -> {
+            else -> {
+              val magicEnum = CSMAGIC.getInstance(CS_BlobIndex_type)
+
               _stream.Seek(CS_SuperBlob_start, SeekOrigin.Begin)
               _stream.Seek(CS_BlobIndex_offset.toLong(), SeekOrigin.Current)
-              cmsData = MachoUtils.ReadBlob(reader)
+              val (blobMagic, data) = MachoUtils.ReadBlob(reader)
               _stream.Seek(position, SeekOrigin.Begin)
 
               metaInfo.codeSignatureInfo.blobs.add(
                 Blob(
                   CS_BlobIndex_type,
                   CS_BlobIndex_offset,
-                  CSMAGIC.CMS_SIGNATURE
-                )
-              )
-
-            }
-
-            MachoConsts.CSSLOT_REQUIREMENTS -> {
-              _stream.Seek(CS_SuperBlob_start, SeekOrigin.Begin)
-              _stream.Seek(CS_BlobIndex_offset.toLong(), SeekOrigin.Current)
-              requirementsData = MachoUtils.ReadBlob(reader)
-              _stream.Seek(position, SeekOrigin.Begin)
-
-              metaInfo.codeSignatureInfo.blobs.add(
-                Blob(
-                  CS_BlobIndex_type,
-                  CS_BlobIndex_offset,
-                  CSMAGIC.REQUIREMENTS,
-                  requirementsData
+                  magicEnum,
+                  blobMagic,
+                  if (magicEnum == CSMAGIC.CMS_SIGNATURE) {
+                    cmsData = data
+                    byteArrayOf()
+                  } else data
                 )
               )
             }

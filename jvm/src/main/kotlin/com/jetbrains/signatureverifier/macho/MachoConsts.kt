@@ -24,10 +24,37 @@ object MachoConsts {
   ).toByteArray()
 }
 
-enum class CSMAGIC(val code: UInt) {
-  CODEDIRECTORY((0xfade0c02).toUInt()),
-  REQUIREMENTS((0xfade0c01).toUInt()),
-  CMS_SIGNATURE((0xfade0b01).toUInt()),
-  UNKNOWN(0u)
+enum class CSMAGIC {
+  CODEDIRECTORY,
+  INFOSLOT,
+  REQUIREMENTS,
+  RESOURCEDIR,
+  APPLICATION,
+  ENTITLEMENTS,
+  ENTITLEMENTS_DER,
+  ALTERNATE_CODEDIRECTORIES,
+  CMS_SIGNATURE,
+  UNKNOWN;
+
+  companion object {
+    /**
+     * Returns an instance of a specific object based on the given csSlot value.
+     *
+     * @param csSlot The csSlot value used to determine the object instance.
+     * @return CSMAGIC corresponding to the csSlot value.
+     */
+    fun getInstance(csSlot: UInt) = when (csSlot) {
+      0u -> CODEDIRECTORY
+      1u -> INFOSLOT
+      2u -> REQUIREMENTS
+      3u -> RESOURCEDIR
+      4u -> APPLICATION
+      5u -> ENTITLEMENTS
+      7u -> ENTITLEMENTS_DER
+      0x1000u -> ALTERNATE_CODEDIRECTORIES
+      0x10000u -> CMS_SIGNATURE
+      else -> UNKNOWN
+    }
+  }
 }
 

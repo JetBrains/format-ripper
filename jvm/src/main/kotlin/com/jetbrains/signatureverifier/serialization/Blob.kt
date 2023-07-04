@@ -7,14 +7,15 @@ import kotlinx.serialization.Serializable
 data class Blob(
   val type: UInt = 0u,
   val offset: UInt = 0u,
-  var magic: CSMAGIC = CSMAGIC.UNKNOWN,
+  val magic: CSMAGIC = CSMAGIC.UNKNOWN,
+  val magicValue: UInt = 0u,
   var length: Int = 0,
   @Serializable(ByteArraySerializer::class)
   var content: ByteArray = byteArrayOf()
 ) {
-  constructor(type: UInt, offset: UInt, magic: CSMAGIC, content: ByteArray) : this(
-    type, offset, magic, content.size, content
+  constructor(type: UInt, offset: UInt, magic: CSMAGIC, magicValue: UInt, content: ByteArray) : this(
+    type, offset, magic, magicValue, content.size, content
   )
 
-  fun toByteArray() = magic.code.toByteArray(true) + length.toByteArray(true) + content
+  fun toByteArray() = magicValue.toByteArray(true) + length.toByteArray(true) + content
 }

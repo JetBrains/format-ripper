@@ -2,7 +2,7 @@ package com.jetbrains.signatureverifier.tests.serialization
 
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.macho.MachoArch
-import com.jetbrains.signatureverifier.macho.MachoFile
+import com.jetbrains.signatureverifier.serialization.FatMachoFileInfo
 import com.jetbrains.signatureverifier.serialization.MachoFileInfo
 import com.jetbrains.signatureverifier.serialization.SignedDataInfo
 import com.jetbrains.util.TestUtil
@@ -32,12 +32,21 @@ class MachoSignatureStoringTests {
       -1
     )
 
-    val signedFile: MachoFile
+    val machoArch: MachoArch
+    val signedSize: Long
 
     val machoFiles =
       Files.newByteChannel(TestUtil.getTestDataFile("mach-o", signedResourceName), StandardOpenOption.READ).use {
-        MachoArch(it).Extract()
+        machoArch = MachoArch(it)
+        signedSize = it.size()
+        machoArch.Extract()
       }
+
+    val path = TestUtil.getTestDataFile("mach-o", unsignedResourceName)
+    val tmpName = "tmp" + Random().nextInt().toString()
+    val tmpFile = path.parent.resolve(tmpName)
+    path.copyTo(tmpFile)
+
     if (machoFiles.size == 1) {
       val machoFile = machoFiles.first()
       val signatureData = machoFile.GetSignatureData()
@@ -45,11 +54,6 @@ class MachoSignatureStoringTests {
       val signedData = signedMessage.SignedData
       val signedDataInfo = SignedDataInfo(signedData)
 
-
-      val path = TestUtil.getTestDataFile("mach-o", unsignedResourceName)
-      val tmpName = "tmp" + Random().nextInt().toString()
-      val tmpFile = path.parent.resolve(tmpName)
-      path.copyTo(tmpFile)
 
       val metaInfo = machoFile.metaInfo
       val fileInfo = MachoFileInfo(metaInfo, signedDataInfo)
@@ -60,16 +64,40 @@ class MachoSignatureStoringTests {
         decoded.modifyFile(unsignedStream)
 
         println(tmpFile)
-        Assertions.assertEquals(
-          -1,
-          Files.mismatch(
-            TestUtil.getTestDataFile("mach-o", signedResourceName),
-            TestUtil.getTestDataFile("mach-o", tmpName)
-          )
-        )
       }
-      tmpFile.deleteExisting()
+    } else {
+      val fatMachoFileInfo = FatMachoFileInfo(
+        signedSize,
+        machoArch.fatHeaderInfo,
+        machoFiles.map { machoFile ->
+          val signatureData = machoFile.GetSignatureData()
+          val signedMessage = SignedMessage.CreateInstance(signatureData)
+          val signedData = signedMessage.SignedData
+          val signedDataInfo = SignedDataInfo(signedData)
+
+
+          val metaInfo = machoFile.metaInfo
+          MachoFileInfo(metaInfo, signedDataInfo)
+        }
+      )
+
+      val json = Json.encodeToString(fatMachoFileInfo)
+      val decoded: FatMachoFileInfo = Json.decodeFromString(json)
+      TestUtil.getTestByteChannel("mach-o", tmpName, write = true).use { unsignedStream ->
+        decoded.modifyFile(unsignedStream)
+
+        println(tmpFile)
+      }
     }
+
+    Assertions.assertEquals(
+      -1,
+      Files.mismatch(
+        TestUtil.getTestDataFile("mach-o", signedResourceName),
+        TestUtil.getTestDataFile("mach-o", tmpName)
+      )
+    )
+    tmpFile.deleteExisting()
   }
 
   companion object {
@@ -78,6 +106,7 @@ class MachoSignatureStoringTests {
       return Stream.of(
         Arguments.of("addhoc_resigned", "addhoc"),
         Arguments.of("nosigned_resigned", "notsigned"),
+        Arguments.of("fat.dylib_signed", "fat.dylib"),
       )
     }
   }
