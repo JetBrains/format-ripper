@@ -5,8 +5,7 @@ import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.crypt.SignedMessageVerifier
 import com.jetbrains.signatureverifier.crypt.VerifySignatureStatus
 import com.jetbrains.signatureverifier.dmg.DmgFile
-import com.jetbrains.signatureverifier.serialization.compareBytes
-import com.jetbrains.signatureverifier.serialization.getTestByteChannel
+import com.jetbrains.util.TestUtil.getTestByteChannel
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
@@ -41,7 +40,7 @@ class DmgSignatureVerifierTests {
         listOf("SHA1", "SHA256").forEach { algorithm ->
           Assertions.assertEquals(
             sameFile,
-            compareBytes(signedFile.ComputeHash(algorithm), unsignedFile.ComputeHash(algorithm), verbose = false)
+            signedFile.ComputeHash(algorithm).contentEquals(unsignedFile.ComputeHash(algorithm))
           )
         }
       }

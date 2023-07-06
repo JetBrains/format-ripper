@@ -52,12 +52,11 @@ class DmgFile(@NotNull stream: SeekableByteChannel) {
         val blobIndexType = reader.ReadUInt32Be()
         val blobIndexOffset = reader.ReadUInt32Be()
         val position = stream.position()
-        when (blobIndexType.toLong()) {
+        when (blobIndexType.toInt()) {
           MachoConsts.CSSLOT_CODEDIRECTORY -> {
             stream.Seek(superBlobStart, SeekOrigin.Begin)
             stream.Seek(blobIndexOffset.toLong(), SeekOrigin.Current)
-            val (_, data) = MachoUtils.ReadCodeDirectoryBlob(reader)
-            signedData = data
+            signedData = MachoUtils.ReadCodeDirectoryBlob(reader)
             stream.Seek(position, SeekOrigin.Begin)
           }
 
@@ -66,7 +65,7 @@ class DmgFile(@NotNull stream: SeekableByteChannel) {
 
             stream.Seek(superBlobStart, SeekOrigin.Begin)
             stream.Seek(blobIndexOffset.toLong(), SeekOrigin.Current)
-            val (_, data) = MachoUtils.ReadBlob(reader)
+            val data = MachoUtils.ReadBlob(reader)
             stream.Seek(position, SeekOrigin.Begin)
             if (magicEnum == CSMAGIC.CMS_SIGNATURE) {
               cmsData = data
@@ -99,20 +98,6 @@ class DmgFile(@NotNull stream: SeekableByteChannel) {
     return hash.digest()
   }
 
-  /**
-   * NOTE
-   * This class is made under the assumption, that `reserved` block in UDIFResourceFile has a structure of
-   * ```
-   * 64 bytes of some info;
-   * ReservedSectorItem;
-   * 40 bytes of some info;
-   * ```
-   * which gives a total size of 120.
-   *
-   * Be aware, that it might be wrong.
-   *
-   * The structure of `ReservedSectorItem` itself was deduced from the sample files and might also be inaccurate
-   */
   data class CodeSignaturePointer(
     val offset: Long,
     val length: Long
