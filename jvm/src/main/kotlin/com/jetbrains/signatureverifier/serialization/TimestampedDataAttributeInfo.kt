@@ -1,7 +1,6 @@
 package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
-import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.cms.Attribute
 
 // 1.3.6.1.4.1.311.10.3.28
@@ -16,9 +15,5 @@ data class TimestampedDataAttributeInfo(
     attribute.attributeValues.map { TextualInfo.getInstance(it) }
   )
 
-  override fun toAttributeDLSequence(): DLSequence =
-    listOf(
-      identifier.toPrimitive(),
-      content.toPrimitiveList().toDLSet()
-    ).toDLSequence()
+  override fun getPrimitiveContent() = content.toPrimitiveList().toDLSet()
 }

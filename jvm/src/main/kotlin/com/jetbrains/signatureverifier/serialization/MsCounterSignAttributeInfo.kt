@@ -27,15 +27,7 @@ data class MsCounterSignAttributeInfo(
     }
   )
 
-  override fun toAttributeDLSequence(): DLSequence = listOf(
-    identifier.toPrimitive(),
-
-    contentIdentifier.zip(content).map {
-      listOf(
-        it.first.toPrimitive(),
-        it.second.toPrimitive()
-      ).toDLSequence()
-    }.toDLSet()
-
-  ).toDLSequence()
+  override fun getPrimitiveContent() = contentIdentifier.toPrimitiveList().zip(content.toPrimitiveList()).map {
+    it.toList().toDLSequence()
+  }.toDLSet()
 }

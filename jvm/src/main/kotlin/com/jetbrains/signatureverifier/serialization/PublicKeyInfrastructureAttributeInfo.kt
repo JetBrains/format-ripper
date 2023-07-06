@@ -1,7 +1,6 @@
 package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
-import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.cms.Attribute
 
 @Serializable
@@ -15,6 +14,5 @@ data class PublicKeyInfrastructureAttributeInfo(
     attribute.attrValues.toEncodableInfo()
   )
 
-  override fun toAttributeDLSequence(): DLSequence =
-    listOf(identifier.toPrimitive(), content.toPrimitive()).toDLSequence()
+  override fun getPrimitiveContent() = content.toPrimitive()
 }

@@ -31,11 +31,7 @@ data class MSCertificateTemplateV2AttributeInfo(
     }
   )
 
-  override fun toAttributeDLSequence(): DLSequence =
-    listOf(
-      identifier.toPrimitive(),
-      content.map {
-        it.toPrimitiveList().toDLSequence()
-      }.toDLSet()
-    ).toDLSequence()
+  override fun getPrimitiveContent() = content.map {
+    it.toPrimitiveList().toDLSequence()
+  }.toDLSet()
 }

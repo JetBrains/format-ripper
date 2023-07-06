@@ -1,7 +1,6 @@
 package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
-import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.cms.Attribute
 
 @Serializable
@@ -17,8 +16,5 @@ data class AppleDeveloperCertificateAttribute(
     }
   )
 
-  override fun toAttributeDLSequence(): DLSequence = listOf(
-    identifier.toPrimitive(),
-    content.toPrimitiveList().toDLSet()
-  ).toDLSequence()
+  override fun getPrimitiveContent() = content.toPrimitiveList().toDLSet()
 }

@@ -2,7 +2,6 @@ package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1Primitive
-import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.cms.Attribute
 
 @Serializable
@@ -31,7 +30,11 @@ sealed interface AttributeInfo : EncodableInfo {
 
   val identifier: TextualInfo
 
-  fun toAttributeDLSequence(): DLSequence
+  fun getPrimitiveContent(): ASN1Primitive
 
-  override fun toPrimitive(): ASN1Primitive = toAttributeDLSequence().toASN1Primitive()
+  override fun toPrimitive(): ASN1Primitive = listOf(
+    identifier.toPrimitive(),
+    getPrimitiveContent()
+  ).toDLSequence()
+    .toASN1Primitive()
 }

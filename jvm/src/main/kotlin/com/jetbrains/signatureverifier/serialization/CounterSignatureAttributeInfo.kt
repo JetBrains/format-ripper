@@ -19,9 +19,5 @@ data class CounterSignatureAttributeInfo(
     }
   }
 
-  override fun toAttributeDLSequence(): DLSequence =
-    listOf(
-      identifier.toPrimitive(),
-      content.toPrimitiveList().toDLSet()
-    ).toDLSequence()
+  override fun getPrimitiveContent() = content.toPrimitiveList().toDLSet()
 }

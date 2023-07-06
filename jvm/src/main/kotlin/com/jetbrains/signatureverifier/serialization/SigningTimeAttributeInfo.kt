@@ -2,7 +2,6 @@ package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
 import org.bouncycastle.asn1.ASN1UTCTime
-import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.cms.Attribute
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -26,13 +25,9 @@ class SigningTimeAttributeInfo(
     val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyMMddHHmmssX")
   }
 
-  override fun toAttributeDLSequence(): DLSequence =
-    listOf(
-      identifier.toPrimitive(),
-      content.map {
-        ASN1UTCTime(
-          it.format(dateTimeFormatter)
-        )
-      }.toDLSet()
-    ).toDLSequence()
+  override fun getPrimitiveContent() = content.map {
+    ASN1UTCTime(
+      it.format(dateTimeFormatter)
+    )
+  }.toDLSet()
 }

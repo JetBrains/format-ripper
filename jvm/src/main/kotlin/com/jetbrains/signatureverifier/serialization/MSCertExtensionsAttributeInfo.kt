@@ -16,11 +16,7 @@ data class MSCertExtensionsAttributeInfo(
     attribute.attributeValues.map { (it as DLSequence).map { s -> TextualInfo.getInstance(s) } }
   )
 
-  override fun toAttributeDLSequence(): DLSequence =
-    listOf(
-      identifier.toPrimitive(),
-      content.map {
-        it.map { s -> s.toPrimitive() }.toDLSequence()
-      }.toDLSet()
-    ).toDLSequence()
+  override fun getPrimitiveContent() = content.map {
+    it.toPrimitiveList().toDLSequence()
+  }.toDLSet()
 }
