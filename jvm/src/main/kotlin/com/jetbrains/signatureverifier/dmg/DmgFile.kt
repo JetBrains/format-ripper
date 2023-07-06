@@ -7,15 +7,17 @@ import com.jetbrains.signatureverifier.macho.MachoUtils
 import com.jetbrains.util.*
 import org.jetbrains.annotations.NotNull
 import java.nio.channels.SeekableByteChannel
+import java.security.MessageDigest
 
-class DmgFile {
+class DmgFile(@NotNull stream: SeekableByteChannel) {
   val UDIFResourceFileSize = 512
   val numDataChecksumOffset = 84L
   private val stream: SeekableByteChannel
   private var signedData: ByteArray? = null
   private var cmsData: ByteArray? = null
+  private val codeSignaturePointer: CodeSignaturePointer
 
-  constructor(@NotNull stream: SeekableByteChannel) {
+  init {
     this.stream = stream
     val reader = BinaryReader(stream.Rewind())
 
@@ -30,43 +32,45 @@ class DmgFile {
     stream.Seek(numDataChecksum * 4L + 16, SeekOrigin.Current)
     stream.Seek(64, SeekOrigin.Current)
 
-    val codeSignaturePointer = CodeSignaturePointer(
+    codeSignaturePointer = CodeSignaturePointer(
       reader.ReadUInt64Be().toLong(),
       reader.ReadUInt64Be().toLong()
     )
 
-    stream.Jump(codeSignaturePointer.offset)
-    val superBlobStart = stream.position()
+    if (codeSignaturePointer.length > 0) {
+      stream.Jump(codeSignaturePointer.offset)
+      val superBlobStart = stream.position()
 
-    val codeSignatureMagic = reader.ReadUInt32Be()
-    if (codeSignatureMagic != MachoConsts.CSMAGIC_SIGNATURE_DATA)
-      error("Could not read Code Signature block")
+      val codeSignatureMagic = reader.ReadUInt32Be()
+      if (codeSignatureMagic != MachoConsts.CSMAGIC_SIGNATURE_DATA)
+        error("Could not read Code Signature block")
 
-    val codeSignatureLength = reader.ReadUInt32Be()
-    val numBlobs = reader.ReadUInt32Be().toInt()
+      val codeSignatureLength = reader.ReadUInt32Be()
+      val numBlobs = reader.ReadUInt32Be().toInt()
 
-    repeat(numBlobs) {
-      val blobIndexType = reader.ReadUInt32Be()
-      val blobIndexOffset = reader.ReadUInt32Be()
-      val position = stream.position()
-      when (blobIndexType.toLong()) {
-        MachoConsts.CSSLOT_CODEDIRECTORY -> {
-          stream.Seek(superBlobStart, SeekOrigin.Begin)
-          stream.Seek(blobIndexOffset.toLong(), SeekOrigin.Current)
-          val (blobMagic, data) = MachoUtils.ReadCodeDirectoryBlob(reader)
-          signedData = data
-          stream.Seek(position, SeekOrigin.Begin)
-        }
+      repeat(numBlobs) {
+        val blobIndexType = reader.ReadUInt32Be()
+        val blobIndexOffset = reader.ReadUInt32Be()
+        val position = stream.position()
+        when (blobIndexType.toLong()) {
+          MachoConsts.CSSLOT_CODEDIRECTORY -> {
+            stream.Seek(superBlobStart, SeekOrigin.Begin)
+            stream.Seek(blobIndexOffset.toLong(), SeekOrigin.Current)
+            val (_, data) = MachoUtils.ReadCodeDirectoryBlob(reader)
+            signedData = data
+            stream.Seek(position, SeekOrigin.Begin)
+          }
 
-        else -> {
-          val magicEnum = CSMAGIC.getInstance(blobIndexType)
+          else -> {
+            val magicEnum = CSMAGIC.getInstance(blobIndexType)
 
-          stream.Seek(superBlobStart, SeekOrigin.Begin)
-          stream.Seek(blobIndexOffset.toLong(), SeekOrigin.Current)
-          val (blobMagic, data) = MachoUtils.ReadBlob(reader)
-          stream.Seek(position, SeekOrigin.Begin)
-          if (magicEnum == CSMAGIC.CMS_SIGNATURE) {
-            cmsData = data
+            stream.Seek(superBlobStart, SeekOrigin.Begin)
+            stream.Seek(blobIndexOffset.toLong(), SeekOrigin.Current)
+            val (_, data) = MachoUtils.ReadBlob(reader)
+            stream.Seek(position, SeekOrigin.Begin)
+            if (magicEnum == CSMAGIC.CMS_SIGNATURE) {
+              cmsData = data
+            }
           }
         }
       }
@@ -75,6 +79,25 @@ class DmgFile {
 
   fun GetSignatureData(): SignatureData = SignatureData(signedData, cmsData)
 
+  fun ComputeHash(algName: String): ByteArray {
+    val hash = MessageDigest.getInstance(algName)
+    val reader = BinaryReader(stream.Rewind())
+    // if signature is empty
+    if (codeSignaturePointer.length == 0L) {
+      hash.update(reader.ReadBytes(stream.size().toInt() - 512)) // exclude UDIF block
+    } else {
+      // Data before codeSignature
+      hash.update(reader.ReadBytes(codeSignaturePointer.offset.toInt()))
+
+      val dataBeforeUDIFLength = stream.size() - (codeSignaturePointer.offset + codeSignaturePointer.length) - 512
+      // If something is left before UDIF block
+      if (dataBeforeUDIFLength > 0) {
+        stream.Jump(codeSignaturePointer.offset + codeSignaturePointer.length)
+        hash.update(reader.ReadBytes(dataBeforeUDIFLength.toInt()))
+      }
+    }
+    return hash.digest()
+  }
 
   /**
    * NOTE

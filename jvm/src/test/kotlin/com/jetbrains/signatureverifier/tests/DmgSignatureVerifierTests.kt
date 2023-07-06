@@ -5,6 +5,7 @@ import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.crypt.SignedMessageVerifier
 import com.jetbrains.signatureverifier.crypt.VerifySignatureStatus
 import com.jetbrains.signatureverifier.dmg.DmgFile
+import com.jetbrains.signatureverifier.serialization.compareBytes
 import com.jetbrains.signatureverifier.serialization.getTestByteChannel
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions
@@ -30,12 +31,37 @@ class DmgSignatureVerifierTests {
     }
   }
 
+  @ParameterizedTest
+  @MethodSource("ComputeHashTestProvider")
+  fun ComputeHashTest(signedResource: String, unsignedResource: String, sameFile: Boolean) {
+    getTestByteChannel("dmg", signedResource).use { signedStream ->
+      val signedFile = DmgFile(signedStream)
+      getTestByteChannel("dmg", unsignedResource).use { unsignedStream ->
+        val unsignedFile = DmgFile(unsignedStream)
+        listOf("SHA1", "SHA256").forEach { algorithm ->
+          Assertions.assertEquals(
+            sameFile,
+            compareBytes(signedFile.ComputeHash(algorithm), unsignedFile.ComputeHash(algorithm), verbose = false)
+          )
+        }
+      }
+    }
+  }
+
   companion object {
     @JvmStatic
     fun VerifySignTestProvider(): Stream<Arguments> {
       return Stream.of(
         Arguments.of("steam.dmg", VerifySignatureStatus.Valid),
         Arguments.of("json-viewer.dmg", VerifySignatureStatus.Valid),
+      )
+    }
+
+    @JvmStatic
+    fun ComputeHashTestProvider(): Stream<Arguments> {
+      return Stream.of(
+        Arguments.of("steam.dmg", "steam_not_signed.dmg", true),
+        Arguments.of("steam.dmg", "json-viewer.dmg", false),
       )
     }
   }
