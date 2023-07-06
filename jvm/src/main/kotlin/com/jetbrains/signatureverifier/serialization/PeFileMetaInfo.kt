@@ -23,7 +23,7 @@ data class PeFileMetaInfo(
   var dwLength: DataValue = DataValue(),
   var wRevision: DataValue = DataValue(),
   var signaturePosition: DataInfo = DataInfo(0, 0)
-) : FileMetaInfo {
+) :  FileMetaInfo {
   override fun modifyFile(stream: SeekableByteChannel, signature: ByteArray) {
     listOf(
       ntHeaderOffset,

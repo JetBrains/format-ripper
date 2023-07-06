@@ -7,5 +7,5 @@ import java.nio.channels.SeekableByteChannel
 sealed class FileInfo {
   abstract val fileMetaInfo: FileMetaInfo
   abstract val signedDataInfo: SignedDataInfo
-  fun modifyFile(stream: SeekableByteChannel) = fileMetaInfo.modifyFile(stream, signedDataInfo.toSignature())
+  open fun modifyFile(stream: SeekableByteChannel) = fileMetaInfo.modifyFile(stream, signedDataInfo.toSignature())
 }
