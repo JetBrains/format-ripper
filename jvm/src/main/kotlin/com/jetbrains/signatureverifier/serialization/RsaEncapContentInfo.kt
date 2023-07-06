@@ -1,20 +1,19 @@
 package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
-import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.cms.ContentInfo
 
 @Serializable
 data class RsaEncapContentInfo(
   override val contentType: TextualInfo,
   val content: TextualInfo?
-) : EncapContentInfo {
+) : EncapContentInfo() {
 
   constructor(contentInfo: ContentInfo) : this(
     TextualInfo.getInstance(contentInfo.contentType),
     contentInfo.content?.let { TextualInfo.getInstance(it) }
   )
 
-  override fun toPrimitive(): ASN1Primitive =
-    listOf(contentType.toPrimitive(), content?.toPrimitive()).toDLSequence()
+  override fun getContentPrimitive() =
+    content?.toPrimitive()
 }

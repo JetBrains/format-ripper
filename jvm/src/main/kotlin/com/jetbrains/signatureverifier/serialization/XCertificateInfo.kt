@@ -5,7 +5,7 @@ import org.bouncycastle.cert.X509AttributeCertificateHolder
 import org.bouncycastle.cert.X509CertificateHolder
 
 @Serializable
-sealed interface XCertificateInfo : EncodableInfo {
+sealed class XCertificateInfo : EncodableInfo {
   companion object {
     fun getInstance(obj: Any): XCertificateInfo =
       when (obj) {

@@ -1,10 +1,11 @@
 package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.Serializable
+import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.cms.ContentInfo
 
 @Serializable
-sealed interface EncapContentInfo : EncodableInfo {
+sealed class EncapContentInfo : EncodableInfo {
   companion object {
     fun getInstance(contentInfo: ContentInfo): EncapContentInfo {
       return when (contentInfo.contentType.id) {
@@ -16,5 +17,12 @@ sealed interface EncapContentInfo : EncodableInfo {
     }
   }
 
-  val contentType: TextualInfo
+  abstract fun getContentPrimitive(): ASN1Primitive?
+  abstract val contentType: TextualInfo
+
+  override fun toPrimitive(): ASN1Primitive =
+    listOf(
+      contentType.toPrimitive(),
+      getContentPrimitive()
+    ).toDLSequence()
 }

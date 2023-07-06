@@ -19,7 +19,7 @@ data class X509CertificateInfo(
   val subjectAlgorithm: AlgorithmInfo,
   val subjectData: TextualInfo,
   val extensions: List<ExtensionInfo>?
-) : XCertificateInfo {
+) : XCertificateInfo() {
   companion object {
     fun getInstance(certificateHolder: X509CertificateHolder): X509CertificateInfo =
       X509CertificateInfo(
