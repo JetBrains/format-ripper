@@ -8,7 +8,7 @@ import org.bouncycastle.asn1.cms.Attribute
 data class CounterSignatureAttributeInfo(
   override val identifier: TextualInfo,
   val content: List<CounterSignatureInfo>
-) : AttributeInfo {
+) : AttributeInfo() {
 
   companion object {
     fun getInstance(attribute: Attribute): CounterSignatureAttributeInfo {

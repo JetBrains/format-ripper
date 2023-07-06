@@ -10,7 +10,7 @@ data class MsCounterSignAttributeInfo(
   override val identifier: TextualInfo,
   val contentIdentifier: List<TextualInfo>,
   val content: List<TaggedObjectInfo>
-) : AttributeInfo {
+) : AttributeInfo() {
 
   constructor(attribute: Attribute) : this(
     TextualInfo.getInstance(attribute.attrType),

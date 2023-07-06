@@ -6,4 +6,4 @@ import kotlinx.serialization.Serializable
 data class PEFileInfo(
   override val signedDataInfo: SignedDataInfo,
   override val fileMetaInfo: FileMetaInfo
-) : FileInfo
+) : FileInfo()

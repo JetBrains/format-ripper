@@ -8,7 +8,7 @@ import org.bouncycastle.asn1.cms.Attribute
 data class MSSpcNestedSignatureInfo(
   override val identifier: TextualInfo,
   val content: List<RSASignedDataInfo>
-) : AttributeInfo {
+) : AttributeInfo() {
 
   constructor(attribute: Attribute) : this(
     TextualInfo.getInstance(attribute.attrType),

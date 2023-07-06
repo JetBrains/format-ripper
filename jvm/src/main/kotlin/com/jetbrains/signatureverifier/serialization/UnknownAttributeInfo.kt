@@ -7,7 +7,7 @@ import org.bouncycastle.asn1.cms.Attribute
 data class UnknownAttributeInfo(
   override val identifier: TextualInfo,
   val content: EncodableInfo
-) : AttributeInfo {
+) : AttributeInfo() {
 
   constructor(attribute: Attribute) : this(
     TextualInfo.getInstance(attribute.attrType),

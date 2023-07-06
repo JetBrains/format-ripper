@@ -5,7 +5,7 @@ import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.cms.Attribute
 
 @Serializable
-sealed interface AttributeInfo : EncodableInfo {
+sealed class AttributeInfo : EncodableInfo {
   companion object {
     fun getInstance(attribute: Attribute): AttributeInfo =
       when (attribute.attrType.id) {
@@ -28,9 +28,9 @@ sealed interface AttributeInfo : EncodableInfo {
       }
   }
 
-  val identifier: TextualInfo
+  abstract val identifier: TextualInfo
 
-  fun getPrimitiveContent(): ASN1Primitive
+  abstract fun getPrimitiveContent(): ASN1Primitive
 
   override fun toPrimitive(): ASN1Primitive = listOf(
     identifier.toPrimitive(),

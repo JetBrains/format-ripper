@@ -6,4 +6,4 @@ import kotlinx.serialization.Serializable
 data class MsiFileInfo(
   override val signedDataInfo: SignedDataInfo,
   override val fileMetaInfo: MsiFileMetaInfo
-) : FileInfo
+) : FileInfo()

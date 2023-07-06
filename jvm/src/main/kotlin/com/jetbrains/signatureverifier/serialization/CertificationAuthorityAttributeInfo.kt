@@ -8,7 +8,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier
 data class CertificationAuthorityAttributeInfo(
   override val identifier: TextualInfo,
   val content: List<AlgorithmInfo>
-) : AttributeInfo {
+) : AttributeInfo() {
 
   constructor(attribute: Attribute) : this(
     TextualInfo.getInstance(attribute.attrType),

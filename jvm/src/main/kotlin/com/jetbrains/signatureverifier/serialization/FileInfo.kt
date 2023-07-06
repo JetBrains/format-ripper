@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 import java.nio.channels.SeekableByteChannel
 
 @Serializable
-sealed interface FileInfo {
-  val fileMetaInfo: FileMetaInfo
-  val signedDataInfo: SignedDataInfo
+sealed class FileInfo {
+  abstract val fileMetaInfo: FileMetaInfo
+  abstract val signedDataInfo: SignedDataInfo
   fun modifyFile(stream: SeekableByteChannel) = fileMetaInfo.modifyFile(stream, signedDataInfo.toSignature())
 }

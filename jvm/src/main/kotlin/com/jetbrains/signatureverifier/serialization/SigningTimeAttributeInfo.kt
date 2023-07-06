@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter
 class SigningTimeAttributeInfo(
   override val identifier: TextualInfo,
   val content: List<@Serializable(OffsetDateTimeSerializer::class) OffsetDateTime>
-) : AttributeInfo {
+) : AttributeInfo() {
   constructor(attribute: Attribute) : this(
     TextualInfo.getInstance(attribute.attrType),
     attribute.attributeValues.map {

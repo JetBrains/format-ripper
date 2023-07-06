@@ -10,7 +10,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier
 data class CMSAlgorithmProtectionAttributeInfo(
   override val identifier: TextualInfo,
   val content: List<List<EncodableInfo>>
-) : AttributeInfo {
+) : AttributeInfo() {
 
   constructor(attribute: Attribute) : this(
     TextualInfo.getInstance(attribute.attrType),
