@@ -1,13 +1,15 @@
-name: net
+name: Build and run tests
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
 
 jobs:
-  build-and-tests:
+  net:
+    name: .NET
 
     strategy:
       fail-fast: false
@@ -26,20 +28,21 @@ jobs:
             3.1.x
             7.0.x
       - name: Restore
-        working-directory: ./net
+        working-directory: ${{ github.workspace }}/net
         run: dotnet restore
-      - name: Build and Tests
-        working-directory: ./net
+      - name: Build and run tests
+        working-directory: ${{ github.workspace }}/net
         run: dotnet test --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results'
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: test-results-${{ matrix.os }}
-          path: ${{ github.workspace }}/**/tests/TestResults/*
+          name: net-test-results-${{ matrix.os }}
+          path: ${{ github.workspace }}/net/**/tests/TestResults/*
           if-no-files-found: error
 
-  build-and-tests-qemu:
+  net-qemu:
+    name: .NET QEMU
 
     strategy:
       fail-fast: false
@@ -55,7 +58,7 @@ jobs:
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       - name: Setup .NET SDK, Restore, Build and Tests under QEMU ${{ matrix.arch }}
         run: >
-          docker run --rm -v "$(pwd):/work" --platform linux/${{ matrix.arch }} ${{ matrix.arch }}/fedora:39 /bin/bash -c " \
+          docker run --rm -v "${{ github.workspace }}:/work" --platform linux/${{ matrix.arch }} ${{ matrix.arch }}/fedora:39 /bin/bash -c " \
             dnf install -y dotnet-sdk-7.0 && \
             cd /work/net && \
             dotnet restore && \
@@ -65,6 +68,39 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: test-results-qemu-${{ matrix.arch }}
-          path: ${{ github.workspace }}/**/tests/TestResults/*
+          name: net-test-results-qemu-${{ matrix.arch }}
+          path: ${{ github.workspace }}/net/**/tests/TestResults/*
+          if-no-files-found: error
+
+  jvm:
+    name: JVM
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v1.0.6
+      - name: Gradle Build
+        uses: gradle/gradle-build-action@v2.5.1
+        with:
+          arguments: test
+          build-root-directory: ${{ github.workspace }}/jvm
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: jvm-test-results-${{ matrix.os }}
+          path: ${{ github.workspace }}/jvm/build/test-results/test/*
           if-no-files-found: error
