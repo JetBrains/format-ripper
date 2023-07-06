@@ -1,0 +1,23 @@
+name: jvm-test-report
+
+on:
+  workflow_run:
+    workflows: ['jvm']
+    types:
+      - completed
+
+permissions:
+  checks: write
+
+jobs:
+  report:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: dorny/test-reporter@v1
+        with:
+          artifact: /jvm-test-results-(.*)/
+          name: jvm-test-report ($1)
+          path: '*.xml'
+          reporter: java-junit
