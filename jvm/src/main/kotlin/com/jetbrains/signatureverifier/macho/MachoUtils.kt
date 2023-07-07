@@ -17,9 +17,10 @@ open class MachoUtils {
     fun IsMacho(magic: Long): Boolean =
       magic == MachoConsts.MH_MAGIC || magic == MachoConsts.MH_MAGIC_64 || magic == MachoConsts.MH_CIGAM || magic == MachoConsts.MH_CIGAM_64
 
-    fun ReadBlob(reader: BinaryReader): Pair<UInt, ByteArray> {
+    fun ReadBlob(reader: BinaryReader, isDmg: Boolean = false): Pair<UInt, ByteArray> {
       val magic = reader.ReadUInt32Le(true)
-      val length = reader.ReadUInt32Le(true)
+      val length = reader.ReadUInt32Le(true) - if (isDmg) (2 * UInt.SIZE_BYTES).toUInt() else 0u
+
       return magic to reader.ReadBytes(length.toInt())
     }
 

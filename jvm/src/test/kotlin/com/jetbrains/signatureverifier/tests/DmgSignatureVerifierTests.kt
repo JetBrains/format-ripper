@@ -52,6 +52,7 @@ class DmgSignatureVerifierTests {
     fun VerifySignTestProvider(): Stream<Arguments> {
       return Stream.of(
         Arguments.of("steam.dmg", VerifySignatureStatus.Valid),
+        Arguments.of("dd.dmg", VerifySignatureStatus.Valid),
         Arguments.of("json-viewer.dmg", VerifySignatureStatus.Valid),
       )
     }
@@ -60,6 +61,7 @@ class DmgSignatureVerifierTests {
     fun ComputeHashTestProvider(): Stream<Arguments> {
       return Stream.of(
         Arguments.of("steam.dmg", "steam_not_signed.dmg", true),
+        Arguments.of("dd.dmg", "dd_not_signed.dmg", true),
         Arguments.of("steam.dmg", "json-viewer.dmg", false),
       )
     }
