@@ -91,9 +91,9 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.0.4
+        uses: gradle/wrapper-validation-action@v1.0.6
       - name: Gradle Build
-        uses: gradle/gradle-build-action@v2.1.5
+        uses: gradle/gradle-build-action@v2.5.1
         with:
           arguments: test
           build-root-directory: ./jvm
