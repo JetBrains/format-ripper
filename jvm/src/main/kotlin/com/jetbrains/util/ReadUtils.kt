@@ -80,6 +80,10 @@ fun BinaryReader.ReadUInt64Le(isBe: Boolean): ULong {
   return if (isBe) SwapBytes(value) else value
 }
 
+fun BinaryReader.ReadUInt64Be(): ULong {
+  return SwapBytes(this.ReadUInt64())
+}
+
 private fun SwapBytes(v: UShort): UShort = (((v.toInt() and 0xFF) shl 8) or ((v.toInt() ushr 8) and 0xFF)).toUShort()
 
 private fun SwapBytes(v: UInt): UInt =

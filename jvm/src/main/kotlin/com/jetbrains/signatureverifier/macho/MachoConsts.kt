@@ -16,6 +16,7 @@ object MachoConsts {
   val CSMAGIC_CMS_SIGNATURE = 0xfade0b01
   val CSMAGIC_BLOBWRAPPER = 0xfade0b01 //used for the cms blob
   val CSMAGIC_CODEDIRECTORY = 0xfade0c02 //used for the CodeDirectory blob
+  val CSMAGIC_SIGNATURE_DATA = 0xfade0cc0u
   val LC_SEGMENT = 1
   val LC_SEGMENT_64 = 0x19
   val LC_CODE_SIGNATURE = 0x1D
@@ -57,4 +58,3 @@ enum class CSMAGIC {
     }
   }
 }
-
