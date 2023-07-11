@@ -1,10 +1,8 @@
 package com.jetbrains.signatureverifier.tests.serialization
 
 import com.jetbrains.signatureverifier.PeFile
-import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.serialization.PEFileInfo
 import com.jetbrains.signatureverifier.serialization.PeFileMetaInfo
-import com.jetbrains.signatureverifier.serialization.SignedDataInfo
 import com.jetbrains.signatureverifier.serialization.compareBytes
 import com.jetbrains.util.TestUtil
 import org.junit.jupiter.api.Assertions
@@ -36,22 +34,11 @@ class PeSignatureStoringTests {
 
     TestUtil.getTestByteChannel("pe", signedPeResourceName, write = true).use {
       val peFile = PeFile(it)
-      peFileMetaInfo = peFile.getSignatureMetainfo()
-
-      val signatureData = peFile.GetSignatureData()
-      val signedMessage = SignedMessage.CreateInstance(signatureData)
-
-      val signedData = signedMessage.SignedData
-
-      val signedDataInfo = SignedDataInfo(signedData)
-
-      peFileInfo = PEFileInfo(signedDataInfo, peFileMetaInfo)
-
-      signature = signedDataInfo.toSignature()
+      peFileInfo = PEFileInfo(peFile)
 
       Assertions.assertEquals(
         true,
-        compareBytes(signature, peFile.GetSignatureData().CmsData!!, verbose = false)
+        compareBytes(peFileInfo.signedDataInfo.toSignature(), peFile.GetSignatureData().CmsData!!, verbose = false)
       )
     }
 
