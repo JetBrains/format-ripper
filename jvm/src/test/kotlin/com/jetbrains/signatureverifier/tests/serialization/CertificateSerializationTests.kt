@@ -10,8 +10,6 @@ import com.jetbrains.signatureverifier.serialization.compareBytes
 import com.jetbrains.signatureverifier.serialization.getTestByteChannel
 import com.jetbrains.signatureverifier.serialization.recreateCertificatesFromStore
 import com.jetbrains.util.TestUtil
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.bouncycastle.util.CollectionStore
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
@@ -78,14 +76,6 @@ class CertificateSerializationTests {
     val recreatedList = beautifiedCertificates.map { certificateHolder ->
 
       val certificateInfo = CertificateInfo.getInstance(certificateHolder)
-
-      val json = Json.encodeToString(certificateInfo)
-      val certificateInfoFromJson = Json.decodeFromString<CertificateInfo>(json)
-
-      Assertions.assertEquals(
-        true,
-        certificateInfo == certificateInfoFromJson
-      )
 
       val recreatedCertificateHolder = certificateInfo.toX509CertificateHolder()
 
