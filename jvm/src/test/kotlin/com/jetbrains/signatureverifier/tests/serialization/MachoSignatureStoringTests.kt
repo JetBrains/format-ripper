@@ -1,10 +1,8 @@
 package com.jetbrains.signatureverifier.tests.serialization
 
-import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.macho.MachoArch
 import com.jetbrains.signatureverifier.serialization.FatMachoFileInfo
 import com.jetbrains.signatureverifier.serialization.MachoFileInfo
-import com.jetbrains.signatureverifier.serialization.SignedDataInfo
 import com.jetbrains.util.TestUtil
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -49,14 +47,8 @@ class MachoSignatureStoringTests {
 
     if (machoFiles.size == 1) {
       val machoFile = machoFiles.first()
-      val signatureData = machoFile.GetSignatureData()
-      val signedMessage = SignedMessage.CreateInstance(signatureData)
-      val signedData = signedMessage.SignedData
-      val signedDataInfo = SignedDataInfo(signedData)
 
-
-      val metaInfo = machoFile.metaInfo
-      val fileInfo = MachoFileInfo(metaInfo, signedDataInfo)
+      val fileInfo = MachoFileInfo(machoFile)
       val json = Json.encodeToString(fileInfo)
       val decoded: MachoFileInfo = Json.decodeFromString(json)
 
@@ -70,14 +62,7 @@ class MachoSignatureStoringTests {
         signedSize,
         machoArch.fatHeaderInfo,
         machoFiles.map { machoFile ->
-          val signatureData = machoFile.GetSignatureData()
-          val signedMessage = SignedMessage.CreateInstance(signatureData)
-          val signedData = signedMessage.SignedData
-          val signedDataInfo = SignedDataInfo(signedData)
-
-
-          val metaInfo = machoFile.metaInfo
-          MachoFileInfo(metaInfo, signedDataInfo)
+          MachoFileInfo(machoFile)
         }
       )
 
