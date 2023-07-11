@@ -11,6 +11,7 @@ import java.security.MessageDigest
  */
 open class MsiFile {
   private val _cf: CompoundFile
+  val fileSize: Long
 
   companion object {
     //\u0005DigitalSignature
@@ -48,6 +49,7 @@ open class MsiFile {
    */
   constructor(@NotNull stream: SeekableByteChannel) {
     _cf = CompoundFile(stream)
+    fileSize = stream.size()
   }
 
   /***
@@ -55,6 +57,7 @@ open class MsiFile {
    */
   constructor(compoundFileMetaInfo: CompoundFile.Companion.CompoundFileMetaInfo, stream: SeekableByteChannel) {
     _cf = CompoundFile(compoundFileMetaInfo, stream)
+    fileSize = stream.size()
   }
 
   fun getCFMetaInfo() = _cf.getMetaInfo()
