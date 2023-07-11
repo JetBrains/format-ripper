@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Math;
 
@@ -153,7 +154,6 @@ public class BooleanInfo : ITextualInfo
   protected override Asn1Encodable ToEncodable() =>
     DerBoolean.GetInstance(content);
 }
-
 public class IntegerInfo : StringTextualInfo
 {
   public IntegerInfo(string content) => this.content = content;
