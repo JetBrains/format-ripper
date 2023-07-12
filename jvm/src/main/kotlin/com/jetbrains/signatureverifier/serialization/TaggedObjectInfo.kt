@@ -7,7 +7,8 @@ import org.bouncycastle.asn1.DLTaggedObject
 
 @Serializable
 data class TaggedObjectInfo(
-  val metaInfo: TaggedObjectMetaInfo,
+  val explicit: Boolean,
+  val tagNo: Int,
   val content: EncodableInfo
 ) : EncodableInfo {
   companion object {
@@ -19,26 +20,13 @@ data class TaggedObjectInfo(
     /**
      * Hack to get same explicitness as in original
      */
-    fun getTaggedObjectWithMetaInfo(
-      metaInfo: TaggedObjectMetaInfo,
+    fun getTaggedObject(
+      explicit: Boolean,
+      tagNo: Int,
       content: ASN1Encodable
-    ): DLTaggedObject = when (metaInfo.explicitness) {
-      DECLARED_EXPLICIT -> DLTaggedObject(true, metaInfo.tagNo, content)
-      DECLARED_IMPLICIT -> DLTaggedObject(false, metaInfo.tagNo, content)
-
-      PARSED_EXPLICIT -> DLTaggedObject.getInstance(
-        DLTaggedObject(true, metaInfo.tagNo, content).encoded
-      ) as DLTaggedObject
-
-      PARSED_IMPLICIT -> DLTaggedObject.getInstance(
-        DLTaggedObject(false, metaInfo.tagNo, content).encoded
-      ) as DLTaggedObject
-
-      else -> throw IllegalArgumentException("Tagged object explicitness can only be 1, 2, 3 or 4")
-    }
+    ): DLTaggedObject = DLTaggedObject(explicit, tagNo, content)
   }
 
-  override fun toPrimitive(): ASN1Primitive =
-    getTaggedObjectWithMetaInfo(metaInfo, content.toPrimitive()).toASN1Primitive()
+  override fun toPrimitive(): ASN1Primitive = getTaggedObject(explicit, tagNo, content.toPrimitive()).toASN1Primitive()
 
 }

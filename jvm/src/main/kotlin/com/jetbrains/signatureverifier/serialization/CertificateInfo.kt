@@ -40,7 +40,8 @@ data class CertificateInfo(
 
       is DLTaggedObject -> {
         TaggedObjectInfo(
-          TaggedObjectMetaInfo(obj),
+          obj.isExplicit,
+          obj.tagNo,
           getInstance(
             X509AttributeCertificateHolder(
               AttributeCertificate.getInstance(

@@ -20,7 +20,8 @@ data class MsCounterSignAttributeInfo(
     attribute.attributeValues.map {
       (it as DLSequence).last().let { sequence ->
         TaggedObjectInfo(
-          TaggedObjectMetaInfo(sequence as DLTaggedObject),
+          (sequence as DLTaggedObject).isExplicit,
+          sequence.tagNo,
           MsCounterSignatureInfo.getInstance(sequence.baseObject as DLSequence)
         )
       }

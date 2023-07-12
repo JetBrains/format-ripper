@@ -46,15 +46,17 @@ data class SignerInfo(
       ASN1Integer(version.toLong()),
       sid.toPrimitive(),
       digestAlgorithm.toPrimitive(),
-      TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-        TaggedObjectMetaInfo(0, 2),
+      TaggedObjectInfo.getTaggedObject(
+        false,
+        0,
         authenticatedAttributes.toPrimitiveList().toDLSet()
       ),
       digestEncryptionAlgorithm.toPrimitive(),
       encryptedDigest.toPrimitive(),
       unauthenticatedAttributes?.let { attributes ->
-        TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-          TaggedObjectMetaInfo(1, 2),
+        TaggedObjectInfo.getTaggedObject(
+          false,
+          1,
           attributes.toPrimitiveList().toDLSet()
         )
       }

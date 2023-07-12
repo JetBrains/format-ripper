@@ -17,11 +17,9 @@ data class GeneralNameInfo(
   )
 
   override fun toPrimitive(): ASN1Primitive =
-    TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-      TaggedObjectMetaInfo(
-        tag,
-        (if (tag == 4) 1 else 0)
-      ),
+    TaggedObjectInfo.getTaggedObject(
+      tag == 4,
+      tag,
       name.toPrimitive()
     )
 }

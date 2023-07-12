@@ -29,7 +29,8 @@ data class MsCounterSignatureInfo(
 
       val taggedCertificateInfo = iterator.next().let {
         TaggedObjectInfo(
-          TaggedObjectMetaInfo(it as DLTaggedObject),
+          (it as DLTaggedObject).isExplicit,
+          it.tagNo,
           SequenceInfo(
             (it.baseObject as DLSequence).map { certificateSequence ->
               CertificateInfo.getInstance(certificateSequence.toASN1Primitive())

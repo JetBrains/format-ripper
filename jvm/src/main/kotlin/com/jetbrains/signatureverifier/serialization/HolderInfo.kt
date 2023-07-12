@@ -22,34 +22,39 @@ data class HolderInfo(
   override fun toPrimitive(): ASN1Primitive = when (version) {
     0 -> when (entityName) {
       null ->
-        TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-          TaggedObjectMetaInfo(0, 1),
+        TaggedObjectInfo.getTaggedObject(
+          true,
+          0,
           baseCertificateId!!.toPrimitive()
         ).toASN1Primitive()
 
       else ->
-        TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-          TaggedObjectMetaInfo(1, 1),
+        TaggedObjectInfo.getTaggedObject(
+          true,
+          1,
           entityName.toPrimitiveList().toDLSequence()
         ).toASN1Primitive()
     }
 
     1 -> listOf(
       baseCertificateId?.let {
-        TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-          TaggedObjectMetaInfo(0, 2),
+        TaggedObjectInfo.getTaggedObject(
+          false,
+          0,
           it.toPrimitive()
         )
       },
       entityName?.let {
-        TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-          TaggedObjectMetaInfo(1, 2),
+        TaggedObjectInfo.getTaggedObject(
+          false,
+          1,
           it.toPrimitiveList().toDLSequence()
         )
       },
       objectDigestInfo?.let {
-        TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-          TaggedObjectMetaInfo(2, 2),
+        TaggedObjectInfo.getTaggedObject(
+          false,
+          2,
           it.toPrimitive()
         )
       },

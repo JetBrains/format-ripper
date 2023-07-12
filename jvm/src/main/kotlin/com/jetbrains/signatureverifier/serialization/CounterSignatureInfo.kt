@@ -55,7 +55,8 @@ data class CounterSignatureInfo(
       val counterSignature: TaggedObjectInfo? = if (iterator.hasNext()) {
         val obj = iterator.next()
         TaggedObjectInfo(
-          TaggedObjectMetaInfo(obj as DLTaggedObject),
+          (obj as DLTaggedObject).isExplicit,
+          obj.tagNo,
           AttributeInfo.getInstance(Attribute.getInstance(obj.baseObject))
         )
       } else {
@@ -79,8 +80,10 @@ data class CounterSignatureInfo(
       ASN1Integer(version.toLong()),
       sid.toPrimitive(),
       digestAlgorithm.toPrimitive(),
-      TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-        TaggedObjectMetaInfo(0, 4),
+//      TaggedObjectInfo(false, 0, authenticatedAttributes.toPrimitiveList().toDLSet()).toPrimitive(),
+      TaggedObjectInfo.getTaggedObject(
+        false,
+        0,
         authenticatedAttributes.toPrimitiveList().toDLSet()
       ),
       digestEncryptionAlgorithm.toPrimitive(),

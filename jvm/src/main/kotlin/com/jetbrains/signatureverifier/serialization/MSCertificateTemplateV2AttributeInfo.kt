@@ -18,10 +18,12 @@ data class MSCertificateTemplateV2AttributeInfo(
       (attributeValue as DLSequence).map {
         (it as DLTaggedObject).let { outer ->
           TaggedObjectInfo(
-            TaggedObjectMetaInfo(outer),
+            outer.isExplicit,
+            outer.tagNo,
             (outer.baseObject as DLTaggedObject).let { inner ->
               TaggedObjectInfo(
-                TaggedObjectMetaInfo(inner),
+                inner.isExplicit,
+                inner.tagNo,
                 TextualInfo.getInstance(inner.baseObject)
               )
             }

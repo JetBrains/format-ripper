@@ -15,7 +15,8 @@ data class TSTInfo(
     TextualInfo.getInstance(sequence.first()),
     sequence.last().let {
       TaggedObjectInfo(
-        TaggedObjectMetaInfo(it as DLTaggedObject),
+        (it as DLTaggedObject).isExplicit,
+        it.tagNo,
         TextualInfo.getInstance(it.baseObject)
       )
     }

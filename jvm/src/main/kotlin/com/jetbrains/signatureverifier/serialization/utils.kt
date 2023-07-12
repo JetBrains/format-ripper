@@ -103,19 +103,6 @@ fun findGaps(start: Int, end: Int, segments: List<Pair<Int, Int>>): List<Pair<In
   return gaps
 }
 
-/**
- * This method exists, because org.bouncycastle.asn1.ASN1TaggedObject
- * has different explicitness types for different modes,
- * yet you can not access neither the explicitness field itself, nor isParsed() method
- * needed to reproduce the same value.
- * We, of course, need this value to recreate byte-identical instance of DLTaggedObject
- * from serialized data.
- */
-fun ASN1TaggedObject.getExplicitness(): Int {
-  val explicitnessField = ASN1TaggedObject::class.java.getDeclaredField("explicitness")
-  explicitnessField.isAccessible = true
-  return explicitnessField.get(this) as Int
-}
 
 fun ByteArray.toHexString(): String {
   val hexChars = "0123456789ABCDEF"
