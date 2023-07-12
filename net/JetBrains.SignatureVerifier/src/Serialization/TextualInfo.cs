@@ -5,30 +5,30 @@ using Org.BouncyCastle.Math;
 
 namespace JetBrains.SignatureVerifier.Serialization;
 
-public abstract class ITextualInfo : IEncodableInfo
+public abstract class TextualInfo : IEncodableInfo
 {
-  public static ITextualInfo GetInstance(Asn1Encodable value)
+  public static TextualInfo GetInstance(Asn1Encodable value)
   {
     switch (value)
     {
       case DerUtcTime utcTime:
-        return new ASN1UTCTimeInfo(utcTime.ToDateTime());
+        return new Asn1UtcTimeInfo(utcTime.ToDateTime());
       case DerGeneralizedTime generalizedTime:
-        return new ASN1GeneralizedTimeInfo(generalizedTime.ToDateTime());
+        return new Asn1GeneralizedTimeInfo(generalizedTime.ToDateTime());
       case DerUniversalString universalString:
-        return new DERUniversalStringInfo(universalString.GetOctets());
+        return new DerUniversalStringInfo(universalString.GetOctets());
       case DerOctetString octetString:
-        return new DEROctetStringInfo(octetString.GetOctets());
+        return new DerOctetStringInfo(octetString.GetOctets());
       case DerBitString bitString:
-        return new DERBitStringInfo(bitString.GetOctets());
+        return new DerBitStringInfo(bitString.GetOctets());
       case DerPrintableString printableString:
-        return new DERPrintableStringInfo(printableString.GetString());
+        return new DerPrintableStringInfo(printableString.GetString());
       case DerUtf8String utf8String:
-        return new DERUTF8StringInfo(utf8String.GetString());
+        return new DerUTF8StringInfo(utf8String.GetString());
       case DerIA5String ia5String:
-        return new DERIA5StringInfo(ia5String.GetString());
+        return new DerIA5StringInfo(ia5String.GetString());
       case DerBmpString bmpString:
-        return new DERBmpStringInfo(bmpString.GetString());
+        return new DerBmpStringInfo(bmpString.GetString());
       case DerVisibleString visibleString:
         return new DerVisibleStringInfo(visibleString.GetString());
       case DerNumericString numericString:
@@ -50,118 +50,118 @@ public abstract class ITextualInfo : IEncodableInfo
 
   protected abstract Asn1Encodable ToEncodable();
 
-  public Asn1Object ToPrimitive() => ToEncodable().ToAsn1Object();
+  public Asn1Encodable ToPrimitive() => ToEncodable().ToAsn1Object();
 }
 
-public abstract class DateTextualInfo : ITextualInfo
+public abstract class DateTextualInfo : TextualInfo
 {
-  protected DateTime content { get; set; }
+  protected DateTime Content { get; set; }
 }
 
-public class ASN1UTCTimeInfo : DateTextualInfo
+public class Asn1UtcTimeInfo : DateTextualInfo
 {
-  public ASN1UTCTimeInfo(DateTime content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerUtcTime(content);
+  public Asn1UtcTimeInfo(DateTime content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerUtcTime(Content);
 }
 
-public class ASN1GeneralizedTimeInfo : DateTextualInfo
+public class Asn1GeneralizedTimeInfo : DateTextualInfo
 {
-  public ASN1GeneralizedTimeInfo(DateTime content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerGeneralizedTime(content);
+  public Asn1GeneralizedTimeInfo(DateTime content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerGeneralizedTime(Content);
 }
 
-public abstract class HexTextualInfo : ITextualInfo
+public abstract class HexTextualInfo : TextualInfo
 {
-  protected byte[] content { get; set; }
+  protected byte[] Content { get; set; }
 }
 
-public class DERUniversalStringInfo : HexTextualInfo
+public class DerUniversalStringInfo : HexTextualInfo
 {
-  public DERUniversalStringInfo(byte[] content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerUniversalString(content);
+  public DerUniversalStringInfo(byte[] content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerUniversalString(Content);
 }
 
-public class DEROctetStringInfo : HexTextualInfo
+public class DerOctetStringInfo : HexTextualInfo
 {
-  public DEROctetStringInfo(byte[] content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerOctetString(content);
+  public DerOctetStringInfo(byte[] content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerOctetString(Content);
 }
 
-public class DERBitStringInfo : HexTextualInfo
+public class DerBitStringInfo : HexTextualInfo
 {
-  public DERBitStringInfo(byte[] content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerBitString(content);
+  public DerBitStringInfo(byte[] content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerBitString(Content);
 }
 
-public abstract class StringTextualInfo : ITextualInfo
+public abstract class StringTextualInfo : TextualInfo
 {
-  protected string content { get; set; }
+  protected string Content { get; set; }
 }
 
-public class DERPrintableStringInfo : StringTextualInfo
+public class DerPrintableStringInfo : StringTextualInfo
 {
-  public DERPrintableStringInfo(string content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerPrintableString(content);
+  public DerPrintableStringInfo(string content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerPrintableString(Content);
 }
 
-public class DERUTF8StringInfo : StringTextualInfo
+public class DerUTF8StringInfo : StringTextualInfo
 {
-  public DERUTF8StringInfo(string content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerUtf8String(content);
+  public DerUTF8StringInfo(string content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerUtf8String(Content);
 }
 
-public class DERIA5StringInfo : StringTextualInfo
+public class DerIA5StringInfo : StringTextualInfo
 {
-  public DERIA5StringInfo(string content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerIA5String(content);
+  public DerIA5StringInfo(string content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerIA5String(Content);
 }
 
-public class DERBmpStringInfo : StringTextualInfo
+public class DerBmpStringInfo : StringTextualInfo
 {
-  public DERBmpStringInfo(string content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerBmpString(content);
+  public DerBmpStringInfo(string content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerBmpString(Content);
 }
 
 public class DerVisibleStringInfo : StringTextualInfo
 {
-  public DerVisibleStringInfo(string content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerVisibleString(content);
+  public DerVisibleStringInfo(string content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerVisibleString(Content);
 }
 
 public class DerNumericStringInfo : StringTextualInfo
 {
-  public DerNumericStringInfo(string content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerNumericString(content);
+  public DerNumericStringInfo(string content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerNumericString(Content);
 }
 
 public class DerGeneralStringInfo : StringTextualInfo
 {
-  public DerGeneralStringInfo(string content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerGeneralString(content);
+  public DerGeneralStringInfo(string content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerGeneralString(Content);
 }
 
 public class Asn1ObjectIdentifierInfo : StringTextualInfo
 {
-  public Asn1ObjectIdentifierInfo(string content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerObjectIdentifier(content);
+  public Asn1ObjectIdentifierInfo(string content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerObjectIdentifier(Content);
 }
 
-public class BooleanInfo : ITextualInfo
+public class BooleanInfo : TextualInfo
 {
-  private bool content { get; }
-  public BooleanInfo(bool content) => this.content = content;
+  private bool Content { get; }
+  public BooleanInfo(bool content) => this.Content = content;
 
   protected override Asn1Encodable ToEncodable() =>
-    DerBoolean.GetInstance(content);
+    DerBoolean.GetInstance(Content);
 }
 public class IntegerInfo : StringTextualInfo
 {
-  public IntegerInfo(string content) => this.content = content;
-  protected override Asn1Encodable ToEncodable() => new DerInteger(new BigInteger(content));
+  public IntegerInfo(string content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerInteger(new BigInteger(Content));
 }
 
 public class Asn1NullInfo : StringTextualInfo
 {
-  public Asn1NullInfo(string content) => this.content = content;
+  public Asn1NullInfo(string content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => DerNull.Instance;
 }
