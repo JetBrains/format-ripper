@@ -19,7 +19,8 @@ data class CMSAlgorithmProtectionAttributeInfo(
         when (it) {
           is DLSequence -> AlgorithmInfo(AlgorithmIdentifier.getInstance(it))
           is DLTaggedObject -> TaggedObjectInfo(
-            TaggedObjectMetaInfo(it),
+            it.isExplicit,
+            it.tagNo,
             AlgorithmInfo(AlgorithmIdentifier.getInstance(it.baseObject))
           )
 

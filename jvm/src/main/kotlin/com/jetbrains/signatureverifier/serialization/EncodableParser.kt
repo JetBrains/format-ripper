@@ -14,7 +14,8 @@ import org.bouncycastle.operator.DefaultAlgorithmNameFinder
 fun ASN1Primitive.toEncodableInfo(): EncodableInfo = when (this) {
 
   is ASN1TaggedObject -> TaggedObjectInfo(
-    TaggedObjectMetaInfo(this),
+    isExplicit,
+    tagNo,
     this.baseObject.toASN1Primitive().toEncodableInfo()
   )
 

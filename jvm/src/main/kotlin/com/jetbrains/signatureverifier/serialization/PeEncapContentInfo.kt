@@ -31,8 +31,9 @@ data class PeEncapContentInfo(
   }
 
   override fun getContentPrimitive() =
-    TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-      TaggedObjectMetaInfo(0, 1),
+    TaggedObjectInfo.getTaggedObject(
+      true,
+      0,
       listOf(
         imageDataObjIdInfo.toPrimitive(),
         listOf(

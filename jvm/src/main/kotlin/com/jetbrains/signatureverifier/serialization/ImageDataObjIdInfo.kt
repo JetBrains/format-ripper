@@ -28,7 +28,8 @@ data class ImageDataObjIdInfo(
           val thirdLevelObject = secondLevelTaggedObject.baseObject.let { obj ->
             when (obj) {
               is DLTaggedObject -> TaggedObjectInfo(
-                TaggedObjectMetaInfo(obj),
+                obj.isExplicit,
+                obj.tagNo,
                 TextualInfo.getInstance(obj.baseObject)
               )
 
@@ -43,9 +44,11 @@ data class ImageDataObjIdInfo(
           }
 
           TaggedObjectInfo(
-            TaggedObjectMetaInfo(taggedObject),
+            taggedObject.isExplicit,
+            taggedObject.tagNo,
             TaggedObjectInfo(
-              TaggedObjectMetaInfo(secondLevelTaggedObject),
+              secondLevelTaggedObject.isExplicit,
+              secondLevelTaggedObject.tagNo,
               thirdLevelObject
             )
           )

@@ -35,8 +35,9 @@ data class SignedDataInfo(
       ASN1Integer(version),
       digestAlgorithmsInfo.toPrimitiveList().toDLSet(),
       encapContentInfo.toPrimitive(),
-      TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-        TaggedObjectMetaInfo(0, 2),
+      TaggedObjectInfo.getTaggedObject(
+        false,
+        0,
         recreateCertificatesFromStore(
           CollectionStore(certificates.map {
             it.toX509CertificateHolder()

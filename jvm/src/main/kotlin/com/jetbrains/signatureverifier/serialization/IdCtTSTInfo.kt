@@ -15,8 +15,9 @@ data class IdCtTSTInfo(
   )
 
   override fun getContentPrimitive() =
-    TaggedObjectInfo.getTaggedObjectWithMetaInfo(
-      TaggedObjectMetaInfo(0, 1),
+    TaggedObjectInfo.getTaggedObject(
+      true,
+      0,
       content.toPrimitive()
     )
 }
