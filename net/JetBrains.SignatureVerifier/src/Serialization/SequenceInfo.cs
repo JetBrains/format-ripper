@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 
 namespace JetBrains.SignatureVerifier.Serialization;
 
-public class SequenceInfo: IEncodableInfo
+[JsonObject(MemberSerialization.Fields)]
+public class SequenceInfo : IEncodableInfo
 {
   private readonly List<IEncodableInfo> _content;
 

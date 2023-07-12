@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Math;
 
@@ -53,113 +54,133 @@ public abstract class TextualInfo : IEncodableInfo
   public Asn1Encodable ToPrimitive() => ToEncodable().ToAsn1Object();
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public abstract class DateTextualInfo : TextualInfo
 {
-  protected DateTime Content { get; set; }
+  protected DateTime Content;
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class Asn1UtcTimeInfo : DateTextualInfo
 {
   public Asn1UtcTimeInfo(DateTime content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerUtcTime(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class Asn1GeneralizedTimeInfo : DateTextualInfo
 {
   public Asn1GeneralizedTimeInfo(DateTime content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerGeneralizedTime(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public abstract class HexTextualInfo : TextualInfo
 {
-  protected byte[] Content { get; set; }
+  protected byte[] Content;
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class DerUniversalStringInfo : HexTextualInfo
 {
   public DerUniversalStringInfo(byte[] content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerUniversalString(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class DerOctetStringInfo : HexTextualInfo
 {
   public DerOctetStringInfo(byte[] content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerOctetString(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class DerBitStringInfo : HexTextualInfo
 {
   public DerBitStringInfo(byte[] content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerBitString(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public abstract class StringTextualInfo : TextualInfo
 {
-  protected string Content { get; set; }
+  protected string Content;
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class DerPrintableStringInfo : StringTextualInfo
 {
   public DerPrintableStringInfo(string content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerPrintableString(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class DerUTF8StringInfo : StringTextualInfo
 {
   public DerUTF8StringInfo(string content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerUtf8String(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class DerIA5StringInfo : StringTextualInfo
 {
   public DerIA5StringInfo(string content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerIA5String(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class DerBmpStringInfo : StringTextualInfo
 {
   public DerBmpStringInfo(string content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerBmpString(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class DerVisibleStringInfo : StringTextualInfo
 {
   public DerVisibleStringInfo(string content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerVisibleString(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class DerNumericStringInfo : StringTextualInfo
 {
   public DerNumericStringInfo(string content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerNumericString(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class DerGeneralStringInfo : StringTextualInfo
 {
   public DerGeneralStringInfo(string content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerGeneralString(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class Asn1ObjectIdentifierInfo : StringTextualInfo
 {
   public Asn1ObjectIdentifierInfo(string content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerObjectIdentifier(Content);
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class BooleanInfo : TextualInfo
 {
-  private bool Content { get; }
-  public BooleanInfo(bool content) => this.Content = content;
+  private bool _content;
+  public BooleanInfo(bool content) => this._content = content;
 
   protected override Asn1Encodable ToEncodable() =>
-    DerBoolean.GetInstance(Content);
+    DerBoolean.GetInstance(_content);
 }
+
+[JsonObject(MemberSerialization.Fields)]
 public class IntegerInfo : StringTextualInfo
 {
   public IntegerInfo(string content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerInteger(new BigInteger(Content));
 }
 
+[JsonObject(MemberSerialization.Fields)]
 public class Asn1NullInfo : StringTextualInfo
 {
   public Asn1NullInfo(string content) => this.Content = content;

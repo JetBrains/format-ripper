@@ -1,13 +1,16 @@
+using System;
+using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 
 namespace JetBrains.SignatureVerifier.Serialization;
 
+[JsonObject(MemberSerialization.Fields)]
 public class TaggedObjectInfo : IEncodableInfo
 {
   private readonly bool _explicit;
   private readonly int _tagNo;
   private readonly IEncodableInfo _content;
-  
+
   public TaggedObjectInfo(bool explicitness, int tagNo, IEncodableInfo content)
   {
     _explicit = explicitness;
