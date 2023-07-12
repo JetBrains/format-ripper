@@ -42,6 +42,8 @@ public abstract class TextualInfo : IEncodableInfo
         return new BooleanInfo(boolean.IsTrue);
       case DerInteger integer:
         return new IntegerInfo(integer.ToString());
+      case DerEnumerated enumerated:
+        return new EnumeratedInfo(enumerated.Value);
       case DerNull _:
         return new Asn1NullInfo("NULL");
       default:
@@ -178,6 +180,15 @@ public class IntegerInfo : StringTextualInfo
 {
   public IntegerInfo(string content) => this.Content = content;
   protected override Asn1Encodable ToEncodable() => new DerInteger(new BigInteger(Content));
+}
+
+[JsonObject(MemberSerialization.Fields)]
+public class EnumeratedInfo : TextualInfo
+{
+  protected BigInteger Content;
+
+  public EnumeratedInfo(BigInteger content) => this.Content = content;
+  protected override Asn1Encodable ToEncodable() => new DerEnumerated(Content);
 }
 
 [JsonObject(MemberSerialization.Fields)]
