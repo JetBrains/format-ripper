@@ -212,6 +212,8 @@ class PeSignatureVerifierTests {
     private const val pe_08_signed = "dotnet.exe"
     private const val pe_09_broken_timestamp = "dotnet_broken_timestamp.exe"
 
+    private const val pe_10_signed = "JetBrains.ReSharper.TestResources.dll"
+
     @JvmStatic
     fun ComputeHashTestProvider(): Stream<Arguments> {
       return Stream.of(
@@ -241,7 +243,8 @@ class PeSignatureVerifierTests {
         Arguments.of(pe_05_signed, VerifySignatureStatus.InvalidSignature),
         Arguments.of(pe_06_signed, VerifySignatureStatus.InvalidSignature),
         Arguments.of(pe_07_signed, VerifySignatureStatus.Valid),
-        Arguments.of(pe_09_broken_timestamp, VerifySignatureStatus.InvalidTimestamp)
+        Arguments.of(pe_09_broken_timestamp, VerifySignatureStatus.InvalidTimestamp),
+        Arguments.of(pe_10_signed, VerifySignatureStatus.Valid)
       )
     }
 
@@ -250,6 +253,7 @@ class PeSignatureVerifierTests {
       return Stream.of(
         Arguments.of(pe_01_signed, VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root),
         Arguments.of(pe_07_signed, VerifySignatureStatus.Valid, jb_codesign_roots, jb_timestamp_roots),
+        Arguments.of(pe_10_signed, VerifySignatureStatus.Valid, jb_codesign_roots, jb_timestamp_roots),
         Arguments.of(pe_08_signed, VerifySignatureStatus.Valid, ms_codesign_roots, ms_timestamp_root)
       )
     }
