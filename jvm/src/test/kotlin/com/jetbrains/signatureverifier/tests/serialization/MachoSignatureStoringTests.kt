@@ -22,13 +22,15 @@ class MachoSignatureStoringTests {
   @ParameterizedTest
   @MethodSource("MachoProvider")
   fun InsertSignatureTest(signedResourceName: String, unsignedResourceName: String) {
-    Assertions.assertNotEquals(
-      Files.mismatch(
-        TestUtil.getTestDataFile("mach-o", signedResourceName),
-        TestUtil.getTestDataFile("mach-o", unsignedResourceName)
-      ),
-      -1
-    )
+    if (signedResourceName != unsignedResourceName) {
+      Assertions.assertNotEquals(
+        Files.mismatch(
+          TestUtil.getTestDataFile("mach-o", signedResourceName),
+          TestUtil.getTestDataFile("mach-o", unsignedResourceName)
+        ),
+        -1
+      )
+    }
 
     val machoArch: MachoArch
     val signedSize: Long
@@ -92,6 +94,12 @@ class MachoSignatureStoringTests {
         Arguments.of("addhoc_resigned", "addhoc"),
         Arguments.of("nosigned_resigned", "notsigned"),
         Arguments.of("fat.dylib_signed", "fat.dylib"),
+        Arguments.of("JetBrains.Profiler.PdbServer", "JetBrains.Profiler.PdbServer"),
+        Arguments.of("cat", "cat"),
+        Arguments.of("env-wrapper.x64", "env-wrapper.x64"),
+        Arguments.of("libMonoSupportW.x64.dylib", "libMonoSupportW.x64.dylib"),
+        Arguments.of("libhostfxr.dylib", "libhostfxr.dylib"),
+
       )
     }
   }
