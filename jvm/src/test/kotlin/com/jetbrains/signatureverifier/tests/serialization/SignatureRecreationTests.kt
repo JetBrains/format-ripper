@@ -214,7 +214,13 @@ class SignatureRecreationTests {
           pe_07_signed
         ),
         Arguments.of(
-          pe_08_signed, pe_08_not_signed
+          pe_08_signed
+        ),
+        Arguments.of(
+          "JetBrains.ReSharper.TestResources.dll"
+        ),
+        Arguments.of(
+          "System.Security.Principal.Windows.dll"
         ),
       )
     }

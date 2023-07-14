@@ -20,13 +20,15 @@ class PeSignatureStoringTests {
   @ParameterizedTest
   @MethodSource("InsertSignatureTestProvider")
   fun InsertSignatureTest(signedPeResourceName: String, unsignedPeResourceName: String) {
-    Assertions.assertNotEquals(
-      Files.mismatch(
-        TestUtil.getTestDataFile("pe", signedPeResourceName),
-        TestUtil.getTestDataFile("pe", unsignedPeResourceName)
-      ),
-      -1
-    )
+    if (signedPeResourceName != unsignedPeResourceName) {
+      Assertions.assertNotEquals(
+        Files.mismatch(
+          TestUtil.getTestDataFile("pe", signedPeResourceName),
+          TestUtil.getTestDataFile("pe", unsignedPeResourceName)
+        ),
+        -1
+      )
+    }
 
     val peFileMetaInfo: PeFileMetaInfo
     val signature: ByteArray
@@ -115,6 +117,11 @@ class PeSignatureStoringTests {
         ),
         Arguments.of(
           pe_08_signed, pe_08_not_signed
+        ),
+        Arguments.of(
+          "JetBrains.ReSharper.TestResources.dll", "JetBrains.ReSharper.TestResources.dll"
+        ),Arguments.of(
+          "System.Security.Principal.Windows.dll", "System.Security.Principal.Windows.dll"
         ),
       )
     }

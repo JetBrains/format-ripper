@@ -179,6 +179,9 @@ class SignerInformationSerializationTests {
         Arguments.of(
           pe_08_signed, pe_08_not_signed
         ),
+        Arguments.of(
+          "JetBrains.ReSharper.TestResources.dll"
+        ),
       )
     }
   }
