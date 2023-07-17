@@ -1,27 +1,22 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using JetBrains.SignatureVerifier.Crypt.BC.Compat;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.CryptoPro;
 using Org.BouncyCastle.Asn1.Nist;
 using Org.BouncyCastle.Asn1.Oiw;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Asn1.TeleTrust;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Cms;
-
 
 namespace JetBrains.Serialization;
 
 public static class AsnExtensions
 {
-  public static List<Asn1Encodable> ToPrimitiveList(this List<IEncodableInfo> source) =>
-    source.Select(item => item.ToPrimitive()).ToList();
+  public static List<Asn1Encodable?> ToPrimitiveList(this List<IEncodableInfo?> source) =>
+    source.Select(item => item?.ToPrimitive()).ToList();
 
-  public static DerSequence ToDlSequence(this List<Asn1Encodable> source)
+  public static DerSequence ToDlSequence(this List<Asn1Encodable?> source)
   {
     Asn1EncodableVector vector = new Asn1EncodableVector();
     vector.Add(source.Where(item => item != null).ToArray());
@@ -29,7 +24,7 @@ public static class AsnExtensions
     return new DerSequence(vector);
   }
 
-  public static DerSet ToDlSet(this List<Asn1Encodable> source)
+  public static DerSet ToDlSet(this List<Asn1Encodable?> source)
   {
     Asn1EncodableVector vector = new Asn1EncodableVector();
     vector.Add(source.Where(item => item != null).ToArray());
