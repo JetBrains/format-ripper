@@ -185,10 +185,10 @@ public class IntegerInfo : StringTextualInfo
 [JsonObject(MemberSerialization.Fields)]
 public class EnumeratedInfo : TextualInfo
 {
-  protected BigInteger Content;
+  protected string Content;
 
-  public EnumeratedInfo(BigInteger content) => this.Content = content;
-  protected override Asn1Encodable ToEncodable() => new DerEnumerated(Content);
+  public EnumeratedInfo(BigInteger content) => this.Content = content.ToString();
+  protected override Asn1Encodable ToEncodable() => new DerEnumerated(new BigInteger(Content));
 }
 
 [JsonObject(MemberSerialization.Fields)]
