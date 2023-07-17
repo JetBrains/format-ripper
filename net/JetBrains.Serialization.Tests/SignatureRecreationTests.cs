@@ -1,51 +1,120 @@
+using JetBrains.FormatRipper.Compound;
+using JetBrains.FormatRipper.MachO;
 using JetBrains.FormatRipper.Pe;
 using JetBrains.SignatureVerifier.Crypt;
-using JetBrains.SignatureVerifier.Serialization;
+using JetBrains.SignatureVerifier.Crypt.BC;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using Org.BouncyCastle.Asn1.Cms;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.Pkcs;
+using ContentInfo = Org.BouncyCastle.Asn1.Cms.ContentInfo;
+using SignedData = Org.BouncyCastle.Asn1.Cms.SignedData;
 
 namespace JetBrains.Serialization.Tests;
 
 public class SignatureRecreationTests
 {
   // @formatter:off
-  [TestCase(VerifySignatureStatus.Valid           , "ServiceModelRegUI.dll")]
-  [TestCase(VerifySignatureStatus.InvalidSignature, "ServiceModelRegUI_broken_hash.dll")]
-  [TestCase(VerifySignatureStatus.InvalidSignature, "ServiceModelRegUI_broken_sign.dll")]
-  [TestCase(VerifySignatureStatus.InvalidSignature, "ServiceModelRegUI_broken_counter_sign.dll")]
-  [TestCase(VerifySignatureStatus.InvalidSignature, "ServiceModelRegUI_broken_nested_sign.dll")]
-  [TestCase(VerifySignatureStatus.InvalidTimestamp, "ServiceModelRegUI_broken_nested_sign_timestamp.dll")]
-  [TestCase(VerifySignatureStatus.Valid           , "shell32.dll")]
-  [TestCase(VerifySignatureStatus.Valid           , "IntelAudioService.exe")]
-  [TestCase(VerifySignatureStatus.InvalidSignature, "libcrypto-1_1-x64.dll")]
-  [TestCase(VerifySignatureStatus.InvalidSignature, "libssl-1_1-x64.dll")]
-  [TestCase(VerifySignatureStatus.Valid           , "JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe")]
-  [TestCase(VerifySignatureStatus.Valid           , "JetBrains.ReSharper.TestResources.dll")]
-  [TestCase(VerifySignatureStatus.InvalidTimestamp, "dotnet_broken_timestamp.exe")]
+  [TestCase("ServiceModelRegUI.dll")]
+  [TestCase("ServiceModelRegUI_broken_hash.dll")]
+  [TestCase("ServiceModelRegUI_broken_sign.dll")]
+  [TestCase("ServiceModelRegUI_broken_counter_sign.dll")]
+  [TestCase("ServiceModelRegUI_broken_nested_sign.dll")]
+  [TestCase("ServiceModelRegUI_broken_nested_sign_timestamp.dll")]
+  [TestCase("shell32.dll")]
+  [TestCase("IntelAudioService.exe")]
+  [TestCase("libcrypto-1_1-x64.dll")]
+  [TestCase("libssl-1_1-x64.dll")]
+  [TestCase("JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe")]
+  [TestCase("JetBrains.ReSharper.TestResources.dll")]
+  [TestCase("dotnet_broken_timestamp.exe")]
   // @formatter:on
-  public Task PeVerifySignTest(VerifySignatureStatus expectedResult, string peResourceName)
+  public Task PeVerifySignTest(string resourceName)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName,
+    var file = ResourceUtil.OpenRead(ResourceCategory.Pe, resourceName,
       stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
     var signedMessage = SignedMessage.CreateInstance(file.SignatureData);
     var originalContentInfo = signedMessage.SignedData.ContentInfo;
-    VerifySignTest(originalContentInfo);
+    VerifySignTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
 
     return Task.CompletedTask;
   }
 
-  public void VerifySignTest(ContentInfo originalContentInfo, string encoding = "DER")
+  // @formatter:off
+  [TestCase("2dac4b.msi")]
+  [TestCase("2dac4b_broken_hash.msi")]
+  [TestCase("2dac4b_broken_sign.msi")]
+  [TestCase("2dac4b_broken_timestamp.msi")]
+  // @formatter:on
+  public Task MsiVerifySignTest(string resourceName)
   {
-    var encodable = originalContentInfo.ToAsn1Object().ToEncodableInfo();
+    var file = ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
+    {
+      Assert.IsTrue(CompoundFile.Is(stream));
+      return CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData);
+    });
+
+    var signedMessage = SignedMessage.CreateInstance(file.SignatureData);
+    var originalContentInfo = signedMessage.SignedData.ContentInfo;
+    VerifySignTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
+
+    return Task.CompletedTask;
+  }
+
+  private static MachOFile GetMachOFile(string resourceName) =>
+    ResourceUtil.OpenRead(ResourceCategory.MachO, resourceName,
+      stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData));
+
+  // @formatter:off
+  [TestCase("JetBrains.Profiler.PdbServer")]
+  [TestCase("cat")]
+  [TestCase("env-wrapper.x64")]
+  [TestCase("libMonoSupportW.x64.dylib")]
+  [TestCase("libhostfxr.dylib")]
+  // @formatter:on
+  [Ignore("For now there is a problem with order of some sequence elements")]
+  public Task MachOVerifySignTest(string resourceName)
+  {
+    foreach (var section in GetMachOFile(resourceName).Sections)
+    {
+      var signedMessage = SignedMessage.CreateInstance(section.SignatureData);
+
+      VerifySignTest(signedMessage.SignedData, section.SignatureData.CmsBlob!, "BER");
+    }
+
+    return Task.CompletedTask;
+  }
+
+  public ContentInfo SignedDataToContentInfo(SignedData signedData, string encoding = "BER")
+  {
+    byte[] signedDataBytes = signedData.GetEncoded(encoding);
+
+    Asn1InputStream inputStream = new Asn1InputStream(signedDataBytes);
+    Asn1Object asn1Object = inputStream.ReadObject();
+
+    return new ContentInfo(PkcsObjectIdentifiers.SignedData, asn1Object);
+  }
+
+  public void VerifySignTest(CmsSignedData signedData, byte[] originalSignature, string encoding = "DER")
+  {
+    var innerSignedData = signedData.SignedData;
+    var signedDataInfo = innerSignedData.ToAsn1Object().ToEncodableInfo();
+
     var settings = new JsonSerializerSettings
     {
       TypeNameHandling = TypeNameHandling.Auto
     };
-    var json = JsonConvert.SerializeObject(encodable, settings);
+    var json = JsonConvert.SerializeObject(signedDataInfo, settings);
     var recreated = JsonConvert.DeserializeObject<SequenceInfo>(json, settings);
 
-    Assert.That(originalContentInfo.GetEncoded(encoding).SequenceEqual(recreated.ToPrimitive().GetEncoded(encoding)));
+    var copy = SignedData.GetInstance(recreated.ToPrimitive());
+    Assert.That(innerSignedData.GetEncoded("DER").SequenceEqual(copy.GetEncoded("DER")));
+
+    var recreatedInfo = SignedDataToContentInfo(copy);
+    Assert.That(signedData.ContentInfo.GetEncoded(encoding).SequenceEqual(recreatedInfo.GetEncoded(encoding)));
+
+    var cropped = new ArraySegment<byte>(originalSignature, 0, recreatedInfo.GetEncoded(encoding).Length);
+    Assert.That(cropped.ToArray().SequenceEqual(recreatedInfo.GetEncoded(encoding)));
   }
 }

@@ -9,28 +9,28 @@ using Org.BouncyCastle.X509.Store;
 namespace JetBrains.SignatureVerifier.Crypt.BC
 {
   /**
-	* general class for handling a pkcs7-signature message.
-	*
-	* A simple example of usage - note, in the example below the validity of
-	* the certificate isn't verified, just the fact that one of the certs
-	* matches the given signer...
-	*
-	* <pre>
-	*  IX509Store              certs = s.GetCertificates();
-	*  SignerInformationStore  signers = s.GetSignerInfos();
-	*
-	*  foreach (SignerInformation signer in signers.GetSigners())
-	*  {
-	*      ArrayList       certList = new ArrayList(certs.GetMatches(signer.SignerID));
-	*      X509Certificate cert = (X509Certificate) certList[0];
-	*
-	*      if (signer.Verify(cert.GetPublicKey()))
-	*      {
-	*          verified++;
-	*      }
-	*  }
-	* </pre>
-	*/
+  * general class for handling a pkcs7-signature message.
+  *
+  * A simple example of usage - note, in the example below the validity of
+  * the certificate isn't verified, just the fact that one of the certs
+  * matches the given signer...
+  *
+  * <pre>
+  *  IX509Store              certs = s.GetCertificates();
+  *  SignerInformationStore  signers = s.GetSignerInfos();
+  *
+  *  foreach (SignerInformation signer in signers.GetSigners())
+  *  {
+  *      ArrayList       certList = new ArrayList(certs.GetMatches(signer.SignerID));
+  *      X509Certificate cert = (X509Certificate) certList[0];
+  *
+  *      if (signer.Verify(cert.GetPublicKey()))
+  *      {
+  *          verified++;
+  *      }
+  *  }
+  * </pre>
+  */
   public class CmsSignedData
   {
     private static readonly CmsSignedHelper Helper = CmsSignedHelper.Instance;
@@ -114,9 +114,9 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
     }
 
     /**
-		* return the collection of signers that are associated with the
-		* signatures for the message.
-		*/
+    * return the collection of signers that are associated with the
+    * signatures for the message.
+    */
     public SignerInformationStore GetSignerInfos()
     {
       if (signerInfoStore == null)
@@ -148,14 +148,14 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
     }
 
     /**
-		 * return a X509Store containing the attribute certificates, if any, contained
-		 * in this message.
-		 *
-		 * @param type type of store to create
-		 * @return a store of attribute certificates
-		 * @exception NoSuchStoreException if the store type isn't available.
-		 * @exception CmsException if a general exception prevents creation of the X509Store
-		 */
+     * return a X509Store containing the attribute certificates, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @return a store of attribute certificates
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CmsException if a general exception prevents creation of the X509Store
+     */
     public IX509Store GetAttributeCertificates(
       string type)
     {
@@ -168,14 +168,14 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
     }
 
     /**
-		 * return a X509Store containing the public key certificates, if any, contained
-		 * in this message.
-		 *
-		 * @param type type of store to create
-		 * @return a store of public key certificates
-		 * @exception NoSuchStoreException if the store type isn't available.
-		 * @exception CmsException if a general exception prevents creation of the X509Store
-		 */
+     * return a X509Store containing the public key certificates, if any, contained
+     * in this message.
+     *
+     * @param type type of store to create
+     * @return a store of public key certificates
+     * @exception NoSuchStoreException if the store type isn't available.
+     * @exception CmsException if a general exception prevents creation of the X509Store
+     */
     public IX509Store GetCertificates(
       string type)
     {
@@ -188,14 +188,14 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
     }
 
     /**
-		* return a X509Store containing CRLs, if any, contained
-		* in this message.
-		*
-		* @param type type of store to create
-		* @return a store of CRLs
-		* @exception NoSuchStoreException if the store type isn't available.
-		* @exception CmsException if a general exception prevents creation of the X509Store
-		*/
+    * return a X509Store containing CRLs, if any, contained
+    * in this message.
+    *
+    * @param type type of store to create
+    * @return a store of CRLs
+    * @exception NoSuchStoreException if the store type isn't available.
+    * @exception CmsException if a general exception prevents creation of the X509Store
+    */
     public IX509Store GetCrls(
       string type)
     {
@@ -227,17 +227,22 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
       get { return signedContent; }
     }
 
+    public SignedData SignedData
+    {
+      get { return signedData; }
+    }
+
     /**
-		 * return the ContentInfo
-		 */
+     * return the ContentInfo
+     */
     public ContentInfo ContentInfo
     {
       get { return contentInfo; }
     }
 
     /**
-		* return the ASN.1 encoded representation of this object.
-		*/
+    * return the ASN.1 encoded representation of this object.
+    */
     public byte[] GetEncoded()
     {
       return contentInfo.GetEncoded();
@@ -254,15 +259,15 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
     }
 
     /**
-		* Replace the signerinformation store associated with this
-		* CmsSignedData object with the new one passed in. You would
-		* probably only want to do this if you wanted to change the unsigned
-		* attributes associated with a signer, or perhaps delete one.
-		*
-		* @param signedData the signed data object to be used as a base.
-		* @param signerInformationStore the new signer information store to use.
-		* @return a new signed data object.
-		*/
+    * Replace the signerinformation store associated with this
+    * CmsSignedData object with the new one passed in. You would
+    * probably only want to do this if you wanted to change the unsigned
+    * attributes associated with a signer, or perhaps delete one.
+    *
+    * @param signedData the signed data object to be used as a base.
+    * @param signerInformationStore the new signer information store to use.
+    * @return a new signed data object.
+    */
     public static CmsSignedData ReplaceSigners(
       CmsSignedData signedData,
       SignerInformationStore signerInformationStore)
