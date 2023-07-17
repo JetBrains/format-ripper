@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using JetBrains.SignatureVerifier.Crypt.BC;
@@ -6,6 +7,23 @@ using Org.BouncyCastle.X509.Store;
 
 namespace JetBrains.SignatureVerifier.Crypt
 {
+  public static class Extension
+  {
+    public static string ToHexString(this byte[] bytes)
+    {
+      var hexChars = "0123456789ABCDEF";
+      var result = new StringBuilder(bytes.Length * 2);
+
+      foreach (var b in bytes)
+      {
+        var value = b & 0xFF;
+        result.Append(hexChars[value >> 4]);
+        result.Append(hexChars[value & 0x0F]);
+      }
+
+      return result.ToString();
+    }
+  }
   public class SignedMessageVerifier
   {
     private readonly CrlProvider _crlProvider;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using JetBrains.FormatRipper.MachO;
@@ -9,6 +10,24 @@ using NUnit.Framework;
 
 namespace JetBrains.SignatureVerifier.Tests
 {
+  public static class Extension
+  {
+    public static string ToHexString(this byte[] bytes)
+    {
+      var hexChars = "0123456789ABCDEF";
+      var result = new StringBuilder(bytes.Length * 2);
+
+      foreach (var b in bytes)
+      {
+        var value = b & 0xFF;
+        result.Append(hexChars[value >> 4]);
+        result.Append(hexChars[value & 0x0F]);
+      }
+
+      return result.ToString();
+    }
+  }
+
   [SuppressMessage("ReSharper", "InconsistentNaming")]
   public class MachOSignatureVerifierTests
   {
@@ -44,6 +63,7 @@ namespace JetBrains.SignatureVerifier.Tests
           .WithMessage("Invalid signature format");
       }
     }
+
 
     [TestCase(VerifySignatureStatus.Valid, apple_root, "JetBrains.Profiler.PdbServer")]
     [TestCase(VerifySignatureStatus.Valid, apple_root, "cat")]
