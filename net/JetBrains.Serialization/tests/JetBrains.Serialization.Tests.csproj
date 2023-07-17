@@ -15,12 +15,12 @@
         <PackageReference Include="NUnit3TestAdapter" Version="4.4.2"/>
         <PackageReference Include="NUnit.Analyzers" Version="3.6.1"/>
         <PackageReference Include="coverlet.collector" Version="3.2.0"/>
-        <ProjectReference Include="..\JetBrains.Serialization\JetBrains.Serialization.csproj" />
+        <ProjectReference Include="..\src\JetBrains.Serialization.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="..\..\data\mach-o\*" LinkBase="Resources\MachO" />
-        <EmbeddedResource Include="..\..\data\msi\*" LinkBase="Resources\Msi" />
-        <EmbeddedResource Include="..\..\data\pe\*" LinkBase="Resources\Pe" />
+        <EmbeddedResource Include="..\..\..\data\mach-o\*" LinkBase="Resources\MachO" />
+        <EmbeddedResource Include="..\..\..\data\msi\*" LinkBase="Resources\Msi" />
+        <EmbeddedResource Include="..\..\..\data\pe\*" LinkBase="Resources\Pe" />
     </ItemGroup>
 </Project>

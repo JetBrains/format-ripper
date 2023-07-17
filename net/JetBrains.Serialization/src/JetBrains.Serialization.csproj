@@ -9,7 +9,7 @@
 
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <ProjectReference Include="..\JetBrains.SignatureVerifier\src\JetBrains.SignatureVerifier.csproj" />
+      <ProjectReference Include="..\..\JetBrains.SignatureVerifier\src\JetBrains.SignatureVerifier.csproj" />
     </ItemGroup>
 
 
