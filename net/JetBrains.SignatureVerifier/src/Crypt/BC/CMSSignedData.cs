@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using JetBrains.SignatureVerifier.Crypt.BC.Compat;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
+using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.X509.Store;
 
@@ -320,6 +322,16 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
       cms.contentInfo = new ContentInfo(cms.contentInfo.ContentType, cms.signedData);
 
       return cms;
+    }
+    public HashSet<AlgorithmIdentifier> DigestAlgorithmIdentifiers()
+    {
+      HashSet<AlgorithmIdentifier> digestAlgorithmIDs = new HashSet<AlgorithmIdentifier>();
+      foreach (var algorithm in signedData.DigestAlgorithms)
+      {
+        digestAlgorithmIDs.Add(AlgorithmIdentifier.GetInstance(algorithm));
+      }
+
+      return digestAlgorithmIDs;
     }
   }
 }
