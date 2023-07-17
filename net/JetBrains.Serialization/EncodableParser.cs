@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Org.BouncyCastle.Asn1;
 
-namespace JetBrains.SignatureVerifier.Serialization;
+namespace JetBrains.Serialization;
 
 public static class EncodableParser
 {

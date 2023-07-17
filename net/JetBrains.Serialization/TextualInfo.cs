@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Math;
 
-namespace JetBrains.SignatureVerifier.Serialization;
+namespace JetBrains.Serialization;
 
 public abstract class TextualInfo : IEncodableInfo
 {

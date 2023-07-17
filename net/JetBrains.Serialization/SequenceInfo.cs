@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 
-namespace JetBrains.SignatureVerifier.Serialization;
+namespace JetBrains.Serialization;
 
 [JsonObject(MemberSerialization.Fields)]
 public class SequenceInfo : IEncodableInfo
