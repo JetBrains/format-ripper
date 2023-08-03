@@ -17,6 +17,6 @@ public class SequenceInfo : IEncodableInfo
 
   public Asn1Encodable ToPrimitive()
   {
-    return _content.ToPrimitiveList().ToDlSequence();
+    return _content.ToPrimitiveList().ToDerSequence();
   }
 }

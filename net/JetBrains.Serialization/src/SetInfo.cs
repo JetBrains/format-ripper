@@ -18,6 +18,6 @@ public class SetInfo : IEncodableInfo
 
   public Asn1Encodable ToPrimitive()
   {
-    return _content.ToPrimitiveList().ToDlSet();
+    return _content.ToPrimitiveList().ToDerSet();
   }
 }
