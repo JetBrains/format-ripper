@@ -1,8 +1,10 @@
+using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 
 namespace JetBrains.Serialization;
 
+[JsonObject(MemberSerialization.Fields)]
 public class PublicKeyInfrastructureAttributeInfo : AttributeInfo
 {
   public override TextualInfo Identifier { get; }

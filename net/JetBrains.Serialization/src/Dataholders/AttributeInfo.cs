@@ -40,8 +40,8 @@ public abstract class AttributeInfo : IEncodableInfo
       //   return new MsCounterSignAttributeInfo(attribute);
       // case "1.2.840.113549.1.9.52":
       //   return new CMSAlgorithmProtectionAttributeInfo(attribute);
-      // case "1.2.840.113549.1.9.16.2.47":
-      //   return new V2CertificateAttributeInfo(attribute);
+      case "1.2.840.113549.1.9.16.2.47":
+        return new V2CertificateAttributeInfo(attribute);
       case "1.2.840.113549.1.9.16.2.12":
         return new PublicKeyInfrastructureAttributeInfo(attribute);
       case "1.2.840.113549.1.9.16.2.14":
