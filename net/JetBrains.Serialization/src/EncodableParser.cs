@@ -3,6 +3,7 @@ using System.Linq;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Asn1.X509;
+using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 
 namespace JetBrains.Serialization;
 
@@ -23,6 +24,8 @@ public static class EncodableParser
       {
         if (TryAlgorithmInfo(sequence) is { } algorithmInfo) return algorithmInfo;
         if (TryEncapContentInfo(sequence) is { } encapContentInfo) return encapContentInfo;
+        if (TryCertificateInfo(sequence) is { } certificateInfo) return certificateInfo;
+        if (TryAttributeInfo(sequence) is { } attributeInfo) return attributeInfo;
 
         return new SequenceInfo(sequence
           .ToArray()
@@ -56,6 +59,30 @@ public static class EncodableParser
     try
     {
       return EncapContentInfo.GetInstance(ContentInfo.GetInstance(sequence));
+    }
+    catch (Exception)
+    {
+      return null;
+    }
+  }
+
+  private static AttributeInfo? TryAttributeInfo(Asn1Sequence sequence)
+  {
+    try
+    {
+      return AttributeInfo.GetInstance(Attribute.GetInstance(sequence));
+    }
+    catch (Exception)
+    {
+      return null;
+    }
+  }
+
+  private static IEncodableInfo? TryCertificateInfo(Asn1Sequence sequence)
+  {
+    try
+    {
+      return CertificateInfo.GetInstance(sequence.ToAsn1Object());
     }
     catch (Exception)
     {
