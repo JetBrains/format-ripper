@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Asn1.X509;
 
 namespace JetBrains.Serialization;
@@ -21,7 +22,8 @@ public static class EncodableParser
       case Asn1Sequence sequence:
       {
         if (TryAlgorithmInfo(sequence) is { } algorithmInfo) return algorithmInfo;
-        
+        if (TryEncapContentInfo(sequence) is { } encapContentInfo) return encapContentInfo;
+
         return new SequenceInfo(sequence
           .ToArray()
           .Select(item => item.ToAsn1Object().ToEncodableInfo())
@@ -46,6 +48,18 @@ public static class EncodableParser
           Console.WriteLine(e);
           throw;
         }
+    }
+  }
+
+  private static EncapContentInfo? TryEncapContentInfo(Asn1Sequence sequence)
+  {
+    try
+    {
+      return EncapContentInfo.GetInstance(ContentInfo.GetInstance(sequence));
+    }
+    catch (Exception)
+    {
+      return null;
     }
   }
 
