@@ -1,6 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.CryptoPro;
@@ -16,7 +14,7 @@ public static class AsnExtensions
   public static List<Asn1Encodable?> ToPrimitiveList(this List<IEncodableInfo?> source) =>
     source.Select(item => item?.ToPrimitive()).ToList();
 
-  public static DerSequence ToDlSequence(this List<Asn1Encodable?> source)
+  public static DerSequence ToDerSequence(this List<Asn1Encodable?> source)
   {
     Asn1EncodableVector vector = new Asn1EncodableVector();
     vector.Add(source.Where(item => item != null).ToArray());
@@ -24,12 +22,16 @@ public static class AsnExtensions
     return new DerSequence(vector);
   }
 
-  public static DerSet ToDlSet(this List<Asn1Encodable?> source)
+  /*
+   * This is a HACK to create DerSet with the exact order of elements, we provide.
+   * We need this, because sorting seems to work wrong with BER encoding (mach-O files).
+   */
+  public static DerSet ToDerSet(this List<Asn1Encodable?> source)
   {
-    Asn1EncodableVector vector = new Asn1EncodableVector();
-    vector.Add(source.Where(item => item != null).ToArray());
+    var sequence = source.ToDerSequence();
+    var tagged = new DerTaggedObject(false , 0, sequence);
 
-    return new DerSet(vector);
+    return (DerSet) Asn1Set.GetInstance(tagged, false);
   }
 
   public static string ToHexString(this byte[] bytes)
