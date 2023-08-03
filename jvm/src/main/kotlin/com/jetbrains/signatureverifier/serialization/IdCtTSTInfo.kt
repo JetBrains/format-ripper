@@ -14,10 +14,5 @@ data class IdCtTSTInfo(
     TextualInfo.getInstance(contentInfo.content)
   )
 
-  override fun getContentPrimitive() =
-    TaggedObjectInfo.getTaggedObject(
-      true,
-      0,
-      content.toPrimitive()
-    )
+  override fun getContentPrimitive() = content.toPrimitive()
 }

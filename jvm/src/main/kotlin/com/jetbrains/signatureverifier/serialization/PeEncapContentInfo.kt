@@ -7,39 +7,35 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier
 
 @Serializable
 data class PeEncapContentInfo(
-  override val contentType: TextualInfo,
-  val imageDataObjIdInfo: ImageDataObjIdInfo,
-  val hashAlgorithmInfo: AlgorithmInfo,
-  val contentHash: TextualInfo
+    override val contentType: TextualInfo,
+    val imageDataObjIdInfo: ImageDataObjIdInfo,
+    val hashAlgorithmInfo: AlgorithmInfo,
+    val contentHash: TextualInfo
 ) : EncapContentInfo() {
-  companion object {
-    fun getInstance(contentInfo: ContentInfo): PeEncapContentInfo =
-      (contentInfo.content as DLSequence).let { contentSequence ->
-        (contentSequence.getObjectAt(1) as DLSequence).let { algorithmSequence ->
-          PeEncapContentInfo(
-            TextualInfo.getInstance(contentInfo.contentType),
-            ImageDataObjIdInfo.getInstance(contentSequence.first() as DLSequence),
-            AlgorithmInfo(
-              (AlgorithmIdentifier.getInstance(
-                algorithmSequence.first()
-              ))
-            ),
-            TextualInfo.getInstance(algorithmSequence.getObjectAt(1))
-          )
-        }
-      }
-  }
+    companion object {
+        fun getInstance(contentInfo: ContentInfo): PeEncapContentInfo =
+            (contentInfo.content as DLSequence).let { contentSequence ->
+                (contentSequence.getObjectAt(1) as DLSequence).let { algorithmSequence ->
+                    PeEncapContentInfo(
+                        TextualInfo.getInstance(contentInfo.contentType),
+                        ImageDataObjIdInfo.getInstance(contentSequence.first() as DLSequence),
+                        AlgorithmInfo(
+                            (AlgorithmIdentifier.getInstance(
+                                algorithmSequence.first()
+                            ))
+                        ),
+                        TextualInfo.getInstance(algorithmSequence.getObjectAt(1))
+                    )
+                }
+            }
+    }
 
-  override fun getContentPrimitive() =
-    TaggedObjectInfo.getTaggedObject(
-      true,
-      0,
-      listOf(
-        imageDataObjIdInfo.toPrimitive(),
+    override fun getContentPrimitive() =
         listOf(
-          hashAlgorithmInfo.toPrimitive(),
-          contentHash.toPrimitive()
+            imageDataObjIdInfo.toPrimitive(),
+            listOf(
+                hashAlgorithmInfo.toPrimitive(),
+                contentHash.toPrimitive()
+            ).toDLSequence()
         ).toDLSequence()
-      ).toDLSequence()
-    )
 }

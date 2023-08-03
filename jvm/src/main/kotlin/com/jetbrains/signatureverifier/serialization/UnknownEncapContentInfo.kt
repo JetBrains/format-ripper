@@ -5,14 +5,14 @@ import org.bouncycastle.asn1.cms.ContentInfo
 
 @Serializable
 data class UnknownEncapContentInfo(
-  override val contentType: TextualInfo,
-  val content: EncodableInfo?
+    override val contentType: TextualInfo,
+    val content: EncodableInfo?
 ) : EncapContentInfo() {
 
-  constructor(contentInfo: ContentInfo) : this(
-    TextualInfo.getInstance(contentInfo.contentType),
-    contentInfo.content?.toASN1Primitive()?.toEncodableInfo()
-  )
+    constructor(contentInfo: ContentInfo) : this(
+        TextualInfo.getInstance(contentInfo.contentType),
+        contentInfo.content?.toASN1Primitive()?.toEncodableInfo()
+    )
 
-  override fun getContentPrimitive() = content?.toPrimitive()
+    override fun getContentPrimitive() = content?.toPrimitive()
 }
