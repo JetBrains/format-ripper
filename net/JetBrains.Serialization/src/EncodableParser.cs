@@ -23,6 +23,7 @@ public static class EncodableParser
       {
         if (TryAlgorithmInfo(sequence) is { } algorithmInfo) return algorithmInfo;
         if (TryEncapContentInfo(sequence) is { } encapContentInfo) return encapContentInfo;
+        if (TryCertificateInfo(sequence) is { } certificateInfo) return certificateInfo;
 
         return new SequenceInfo(sequence
           .ToArray()
@@ -56,6 +57,18 @@ public static class EncodableParser
     try
     {
       return EncapContentInfo.GetInstance(ContentInfo.GetInstance(sequence));
+    }
+    catch (Exception)
+    {
+      return null;
+    }
+  }
+
+  private static IEncodableInfo? TryCertificateInfo(Asn1Sequence sequence)
+  {
+    try
+    {
+      return CertificateInfo.GetInstance(sequence.ToAsn1Object());
     }
     catch (Exception)
     {
