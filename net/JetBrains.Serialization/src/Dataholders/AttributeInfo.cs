@@ -38,8 +38,8 @@ public abstract class AttributeInfo : IEncodableInfo
       //   return new AppleDeveloperCertificateAttribute(attribute);
       // case "1.3.6.1.4.1.311.3.3.1":
       //   return new MsCounterSignAttributeInfo(attribute);
-      // case "1.2.840.113549.1.9.52":
-      //   return new CMSAlgorithmProtectionAttributeInfo(attribute);
+      case "1.2.840.113549.1.9.52":
+        return new CMSAlgorithmProtectionAttributeInfo(attribute);
       case "1.2.840.113549.1.9.16.2.47":
         return new V2CertificateAttributeInfo(attribute);
       case "1.2.840.113549.1.9.16.2.12":
