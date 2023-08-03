@@ -8,15 +8,15 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.Fields)]
 public class SequenceInfo : IEncodableInfo
 {
-  private readonly List<IEncodableInfo> _content;
+  public readonly List<IEncodableInfo> Content;
 
   public SequenceInfo(List<IEncodableInfo> content)
   {
-    _content = content;
+    Content = content;
   }
 
   public Asn1Encodable ToPrimitive()
   {
-    return _content.ToPrimitiveList().ToDerSequence();
+    return Content.ToPrimitiveList().ToDerSequence();
   }
 }

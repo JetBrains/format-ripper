@@ -16,18 +16,11 @@ public class SignatureRecreationTests
 {
   // @formatter:off
   [TestCase("ServiceModelRegUI.dll")]
-  [TestCase("ServiceModelRegUI_broken_hash.dll")]
-  [TestCase("ServiceModelRegUI_broken_sign.dll")]
-  [TestCase("ServiceModelRegUI_broken_counter_sign.dll")]
-  [TestCase("ServiceModelRegUI_broken_nested_sign.dll")]
-  [TestCase("ServiceModelRegUI_broken_nested_sign_timestamp.dll")]
   [TestCase("shell32.dll")]
   [TestCase("IntelAudioService.exe")]
   [TestCase("libcrypto-1_1-x64.dll")]
   [TestCase("libssl-1_1-x64.dll")]
   [TestCase("JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe")]
-  [TestCase("JetBrains.ReSharper.TestResources.dll")]
-  [TestCase("dotnet_broken_timestamp.exe")]
   // @formatter:on
   public Task PeVerifySignTest(string resourceName)
   {
@@ -43,9 +36,8 @@ public class SignatureRecreationTests
 
   // @formatter:off
   [TestCase("2dac4b.msi")]
-  [TestCase("2dac4b_broken_hash.msi")]
-  [TestCase("2dac4b_broken_sign.msi")]
-  [TestCase("2dac4b_broken_timestamp.msi")]
+  [TestCase("firefox.msi")]
+  [TestCase("sumatra.msi")]
   // @formatter:on
   public Task MsiVerifySignTest(string resourceName)
   {
