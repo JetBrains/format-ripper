@@ -73,7 +73,6 @@ public class SignatureRecreationTests
   [TestCase("libMonoSupportW.x64.dylib")]
   [TestCase("libhostfxr.dylib")]
   // @formatter:on
-  [Ignore("For now there is a problem with order of some sequence elements")]
   public Task MachOVerifySignTest(string resourceName)
   {
     foreach (var section in GetMachOFile(resourceName).Sections)
