@@ -44,8 +44,8 @@ public abstract class AttributeInfo : IEncodableInfo
       //   return new V2CertificateAttributeInfo(attribute);
       // case "1.2.840.113549.1.9.16.2.12":
       //   return new PublicKeyInfrastructureAttributeInfo(attribute);
-      // case "1.2.840.113549.1.9.16.2.14":
-        // return new SignatureTimeStampAttributeInfo(attribute);
+      case "1.2.840.113549.1.9.16.2.14":
+        return new SignatureTimeStampAttributeInfo(attribute);
       case "1.3.6.1.4.1.311.2.4.1":
         return new MSSpcNestedSignatureInfo(attribute);
       default:
