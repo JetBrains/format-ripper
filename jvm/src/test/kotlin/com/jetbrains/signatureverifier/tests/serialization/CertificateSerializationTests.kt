@@ -5,10 +5,10 @@ import com.jetbrains.signatureverifier.cf.MsiFile
 import com.jetbrains.signatureverifier.crypt.SignatureVerificationParams
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.macho.MachoArch
-import com.jetbrains.signatureverifier.serialization.CertificateInfo
+import com.jetbrains.signatureverifier.serialization.dataholders.CertificateInfo
 import com.jetbrains.signatureverifier.serialization.compareBytes
-import com.jetbrains.signatureverifier.serialization.getTestByteChannel
-import com.jetbrains.signatureverifier.serialization.recreateCertificatesFromStore
+import com.jetbrains.signatureverifier.serialization.fileInfos.getTestByteChannel
+import com.jetbrains.signatureverifier.serialization.dataholders.recreateCertificatesFromStore
 import com.jetbrains.util.TestUtil
 import org.bouncycastle.util.CollectionStore
 import org.junit.jupiter.api.Assertions

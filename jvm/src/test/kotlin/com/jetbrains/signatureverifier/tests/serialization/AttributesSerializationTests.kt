@@ -5,9 +5,9 @@ import com.jetbrains.signatureverifier.cf.MsiFile
 import com.jetbrains.signatureverifier.crypt.SignatureVerificationParams
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.macho.MachoArch
-import com.jetbrains.signatureverifier.serialization.AttributeInfo
+import com.jetbrains.signatureverifier.serialization.dataholders.AttributeInfo
 import com.jetbrains.signatureverifier.serialization.compareBytes
-import com.jetbrains.signatureverifier.serialization.getTestByteChannel
+import com.jetbrains.signatureverifier.serialization.fileInfos.getTestByteChannel
 import com.jetbrains.signatureverifier.serialization.toDLSet
 import com.jetbrains.util.TestUtil
 import kotlinx.serialization.encodeToString

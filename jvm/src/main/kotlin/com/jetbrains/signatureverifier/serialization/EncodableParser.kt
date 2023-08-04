@@ -1,5 +1,6 @@
 package com.jetbrains.signatureverifier.serialization
 
+import com.jetbrains.signatureverifier.serialization.dataholders.*
 import org.bouncycastle.asn1.*
 import org.bouncycastle.asn1.cms.Attribute
 import org.bouncycastle.asn1.cms.ContentInfo

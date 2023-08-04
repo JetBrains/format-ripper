@@ -6,9 +6,9 @@ import com.jetbrains.signatureverifier.crypt.SignatureVerificationParams
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.crypt.SignedMessageVerifier
 import com.jetbrains.signatureverifier.macho.MachoArch
-import com.jetbrains.signatureverifier.serialization.ConsoleLogger
+import com.jetbrains.signatureverifier.serialization.fileInfos.ConsoleLogger
 import com.jetbrains.signatureverifier.serialization.compareBytes
-import com.jetbrains.signatureverifier.serialization.getTestByteChannel
+import com.jetbrains.signatureverifier.serialization.fileInfos.getTestByteChannel
 import com.jetbrains.signatureverifier.serialization.toDLSet
 import com.jetbrains.util.TestUtil
 import kotlinx.coroutines.runBlocking
@@ -22,7 +22,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
 import java.util.stream.Stream
-import com.jetbrains.signatureverifier.serialization.SignerInfo as SerializableSignerInfo
+import com.jetbrains.signatureverifier.serialization.dataholders.SignerInfo as SerializableSignerInfo
 
 class SignerInformationSerializationTests {
 

@@ -1,8 +1,8 @@
 package com.jetbrains.signatureverifier.tests.serialization
 
 import com.jetbrains.signatureverifier.PeFile
-import com.jetbrains.signatureverifier.serialization.PEFileInfo
-import com.jetbrains.signatureverifier.serialization.PeFileMetaInfo
+import com.jetbrains.signatureverifier.serialization.fileInfos.PEFileInfo
+import com.jetbrains.signatureverifier.serialization.fileInfos.PeFileMetaInfo
 import com.jetbrains.signatureverifier.serialization.compareBytes
 import com.jetbrains.util.TestUtil
 import org.junit.jupiter.api.Assertions

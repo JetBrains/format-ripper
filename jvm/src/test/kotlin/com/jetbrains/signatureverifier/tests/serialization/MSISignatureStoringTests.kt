@@ -1,7 +1,7 @@
 package com.jetbrains.signatureverifier.tests.serialization
 
 import com.jetbrains.signatureverifier.cf.MsiFile
-import com.jetbrains.signatureverifier.serialization.MsiFileInfo
+import com.jetbrains.signatureverifier.serialization.fileInfos.MsiFileInfo
 import com.jetbrains.util.TestUtil
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

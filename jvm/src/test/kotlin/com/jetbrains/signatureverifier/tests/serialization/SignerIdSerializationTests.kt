@@ -5,9 +5,9 @@ import com.jetbrains.signatureverifier.cf.MsiFile
 import com.jetbrains.signatureverifier.crypt.SignatureVerificationParams
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.macho.MachoArch
-import com.jetbrains.signatureverifier.serialization.SignerIdentifierInfo
+import com.jetbrains.signatureverifier.serialization.dataholders.SignerIdentifierInfo
 import com.jetbrains.signatureverifier.serialization.compareBytes
-import com.jetbrains.signatureverifier.serialization.getTestByteChannel
+import com.jetbrains.signatureverifier.serialization.fileInfos.getTestByteChannel
 import com.jetbrains.util.TestUtil
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest

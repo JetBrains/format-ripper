@@ -1,8 +1,8 @@
 package com.jetbrains.signatureverifier.tests.serialization
 
 import com.jetbrains.signatureverifier.macho.MachoArch
-import com.jetbrains.signatureverifier.serialization.FatMachoFileInfo
-import com.jetbrains.signatureverifier.serialization.MachoFileInfo
+import com.jetbrains.signatureverifier.serialization.fileInfos.FatMachoFileInfo
+import com.jetbrains.signatureverifier.serialization.fileInfos.MachoFileInfo
 import com.jetbrains.util.TestUtil
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

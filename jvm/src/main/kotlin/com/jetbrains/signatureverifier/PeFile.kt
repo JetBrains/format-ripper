@@ -1,7 +1,7 @@
 ﻿package com.jetbrains.signatureverifier
 
 import com.google.gson.Gson
-import com.jetbrains.signatureverifier.serialization.PeFileMetaInfo
+import com.jetbrains.signatureverifier.serialization.fileInfos.PeFileMetaInfo
 import com.jetbrains.signatureverifier.serialization.toByteArray
 import com.jetbrains.util.*
 import org.jetbrains.annotations.NotNull

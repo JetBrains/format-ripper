@@ -4,9 +4,9 @@ import com.jetbrains.signatureverifier.DataInfo
 import com.jetbrains.signatureverifier.ILogger
 import com.jetbrains.signatureverifier.InvalidDataException
 import com.jetbrains.signatureverifier.NullLogger
-import com.jetbrains.signatureverifier.serialization.FatArchInfo32
-import com.jetbrains.signatureverifier.serialization.FatArchInfo64
-import com.jetbrains.signatureverifier.serialization.FatHeaderInfo
+import com.jetbrains.signatureverifier.serialization.fileInfos.FatArchInfo32
+import com.jetbrains.signatureverifier.serialization.fileInfos.FatArchInfo64
+import com.jetbrains.signatureverifier.serialization.fileInfos.FatHeaderInfo
 import com.jetbrains.util.*
 import org.jetbrains.annotations.NotNull
 import java.nio.ByteOrder
