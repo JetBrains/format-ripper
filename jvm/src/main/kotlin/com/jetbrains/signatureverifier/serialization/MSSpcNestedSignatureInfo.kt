@@ -15,5 +15,5 @@ data class MSSpcNestedSignatureInfo(
     attribute.attrValues.map { RSASignedDataInfo.getInstance(it as DLSequence) }
   )
 
-  override fun getPrimitiveContent() = content.toPrimitiveList().toDLSet()
+  override fun getPrimitiveContent() = content.toPrimitiveDLSet()
 }

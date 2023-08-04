@@ -68,7 +68,7 @@ data class X509AttributeCertificateInfo(
       ASN1GeneralizedTime(startDate),
       ASN1GeneralizedTime(endDate)
     ),
-    attributes.toPrimitiveList().toDLSequence(),
+    attributes.toPrimitiveDLSequence(),
     issuerUniqueId?.toPrimitive(),
     extensions?.toPrimitiveList()?.toDLSequence()
   ).toDLSequence()

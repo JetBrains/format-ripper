@@ -84,7 +84,7 @@ data class CounterSignatureInfo(
       TaggedObjectInfo.getTaggedObject(
         false,
         0,
-        authenticatedAttributes.toPrimitiveList().toDLSet()
+        authenticatedAttributes.toPrimitiveDLSet()
       ),
       digestEncryptionAlgorithm.toPrimitive(),
       encryptedDigest.toPrimitive(),

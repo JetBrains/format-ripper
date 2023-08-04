@@ -17,6 +17,6 @@ data class MSCertExtensionsAttributeInfo(
   )
 
   override fun getPrimitiveContent() = content.map {
-    it.toPrimitiveList().toDLSequence()
+    it.toPrimitiveDLSequence()
   }.toDLSet()
 }

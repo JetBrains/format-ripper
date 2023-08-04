@@ -34,6 +34,6 @@ data class MSCertificateTemplateV2AttributeInfo(
   )
 
   override fun getPrimitiveContent() = content.map {
-    it.toPrimitiveList().toDLSequence()
+    it.toPrimitiveDLSequence()
   }.toDLSet()
 }

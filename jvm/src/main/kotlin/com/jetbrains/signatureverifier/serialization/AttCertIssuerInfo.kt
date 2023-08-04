@@ -22,7 +22,7 @@ data class AttCertIssuerInfo(
     AttCertIssuer.getInstance(
       V2Form.getInstance(
         listOf(
-          issuerName.toPrimitiveList().toDLSequence(),
+          issuerName.toPrimitiveDLSequence(),
           baseCertificateId?.toPrimitive(),
           objectDigestInfo?.toPrimitive()
         ).toDLSequence()

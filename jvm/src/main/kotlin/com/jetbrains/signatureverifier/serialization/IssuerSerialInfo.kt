@@ -22,7 +22,7 @@ data class IssuerSerialInfo(
 
   override fun toPrimitive(): ASN1Primitive =
     listOf(
-      generalNames.toPrimitiveList().toDLSequence(),
+      generalNames.toPrimitiveDLSequence(),
       ASN1Integer(serial),
       issuerUID?.toPrimitive()
     ).toDLSequence()

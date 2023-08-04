@@ -67,7 +67,7 @@ data class X509CertificateInfo(
         DLTaggedObject(
           true,
           3,
-          it.toPrimitiveList().toDLSequence()
+          it.toPrimitiveDLSequence()
         )
       }
     ).toDLSequence()

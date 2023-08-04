@@ -16,5 +16,5 @@ data class AppleDeveloperCertificateAttribute(
     }
   )
 
-  override fun getPrimitiveContent() = content.toPrimitiveList().toDLSet()
+  override fun getPrimitiveContent() = content.toPrimitiveDLSet()
 }

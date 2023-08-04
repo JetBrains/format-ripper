@@ -8,5 +8,5 @@ data class SequenceInfo(
   val content: List<EncodableInfo>
 ) : EncodableInfo {
   override fun toPrimitive(): ASN1Primitive =
-    content.toPrimitiveList().toDLSequence()
+    content.toPrimitiveDLSequence()
 }

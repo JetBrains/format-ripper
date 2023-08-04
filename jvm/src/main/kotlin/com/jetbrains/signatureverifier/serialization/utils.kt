@@ -8,6 +8,9 @@ import java.util.*
 
 fun List<EncodableInfo>.toPrimitiveList(): List<ASN1Encodable?> = this.map { it.toPrimitive() }
 
+fun List<EncodableInfo>.toPrimitiveDLSequence(): DLSequence = this.toPrimitiveList().toDLSequence()
+fun List<EncodableInfo>.toPrimitiveDLSet(): DLSet = this.toPrimitiveList().toDLSet()
+
 fun List<ASN1Encodable?>.toDLSequence(): DLSequence {
   val vector = ASN1EncodableVector()
   vector.addAll(this.filterNotNull().toTypedArray())

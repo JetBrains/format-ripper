@@ -9,5 +9,5 @@ data class SetInfo(
 ) : EncodableInfo {
 
   override fun toPrimitive(): ASN1Primitive =
-    content.toPrimitiveList().toDLSet()
+    content.toPrimitiveDLSet()
 }

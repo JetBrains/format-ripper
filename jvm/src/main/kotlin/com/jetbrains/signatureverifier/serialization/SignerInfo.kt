@@ -49,7 +49,7 @@ data class SignerInfo(
       TaggedObjectInfo.getTaggedObject(
         false,
         0,
-        authenticatedAttributes.toPrimitiveList().toDLSet()
+        authenticatedAttributes.toPrimitiveDLSet()
       ),
       digestEncryptionAlgorithm.toPrimitive(),
       encryptedDigest.toPrimitive(),
@@ -57,7 +57,7 @@ data class SignerInfo(
         TaggedObjectInfo.getTaggedObject(
           false,
           1,
-          attributes.toPrimitiveList().toDLSet()
+          attributes.toPrimitiveDLSet()
         )
       }
     ).toDLSequence()

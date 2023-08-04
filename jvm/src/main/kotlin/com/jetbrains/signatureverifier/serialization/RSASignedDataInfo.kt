@@ -70,10 +70,10 @@ data class RSASignedDataInfo(
       tagNo,
       listOf(
         version.toPrimitive(),
-        digestAlgorithmsInfo.toPrimitiveList().toDLSet(),
+        digestAlgorithmsInfo.toPrimitiveDLSet(),
         encapContentInfo.toPrimitive(),
         certificates.toPrimitive(),
-        counterSignatureInfos.toPrimitiveList().toDLSet()
+        counterSignatureInfos.toPrimitiveDLSet()
       ).toDLSequence()
     )
   ).toDLSequence()

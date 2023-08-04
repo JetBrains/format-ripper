@@ -56,9 +56,9 @@ data class MsCounterSignatureInfo(
 
   override fun toPrimitive(): ASN1Primitive = listOf(
     ASN1Integer(version.toLong()),
-    algorithms.toPrimitiveList().toDLSet(),
+    algorithms.toPrimitiveDLSet(),
     tstInfo.toPrimitive(),
     taggedCertificateInfo.toPrimitive(),
-    counterSignatures.toPrimitiveList().toDLSet()
+    counterSignatures.toPrimitiveDLSet()
   ).toDLSequence()
 }

@@ -15,5 +15,5 @@ data class CertificationAuthorityAttributeInfo(
     attribute.attributeValues.map { AlgorithmInfo(AlgorithmIdentifier.getInstance(it)) }
   )
 
-  override fun getPrimitiveContent() = content.toPrimitiveList().toDLSet()
+  override fun getPrimitiveContent() = content.toPrimitiveDLSet()
 }

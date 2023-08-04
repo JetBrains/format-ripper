@@ -33,7 +33,7 @@ data class SignedDataInfo(
   override fun toPrimitive(): ASN1Primitive =
     listOf(
       ASN1Integer(version),
-      digestAlgorithmsInfo.toPrimitiveList().toDLSet(),
+      digestAlgorithmsInfo.toPrimitiveDLSet(),
       encapContentInfo.toPrimitive(),
       TaggedObjectInfo.getTaggedObject(
         false,
@@ -45,7 +45,7 @@ data class SignedDataInfo(
         ).toASN1Primitive()
       ),
       crls?.toPrimitiveList()?.toDLSet()?.toASN1Primitive(),
-      signerInfos.toPrimitiveList().toDLSet().toASN1Primitive()
+      signerInfos.toPrimitiveDLSet().toASN1Primitive()
     ).toDLSequence()
 
   fun toSignature(encoding: String = "DER") =

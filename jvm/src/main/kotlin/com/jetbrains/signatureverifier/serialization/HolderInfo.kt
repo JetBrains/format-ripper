@@ -32,7 +32,7 @@ data class HolderInfo(
         TaggedObjectInfo.getTaggedObject(
           true,
           1,
-          entityName.toPrimitiveList().toDLSequence()
+          entityName.toPrimitiveDLSequence()
         ).toASN1Primitive()
     }
 
@@ -48,7 +48,7 @@ data class HolderInfo(
         TaggedObjectInfo.getTaggedObject(
           false,
           1,
-          it.toPrimitiveList().toDLSequence()
+          it.toPrimitiveDLSequence()
         )
       },
       objectDigestInfo?.let {
