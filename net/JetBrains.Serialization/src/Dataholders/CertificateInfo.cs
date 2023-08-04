@@ -20,14 +20,14 @@ public class CertificateInfo : IEncodableInfo
     SignatureData = signatureData;
   }
 
-  public static IEncodableInfo GetInstance(X509CertificateStructure x509CertificateStructure)
+  private static IEncodableInfo GetInstance(X509CertificateStructure x509CertificateStructure)
     => new CertificateInfo(
       XCertificateInfo.GetInstance(x509CertificateStructure.TbsCertificate),
       new AlgorithmInfo(x509CertificateStructure.SignatureAlgorithm),
       TextualInfo.GetInstance(new DerBitString(x509CertificateStructure.GetSignatureOctets()))
     );
 
-  public static IEncodableInfo GetInstance(AttributeCertificate attributeCertificate)
+  private static IEncodableInfo GetInstance(AttributeCertificate attributeCertificate)
     => new CertificateInfo(
       XCertificateInfo.GetInstance(attributeCertificate),
       new AlgorithmInfo(attributeCertificate.SignatureAlgorithm),
