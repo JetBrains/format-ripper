@@ -20,21 +20,21 @@ fun ASN1Primitive.toEncodableInfo(): EncodableInfo = when (this) {
   )
 
   is ASN1Sequence -> {
-    trySignerIdentifierInfo(this)?.let { return it }
+//    trySignerIdentifierInfo(this)?.let { return it }
 
     tryX500NameInfo(this)?.let { return it }
 
-    tryCounterSignatureInfo(this)?.let { return it }
+//    tryCounterSignatureInfo(this)?.let { return it }
 
     tryAlgorithmInfo(this)?.let { return it }
 
-    tryAttributeInfo(this)?.let { return it }
+//    tryAttributeInfo(this)?.let { return it }
 
-    tryEncapContentInfo(this)?.let { return it }
+//    tryEncapContentInfo(this)?.let { return it }
 
-    tryCertificateInfo(this)?.let { return it }
+//    tryCertificateInfo(this)?.let { return it }
 
-    tryCertificateInfo(this)?.let { return it }
+//    tryCertificateInfo(this)?.let { return it }
 
     SequenceInfo(this.map { it.toASN1Primitive().toEncodableInfo() })
   }
