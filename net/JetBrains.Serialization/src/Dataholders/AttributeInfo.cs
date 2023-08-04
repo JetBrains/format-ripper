@@ -28,8 +28,8 @@ public abstract class AttributeInfo : IEncodableInfo
       //   return new MSCertificateTemplateV2AttributeInfo(attribute);
       // case "1.3.6.1.4.1.311.10.3.28":
       //   return new TimestampedDataAttributeInfo(attribute);
-      // case "1.2.840.113549.1.9.5":
-      //   return new SigningTimeAttributeInfo(attribute);
+      case "1.2.840.113549.1.9.5":
+        return new SigningTimeAttributeInfo(attribute);
       case "1.2.840.113635.100.9.2":
         return new CertificationAuthorityAttributeInfo(attribute);
       case "1.2.840.113549.1.9.6":
