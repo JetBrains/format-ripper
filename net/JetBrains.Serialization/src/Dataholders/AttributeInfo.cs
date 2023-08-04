@@ -18,8 +18,8 @@ public abstract class AttributeInfo : IEncodableInfo
   {
     switch (attribute.AttrType.Id)
     {
-      // case "1.2.840.113549.1.9.3":
-      //   return new ContentTypeAttributeInfo(attribute);
+      case "1.2.840.113549.1.9.3":
+        return new ContentTypeAttributeInfo(attribute);
       case "1.2.840.113549.1.9.4":
         return new MessageDigestAttributeInfo(attribute);
       case "1.3.6.1.4.1.311.2.1.11":
