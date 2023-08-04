@@ -73,7 +73,7 @@ public class X509AttributeCertificateInfo : XCertificateInfo, IEncodableInfo
         new DerGeneralizedTime(StartDate),
         new DerGeneralizedTime(EndDate)
       ),
-      Attributes.ToDerSequence()
+      Attributes.ToPrimitiveDerSequence()
     };
 
     if (IssuerUniqueId != null)
@@ -83,7 +83,7 @@ public class X509AttributeCertificateInfo : XCertificateInfo, IEncodableInfo
 
     if (Extensions != null && Extensions.Any())
     {
-      asn1List.Add(Extensions.ToDerSequence());
+      asn1List.Add(Extensions.ToPrimitiveDerSequence());
     }
 
     return asn1List.ToDerSequence();

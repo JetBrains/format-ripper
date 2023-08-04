@@ -74,15 +74,13 @@ public class MsCounterSignatureInfo : IEncodableInfo
       counterSignatures);
   }
 
-  public virtual Asn1Encodable ToPrimitive()
-  {
-    return new List<Asn1Encodable>
+  public virtual Asn1Encodable ToPrimitive() =>
+    new List<Asn1Encodable>
     {
       new DerInteger(Version),
-      Algorithms.Cast<IEncodableInfo>().ToList().ToPrimitiveList().ToDerSet(),
+      Algorithms.ToPrimitiveDerSet(),
       TstInfo.ToPrimitive(),
       TaggedCertificateInfo.ToPrimitive(),
-      CounterSignatures.Cast<IEncodableInfo>().ToList().ToPrimitiveList().ToDerSet()
+      CounterSignatures.ToPrimitiveDerSet()
     }.ToDerSequence();
-  }
 }

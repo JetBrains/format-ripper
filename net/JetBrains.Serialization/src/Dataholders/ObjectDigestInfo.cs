@@ -26,5 +26,5 @@ public class ObjectDigestInfo : IEncodableInfo
       OtherObjectTypeID,
       DigestAlgorithmInfo,
       ObjectDigest
-    }.ToDerSequence();
+    }.ToPrimitiveDerSequence();
 }

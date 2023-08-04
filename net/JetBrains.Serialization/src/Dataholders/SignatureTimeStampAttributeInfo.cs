@@ -23,5 +23,5 @@ public class SignatureTimeStampAttributeInfo : AttributeInfo
   }
 
   public override Asn1Encodable GetPrimitiveContent() =>
-    Content.Cast<IEncodableInfo>().ToList().ToPrimitiveList().ToDerSet();
+    Content.ToPrimitiveDerSet();
 }

@@ -20,9 +20,9 @@ public class SignerIdentifierInfo : IEncodableInfo
     SerialNumber = TextualInfo.GetInstance(serialNumber);
   }
 
-  public Asn1Encodable ToPrimitive() => new List<Asn1Encodable?>
+  public Asn1Encodable ToPrimitive() => new List<IEncodableInfo?>
   {
-    IssuerInfo.ToPrimitive(),
-    SerialNumber.ToPrimitive()
-  }.ToDerSequence();
+    IssuerInfo,
+    SerialNumber
+  }.ToPrimitiveDerSequence();
 }

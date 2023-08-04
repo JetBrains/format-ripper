@@ -22,15 +22,13 @@ public class TSTInfo : IEncodableInfo
         ((DerTaggedObject)sequence[1]).IsExplicit(),
         ((DerTaggedObject)sequence[1]).TagNo,
         TextualInfo.GetInstance(((DerTaggedObject)sequence[1]).GetObject())))
-      {
-      }
-
-  public virtual Asn1Encodable ToPrimitive()
   {
-    return new List<Asn1Encodable?>
-    {
-      Identifier.ToPrimitive(),
-      Content.ToPrimitive()
-    }.ToDerSequence();
   }
+
+  public virtual Asn1Encodable ToPrimitive() =>
+    new List<IEncodableInfo?>
+    {
+      Identifier,
+      Content
+    }.ToPrimitiveDerSequence();
 }

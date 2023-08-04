@@ -12,7 +12,8 @@ public class CertificateInfo : IEncodableInfo
   public AlgorithmInfo SignatureAlgorithm { get; }
   public TextualInfo SignatureData { get; }
 
-  private CertificateInfo(XCertificateInfo xCertificateInfo, AlgorithmInfo signatureAlgorithm, TextualInfo signatureData)
+  private CertificateInfo(XCertificateInfo xCertificateInfo, AlgorithmInfo signatureAlgorithm,
+    TextualInfo signatureData)
   {
     this.XCertificateInfo = xCertificateInfo;
     SignatureAlgorithm = signatureAlgorithm;
@@ -52,13 +53,14 @@ public class CertificateInfo : IEncodableInfo
     }
   }
 
-  private DerSequence ToDLSequence()
-  {
-    return new DerSequence(
-      XCertificateInfo.ToPrimitive(),
-      SignatureAlgorithm.ToPrimitive(),
-      SignatureData.ToPrimitive());
-  }
+  private DerSequence ToDLSequence() =>
+    new List<IEncodableInfo?>
+    {
+      XCertificateInfo,
+      SignatureAlgorithm,
+      SignatureData
+    }.ToPrimitiveDerSequence();
+
 
   // public X509CertificateHolder toX509CertificateHolder() => new X509CertificateHolder(
   //   Certificate.GetInstance(ToPrimitive()));

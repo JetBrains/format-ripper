@@ -12,15 +12,15 @@ namespace JetBrains.Serialization;
 public static class AsnExtensions
 {
   public static List<Asn1Encodable?> ToPrimitiveList(this IEnumerable<IEncodableInfo?> source) =>
-     source.Select(item => item?.ToPrimitive()).ToList();
+    source.Select(item => item?.ToPrimitive()).ToList();
 
-   public static DerSequence ToDerSequence(this IEnumerable<IEncodableInfo?> source) =>
-     source.ToPrimitiveList().ToDerSequence();
+  public static DerSequence ToPrimitiveDerSequence(this IEnumerable<IEncodableInfo?> source) =>
+    source.ToPrimitiveList().ToDerSequence();
 
-   public static DerSet ToDerSet(this IEnumerable<IEncodableInfo?> source) =>
-     source.ToPrimitiveList().ToDerSet();
+  public static DerSet ToPrimitiveDerSet(this IEnumerable<IEncodableInfo?> source) =>
+    source.ToPrimitiveList().ToDerSet();
 
-  public static DerSequence ToDerSequence(this List<Asn1Encodable?> source)
+  public static DerSequence ToDerSequence(this IEnumerable<Asn1Encodable?> source)
   {
     Asn1EncodableVector vector = new Asn1EncodableVector();
     vector.Add(source.Where(item => item != null).ToArray());
@@ -32,12 +32,12 @@ public static class AsnExtensions
    * This is a HACK to create DerSet with the exact order of elements, we provide.
    * We need this, because sorting seems to work wrong with BER encoding (mach-O files).
    */
-  public static DerSet ToDerSet(this List<Asn1Encodable?> source)
+  public static DerSet ToDerSet(this IEnumerable<Asn1Encodable?> source)
   {
     var sequence = source.ToDerSequence();
-    var tagged = new DerTaggedObject(false , 0, sequence);
+    var tagged = TaggedObjectInfo.GetTaggedObject(false, 0, sequence);
 
-    return (DerSet) Asn1Set.GetInstance(tagged, false);
+    return (DerSet)Asn1Set.GetInstance(tagged, false);
   }
 
   public static string ToHexString(this byte[] bytes)

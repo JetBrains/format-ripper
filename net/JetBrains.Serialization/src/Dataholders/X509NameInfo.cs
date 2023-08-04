@@ -30,8 +30,8 @@ public class X509NameInfo : IEncodableInfo
   {
     return
       RdNs.Select(
-        rdnList => rdnList.Cast<IEncodableInfo?>().ToList().ToPrimitiveList().ToDerSet()
-      ).Cast<Asn1Encodable>().ToList()!.ToDerSequence();
+        rdnList => rdnList.ToPrimitiveDerSet()
+      ).ToDerSequence();
   }
 
   public Asn1Encodable ToPrimitive() => ToDLSequence();

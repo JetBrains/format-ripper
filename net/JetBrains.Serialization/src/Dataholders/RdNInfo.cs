@@ -16,5 +16,5 @@ public class RdNInfo : IEncodableInfo
   }
 
   public Asn1Encodable ToPrimitive() =>
-    new DerSequence(Type.ToPrimitive(), Value.ToPrimitive());
+    new List<IEncodableInfo> { Type, Value }.ToPrimitiveDerSequence();
 }

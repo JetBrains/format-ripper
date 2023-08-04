@@ -23,7 +23,7 @@ public class IssuerSerialInfo : IEncodableInfo
     {
         var asn1Items = new List<Asn1Encodable>
         {
-            GeneralNames.ToDerSequence(),
+            GeneralNames.ToPrimitiveDerSequence(),
             new DerInteger(Serial)
         };
 

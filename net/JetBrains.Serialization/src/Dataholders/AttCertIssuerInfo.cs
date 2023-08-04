@@ -23,7 +23,7 @@ public class AttCertIssuerInfo : IEncodableInfo
     {
         var asn1Items = new List<Asn1Encodable?>
         {
-            IssuerName.ToDerSequence(),
+            IssuerName.ToPrimitiveDerSequence(),
             BaseCertificateId?.ToPrimitive(),
             ObjectDigestInfo?.ToPrimitive()
         };

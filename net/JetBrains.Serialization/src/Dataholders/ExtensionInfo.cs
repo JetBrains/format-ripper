@@ -18,10 +18,8 @@ public class ExtensionInfo : IEncodableInfo
   }
 
   private DerSequence ToDLSequence() =>
-    new DerSequence(
-      new[] {Key.ToPrimitive(), Critical ? DerBoolean.True : null, Value.ToPrimitive()}
-        .OfType<Asn1Encodable>()
-        .ToArray());
+    new List<Asn1Encodable>
+      { Key.ToPrimitive(), Critical ? DerBoolean.True : null, Value.ToPrimitive() }.ToDerSequence();
 
   public Asn1Encodable ToPrimitive() => ToDLSequence();
 }

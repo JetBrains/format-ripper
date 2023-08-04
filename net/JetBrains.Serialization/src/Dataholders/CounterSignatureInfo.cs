@@ -95,7 +95,7 @@ public class CounterSignatureInfo : IEncodableInfo
       new DerInteger(Version),
       Sid.ToPrimitive(),
       DigestAlgorithm.ToPrimitive(),
-      new DerTaggedObject(false, 0, new DerSet(AuthenticatedAttributes.Select(aa => aa.ToPrimitive()).ToArray())),
+      TaggedObjectInfo.GetTaggedObject(false, 0, AuthenticatedAttributes.ToPrimitiveDerSet()),
       DigestEncryptionAlgorithm.ToPrimitive(),
       EncryptedDigest.ToPrimitive()
     };

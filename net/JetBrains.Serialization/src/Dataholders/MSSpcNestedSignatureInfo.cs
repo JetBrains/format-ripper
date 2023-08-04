@@ -23,5 +23,5 @@ public class MSSpcNestedSignatureInfo : AttributeInfo
   }
 
   public override Asn1Encodable GetPrimitiveContent()
-    => Content.Select(c => c.ToPrimitive()).ToArray().ToList().ToDerSet();
+    => Content.ToPrimitiveDerSet();
 }

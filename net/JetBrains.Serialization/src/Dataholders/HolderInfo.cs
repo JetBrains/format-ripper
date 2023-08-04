@@ -30,7 +30,7 @@ public class HolderInfo : IEncodableInfo
             return TaggedObjectInfo.GetTaggedObject(true, 0, BaseCertificateId?.ToPrimitive());
           }
 
-          return TaggedObjectInfo.GetTaggedObject(true, 1, EntityName.ToDerSequence());
+          return TaggedObjectInfo.GetTaggedObject(true, 1, EntityName.ToPrimitiveDerSequence());
         case 1:
           var items = new List<Asn1Encodable>();
           if (BaseCertificateId != null)
@@ -40,7 +40,7 @@ public class HolderInfo : IEncodableInfo
 
           if (EntityName != null)
           {
-            items.Add(TaggedObjectInfo.GetTaggedObject(false, 1, EntityName.ToDerSequence()));
+            items.Add(TaggedObjectInfo.GetTaggedObject(false, 1, EntityName.ToPrimitiveDerSequence()));
           }
 
           if (ObjectDigestInfo != null)

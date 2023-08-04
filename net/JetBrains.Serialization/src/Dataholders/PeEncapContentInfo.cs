@@ -39,10 +39,10 @@ public class PeEncapContentInfo : EncapContentInfo
       new List<Asn1Encodable?>
       {
         ImageDataObjIdInfo.ToPrimitive(),
-        new List<Asn1Encodable?>
+        new List<IEncodableInfo>
         {
-          HashAlgorithmInfo.ToPrimitive(),
-          ContentHash.ToPrimitive()
-        }.ToDerSequence()
+          HashAlgorithmInfo,
+          ContentHash
+        }.ToPrimitiveDerSequence()
       }.ToDerSequence();
 }

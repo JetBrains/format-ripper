@@ -97,10 +97,10 @@ public class RSASignedDataInfo : IEncodableInfo
         new List<Asn1Encodable?>
         {
           Version.ToPrimitive(),
-          DigestAlgorithmsInfo.Cast<IEncodableInfo?>().ToList().ToPrimitiveList().ToDerSet(),
+          DigestAlgorithmsInfo.ToPrimitiveDerSet(),
           EncapContentInfo.ToPrimitive(),
           Certificates.ToPrimitive(),
-          CounterSignatureInfos.Cast<IEncodableInfo?>().ToList().ToPrimitiveList().ToDerSet()
+          CounterSignatureInfos.ToPrimitiveDerSet()
         }.ToDerSequence()
       )
     }

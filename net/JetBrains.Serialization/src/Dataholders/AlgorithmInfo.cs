@@ -23,6 +23,6 @@ public class AlgorithmInfo : IEncodableInfo
   }
 
   public Asn1Encodable ToPrimitive() => new List<IEncodableInfo> { _algorithmIdentifier, _additionalValue }
-    .ToPrimitiveList().ToDerSequence()
+    .ToPrimitiveDerSequence()
     .ToAsn1Object();
 }

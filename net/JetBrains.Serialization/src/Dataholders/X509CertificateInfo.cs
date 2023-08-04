@@ -69,29 +69,33 @@ public class X509CertificateInfo : XCertificateInfo
 
   // However, ASN1Integer, DLSequence, DLTaggedObjects and such are from BouncyCastle's ASN1 libraries.
   // So, be sure to include an appropriate library which can handle these structures.
-  private DerSequence ToDLSequence()
-  {
-    return new DerSequence(
-      new DerTaggedObject(
+  private DerSequence ToDLSequence() =>
+    new List<Asn1Encodable>
+    {
+      TaggedObjectInfo.GetTaggedObject(
         true, 0, new DerInteger(Version - 1)),
       new DerInteger(new BigInteger(SerialNumber)),
       SignatureAlgorithm.ToPrimitive(),
       Issuer.ToPrimitive(),
-      new DerSequence(
+      new List<Asn1Encodable>
+      {
         new DerUtcTime(StartDate),
-        new DerUtcTime(EndDate)),
+        new DerUtcTime(EndDate)
+      }.ToDerSequence(),
       Subject.ToPrimitive(),
-      new DerSequence(
-        SubjectAlgorithm.ToPrimitive(),
-        SubjectData.ToPrimitive()),
+      new List<IEncodableInfo>
+      {
+        SubjectAlgorithm,
+        SubjectData
+      }.ToPrimitiveDerSequence(),
       Extensions != null
-        ? new DerTaggedObject(
+        ? TaggedObjectInfo.GetTaggedObject(
           true,
           3,
-          new DerSequence(Extensions.Select(e => e.ToPrimitive()).ToArray()))
+          Extensions.ToPrimitiveDerSequence())
         : null
-    );
-  }
+    }.ToDerSequence();
+
 
   public override Asn1Encodable ToPrimitive() => ToDLSequence();
 }

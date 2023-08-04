@@ -38,12 +38,9 @@ public class MsCounterSignAttributeInfo : AttributeInfo
 
   public override Asn1Encodable GetPrimitiveContent() =>
     ContentIdentifier
-      .Cast<IEncodableInfo>()
-      .ToList()
-      .ToPrimitiveList().Zip(
-        Content.Cast<IEncodableInfo>().ToList().ToPrimitiveList(),
+      .ToPrimitiveList()
+      .Zip(
+        Content.ToPrimitiveList(),
         (first, second) => new List<Asn1Encodable?> { first, second }.ToDerSequence())
-      .Cast<Asn1Encodable>()
-      .ToList()
       .ToDerSet();
 }
