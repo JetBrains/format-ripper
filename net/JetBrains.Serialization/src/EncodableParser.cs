@@ -22,10 +22,11 @@ public static class EncodableParser
 
       case Asn1Sequence sequence:
       {
+        if (TryX509NameInfo(sequence) is { } nameInfo) return nameInfo;
         if (TryAlgorithmInfo(sequence) is { } algorithmInfo) return algorithmInfo;
-        if (TryEncapContentInfo(sequence) is { } encapContentInfo) return encapContentInfo;
-        if (TryCertificateInfo(sequence) is { } certificateInfo) return certificateInfo;
-        if (TryAttributeInfo(sequence) is { } attributeInfo) return attributeInfo;
+        // if (TryEncapContentInfo(sequence) is { } encapContentInfo) return encapContentInfo;
+        // if (TryCertificateInfo(sequence) is { } certificateInfo) return certificateInfo;
+        // if (TryAttributeInfo(sequence) is { } attributeInfo) return attributeInfo;
 
         return new SequenceInfo(sequence
           .ToArray()
@@ -83,6 +84,18 @@ public static class EncodableParser
     try
     {
       return CertificateInfo.GetInstance(sequence.ToAsn1Object());
+    }
+    catch (Exception)
+    {
+      return null;
+    }
+  }
+
+  private static IEncodableInfo? TryX509NameInfo(Asn1Sequence sequence)
+  {
+    try
+    {
+      return new X509NameInfo(X509Name.GetInstance(sequence));
     }
     catch (Exception)
     {
