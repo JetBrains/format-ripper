@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Text;
 using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Asn1.CryptoPro;
 using Org.BouncyCastle.Asn1.Nist;
 using Org.BouncyCastle.Asn1.Oiw;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Asn1.TeleTrust;
 using Org.BouncyCastle.Math;
+using ContentInfo = Org.BouncyCastle.Asn1.Pkcs.ContentInfo;
+using SignedData = Org.BouncyCastle.Asn1.Cms.SignedData;
 
 namespace JetBrains.Serialization;
 
@@ -25,7 +28,7 @@ public static class AsnExtensions
   {
     Asn1EncodableVector vector = new Asn1EncodableVector();
     vector.Add(source.Where(item => item != null).ToArray());
-    
+
     return new DerSequence(vector);
   }
 
@@ -39,6 +42,18 @@ public static class AsnExtensions
     var tagged = TaggedObjectInfo.GetTaggedObject(false, 0, sequence);
 
     return (DerSet)Asn1Set.GetInstance(tagged, false);
+  }
+
+  public static ContentInfo ToContentInfo(this SignedData signedData, string encoding = "BER")
+  {
+    var signedDataBytes = signedData.GetEncoded(encoding);
+    using (var memoryStream = new MemoryStream(signedDataBytes))
+    {
+      var asn1Stream = new Asn1InputStream(memoryStream);
+      var asn1Object = asn1Stream.ReadObject();
+
+      return new ContentInfo(CmsObjectIdentifiers.SignedData, asn1Object);
+    }
   }
 
   public static string ToHexString(this byte[] bytes)
@@ -71,18 +86,7 @@ public static class SerializationUtils
       digestOidToNames.Add(NistObjectIdentifiers.IdSha384, "SHA-384");
       digestOidToNames.Add(NistObjectIdentifiers.IdSha512, "SHA-512");
       digestOidToNames.Add(NistObjectIdentifiers.IdSha512_224, "SHA-512/224");
-      digestOidToNames.Add(NistObjectIdentifiers.IdSha512_224, "SHA-512(224)");
       digestOidToNames.Add(NistObjectIdentifiers.IdSha512_256, "SHA-512/256");
-      digestOidToNames.Add(NistObjectIdentifiers.IdSha512_256, "SHA-512(256)");
-      digestOidToNames.Add(OiwObjectIdentifiers.IdSha1, "SHA1");
-      digestOidToNames.Add(NistObjectIdentifiers.IdSha224, "SHA224");
-      digestOidToNames.Add(NistObjectIdentifiers.IdSha256, "SHA256");
-      digestOidToNames.Add(NistObjectIdentifiers.IdSha384, "SHA384");
-      digestOidToNames.Add(NistObjectIdentifiers.IdSha512, "SHA512");
-      digestOidToNames.Add(NistObjectIdentifiers.IdSha512_224, "SHA512/224");
-      digestOidToNames.Add(NistObjectIdentifiers.IdSha512_224, "SHA512(224)");
-      digestOidToNames.Add(NistObjectIdentifiers.IdSha512_256, "SHA512/256");
-      digestOidToNames.Add(NistObjectIdentifiers.IdSha512_256, "SHA512(256)");
       digestOidToNames.Add(NistObjectIdentifiers.IdSha3_224, "SHA3-224");
       digestOidToNames.Add(NistObjectIdentifiers.IdSha3_256, "SHA3-256");
       digestOidToNames.Add(NistObjectIdentifiers.IdSha3_384, "SHA3-384");

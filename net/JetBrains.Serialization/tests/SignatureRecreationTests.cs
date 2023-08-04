@@ -22,16 +22,17 @@ public class SignatureRecreationTests
   [TestCase("libssl-1_1-x64.dll")]
   [TestCase("JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe")]
   // @formatter:on
-  public Task PeVerifySignTest(string resourceName)
+  public async Task PeVerifySignTest(string resourceName)
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Pe, resourceName,
       stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
+    var verificationParams = new SignatureVerificationParams(null, null, false, false);
     var signedMessage = SignedMessage.CreateInstance(file.SignatureData);
-    var originalContentInfo = signedMessage.SignedData.ContentInfo;
-    VerifySignTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
+    var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
+    var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 
-    return Task.CompletedTask;
+    VerifySignTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
   }
 
   // @formatter:off
@@ -39,7 +40,7 @@ public class SignatureRecreationTests
   [TestCase("firefox.msi")]
   [TestCase("sumatra.msi")]
   // @formatter:on
-  public Task MsiVerifySignTest(string resourceName)
+  public async Task MsiVerifySignTest(string resourceName)
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
     {
@@ -47,11 +48,12 @@ public class SignatureRecreationTests
       return CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData);
     });
 
+    var verificationParams = new SignatureVerificationParams(null, null, false, false);
     var signedMessage = SignedMessage.CreateInstance(file.SignatureData);
-    var originalContentInfo = signedMessage.SignedData.ContentInfo;
-    VerifySignTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
+    var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
+    var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 
-    return Task.CompletedTask;
+    VerifySignTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
   }
 
   private static MachOFile GetMachOFile(string resourceName) =>
@@ -65,16 +67,17 @@ public class SignatureRecreationTests
   [TestCase("libMonoSupportW.x64.dylib")]
   [TestCase("libhostfxr.dylib")]
   // @formatter:on
-  public Task MachOVerifySignTest(string resourceName)
+  public async Task MachOVerifySignTest(string resourceName)
   {
+    var verificationParams = new SignatureVerificationParams(buildChain: false, withRevocationCheck: false);
     foreach (var section in GetMachOFile(resourceName).Sections)
     {
       var signedMessage = SignedMessage.CreateInstance(section.SignatureData);
+      var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
+      var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 
       VerifySignTest(signedMessage.SignedData, section.SignatureData.CmsBlob!, "BER");
     }
-
-    return Task.CompletedTask;
   }
 
   public ContentInfo SignedDataToContentInfo(SignedData signedData, string encoding = "BER")
@@ -90,14 +93,14 @@ public class SignatureRecreationTests
   public void VerifySignTest(CmsSignedData signedData, byte[] originalSignature, string encoding = "DER")
   {
     var innerSignedData = signedData.SignedData;
-    var signedDataInfo = innerSignedData.ToAsn1Object().ToEncodableInfo();
+    var signedDataInfo = new SignedDataInfo(signedData); //innerSignedData.ToAsn1Object().ToEncodableInfo();
 
     var settings = new JsonSerializerSettings
     {
       TypeNameHandling = TypeNameHandling.Auto
     };
     var json = JsonConvert.SerializeObject(signedDataInfo, settings);
-    var recreated = JsonConvert.DeserializeObject<SequenceInfo>(json, settings);
+    var recreated = JsonConvert.DeserializeObject<SignedDataInfo>(json, settings);
 
     var copy = SignedData.GetInstance(recreated.ToPrimitive());
     Assert.That(innerSignedData.GetEncoded("DER").SequenceEqual(copy.GetEncoded("DER")));

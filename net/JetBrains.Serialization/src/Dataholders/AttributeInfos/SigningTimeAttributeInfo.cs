@@ -13,7 +13,7 @@ public class SigningTimeAttributeInfo : AttributeInfo
 {
   public override TextualInfo Identifier { get; }
   public List<DateTimeOffset> Content { get; }
-  private static readonly string DateTimeFormat = "yyMMddHHmmssX";
+  private static readonly string DateTimeFormat = "yyMMddHHmmssZ";
 
   public SigningTimeAttributeInfo(Attribute attribute)
   {
