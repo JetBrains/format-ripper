@@ -6,11 +6,12 @@ using Org.BouncyCastle.Asn1;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class SetInfo : IEncodableInfo
 {
-  private readonly List<IEncodableInfo> _content;
+  [JsonProperty("Content")] private readonly List<IEncodableInfo> _content;
 
+  [JsonConstructor]
   public SetInfo(List<IEncodableInfo> content)
   {
     _content = content;
