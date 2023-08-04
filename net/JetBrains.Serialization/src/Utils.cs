@@ -6,6 +6,7 @@ using Org.BouncyCastle.Asn1.Nist;
 using Org.BouncyCastle.Asn1.Oiw;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Asn1.TeleTrust;
+using Org.BouncyCastle.Math;
 
 namespace JetBrains.Serialization;
 
@@ -24,7 +25,7 @@ public static class AsnExtensions
   {
     Asn1EncodableVector vector = new Asn1EncodableVector();
     vector.Add(source.Where(item => item != null).ToArray());
-
+    
     return new DerSequence(vector);
   }
 

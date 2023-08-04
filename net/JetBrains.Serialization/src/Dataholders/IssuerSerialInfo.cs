@@ -9,13 +9,13 @@ using Org.BouncyCastle.Math;
 public class IssuerSerialInfo : IEncodableInfo
 {
     public List<GeneralNameInfo> GeneralNames { get; set; }
-    public BigInteger Serial { get; set; }
+    public TextualInfo Serial { get; set; }
     public TextualInfo? IssuerUID { get; set; }
 
     public IssuerSerialInfo(IssuerSerial issuer)
     {
         GeneralNames = issuer.Issuer.GetNames().Select(name => new GeneralNameInfo(name)).ToList();
-        Serial = issuer.Serial.Value;
+        Serial = TextualInfo.GetInstance(issuer.Serial);
         IssuerUID = issuer.IssuerUid != null ? TextualInfo.GetInstance(issuer.IssuerUid) : null;
     }
 
@@ -24,7 +24,7 @@ public class IssuerSerialInfo : IEncodableInfo
         var asn1Items = new List<Asn1Encodable>
         {
             GeneralNames.ToPrimitiveDerSequence(),
-            new DerInteger(Serial)
+            Serial.ToPrimitive()
         };
 
         if (IssuerUID != null)

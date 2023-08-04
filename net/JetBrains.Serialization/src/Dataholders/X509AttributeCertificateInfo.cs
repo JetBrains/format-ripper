@@ -11,7 +11,7 @@ using JetBrains.Serialization;
 [JsonObject(MemberSerialization.Fields)]
 public class X509AttributeCertificateInfo : XCertificateInfo, IEncodableInfo
 {
-  public BigInteger Version { get; set; }
+  public TextualInfo Version { get; set; }
 
   public HolderInfo HolderInfo { get; set; }
 
@@ -19,7 +19,7 @@ public class X509AttributeCertificateInfo : XCertificateInfo, IEncodableInfo
 
   public AlgorithmInfo SignatureInfo { get; set; }
 
-  public BigInteger SerialNumber { get; set; }
+  public TextualInfo SerialNumber { get; set; }
 
   public DateTime StartDate { get; set; }
 
@@ -36,11 +36,11 @@ public class X509AttributeCertificateInfo : XCertificateInfo, IEncodableInfo
     var acinfo = attributeCertificate.ACInfo;
     return new X509AttributeCertificateInfo
     {
-      Version = acinfo.Version.Value,
+      Version = TextualInfo.GetInstance(acinfo.Version),
       HolderInfo = new HolderInfo(acinfo.Holder),
       Issuer = new AttCertIssuerInfo(acinfo.Issuer),
       SignatureInfo = new AlgorithmInfo(acinfo.Signature),
-      SerialNumber = acinfo.SerialNumber.Value,
+      SerialNumber = TextualInfo.GetInstance(acinfo.SerialNumber),
       StartDate = acinfo.AttrCertValidityPeriod.NotBeforeTime.ToDateTime(),
       EndDate = acinfo.AttrCertValidityPeriod.NotAfterTime.ToDateTime(),
       Attributes = acinfo.Attributes.ToArray().Select(it => AttributeInfo.GetInstance(Attribute.GetInstance(it)))
@@ -64,11 +64,11 @@ public class X509AttributeCertificateInfo : XCertificateInfo, IEncodableInfo
   {
     var asn1List = new List<Asn1Encodable>
     {
-      new DerInteger(Version),
+      Version.ToPrimitive(),
       HolderInfo.ToPrimitive(),
       Issuer.ToPrimitive(),
       SignatureInfo.ToPrimitive(),
-      new DerInteger(SerialNumber),
+      SerialNumber.ToPrimitive(),
       new AttCertValidityPeriod(
         new DerGeneralizedTime(StartDate),
         new DerGeneralizedTime(EndDate)

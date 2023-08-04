@@ -10,7 +10,7 @@ namespace JetBrains.Serialization;
 public class X509CertificateInfo : XCertificateInfo
 {
   public int Version { get; }
-  public string SerialNumber { get; }
+  public TextualInfo SerialNumber { get; }
   public AlgorithmInfo SignatureAlgorithm { get; }
   public X509NameInfo Issuer { get; }
   public DateTime StartDate { get; }
@@ -22,7 +22,7 @@ public class X509CertificateInfo : XCertificateInfo
 
   public X509CertificateInfo(
     int version,
-    string serialNumber,
+    TextualInfo serialNumber,
     AlgorithmInfo signatureAlgorithm,
     X509NameInfo issuer,
     DateTime startDate,
@@ -48,7 +48,7 @@ public class X509CertificateInfo : XCertificateInfo
   {
     return new X509CertificateInfo(
       certificateHolder.Version,
-      certificateHolder.SerialNumber.ToString(),
+      TextualInfo.GetInstance(certificateHolder.SerialNumber),
       new AlgorithmInfo(certificateHolder.Signature),
       new X509NameInfo(certificateHolder.Issuer),
       certificateHolder.StartDate.ToDateTime(),
@@ -74,7 +74,7 @@ public class X509CertificateInfo : XCertificateInfo
     {
       TaggedObjectInfo.GetTaggedObject(
         true, 0, new DerInteger(Version - 1)),
-      new DerInteger(new BigInteger(SerialNumber)),
+      SerialNumber.ToPrimitive(),
       SignatureAlgorithm.ToPrimitive(),
       Issuer.ToPrimitive(),
       new List<Asn1Encodable>
