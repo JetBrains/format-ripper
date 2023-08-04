@@ -8,22 +8,29 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.Fields)]
 public class CertificateInfo : IEncodableInfo
 {
-  public X509CertificateInfo X509CertificateInfo { get; }
+  public XCertificateInfo XCertificateInfo { get; }
   public AlgorithmInfo SignatureAlgorithm { get; }
   public TextualInfo SignatureData { get; }
 
-  public CertificateInfo(X509CertificateInfo X509CertificateInfo, AlgorithmInfo signatureAlgorithm, TextualInfo signatureData)
+  private CertificateInfo(XCertificateInfo xCertificateInfo, AlgorithmInfo signatureAlgorithm, TextualInfo signatureData)
   {
-    this.X509CertificateInfo = X509CertificateInfo;
+    this.XCertificateInfo = xCertificateInfo;
     SignatureAlgorithm = signatureAlgorithm;
     SignatureData = signatureData;
   }
 
   public static IEncodableInfo GetInstance(X509CertificateStructure x509CertificateStructure)
     => new CertificateInfo(
-      X509CertificateInfo.GetInstance(x509CertificateStructure.TbsCertificate),
+      XCertificateInfo.GetInstance(x509CertificateStructure.TbsCertificate),
       new AlgorithmInfo(x509CertificateStructure.SignatureAlgorithm),
       TextualInfo.GetInstance(new DerBitString(x509CertificateStructure.GetSignatureOctets()))
+    );
+
+  public static IEncodableInfo GetInstance(AttributeCertificate attributeCertificate)
+    => new CertificateInfo(
+      XCertificateInfo.GetInstance(attributeCertificate),
+      new AlgorithmInfo(attributeCertificate.SignatureAlgorithm),
+      TextualInfo.GetInstance(new DerBitString(attributeCertificate.GetSignatureOctets()))
     );
 
   public static IEncodableInfo GetInstance(Asn1Object obj)
@@ -33,6 +40,13 @@ public class CertificateInfo : IEncodableInfo
       case DerSequence sequence:
         return GetInstance(X509CertificateStructure.GetInstance(sequence));
 
+      case Asn1TaggedObject taggedObject:
+        return new TaggedObjectInfo(
+          taggedObject.IsExplicit(),
+          taggedObject.TagNo,
+          GetInstance(AttributeCertificate.GetInstance(taggedObject.GetObject()))
+        );
+
       default:
         throw new ArgumentException("Unexpected object type");
     }
@@ -41,7 +55,7 @@ public class CertificateInfo : IEncodableInfo
   private DerSequence ToDLSequence()
   {
     return new DerSequence(
-      X509CertificateInfo.ToPrimitive(),
+      XCertificateInfo.ToPrimitive(),
       SignatureAlgorithm.ToPrimitive(),
       SignatureData.ToPrimitive());
   }

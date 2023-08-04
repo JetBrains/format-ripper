@@ -7,7 +7,7 @@ using Org.BouncyCastle.X509;
 namespace JetBrains.Serialization;
 
 [JsonObject(MemberSerialization.Fields)]
-public class X509CertificateInfo : IEncodableInfo
+public class X509CertificateInfo : XCertificateInfo
 {
   public int Version { get; }
   public string SerialNumber { get; }
@@ -93,5 +93,5 @@ public class X509CertificateInfo : IEncodableInfo
     );
   }
 
-  public Asn1Encodable ToPrimitive() => ToDLSequence();
+  public override Asn1Encodable ToPrimitive() => ToDLSequence();
 }

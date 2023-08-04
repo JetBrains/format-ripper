@@ -105,6 +105,6 @@ public class CounterSignatureInfo : IEncodableInfo
       primitiveValues.Add(CounterSignature.ToPrimitive());
     }
 
-    return new DerSequence(primitiveValues.ToArray());
+    return primitiveValues.ToDerSequence();
   }
 }

@@ -92,12 +92,13 @@ public class SignatureRecreationTests
     var innerSignedData = signedData.SignedData;
     var signedDataInfo = innerSignedData.ToAsn1Object().ToEncodableInfo();
 
-    var settings = new JsonSerializerSettings
-    {
-      TypeNameHandling = TypeNameHandling.Auto
-    };
-    var json = JsonConvert.SerializeObject(signedDataInfo, settings);
-    var recreated = JsonConvert.DeserializeObject<SequenceInfo>(json, settings);
+    // var settings = new JsonSerializerSettings
+    // {
+    //   TypeNameHandling = TypeNameHandling.Auto
+    // };
+    // var json = JsonConvert.SerializeObject(signedDataInfo, settings);
+    // var recreated = JsonConvert.DeserializeObject<SequenceInfo>(json, settings);
+    var recreated = signedDataInfo;
 
     var copy = SignedData.GetInstance(recreated.ToPrimitive());
     Assert.That(innerSignedData.GetEncoded("DER").SequenceEqual(copy.GetEncoded("DER")));

@@ -12,13 +12,13 @@ namespace JetBrains.Serialization;
 public static class AsnExtensions
 {
   public static List<Asn1Encodable?> ToPrimitiveList(this IEnumerable<IEncodableInfo?> source) =>
-    source.Select(item => item?.ToPrimitive()).ToList();
+     source.Select(item => item?.ToPrimitive()).ToList();
 
-  public static DerSequence ToDerSequence(this IEnumerable<IEncodableInfo?> source) =>
-    source.ToPrimitiveList().ToDerSequence();
+   public static DerSequence ToDerSequence(this IEnumerable<IEncodableInfo?> source) =>
+     source.ToPrimitiveList().ToDerSequence();
 
-  public static DerSet ToDerSet(this IEnumerable<IEncodableInfo?> source) =>
-    source.ToPrimitiveList().ToDerSet();
+   public static DerSet ToDerSet(this IEnumerable<IEncodableInfo?> source) =>
+     source.ToPrimitiveList().ToDerSet();
 
   public static DerSequence ToDerSequence(this List<Asn1Encodable?> source)
   {
