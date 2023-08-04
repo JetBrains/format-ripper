@@ -34,8 +34,8 @@ public abstract class AttributeInfo : IEncodableInfo
       //   return new CertificationAuthorityAttributeInfo(attribute);
       // case "1.2.840.113549.1.9.6":
       //   return CounterSignatureAttributeInfo.GetInstance(attribute);
-      // case "1.2.840.113635.100.9.1":
-      //   return new AppleDeveloperCertificateAttribute(attribute);
+      case "1.2.840.113635.100.9.1":
+        return new AppleDeveloperCertificateAttribute(attribute);
       case "1.3.6.1.4.1.311.3.3.1":
         return new MsCounterSignAttributeInfo(attribute);
       case "1.2.840.113549.1.9.52":
