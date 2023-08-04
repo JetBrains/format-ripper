@@ -38,11 +38,7 @@ data class SignedDataInfo(
       TaggedObjectInfo.getTaggedObject(
         false,
         0,
-        recreateCertificatesFromStore(
-          CollectionStore(certificates.map {
-            it.toX509CertificateHolder()
-          })
-        ).toASN1Primitive()
+        certificates.toPrimitiveDLSet()
       ),
       crls?.toPrimitiveList()?.toDLSet()?.toASN1Primitive(),
       signerInfos.toPrimitiveDLSet().toASN1Primitive()
