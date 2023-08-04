@@ -2,16 +2,20 @@ using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.X509;
+using System.Collections.Generic;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class CertificateInfo : IEncodableInfo
 {
-  public XCertificateInfo XCertificateInfo { get; }
-  public AlgorithmInfo SignatureAlgorithm { get; }
-  public TextualInfo SignatureData { get; }
+  [JsonProperty("XCertificateInfo")] public XCertificateInfo XCertificateInfo { get; }
 
+  [JsonProperty("SignatureAlgorithm")] public AlgorithmInfo SignatureAlgorithm { get; }
+
+  [JsonProperty("SignatureData")] public TextualInfo SignatureData { get; }
+
+  [JsonConstructor]
   private CertificateInfo(XCertificateInfo xCertificateInfo, AlgorithmInfo signatureAlgorithm,
     TextualInfo signatureData)
   {

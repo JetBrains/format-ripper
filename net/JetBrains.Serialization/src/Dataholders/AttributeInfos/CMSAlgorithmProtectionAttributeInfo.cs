@@ -4,12 +4,14 @@ using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class CMSAlgorithmProtectionAttributeInfo : AttributeInfo
 {
-  public override TextualInfo Identifier { get; }
-  public IEncodableInfo Content { get; }
+  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
 
+  [JsonProperty("Content")] public IEncodableInfo Content { get; }
+
+  [JsonConstructor]
   public CMSAlgorithmProtectionAttributeInfo(TextualInfo identifier, IEncodableInfo content)
   {
     Identifier = identifier;

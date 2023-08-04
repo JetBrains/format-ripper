@@ -4,12 +4,13 @@ using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class MSSpcNestedSignatureInfo : AttributeInfo
 {
-  public override TextualInfo Identifier { get; }
-  public List<RSASignedDataInfo> Content { get; }
+  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
+  [JsonProperty("Content")] public List<RSASignedDataInfo> Content { get; }
 
+  [JsonConstructor]
   public MSSpcNestedSignatureInfo(TextualInfo identifier, List<RSASignedDataInfo> content)
   {
     Identifier = identifier;

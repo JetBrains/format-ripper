@@ -4,12 +4,13 @@ using Org.BouncyCastle.Asn1.Cms;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class RsaEncapContentInfo : EncapContentInfo
 {
-  protected override TextualInfo ContentType { get; }
-  public TextualInfo? Content { get; }
+  [JsonProperty("ContentType")] protected override TextualInfo ContentType { get; }
+  [JsonProperty("Content")] public TextualInfo? Content { get; }
 
+  [JsonConstructor]
   public RsaEncapContentInfo(TextualInfo contentType, TextualInfo? content)
   {
     ContentType = contentType;

@@ -4,10 +4,10 @@ using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public abstract class AttributeInfo : IEncodableInfo
 {
-  public abstract TextualInfo Identifier { get; }
+  [JsonProperty("Identifier")] public abstract TextualInfo Identifier { get; }
 
   public abstract Asn1Encodable GetPrimitiveContent();
 

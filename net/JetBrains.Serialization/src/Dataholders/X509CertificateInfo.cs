@@ -1,25 +1,33 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Math;
-using Org.BouncyCastle.X509;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class X509CertificateInfo : XCertificateInfo
 {
-  public int Version { get; }
-  public TextualInfo SerialNumber { get; }
-  public AlgorithmInfo SignatureAlgorithm { get; }
-  public X509NameInfo Issuer { get; }
-  public DateTime StartDate { get; }
-  public DateTime EndDate { get; }
-  public X509NameInfo Subject { get; }
-  public AlgorithmInfo SubjectAlgorithm { get; }
-  public TextualInfo SubjectData { get; }
-  public List<ExtensionInfo>? Extensions { get; }
+  [JsonProperty("Version")] public int Version { get; }
 
+  [JsonProperty("SerialNumber")] public TextualInfo SerialNumber { get; }
+
+  [JsonProperty("SignatureAlgorithm")] public AlgorithmInfo SignatureAlgorithm { get; }
+
+  [JsonProperty("Issuer")] public X509NameInfo Issuer { get; }
+
+  [JsonProperty("StartDate")] public DateTime StartDate { get; }
+
+  [JsonProperty("EndDate")] public DateTime EndDate { get; }
+
+  [JsonProperty("Subject")] public X509NameInfo Subject { get; }
+
+  [JsonProperty("SubjectAlgorithm")] public AlgorithmInfo SubjectAlgorithm { get; }
+
+  [JsonProperty("SubjectData")] public TextualInfo SubjectData { get; }
+
+  [JsonProperty("Extensions")] public List<ExtensionInfo>? Extensions { get; }
+
+  [JsonConstructor]
   public X509CertificateInfo(
     int version,
     TextualInfo serialNumber,

@@ -4,22 +4,24 @@ using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class UnknownAttributeInfo : AttributeInfo
 {
-    public override TextualInfo Identifier { get; }
-    public IEncodableInfo Content { get; }
+  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
 
-    private UnknownAttributeInfo(TextualInfo identifier, IEncodableInfo content)
-    {
-        Identifier = identifier;
-        Content = content;
-    }
+  [JsonProperty("Content")] public IEncodableInfo Content { get; }
 
-    public UnknownAttributeInfo(Attribute attribute)
-        : this(TextualInfo.GetInstance(attribute.AttrType), attribute.AttrValues.ToEncodableInfo())
-    {
-    }
+  [JsonConstructor]
+  private UnknownAttributeInfo(TextualInfo identifier, IEncodableInfo content)
+  {
+    Identifier = identifier;
+    Content = content;
+  }
 
-    public override Asn1Encodable GetPrimitiveContent() => Content.ToPrimitive();
+  public UnknownAttributeInfo(Attribute attribute)
+    : this(TextualInfo.GetInstance(attribute.AttrType), attribute.AttrValues.ToEncodableInfo())
+  {
+  }
+
+  public override Asn1Encodable GetPrimitiveContent() => Content.ToPrimitive();
 }

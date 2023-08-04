@@ -4,7 +4,7 @@ using Org.BouncyCastle.Asn1.X509;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public abstract class XCertificateInfo : IEncodableInfo
 {
   public static XCertificateInfo GetInstance(Asn1Encodable obj)

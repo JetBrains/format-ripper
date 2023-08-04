@@ -1,35 +1,53 @@
+using Newtonsoft.Json;
+using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Math;
+using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 
 namespace JetBrains.Serialization;
 
-using Newtonsoft.Json;
-using Org.BouncyCastle.Asn1;
-using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
-using JetBrains.Serialization;
-
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class X509AttributeCertificateInfo : XCertificateInfo, IEncodableInfo
 {
-  public TextualInfo Version { get; set; }
+  [JsonProperty("Version")] public TextualInfo Version { get; set; }
 
-  public HolderInfo HolderInfo { get; set; }
+  [JsonProperty("HolderInfo")] public HolderInfo HolderInfo { get; set; }
 
-  public AttCertIssuerInfo Issuer { get; set; }
+  [JsonProperty("Issuer")] public AttCertIssuerInfo Issuer { get; set; }
 
-  public AlgorithmInfo SignatureInfo { get; set; }
+  [JsonProperty("SignatureInfo")] public AlgorithmInfo SignatureInfo { get; set; }
 
-  public TextualInfo SerialNumber { get; set; }
+  [JsonProperty("SerialNumber")] public TextualInfo SerialNumber { get; set; }
 
-  public DateTime StartDate { get; set; }
+  [JsonProperty("StartDate")] public DateTime StartDate { get; set; }
 
-  public DateTime EndDate { get; set; }
+  [JsonProperty("EndDate")] public DateTime EndDate { get; set; }
 
-  public List<AttributeInfo> Attributes { get; set; }
+  [JsonProperty("Attributes")] public List<AttributeInfo> Attributes { get; set; }
 
-  public TextualInfo? IssuerUniqueId { get; set; }
+  [JsonProperty("IssuerUniqueId")] public TextualInfo? IssuerUniqueId { get; set; }
 
-  public List<ExtensionInfo>? Extensions { get; set; }
+  [JsonProperty("Extensions")] public List<ExtensionInfo>? Extensions { get; set; }
+
+  [JsonConstructor]
+  public X509AttributeCertificateInfo(TextualInfo version, HolderInfo holderInfo, AttCertIssuerInfo issuer,
+    AlgorithmInfo signatureInfo, TextualInfo serialNumber, DateTime startDate, DateTime endDate,
+    List<AttributeInfo> attributes, TextualInfo? issuerUniqueId, List<ExtensionInfo>? extensions)
+  {
+    Version = version;
+    HolderInfo = holderInfo;
+    Issuer = issuer;
+    SignatureInfo = signatureInfo;
+    SerialNumber = serialNumber;
+    StartDate = startDate;
+    EndDate = endDate;
+    Attributes = attributes;
+    IssuerUniqueId = issuerUniqueId;
+    Extensions = extensions;
+  }
+
+  public X509AttributeCertificateInfo()
+  {
+  }
 
   public static X509AttributeCertificateInfo GetInstance(AttributeCertificate attributeCertificate)
   {

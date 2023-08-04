@@ -6,20 +6,30 @@ using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.X509.Store;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
+using System.Collections.Generic;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class CounterSignatureInfo : IEncodableInfo
 {
-  public int Version { get; }
-  public SignerIdentifierInfo Sid { get; }
-  public AlgorithmInfo DigestAlgorithm { get; }
-  public List<AttributeInfo> AuthenticatedAttributes { get; }
-  public AlgorithmInfo DigestEncryptionAlgorithm { get; }
-  public TextualInfo EncryptedDigest { get; }
-  public TaggedObjectInfo CounterSignature { get; }
+  [JsonProperty("Version")] public int Version { get; }
 
+  [JsonProperty("Sid")] public SignerIdentifierInfo Sid { get; }
+
+  [JsonProperty("DigestAlgorithm")] public AlgorithmInfo DigestAlgorithm { get; }
+
+  [JsonProperty("AuthenticatedAttributes")]
+  public List<AttributeInfo> AuthenticatedAttributes { get; }
+
+  [JsonProperty("DigestEncryptionAlgorithm")]
+  public AlgorithmInfo DigestEncryptionAlgorithm { get; }
+
+  [JsonProperty("EncryptedDigest")] public TextualInfo EncryptedDigest { get; }
+
+  [JsonProperty("CounterSignature")] public TaggedObjectInfo CounterSignature { get; }
+
+  [JsonConstructor]
   public CounterSignatureInfo(
     int version,
     SignerIdentifierInfo sid,

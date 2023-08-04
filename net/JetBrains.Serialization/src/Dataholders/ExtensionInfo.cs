@@ -1,15 +1,19 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
+using System.Collections.Generic;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class ExtensionInfo : IEncodableInfo
 {
-  public TextualInfo Key { get; }
-  public bool Critical { get; }
-  public TextualInfo Value { get; }
+  [JsonProperty("Key")] public TextualInfo Key { get; }
 
+  [JsonProperty("Critical")] public bool Critical { get; }
+
+  [JsonProperty("Value")] public TextualInfo Value { get; }
+
+  [JsonConstructor]
   public ExtensionInfo(TextualInfo key, bool critical, TextualInfo value)
   {
     Key = key;

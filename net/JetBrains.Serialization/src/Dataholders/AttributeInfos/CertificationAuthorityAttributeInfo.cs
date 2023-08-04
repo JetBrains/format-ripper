@@ -4,11 +4,18 @@ using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
 using Org.BouncyCastle.Asn1.X509;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class CertificationAuthorityAttributeInfo : AttributeInfo
 {
-  public override TextualInfo Identifier { get; }
-  public List<AlgorithmInfo> Content { get; }
+  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
+  [JsonProperty("Content")] public List<AlgorithmInfo> Content { get; }
+
+  [JsonConstructor]
+  public CertificationAuthorityAttributeInfo(TextualInfo identifier, List<AlgorithmInfo> content)
+  {
+    Identifier = identifier;
+    Content = content;
+  }
 
   public CertificationAuthorityAttributeInfo(Attribute attribute)
   {

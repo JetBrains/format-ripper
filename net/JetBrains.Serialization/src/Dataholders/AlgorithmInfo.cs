@@ -8,12 +8,22 @@ using Org.BouncyCastle.Cms;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class AlgorithmInfo : IEncodableInfo
 {
-  private String _name;
-  [CanBeNull] private IEncodableInfo _additionalValue = null;
-  private TextualInfo _algorithmIdentifier;
+  [JsonProperty("name")] private String _name;
+
+  [JsonProperty("additionalValue")] [CanBeNull]
+  private IEncodableInfo _additionalValue = null;
+
+  [JsonProperty("algorithmIdentifier")] private TextualInfo _algorithmIdentifier;
+
+  [JsonConstructor]
+  public AlgorithmInfo(string name, TextualInfo algorithmIdentifier)
+  {
+    _name = name;
+    _algorithmIdentifier = algorithmIdentifier;
+  }
 
   public AlgorithmInfo(AlgorithmIdentifier signatureAlgorithm)
   {

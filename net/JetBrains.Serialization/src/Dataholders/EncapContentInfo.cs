@@ -4,9 +4,15 @@ using Org.BouncyCastle.Asn1.Cms;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public abstract class EncapContentInfo : IEncodableInfo
 {
+  [JsonProperty("isBer")] private Boolean isBer;
+
+  protected abstract Asn1Encodable? GetContentPrimitive();
+
+  [JsonProperty("ContentType")] protected abstract TextualInfo ContentType { get; }
+
   public static EncapContentInfo GetInstance(ContentInfo contentInfo)
   {
     switch (contentInfo.ContentType.Id)
@@ -21,11 +27,6 @@ public abstract class EncapContentInfo : IEncodableInfo
         return new UnknownEncapContentInfo(contentInfo);
     }
   }
-
-  private Boolean isBer;
-
-  protected abstract Asn1Encodable? GetContentPrimitive();
-  protected abstract TextualInfo ContentType { get; }
 
   public Asn1Encodable ToPrimitive()
   {

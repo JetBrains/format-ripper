@@ -1,15 +1,20 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class ImageDataObjIdInfo : IEncodableInfo
 {
-  public TextualInfo Identifier { get; }
-  public TextualInfo HexCode { get; }
-  public IEncodableInfo Content { get; }
+  [JsonProperty("Identifier")] public TextualInfo Identifier { get; }
 
+  [JsonProperty("HexCode")] public TextualInfo HexCode { get; }
+
+  [JsonProperty("Content")] public IEncodableInfo Content { get; }
+
+  [JsonConstructor]
   public ImageDataObjIdInfo(TextualInfo identifier, TextualInfo hexCode, IEncodableInfo content)
   {
     Identifier = identifier;

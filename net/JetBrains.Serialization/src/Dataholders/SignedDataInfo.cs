@@ -15,20 +15,31 @@ using Org.BouncyCastle.X509;
 using CmsSignedData = JetBrains.SignatureVerifier.Crypt.BC.CmsSignedData;
 using SignerInformation = JetBrains.SignatureVerifier.Crypt.BC.SignerInformation;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class SignedDataInfo : IEncodableInfo
 {
-  public TextualInfo Version { get; }
+  [JsonProperty("Version")] public TextualInfo Version { get; }
 
-  public List<AlgorithmInfo> DigestAlgorithmsInfo { get; }
+  [JsonProperty("DigestAlgorithmsInfo")] public List<AlgorithmInfo> DigestAlgorithmsInfo { get; }
 
-  public EncapContentInfo EncapContentInfo { get; }
+  [JsonProperty("EncapContentInfo")] public EncapContentInfo EncapContentInfo { get; }
 
-  public List<CertificateInfo> Certificates { get; }
+  [JsonProperty("Certificates")] public List<CertificateInfo> Certificates { get; }
 
-  public List<IEncodableInfo>? CRLs { get; }
+  [JsonProperty("CRLs")] public List<IEncodableInfo?>? CRLs { get; }
 
-  public List<SignerInfo> SignerInfos { get; }
+  [JsonProperty("SignerInfos")] public List<SignerInfo> SignerInfos { get; }
+
+  [JsonConstructor]
+  public SignedDataInfo(TextualInfo version, List<AlgorithmInfo> digestAlgorithmsInfo,
+    EncapContentInfo encapContentInfo, List<CertificateInfo> certificates, List<SignerInfo> signerInfos)
+  {
+    Version = version;
+    DigestAlgorithmsInfo = digestAlgorithmsInfo;
+    EncapContentInfo = encapContentInfo;
+    Certificates = certificates;
+    SignerInfos = signerInfos;
+  }
 
   public SignedDataInfo(CmsSignedData signedData)
   {
@@ -46,7 +57,7 @@ public class SignedDataInfo : IEncodableInfo
 
   public Asn1Encodable ToPrimitive()
   {
-    return new List<Asn1Encodable>
+    return new List<Asn1Encodable?>
     {
       Version.ToPrimitive(),
       DigestAlgorithmsInfo.ToPrimitiveDerSet(),

@@ -3,13 +3,21 @@ using Org.BouncyCastle.Asn1;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class ObjectDigestInfo : IEncodableInfo
 {
-  public TextualInfo DigestedObjectType { get; set; }
-  public TextualInfo? OtherObjectTypeID { get; set; }
-  public AlgorithmInfo DigestAlgorithmInfo { get; set; }
-  public TextualInfo ObjectDigest { get; set; }
+  [JsonProperty("DigestedObjectType")] public TextualInfo DigestedObjectType { get; set; }
+  [JsonProperty("OtherObjectTypeID")] public TextualInfo? OtherObjectTypeID { get; set; }
+  [JsonProperty("DigestAlgorithmInfo")] public AlgorithmInfo DigestAlgorithmInfo { get; set; }
+  [JsonProperty("ObjectDigest")] public TextualInfo ObjectDigest { get; set; }
+
+  [JsonConstructor]
+  public ObjectDigestInfo(TextualInfo digestedObjectType, AlgorithmInfo digestAlgorithmInfo, TextualInfo objectDigest)
+  {
+    DigestedObjectType = digestedObjectType;
+    DigestAlgorithmInfo = digestAlgorithmInfo;
+    ObjectDigest = objectDigest;
+  }
 
   public ObjectDigestInfo(Org.BouncyCastle.Asn1.X509.ObjectDigestInfo info)
   {

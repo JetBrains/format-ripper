@@ -4,22 +4,24 @@ using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class V2CertificateAttributeInfo : AttributeInfo
 {
-    public override TextualInfo Identifier { get; }
-    public IEncodableInfo Content { get; }
+  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
 
-    public V2CertificateAttributeInfo(TextualInfo identifier, IEncodableInfo content)
-    {
-        Identifier = identifier;
-        Content = content;
-    }
+  [JsonProperty("Content")] public IEncodableInfo Content { get; }
 
-    public V2CertificateAttributeInfo(Attribute attribute)
-        : this(TextualInfo.GetInstance(attribute.AttrType), attribute.AttrValues.ToEncodableInfo())
-    {
-    }
+  [JsonConstructor]
+  public V2CertificateAttributeInfo(TextualInfo identifier, IEncodableInfo content)
+  {
+    Identifier = identifier;
+    Content = content;
+  }
 
-    public override Asn1Encodable GetPrimitiveContent() => Content.ToPrimitive();
+  public V2CertificateAttributeInfo(Attribute attribute)
+    : this(TextualInfo.GetInstance(attribute.AttrType), attribute.AttrValues.ToEncodableInfo())
+  {
+  }
+
+  public override Asn1Encodable GetPrimitiveContent() => Content.ToPrimitive();
 }

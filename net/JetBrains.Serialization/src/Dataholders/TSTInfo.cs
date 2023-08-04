@@ -3,12 +3,13 @@ using Org.BouncyCastle.Asn1;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class TSTInfo : IEncodableInfo
 {
-  public TextualInfo Identifier { get; }
-  public TaggedObjectInfo Content { get; }
+  [JsonProperty("Identifier")] public TextualInfo Identifier { get; }
+  [JsonProperty("Content")] public TaggedObjectInfo Content { get; }
 
+  [JsonConstructor]
   public TSTInfo(TextualInfo identifier, TaggedObjectInfo content)
   {
     Identifier = identifier;

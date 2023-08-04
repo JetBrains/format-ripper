@@ -3,12 +3,13 @@ using Org.BouncyCastle.Asn1;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class RdNInfo : IEncodableInfo
 {
-  public TextualInfo Type { get; }
-  public TextualInfo Value { get; }
+  [JsonProperty("Type")] public TextualInfo Type { get; }
+  [JsonProperty("Value")] public TextualInfo Value { get; }
 
+  [JsonConstructor]
   public RdNInfo(TextualInfo type, TextualInfo value)
   {
     Type = type;

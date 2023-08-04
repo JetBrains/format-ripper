@@ -5,11 +5,19 @@ using JetBrains.Serialization;
 using System.Collections.Generic;
 using System.Linq;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class MessageDigestAttributeInfo : AttributeInfo
 {
-  public override TextualInfo Identifier { get; }
-  public List<TextualInfo> Content { get; }
+  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
+
+  [JsonProperty("Content")] public List<TextualInfo> Content { get; }
+
+  [JsonConstructor]
+  public MessageDigestAttributeInfo(TextualInfo identifier, List<TextualInfo> content)
+  {
+    Identifier = identifier;
+    Content = content;
+  }
 
   public MessageDigestAttributeInfo(Attribute attribute)
   {

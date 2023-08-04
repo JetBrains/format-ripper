@@ -5,14 +5,15 @@ using Org.BouncyCastle.Asn1.X509;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class PeEncapContentInfo : EncapContentInfo
 {
-  protected override TextualInfo ContentType { get; }
-  public ImageDataObjIdInfo ImageDataObjIdInfo { get; }
-  public AlgorithmInfo HashAlgorithmInfo { get; }
-  public TextualInfo ContentHash { get; }
+  [JsonProperty("ContentType")] protected override TextualInfo ContentType { get; }
+  [JsonProperty("ImageDataObjIdInfo")] public ImageDataObjIdInfo ImageDataObjIdInfo { get; }
+  [JsonProperty("HashAlgorithmInfo")] public AlgorithmInfo HashAlgorithmInfo { get; }
+  [JsonProperty("ContentHash")] public TextualInfo ContentHash { get; }
 
+  [JsonConstructor]
   public PeEncapContentInfo(TextualInfo contentType, ImageDataObjIdInfo imageDataObjIdInfo,
     AlgorithmInfo hashAlgorithmInfo, TextualInfo contentHash)
   {

@@ -8,15 +8,16 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.Fields)]
 public class RSASignedDataInfo : IEncodableInfo
 {
-  public TextualInfo Identifier { get; }
-  public bool Explicit { get; }
-  public int TagNo { get; }
-  public TextualInfo Version { get; }
-  public List<AlgorithmInfo> DigestAlgorithmsInfo { get; }
-  public EncapContentInfo EncapContentInfo { get; }
-  public TaggedObjectInfo Certificates { get; }
-  public List<CounterSignatureInfo> CounterSignatureInfos { get; }
+  [JsonProperty("Identifier")] public TextualInfo Identifier { get; }
+  [JsonProperty("Explicit")] public bool Explicit { get; }
+  [JsonProperty("TagNo")] public int TagNo { get; }
+  [JsonProperty("Version")] public TextualInfo Version { get; }
+  [JsonProperty("DigestAlgorithmsInfo")] public List<AlgorithmInfo> DigestAlgorithmsInfo { get; }
+  [JsonProperty("EncapContentInfo")] public EncapContentInfo EncapContentInfo { get; }
+  [JsonProperty("Certificates")] public TaggedObjectInfo Certificates { get; }
+  [JsonProperty("CounterSignatureInfos")] public List<CounterSignatureInfo> CounterSignatureInfos { get; }
 
+  [JsonConstructor]
   public RSASignedDataInfo(
     TextualInfo identifier,
     bool isExplicit,

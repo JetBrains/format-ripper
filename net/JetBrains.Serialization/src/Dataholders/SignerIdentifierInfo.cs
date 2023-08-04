@@ -5,16 +5,22 @@ using Org.BouncyCastle.Math;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class SignerIdentifierInfo : IEncodableInfo
 {
-  public X509NameInfo IssuerInfo { get; }
-  public TextualInfo SerialNumber { get; }
+  [JsonProperty("IssuerInfo")] public X509NameInfo IssuerInfo { get; }
+  [JsonProperty("SerialNumber")] public TextualInfo SerialNumber { get; }
+
+  [JsonConstructor]
+  public SignerIdentifierInfo(X509NameInfo issuerInfo, TextualInfo serialNumber)
+  {
+    IssuerInfo = issuerInfo;
+    SerialNumber = serialNumber;
+  }
 
   public SignerIdentifierInfo(
     X509Name issuerName,
-    DerInteger serialNumber
-  )
+    DerInteger serialNumber)
   {
     IssuerInfo = new X509NameInfo(issuerName);
     SerialNumber = TextualInfo.GetInstance(serialNumber);

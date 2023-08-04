@@ -4,12 +4,14 @@ using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class PublicKeyInfrastructureAttributeInfo : AttributeInfo
 {
-  public override TextualInfo Identifier { get; }
-  public IEncodableInfo Content { get; }
+  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
 
+  [JsonProperty("Content")] public IEncodableInfo Content { get; }
+
+  [JsonConstructor]
   public PublicKeyInfrastructureAttributeInfo(TextualInfo identifier, IEncodableInfo content)
   {
     Identifier = identifier;

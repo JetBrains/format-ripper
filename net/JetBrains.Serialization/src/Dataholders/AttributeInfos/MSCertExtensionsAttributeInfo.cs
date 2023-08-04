@@ -3,11 +3,19 @@ using Org.BouncyCastle.Asn1;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class MSCertExtensionsAttributeInfo : AttributeInfo
 {
-  public override TextualInfo Identifier { get; }
-  public List<List<TextualInfo>> Content { get; }
+  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
+
+  [JsonProperty("Content")] public List<List<TextualInfo>> Content { get; }
+
+  [JsonConstructor]
+  public MSCertExtensionsAttributeInfo(TextualInfo identifier, List<List<TextualInfo>> content)
+  {
+    Identifier = identifier;
+    Content = content;
+  }
 
   public MSCertExtensionsAttributeInfo(Attribute attribute)
   {

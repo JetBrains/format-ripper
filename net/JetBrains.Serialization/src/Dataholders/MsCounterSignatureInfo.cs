@@ -4,15 +4,19 @@ using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
 using Org.BouncyCastle.Asn1.X509;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class MsCounterSignatureInfo : IEncodableInfo
 {
-  public int Version { get; }
-  public List<AlgorithmInfo> Algorithms { get; }
-  public TSTInfo TstInfo { get; }
-  public TaggedObjectInfo TaggedCertificateInfo { get; }
-  public List<CounterSignatureInfo> CounterSignatures { get; }
+  [JsonProperty("Version")] public int Version { get; }
+  [JsonProperty("Algorithms")] public List<AlgorithmInfo> Algorithms { get; }
+  [JsonProperty("TstInfo")] public TSTInfo TstInfo { get; }
 
+  [JsonProperty("TaggedCertificateInfo")]
+  public TaggedObjectInfo TaggedCertificateInfo { get; }
+
+  [JsonProperty("CounterSignatures")] public List<CounterSignatureInfo> CounterSignatures { get; }
+
+  [JsonConstructor]
   public MsCounterSignatureInfo(
     int version,
     List<AlgorithmInfo> algorithms,

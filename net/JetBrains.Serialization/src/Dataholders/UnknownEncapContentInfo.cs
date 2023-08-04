@@ -3,12 +3,14 @@ using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 
 namespace JetBrains.Serialization;
-[JsonObject(MemberSerialization.Fields)]
+
+[JsonObject(MemberSerialization.OptIn)]
 public class UnknownEncapContentInfo : EncapContentInfo
 {
-  protected override TextualInfo ContentType { get; }
-  private IEncodableInfo? Content { get; }
+  [JsonProperty("ContentType")] protected override TextualInfo ContentType { get; }
+  [JsonProperty("Content")] private IEncodableInfo? Content { get; }
 
+  [JsonConstructor]
   public UnknownEncapContentInfo(TextualInfo contentType, IEncodableInfo? content)
   {
     ContentType = contentType;

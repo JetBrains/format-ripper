@@ -3,11 +3,19 @@ using Org.BouncyCastle.Asn1;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class CounterSignatureAttributeInfo : AttributeInfo
 {
-  public override TextualInfo Identifier { get; }
-  public List<CounterSignatureInfo> Content { get; }
+  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
+
+  [JsonProperty("Content")] public List<CounterSignatureInfo> Content { get; }
+
+  [JsonConstructor]
+  public CounterSignatureAttributeInfo(TextualInfo identifier, List<CounterSignatureInfo> content)
+  {
+    Identifier = identifier;
+    Content = content;
+  }
 
   public CounterSignatureAttributeInfo(Attribute attribute)
   {

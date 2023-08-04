@@ -5,12 +5,13 @@ using Org.BouncyCastle.Asn1.X509;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class X509NameInfo : IEncodableInfo
 {
-  public string Name { get; }
-  public List<List<RdNInfo>> RdNs { get; }
+  [JsonProperty("Name")] public string Name { get; }
+  [JsonProperty("RdNs")] public List<List<RdNInfo>> RdNs { get; }
 
+  [JsonConstructor]
   public X509NameInfo(string name, List<List<RdNInfo>> rdNs)
   {
     Name = name;

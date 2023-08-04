@@ -4,13 +4,14 @@ using Org.BouncyCastle.Asn1;
 
 namespace JetBrains.Serialization;
 
-[JsonObject(MemberSerialization.Fields)]
+[JsonObject(MemberSerialization.OptIn)]
 public class TaggedObjectInfo : IEncodableInfo
 {
-  private readonly bool _explicit;
-  private readonly int _tagNo;
-  private readonly IEncodableInfo _content;
+  [JsonProperty("Explicit")] private readonly bool _explicit;
+  [JsonProperty("TagNo")] private readonly int _tagNo;
+  [JsonProperty("Content")] private readonly IEncodableInfo _content;
 
+  [JsonConstructor]
   public TaggedObjectInfo(bool explicitness, int tagNo, IEncodableInfo content)
   {
     _explicit = explicitness;
