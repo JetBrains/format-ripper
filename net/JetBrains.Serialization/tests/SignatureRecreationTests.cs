@@ -22,14 +22,14 @@ public class SignatureRecreationTests
   [TestCase("libssl-1_1-x64.dll")]
   [TestCase("JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe")]
   // @formatter:on
-  public Task PeVerifySignTest(string resourceName)
+  public Task PeRecreationTest(string resourceName)
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Pe, resourceName,
       stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
     var signedMessage = SignedMessage.CreateInstance(file.SignatureData);
     var originalContentInfo = signedMessage.SignedData.ContentInfo;
-    VerifySignTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
+    RecreationTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
 
     return Task.CompletedTask;
   }
@@ -39,7 +39,7 @@ public class SignatureRecreationTests
   [TestCase("firefox.msi")]
   [TestCase("sumatra.msi")]
   // @formatter:on
-  public Task MsiVerifySignTest(string resourceName)
+  public Task MsiRecreationTest(string resourceName)
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
     {
@@ -49,7 +49,7 @@ public class SignatureRecreationTests
 
     var signedMessage = SignedMessage.CreateInstance(file.SignatureData);
     var originalContentInfo = signedMessage.SignedData.ContentInfo;
-    VerifySignTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
+    RecreationTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
 
     return Task.CompletedTask;
   }
@@ -65,13 +65,13 @@ public class SignatureRecreationTests
   [TestCase("libMonoSupportW.x64.dylib")]
   [TestCase("libhostfxr.dylib")]
   // @formatter:on
-  public Task MachOVerifySignTest(string resourceName)
+  public Task MachORecreationTest(string resourceName)
   {
     foreach (var section in GetMachOFile(resourceName).Sections)
     {
       var signedMessage = SignedMessage.CreateInstance(section.SignatureData);
 
-      VerifySignTest(signedMessage.SignedData, section.SignatureData.CmsBlob!, "BER");
+      RecreationTest(signedMessage.SignedData, section.SignatureData.CmsBlob!, "BER");
     }
 
     return Task.CompletedTask;
@@ -87,7 +87,7 @@ public class SignatureRecreationTests
     return new ContentInfo(PkcsObjectIdentifiers.SignedData, asn1Object);
   }
 
-  public void VerifySignTest(CmsSignedData signedData, byte[] originalSignature, string encoding = "DER")
+  public void RecreationTest(CmsSignedData signedData, byte[] originalSignature, string encoding = "DER")
   {
     var innerSignedData = signedData.SignedData;
     var signedDataInfo = innerSignedData.ToAsn1Object().ToEncodableInfo();
