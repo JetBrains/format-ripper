@@ -22,7 +22,7 @@ public class SignatureRecreationTests
   [TestCase("libssl-1_1-x64.dll")]
   [TestCase("JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe")]
   // @formatter:on
-  public async Task PeVerifySignTest(string resourceName)
+  public async Task PeRecreationTest(string resourceName)
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Pe, resourceName,
       stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
@@ -32,7 +32,7 @@ public class SignatureRecreationTests
     var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
     var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 
-    VerifySignTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
+    RecreationTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
   }
 
   // @formatter:off
@@ -40,7 +40,7 @@ public class SignatureRecreationTests
   [TestCase("firefox.msi")]
   [TestCase("sumatra.msi")]
   // @formatter:on
-  public async Task MsiVerifySignTest(string resourceName)
+  public async Task MsiRecreationTest(string resourceName)
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
     {
@@ -53,7 +53,7 @@ public class SignatureRecreationTests
     var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
     var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 
-    VerifySignTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
+    RecreationTest(signedMessage.SignedData, file.SignatureData.CmsBlob!);
   }
 
   private static MachOFile GetMachOFile(string resourceName) =>
@@ -67,7 +67,7 @@ public class SignatureRecreationTests
   [TestCase("libMonoSupportW.x64.dylib")]
   [TestCase("libhostfxr.dylib")]
   // @formatter:on
-  public async Task MachOVerifySignTest(string resourceName)
+  public async Task MachORecreationTest(string resourceName)
   {
     var verificationParams = new SignatureVerificationParams(buildChain: false, withRevocationCheck: false);
     foreach (var section in GetMachOFile(resourceName).Sections)
@@ -76,7 +76,7 @@ public class SignatureRecreationTests
       var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
       var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 
-      VerifySignTest(signedMessage.SignedData, section.SignatureData.CmsBlob!, "BER");
+      RecreationTest(signedMessage.SignedData, section.SignatureData.CmsBlob!, "BER");
     }
   }
 
@@ -90,7 +90,7 @@ public class SignatureRecreationTests
     return new ContentInfo(PkcsObjectIdentifiers.SignedData, asn1Object);
   }
 
-  public void VerifySignTest(CmsSignedData signedData, byte[] originalSignature, string encoding = "DER")
+  public void RecreationTest(CmsSignedData signedData, byte[] originalSignature, string encoding = "DER")
   {
     var innerSignedData = signedData.SignedData;
     var signedDataInfo = new SignedDataInfo(signedData); //innerSignedData.ToAsn1Object().ToEncodableInfo();
