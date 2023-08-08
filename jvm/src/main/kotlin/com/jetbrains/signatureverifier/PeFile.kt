@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.jetbrains.signatureverifier.serialization.fileInfos.PeFileMetaInfo
 import com.jetbrains.signatureverifier.serialization.toByteArray
 import com.jetbrains.util.*
+import org.bouncycastle.oer.its.Uint16
 import org.jetbrains.annotations.NotNull
 import java.io.EOFException
 import java.io.IOException
@@ -47,8 +48,6 @@ class PeFile {
 
     stream.Seek(0x3C, SeekOrigin.Begin)
     _ntHeaderOffset = reader.ReadUInt32()
-    _signatureMetadata.ntHeaderOffset =
-      DataValue(DataInfo(0x3c, Int.SIZE_BYTES), _ntHeaderOffset.toInt().toByteArray())
 
     _checkSum = DataInfo(_ntHeaderOffset.toInt() + 0x58, Int.SIZE_BYTES)
     stream.Seek(_checkSum.Offset.toLong(), SeekOrigin.Begin)
@@ -108,20 +107,11 @@ class PeFile {
       Long.SIZE_BYTES * 9L,
       SeekOrigin.Current
     ) // DataDirectory + IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
-    position = stream.position().toInt()
 
     val dotnetMetadataRva = reader.ReadUInt32().toInt()
-    _signatureMetadata.dotnetMetadataRva = DataValue(
-      DataInfo(position, Int.SIZE_BYTES),
-      dotnetMetadataRva.toByteArray()
-    )
-
-    position = stream.position().toInt()
     val dotnetMetadataSize = reader.ReadUInt32().toInt()
-    _signatureMetadata.dotnetMetadataSize = DataValue(
-      DataInfo(position, Int.SIZE_BYTES),
-      dotnetMetadataSize.toByteArray()
-    )
+
+//    assert(dotnetMetadataRva == 0 && dotnetMetadataSize == 0)
 
     _dotnetMetadata = DataInfo(dotnetMetadataRva, dotnetMetadataSize)
 
@@ -132,15 +122,19 @@ class PeFile {
         DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
         reader.ReadInt32().toByteArray()
       )
-    } catch (_: EOFException) { // this can happen because of empty signature
-    }
 
-    try {
       _signatureMetadata.wRevision =
         DataValue(
           DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
-          reader.ReadInt32().toByteArray()
+          reader.ReadBytes(Short.SIZE_BYTES)
         )
+
+      _signatureMetadata.wCertificateType =
+        DataValue(
+          DataInfo(stream.position().toInt(), Int.SIZE_BYTES),
+          reader.ReadBytes(Short.SIZE_BYTES)
+        )
+
     } catch (_: EOFException) {
     }
 

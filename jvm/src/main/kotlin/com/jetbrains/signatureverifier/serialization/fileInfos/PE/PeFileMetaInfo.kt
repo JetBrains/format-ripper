@@ -14,26 +14,22 @@ import java.nio.channels.SeekableByteChannel
  */
 @Serializable
 data class PeFileMetaInfo(
-  var ntHeaderOffset: DataValue = DataValue(),
   var checkSum: DataValue = DataValue(),
   var securityRva: DataValue = DataValue(),
   var securitySize: DataValue = DataValue(),
-  var dotnetMetadataRva: DataValue = DataValue(),
-  var dotnetMetadataSize: DataValue = DataValue(),
   var dwLength: DataValue = DataValue(),
   var wRevision: DataValue = DataValue(),
+  var wCertificateType: DataValue = DataValue(),
   var signaturePosition: DataInfo = DataInfo(0, 0)
 ) : FileMetaInfo {
   override fun modifyFile(stream: SeekableByteChannel, signature: ByteArray) {
     listOf(
-      ntHeaderOffset,
       checkSum,
       securityRva,
       securitySize,
       dwLength,
       wRevision,
-      dotnetMetadataRva,
-      dotnetMetadataSize
+      wCertificateType,
     ).forEach {
       stream.Seek(it.dataInfo.Offset.toLong(), SeekOrigin.Begin)
       stream.write(ByteBuffer.wrap(it.value))
