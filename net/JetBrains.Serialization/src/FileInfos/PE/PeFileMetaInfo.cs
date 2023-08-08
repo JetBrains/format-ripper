@@ -1,12 +1,15 @@
 using JetBrains.FormatRipper;
 using JetBrains.FormatRipper.Pe;
+using Newtonsoft.Json;
 
 namespace JetBrains.Serialization.FileInfos.PE;
 
+[JsonObject(MemberSerialization.OptIn)]
 public class PeFileMetaInfo : IFileMetaInfo
 {
-  private PeFileMetadata Metadata { get; }
+  [JsonProperty("Metadata")] private PeFileMetadata Metadata { get; }
 
+  [JsonConstructor]
   public PeFileMetaInfo(PeFileMetadata metadata)
   {
     Metadata = metadata;

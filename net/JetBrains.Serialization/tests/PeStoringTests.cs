@@ -1,6 +1,7 @@
 using JetBrains.FormatRipper.Pe;
 using JetBrains.Serialization.FileInfos.PE;
 using JetBrains.SignatureVerifier.Crypt;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace JetBrains.Serialization.Tests;
@@ -21,7 +22,15 @@ public class PeStoringTests
     var file = ResourceUtil.OpenRead(ResourceCategory.Pe, signedResourceName,
       stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
-    var fileInfo = new PeFileInfo(file);
+    var initialFileInfo = new PeFileInfo(file);
+
+    var settings = new JsonSerializerSettings
+    {
+      TypeNameHandling = TypeNameHandling.Auto
+    };
+    var json = JsonConvert.SerializeObject(initialFileInfo, settings);
+    var fileInfo = JsonConvert.DeserializeObject<PeFileInfo>(json, settings);
+
 
     var tmpFile = Path.GetTempFileName();
     ResourceUtil.OpenRead(ResourceCategory.Pe, unsignedResourceName,

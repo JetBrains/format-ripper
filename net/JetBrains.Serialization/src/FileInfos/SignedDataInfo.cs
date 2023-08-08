@@ -9,13 +9,34 @@ namespace JetBrains.Serialization.FileInfos;
 [JsonObject(MemberSerialization.OptIn)]
 public class SignedDataInfo
 {
-  [JsonProperty("data")] private CmsSignedData _data;
+  // We store both DER and BER data only for serialization to work,
+  // this will not be an issue in SignedDataInfo:IEncodableInfo from net-serialization-dataholders
+  [JsonProperty("dataDer")] private byte[] _dataDer;
+  [JsonProperty("dataBer")] private byte[] _dataBer;
 
   [JsonConstructor]
-  public SignedDataInfo(CmsSignedData signedData)
+  public SignedDataInfo(byte[] dataDer, byte[] dataBer)
   {
-    _data = signedData;
+    _dataDer = dataDer;
+    _dataBer = dataBer;
   }
 
-  public byte[] ToSignature(string encoding = "DER") => _data.GetEncoded(encoding);
+
+  public SignedDataInfo(CmsSignedData signedData)
+  {
+    _dataDer = signedData.GetEncoded("DER");
+    _dataBer = signedData.GetEncoded("BER");
+  }
+
+  public byte[] ToSignature(string encoding = "DER")
+  {
+    switch (encoding)
+    {
+      case "DER":
+        return _dataDer;
+      case "BER":
+      default:
+        return _dataBer;
+    }
+  }
 }

@@ -11,7 +11,13 @@ public class PeFileInfo : FileInfo
 
   [JsonProperty("signedDataInfo")] public override SignedDataInfo SignedDataInfo { get; }
 
-  // Assuming PeFile is a defined class with the two methods
+  [JsonConstructor]
+  public PeFileInfo(IFileMetaInfo fileMetaInfo, SignedDataInfo signedDataInfo)
+  {
+    FileMetaInfo = fileMetaInfo;
+    SignedDataInfo = signedDataInfo;
+  }
+
   public PeFileInfo(PeFile peFile)
   {
     FileMetaInfo = new PeFileMetaInfo(peFile.FileMetadata ??
