@@ -106,7 +106,8 @@ namespace JetBrains.FormatRipper.Pe
             new StreamRange(checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)), sizeof(uint));
           StreamUtil.ReadBytes(stream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER32));
 
-          metadata.CheckSum = new DataValue(checkSumRange.Position, MemoryUtil.ToByteArray(ioh.CheckSum));
+          metadata.CheckSum = new DataValue(checkSumRange.Position,
+            MemoryUtil.ToByteArray(MemoryUtil.GetLeU4(ioh.CheckSum)));
 
           sizeOfHeaders = MemoryUtil.GetLeU4(ioh.SizeOfHeaders);
           subsystem = (IMAGE_SUBSYSTEM)MemoryUtil.GetLeU2(ioh.Subsystem);
@@ -124,7 +125,8 @@ namespace JetBrains.FormatRipper.Pe
             new StreamRange(checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)), sizeof(uint));
           StreamUtil.ReadBytes(stream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER64));
 
-          metadata.CheckSum = new DataValue(checkSumRange.Position, MemoryUtil.ToByteArray(ioh.CheckSum));
+          metadata.CheckSum = new DataValue(checkSumRange.Position,
+            MemoryUtil.ToByteArray(MemoryUtil.GetLeU4(ioh.CheckSum)));
 
           sizeOfHeaders = MemoryUtil.GetLeU4(ioh.SizeOfHeaders);
           subsystem = (IMAGE_SUBSYSTEM)MemoryUtil.GetLeU2(ioh.Subsystem);
@@ -149,9 +151,10 @@ namespace JetBrains.FormatRipper.Pe
         corIdd = iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR];
 
         metadata.SecurityRva =
-          new DataValue(securityIddRange.Position, MemoryUtil.ToByteArray(securityIdd.VirtualAddress));
+          new DataValue(securityIddRange.Position,
+            MemoryUtil.ToByteArray(MemoryUtil.GetLeU4(securityIdd.VirtualAddress)));
         metadata.SecuritySize = new DataValue(securityIddRange.Position + sizeof(UInt32),
-          MemoryUtil.ToByteArray(securityIdd.Size));
+          MemoryUtil.ToByteArray(MemoryUtil.GetLeU4(securityIdd.Size)));
       }
 
       var numberOfSections = MemoryUtil.GetLeU2(ifh.NumberOfSections);
@@ -231,10 +234,12 @@ namespace JetBrains.FormatRipper.Pe
 
             var position = stream.Position;
             StreamUtil.ReadBytes(stream, (byte*)&wc, sizeof(WIN_CERTIFICATE));
-            metadata.DwLength = new DataValue(position, MemoryUtil.ToByteArray(wc.dwLength));
-            metadata.WRevision = new DataValue(position + sizeof(UInt32), MemoryUtil.ToByteArray(wc.wRevision));
+            metadata.DwLength = new DataValue(position, MemoryUtil.ToByteArray(MemoryUtil.GetLeU4(wc.dwLength)));
+            metadata.WRevision = new DataValue(position + sizeof(UInt32),
+              MemoryUtil.ToByteArray(MemoryUtil.GetLeU2(wc.wRevision)));
             metadata.WCertificateType =
-              new DataValue(position + sizeof(UInt32) + sizeof(UInt16), MemoryUtil.ToByteArray(wc.wCertificateType));
+              new DataValue(position + sizeof(UInt32) + sizeof(UInt16),
+                MemoryUtil.ToByteArray(MemoryUtil.GetLeU2(wc.wCertificateType)));
             metadata.SignaturePosition = stream.Position;
 
             if (MemoryUtil.GetLeU2(wc.wCertificateType) != WinCertificate.WIN_CERT_TYPE_PKCS_SIGNED_DATA)
