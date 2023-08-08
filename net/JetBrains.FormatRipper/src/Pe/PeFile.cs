@@ -17,6 +17,8 @@ namespace JetBrains.FormatRipper.Pe
     public readonly ComputeHashInfo? ComputeHashInfo;
     public readonly bool HasMetadata;
     public readonly StreamRange SecurityDataDirectoryRange;
+    private uint _ntHeaderOffset;
+    public PeFileMetadata? FileMetadata { get; }
 
     private PeFile(
       IMAGE_FILE_MACHINE machine,
@@ -27,7 +29,8 @@ namespace JetBrains.FormatRipper.Pe
       SignatureData signatureData,
       bool hasMetadata,
       StreamRange securityDataDirectoryRange,
-      ComputeHashInfo? computeHashInfo)
+      ComputeHashInfo? computeHashInfo,
+      PeFileMetadata? metadata = null)
     {
       Machine = machine;
       Characteristics = characteristics;
@@ -38,6 +41,7 @@ namespace JetBrains.FormatRipper.Pe
       HasMetadata = hasMetadata;
       SecurityDataDirectoryRange = securityDataDirectoryRange;
       ComputeHashInfo = computeHashInfo;
+      FileMetadata = metadata;
     }
 
     public static unsafe bool Is(Stream stream)
@@ -65,11 +69,13 @@ namespace JetBrains.FormatRipper.Pe
 
     public static unsafe PeFile Parse(Stream stream, Mode mode = Mode.Default)
     {
+      var metadata = new PeFileMetadata();
       stream.Position = 0;
       IMAGE_DOS_HEADER ids;
       StreamUtil.ReadBytes(stream, (byte*)&ids, sizeof(IMAGE_DOS_HEADER));
       if (MemoryUtil.GetLeU2(ids.e_magic) != Magic.IMAGE_DOS_SIGNATURE)
         throw new FormatException("Invalid DOS magic");
+
       stream.Position = MemoryUtil.GetLeU4(ids.e_lfanew);
 
       uint peMagic;
@@ -90,35 +96,45 @@ namespace JetBrains.FormatRipper.Pe
       StreamRange checkSumRange;
       switch (MemoryUtil.GetLeU2(iohMagic))
       {
-      case Magic.IMAGE_NT_OPTIONAL_HDR32_MAGIC:
+        case Magic.IMAGE_NT_OPTIONAL_HDR32_MAGIC:
         {
           if (MemoryUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER32))
             throw new FormatException("Invalid 32-bit option header size");
 
           IMAGE_OPTIONAL_HEADER32 ioh;
-          checkSumRange = new StreamRange(checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)), sizeof(uint));
+          checkSumRange =
+            new StreamRange(checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)), sizeof(uint));
           StreamUtil.ReadBytes(stream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER32));
+
+          metadata.CheckSum = new DataValue(checkSumRange.Position, MemoryUtil.ToByteArray(ioh.CheckSum));
+
           sizeOfHeaders = MemoryUtil.GetLeU4(ioh.SizeOfHeaders);
           subsystem = (IMAGE_SUBSYSTEM)MemoryUtil.GetLeU2(ioh.Subsystem);
           dllCharacteristics = (IMAGE_DLLCHARACTERISTICS)MemoryUtil.GetLeU2(ioh.DllCharacteristics);
-          numberOfRvaAndSizes = Math.Max(MemoryUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+          numberOfRvaAndSizes = Math.Max(MemoryUtil.GetLeU4(ioh.NumberOfRvaAndSizes),
+            ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
         }
-        break;
-      case Magic.IMAGE_NT_OPTIONAL_HDR64_MAGIC:
+          break;
+        case Magic.IMAGE_NT_OPTIONAL_HDR64_MAGIC:
         {
           if (MemoryUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER64))
             throw new FormatException("Invalid 64-bit option header size");
           IMAGE_OPTIONAL_HEADER64 ioh;
-          checkSumRange = new StreamRange(checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)), sizeof(uint));
+          checkSumRange =
+            new StreamRange(checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)), sizeof(uint));
           StreamUtil.ReadBytes(stream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER64));
+
+          metadata.CheckSum = new DataValue(checkSumRange.Position, MemoryUtil.ToByteArray(ioh.CheckSum));
+
           sizeOfHeaders = MemoryUtil.GetLeU4(ioh.SizeOfHeaders);
           subsystem = (IMAGE_SUBSYSTEM)MemoryUtil.GetLeU2(ioh.Subsystem);
           dllCharacteristics = (IMAGE_DLLCHARACTERISTICS)MemoryUtil.GetLeU2(ioh.DllCharacteristics);
-          numberOfRvaAndSizes = Math.Max(MemoryUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+          numberOfRvaAndSizes = Math.Max(MemoryUtil.GetLeU4(ioh.NumberOfRvaAndSizes),
+            ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
         }
-        break;
-      default:
-        throw new FormatException("Unsupported PE image optional header");
+          break;
+        default:
+          throw new FormatException("Unsupported PE image optional header");
       }
 
       IMAGE_DATA_DIRECTORY securityIdd;
@@ -131,6 +147,11 @@ namespace JetBrains.FormatRipper.Pe
         StreamUtil.ReadBytes(stream, (byte*)iddsBuf, checked((int)numberOfRvaAndSizes * sizeof(IMAGE_DATA_DIRECTORY)));
         securityIdd = iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY];
         corIdd = iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR];
+
+        metadata.SecurityRva =
+          new DataValue(securityIddRange.Position, MemoryUtil.ToByteArray(securityIdd.VirtualAddress));
+        metadata.SecuritySize = new DataValue(securityIddRange.Position + sizeof(UInt32),
+          MemoryUtil.ToByteArray(securityIdd.Size));
       }
 
       var numberOfSections = MemoryUtil.GetLeU2(ifh.NumberOfSections);
@@ -165,20 +186,21 @@ namespace JetBrains.FormatRipper.Pe
       // Note: This procedure uses offset values from the PE/COFF specification, version 8.1 . For authoritative offset values, refer to the most recent version of the PE/COFF specification.
 
       var sortedHashIncludeRanges = StreamRangeUtil.Invert(sizeOfHeaders, new List<StreamRange>
-          {
-            checkSumRange,
-            securityIddRange
-          });
+      {
+        checkSumRange,
+        securityIddRange
+      });
 
       Array.Sort(ishs, (x, y) =>
-        {
-          if (MemoryUtil.GetLeU4(x.PointerToRawData) < MemoryUtil.GetLeU4(y.PointerToRawData)) return -1;
-          if (MemoryUtil.GetLeU4(x.PointerToRawData) > MemoryUtil.GetLeU4(y.PointerToRawData)) return 1;
-          return 0;
-        });
+      {
+        if (MemoryUtil.GetLeU4(x.PointerToRawData) < MemoryUtil.GetLeU4(y.PointerToRawData)) return -1;
+        if (MemoryUtil.GetLeU4(x.PointerToRawData) > MemoryUtil.GetLeU4(y.PointerToRawData)) return 1;
+        return 0;
+      });
       foreach (var ish in ishs)
         if (ish.PointerToRawData != 0 && ish.SizeOfRawData != 0)
-          sortedHashIncludeRanges.Add(new StreamRange(MemoryUtil.GetLeU4(ish.PointerToRawData), MemoryUtil.GetLeU4(ish.SizeOfRawData)));
+          sortedHashIncludeRanges.Add(new StreamRange(MemoryUtil.GetLeU4(ish.PointerToRawData),
+            MemoryUtil.GetLeU4(ish.SizeOfRawData)));
       var sizeOfSections = sortedHashIncludeRanges[sortedHashIncludeRanges.Count - 1].Position +
                            sortedHashIncludeRanges[sortedHashIncludeRanges.Count - 1].Size;
       var sizeOfFile = stream.Length;
@@ -189,7 +211,8 @@ namespace JetBrains.FormatRipper.Pe
       {
         if (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) < sizeOfFile)
         {
-          sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections, MemoryUtil.GetLeU4(securityIdd.VirtualAddress) - sizeOfSections));
+          sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections,
+            MemoryUtil.GetLeU4(securityIdd.VirtualAddress) - sizeOfSections));
           if (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size) < sizeOfFile)
             sortedHashIncludeRanges.Add(new StreamRange(
               MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size),
@@ -205,10 +228,19 @@ namespace JetBrains.FormatRipper.Pe
           {
             stream.Position = MemoryUtil.GetLeU4(securityIdd.VirtualAddress);
             WIN_CERTIFICATE wc;
+
+            var position = stream.Position;
             StreamUtil.ReadBytes(stream, (byte*)&wc, sizeof(WIN_CERTIFICATE));
+            metadata.DwLength = new DataValue(position, MemoryUtil.ToByteArray(wc.dwLength));
+            metadata.WRevision = new DataValue(position + sizeof(UInt32), MemoryUtil.ToByteArray(wc.wRevision));
+            metadata.WCertificateType =
+              new DataValue(position + sizeof(UInt32) + sizeof(UInt16), MemoryUtil.ToByteArray(wc.wCertificateType));
+            metadata.SignaturePosition = stream.Position;
+
             if (MemoryUtil.GetLeU2(wc.wCertificateType) != WinCertificate.WIN_CERT_TYPE_PKCS_SIGNED_DATA)
               throw new FormatException("Unsupported PE certificate type");
-            signatureData = new SignatureData(null, StreamUtil.ReadBytes(stream, checked((int)(MemoryUtil.GetLeU4(wc.dwLength) - sizeof(WIN_CERTIFICATE)))));
+            signatureData = new SignatureData(null,
+              StreamUtil.ReadBytes(stream, checked((int)(MemoryUtil.GetLeU4(wc.dwLength) - sizeof(WIN_CERTIFICATE)))));
           }
         }
       }
@@ -226,15 +258,17 @@ namespace JetBrains.FormatRipper.Pe
         (IMAGE_FILE_MACHINE)MemoryUtil.GetLeU2(ifh.Machine),
         (IMAGE_FILE)MemoryUtil.GetLeU2(ifh.Characteristics),
         subsystem, dllCharacteristics, hasSignature, signatureData, hasMetadata, securityIddRange,
-        computeHashInfo);
+        computeHashInfo, metadata);
     }
 
     private static uint TranslateVirtualAddress(IMAGE_SECTION_HEADER[] ishs, ref IMAGE_DATA_DIRECTORY idd)
     {
       foreach (var ish in ishs)
         if (MemoryUtil.GetLeU4(ish.VirtualAddress) <= MemoryUtil.GetLeU4(idd.VirtualAddress) &&
-            MemoryUtil.GetLeU4(idd.VirtualAddress) + MemoryUtil.GetLeU4(idd.Size) < MemoryUtil.GetLeU4(ish.VirtualAddress) + MemoryUtil.GetLeU4(ish.VirtualSize))
-          return MemoryUtil.GetLeU4(ish.PointerToRawData) + (MemoryUtil.GetLeU4(idd.VirtualAddress) - MemoryUtil.GetLeU4(ish.VirtualAddress));
+            MemoryUtil.GetLeU4(idd.VirtualAddress) + MemoryUtil.GetLeU4(idd.Size) <
+            MemoryUtil.GetLeU4(ish.VirtualAddress) + MemoryUtil.GetLeU4(ish.VirtualSize))
+          return MemoryUtil.GetLeU4(ish.PointerToRawData) +
+                 (MemoryUtil.GetLeU4(idd.VirtualAddress) - MemoryUtil.GetLeU4(ish.VirtualAddress));
 
       return 0;
     }
