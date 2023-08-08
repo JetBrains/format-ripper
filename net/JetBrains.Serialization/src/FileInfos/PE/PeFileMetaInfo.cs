@@ -34,10 +34,6 @@ public class PeFileMetaInfo : IFileMetaInfo
     );
 
     stream.Position = Metadata.SignaturePosition;
-    // if (!BitConverter.IsLittleEndian)
-    // {
-      // Array.Reverse(signature);
-    // }
 
     stream.Write(signature, 0, signature.Length);
 

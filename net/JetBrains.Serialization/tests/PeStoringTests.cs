@@ -29,7 +29,7 @@ public class PeStoringTests
       TypeNameHandling = TypeNameHandling.Auto
     };
     var json = JsonConvert.SerializeObject(initialFileInfo, settings);
-    var fileInfo = JsonConvert.DeserializeObject<PeFileInfo>(json, settings);
+    var fileInfo = JsonConvert.DeserializeObject<PeFileInfo>(json, settings)!;
 
 
     var tmpFile = Path.GetTempFileName();
