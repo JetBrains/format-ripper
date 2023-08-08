@@ -93,5 +93,41 @@ namespace JetBrains.FormatRipper.Impl
       Array.Copy(array2, 0, res, array1.Length, array2.Length);
       return res;
     }
+
+    internal static byte[] ToByteArray(int value, bool isBe = false)
+    {
+      byte[] bytes = BitConverter.GetBytes(value);
+
+      if (isBe)
+      {
+        Array.Reverse(bytes);
+      }
+
+      return bytes;
+    }
+
+    internal static byte[] ToByteArray(long value, bool isBe = false)
+    {
+      byte[] bytes = BitConverter.GetBytes(value);
+
+      if (isBe)
+      {
+        Array.Reverse(bytes);
+      }
+
+      return bytes;
+    }
+
+    internal static byte[] ToByteArray(uint value, bool isBe = false)
+    {
+      byte[] bytes = BitConverter.GetBytes(value);
+
+      if (isBe)
+      {
+        Array.Reverse(bytes);
+      }
+
+      return bytes;
+    }
   }
 }
