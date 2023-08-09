@@ -17,7 +17,6 @@ namespace JetBrains.FormatRipper.Pe
     public readonly ComputeHashInfo? ComputeHashInfo;
     public readonly bool HasMetadata;
     public readonly StreamRange SecurityDataDirectoryRange;
-    private uint _ntHeaderOffset;
     public PeFileMetadata? FileMetadata { get; }
 
     private PeFile(
