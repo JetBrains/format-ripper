@@ -72,6 +72,32 @@ jobs:
           path: ${{ github.workspace }}/net/**/tests/TestResults/*
           if-no-files-found: error
 
+  jvm-qemu:
+    name: JVM QEMU
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [ s390x ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install QEMU static executables formats
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      - name: Setup JDK and Tests under QEMU ${{ matrix.arch }}
+        run: >
+          docker run --rm -e JAVA_OPTS="-Djdk.lang.Process.launchMechanism=vfork" -v ${PWD}:/home/gradle/project -w /home/gradle/project/jvm --platform linux/${{ matrix.arch }} gradle:jdk17 gradle test
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: jvm-test-results-qemu-${{ matrix.arch }}
+          path: ${{ github.workspace }}/jvm/build/test-results/test/*
+          if-no-files-found: error
+
   jvm:
     name: JVM
 
