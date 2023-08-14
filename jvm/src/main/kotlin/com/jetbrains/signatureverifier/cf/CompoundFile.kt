@@ -22,9 +22,7 @@ open class CompoundFile {
     @Serializable
     data class SectFatMetaInfo(
       var splitIndex: Int = 0,
-      var sectors: MutableList<UInt> = mutableListOf(),
       var freeSect: UInt? = null,
-      var last: UInt? = null
     )
 
     @Serializable
@@ -32,8 +30,7 @@ open class CompoundFile {
       val header: CompoundFileHeader,
       val sectFat: List<UInt>,
       val fat: List<UInt>,
-      val miniFat: List<UInt>,
-      val sectFatMetaInfo: SectFatMetaInfo
+      val miniFat: List<UInt>
     )
   }
 
@@ -42,7 +39,6 @@ open class CompoundFile {
   private val _sectFat: List<UInt>
   private val _fat: List<UInt>
   private val _miniFat: List<UInt>
-  private val _sectFatMetaInfo: SectFatMetaInfo
   private val _metaInfo: CompoundFileMetaInfo
 
 
@@ -52,9 +48,8 @@ open class CompoundFile {
     _header = metaInfo.header
     CompoundFileHeader.writeHeader(_stream, _header.metaInfo)
 
-    _sectFatMetaInfo = metaInfo.sectFatMetaInfo
     _sectFat = metaInfo.sectFat
-    writeSectFat(_sectFat, _sectFatMetaInfo)
+    writeSectFat(_sectFat)
 
     _fat = metaInfo.fat
     writeFat()
@@ -63,7 +58,7 @@ open class CompoundFile {
     writeMiniFat()
 
     _metaInfo = CompoundFileMetaInfo(
-      _header, _sectFat, _fat, _miniFat, _sectFatMetaInfo
+      _header, _sectFat, _fat, _miniFat
     )
   }
 
@@ -75,14 +70,13 @@ open class CompoundFile {
     val reader = BinaryReader(stream.Rewind())
     _header = CompoundFileHeader(_stream, reader)
 
-    _sectFatMetaInfo = SectFatMetaInfo()
     _sectFat = readSectFat(reader)
 
     _fat = readFat(reader)
     _miniFat = readMiniFat(reader)
 
     _metaInfo = CompoundFileMetaInfo(
-      _header, _sectFat, _fat, _miniFat, _sectFatMetaInfo
+      _header, _sectFat, _fat, _miniFat
     )
   }
 
@@ -224,47 +218,19 @@ open class CompoundFile {
     return res
   }
 
-  fun writeSectFat(sectFat: List<UInt>, metaInfo: SectFatMetaInfo) {
-    sectFat.subList(0, metaInfo.splitIndex).forEach {
+  fun writeSectFat(sectFat: List<UInt>) {
+    sectFat.forEach {
       _stream.write(ByteBuffer.wrap(it.toInt().toByteArray().copyOf(UInt.SIZE_BYTES)))
     }
-
-    _sectFatMetaInfo.freeSect?.let {
-      _stream.write(ByteBuffer.wrap(it.toInt().toByteArray().copyOf(UInt.SIZE_BYTES)))
-    }
-
-    var nextSect = _header.SectDifStart
-    val difatSectorsCount = (_header.SectorSize shr 2) - 1u
-    var cursor = metaInfo.splitIndex
-    val sectorIterator = metaInfo.sectors.iterator()
-    while (cursor < sectFat.size) {
-      _stream.Jump(_header.GetSectorOffset(nextSect))
-
-      for (i in 0 until Math.min(difatSectorsCount.toInt(), sectFat.size - cursor)) {
-        _stream.write(ByteBuffer.wrap(sectFat[cursor++].toInt().toByteArray().copyOf(UInt.SIZE_BYTES)))
-      }
-
-      if (!sectorIterator.hasNext())
-        break
-      nextSect = sectorIterator.next()
-      _stream.write(ByteBuffer.wrap(nextSect.toInt().toByteArray().copyOf(UInt.SIZE_BYTES)))
-    }
-    _sectFatMetaInfo.last?.let {
-      _stream.write(ByteBuffer.wrap(it.toInt().toByteArray().copyOf(UInt.SIZE_BYTES)))
-    }
-
   }
 
 
   private fun readSectFat(reader: BinaryReader): MutableList<UInt> {
     val res = mutableListOf<UInt>()
-    _sectFatMetaInfo.splitIndex = 109
     for (i in 0 until 109) {
       val sector = reader.ReadUInt32()
 
       if (sector.toLong() == SpecialSectors.FREESECT) {
-        _sectFatMetaInfo.splitIndex = i
-        _sectFatMetaInfo.freeSect = sector
         break
       }
 
@@ -281,7 +247,6 @@ open class CompoundFile {
         val sector = reader.ReadUInt32()
 
         if (sector.toLong() == SpecialSectors.FREESECT || sector.toLong() == SpecialSectors.ENDOFCHAIN) {
-          _sectFatMetaInfo.last = sector
           return res
         }
 
@@ -289,7 +254,6 @@ open class CompoundFile {
       }
       //next sector in the difat chain
       nextSect = reader.ReadUInt32()
-      _sectFatMetaInfo.sectors.add(nextSect)
     }
     return res
   }
