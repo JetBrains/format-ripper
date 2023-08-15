@@ -9,7 +9,7 @@ namespace JetBrains.FormatRipper.Compound.Impl
   [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Global")]
   [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  internal unsafe struct CompoundFileHeader
+  public unsafe struct CompoundFileHeader
   {
     internal fixed Byte HeaderSignature[Declarations.HeaderSignatureSize];
     internal Guid HeaderClsid;
