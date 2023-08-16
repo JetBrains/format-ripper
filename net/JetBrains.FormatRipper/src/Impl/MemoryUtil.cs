@@ -141,5 +141,16 @@ namespace JetBrains.FormatRipper.Impl
 
       return bytes;
     }
+
+    internal static byte[] SliceArray(byte[] source, int offset, int size)
+    {
+      var result = new byte[size];
+      for (int i = 0; i < size; i++)
+      {
+        result[i] = source[offset + i];
+      }
+
+      return result;
+    }
   }
 }

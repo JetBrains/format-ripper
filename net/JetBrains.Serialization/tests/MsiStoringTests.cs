@@ -10,6 +10,10 @@ public class MsiStoringTests
 {
 // @formatter:off
     [TestCase("2dac4b.msi", "2dac4b_not_signed.msi")]
+    [TestCase("2dac4b_signed2.msi", "2dac4b_not_signed.msi")]
+    [TestCase("firefox.msi", "firefox_not_signed.msi")]
+    [TestCase("sumatra.msi", "sumatra_not_signed.msi")]
+
   // @formatter:on
   public Task MsiStoringTest(string signedResourceName, string unsignedResourceName)
   {
@@ -47,16 +51,6 @@ public class MsiStoringTests
     using (var fileStream = new FileStream(tmpFile, FileMode.Open, FileAccess.ReadWrite))
     {
       initialFileInfo!.ModifyFile(fileStream);
-    }
-
-    using (var fileStream = new FileStream(tmpFile, FileMode.Open, FileAccess.Read))
-    {
-      using (var dstStream = new FileStream("/Users/artemkaramysev/Desktop/projects/work/format-ripper/data/msi/tmp",
-               FileMode.Create, FileAccess.ReadWrite))
-      {
-        fileStream.CopyTo(dstStream);
-        Assert.That(ResourceUtil.CompareTwoStreams(fileStream, dstStream));
-      }
     }
 
     ResourceUtil.OpenRead(ResourceCategory.Msi, signedResourceName,

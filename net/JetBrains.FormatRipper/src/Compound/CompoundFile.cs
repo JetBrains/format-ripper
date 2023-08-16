@@ -63,6 +63,7 @@ namespace JetBrains.FormatRipper.Compound
       sectorSize = 1u << HeaderMetaInfo.Header.SectorShift;
       entitiesPerSector = sectorSize / sizeof(uint);
       firstMiniFatSectorLocation = (REGSECT)HeaderMetaInfo.Header.FirstMiniFatSectorLocation;
+      miniStreamCutoffSize = HeaderMetaInfo.Header.MiniStreamCutoffSize;
 
       WriteHeader(HeaderMetaInfo.Header);
 
@@ -486,18 +487,21 @@ namespace JetBrains.FormatRipper.Compound
       }
     }
 
-    byte[] Read(bool isMiniStream, REGSECT firstSectorNumber, ulong index, ulong size)
+    byte[] Read(bool isMiniStream, REGSECT firstSectorNumber, ulong index, ulong size,
+      List<KeyValuePair<long, long>>? visitedSegments = null)
     {
       var res = new List<byte>(size > int.MaxValue ? int.MaxValue : (int)size);
       Walk(isMiniStream, firstSectorNumber, index, size, range =>
       {
         _stream.Position = range.Position;
         res.AddRange(StreamUtil.ReadBytes(_stream, checked((int)range.Size)));
+
+        visitedSegments?.Add(new KeyValuePair<long, long>(range.Position, _stream.Position));
       });
       return res.ToArray();
     }
 
-    public void PutEntries(List<KeyValuePair<DirectoryEntry, byte[]>> data, REGSECT startSector, bool wipe = false)
+    public void PutEntries(List<KeyValuePair<DirectoryEntry, byte[]>> data, uint startSector, bool wipe = false)
     {
       var entries = new List<DirectoryEntry>();
       foreach (var kv in data)
@@ -519,7 +523,7 @@ namespace JetBrains.FormatRipper.Compound
         _stream.Position = GetSectorPosition(nextSect);
         for (int i = 0; i < Math.Min((1u << header.SectorShift) / DirectoryEntrySize, data.Count); i++)
         {
-          var entry = data[it];
+          var entry = data[it++];
           if (wipe)
           {
             WipeDirectoryEntry();
@@ -565,7 +569,7 @@ namespace JetBrains.FormatRipper.Compound
       writer.Write(entry.CompoundFileDirectoryEntry.StreamSize);
     }
 
-    private void PutStreamData(List<KeyValuePair<DirectoryEntry, byte[]>> data, REGSECT startSector, bool wipe = false)
+    private void PutStreamData(List<KeyValuePair<DirectoryEntry, byte[]>> data, uint startSector, bool wipe = false)
     {
       var header = HeaderMetaInfo.Header;
       var nextSect = (REGSECT)header.FirstDirectorySectorLocation;
@@ -579,11 +583,11 @@ namespace JetBrains.FormatRipper.Compound
           var entry = data[it++];
           if (wipe)
           {
-            WriteStreamData(entry.Key, new byte[entry.Value.Length], startSector);
+            WriteStreamData(entry.Key, startSector, new byte[entry.Value.Length]);
           }
-          else
+          else if (entry.Key.Name != RootEntryName && entry.Value is { Length: > 0 })
           {
-            WriteStreamData(entry.Key, entry.Value, startSector);
+            WriteStreamData(entry.Key, startSector, entry.Value);
           }
         }
 
@@ -591,22 +595,58 @@ namespace JetBrains.FormatRipper.Compound
       }
     }
 
+    public static string ToHexString(byte[] bytes)
+    {
+      var hexChars = "0123456789ABCDEF";
+      var result = new StringBuilder(bytes.Length * 2);
+
+      foreach (var b in bytes)
+      {
+        var value = b & 0xFF;
+        result.Append(hexChars[value >> 4]);
+        result.Append(hexChars[value & 0x0F]);
+      }
+
+      return result.ToString();
+    }
+
     private void WriteStreamData(DirectoryEntry directoryEntry,
-      byte[] data,
-      REGSECT startSector
+      uint startSector,
+      byte[] data
     )
     {
       var offset = 0;
-      Walk(directoryEntry.StreamSize < miniStreamCutoffSize,
-        directoryEntry.StartingSectorLocation,
-        0,
-        directoryEntry.StreamSize, range =>
-        {
-          _stream.Position = range.Position;
-          ArraySegment<byte> segment = new ArraySegment<byte>(data, offset, (int)range.Size);
-          _stream.Write(segment.Array, 0, (int)range.Size);
-          offset += (int)range.Size;
-        });
+      var cursor = 0;
+      var nextSect = directoryEntry.StartingSectorLocation;
+      var isMini = directoryEntry.StreamSize <= miniStreamCutoffSize;
+      var sectorSize = 1 << HeaderMetaInfo.Header.SectorShift;
+      var streamOffset = 0L;
+      if (isMini)
+      {
+        sectorSize = 1 << HeaderMetaInfo.Header.MiniSectorShift;
+      }
+
+      while (nextSect != REGSECT.ENDOFCHAIN)
+      {
+        if (isMini)
+          streamOffset = GetSectorPosition((REGSECT)startSector) +
+                         ((long)nextSect << HeaderMetaInfo.Header.MiniSectorShift);
+        else
+          streamOffset = GetSectorPosition(nextSect);
+
+        _stream.Position = streamOffset;
+        var toWrite = Math.Min((int)directoryEntry.StreamSize - cursor, sectorSize);
+
+        _stream.Write(MemoryUtil.SliceArray(data, cursor, toWrite), 0, toWrite);
+
+        cursor += toWrite;
+        if (cursor >= data.Length)
+          break;
+        if (isMini)
+          nextSect = (REGSECT)HeaderMetaInfo.MiniFat[(int)nextSect];
+        else
+          nextSect = (REGSECT)HeaderMetaInfo.Fat[(int)nextSect];
+      }
     }
 
 
@@ -635,7 +675,8 @@ namespace JetBrains.FormatRipper.Compound
       return childrenIds;
     }
 
-    public List<KeyValuePair<DirectoryEntry, byte[]>> GetEntries()
+    public List<KeyValuePair<DirectoryEntry, byte[]>> GetEntries(List<KeyValuePair<long, long>>? visitedSegments = null,
+      List<KeyValuePair<long, long>>? rootSegments = null)
     {
       var entries = directoryEntries;
 
@@ -648,7 +689,9 @@ namespace JetBrains.FormatRipper.Compound
             Read(directoryEntry.StreamSize < miniStreamCutoffSize,
               directoryEntry.StartingSectorLocation,
               0,
-              directoryEntry.StreamSize)
+              directoryEntry.StreamSize,
+              directoryEntry.Name == RootEntryName ? rootSegments : visitedSegments
+            )
           )
         );
       }
