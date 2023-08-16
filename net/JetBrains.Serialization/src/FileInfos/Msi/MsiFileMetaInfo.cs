@@ -47,7 +47,7 @@ public class MsiFileMetaInfo : IFileMetaInfo
 
     unsignedFile.PutEntries(unsignedEntries, startSect, wipe: true);
 
-    // unsignedFile = new CompoundFile(CompoundFileHeaderMetaInfo, stream);
+    unsignedFile = new CompoundFile(CompoundFileHeaderMetaInfo, stream);
     //
     // var specialEntriesDataMap = new Hashtable();
     // specialEntriesDataMap.Add("MsiDigitalSignatureEx", DigitalSignatureExData);

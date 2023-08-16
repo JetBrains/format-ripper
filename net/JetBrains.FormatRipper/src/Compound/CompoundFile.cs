@@ -62,7 +62,7 @@ namespace JetBrains.FormatRipper.Compound
       HeaderMetaInfo = headerMetaInfo;
       sectorSize = 1u << HeaderMetaInfo.Header.SectorShift;
       entitiesPerSector = sectorSize / sizeof(uint);
-      firstMiniFatSectorLocation = (REGSECT)HeaderMetaInfo.Header.FirstDirectorySectorLocation;
+      firstMiniFatSectorLocation = (REGSECT)HeaderMetaInfo.Header.FirstMiniFatSectorLocation;
 
       WriteHeader(HeaderMetaInfo.Header);
 
@@ -74,9 +74,8 @@ namespace JetBrains.FormatRipper.Compound
         _stream.Write(buf, 0, buf.Length);
       }
 
-      //
       WriteFat();
-      //
+
       WriteMiniFat();
     }
 
