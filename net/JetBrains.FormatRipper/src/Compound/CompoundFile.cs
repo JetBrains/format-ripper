@@ -507,7 +507,7 @@ namespace JetBrains.FormatRipper.Compound
       }
 
       PutDirectoryEntries(entries, wipe);
-      // PutStreamData(data, startSector, wipe);
+      PutStreamData(data, startSector, wipe);
     }
 
     public void PutDirectoryEntries(List<DirectoryEntry> data, bool wipe)
@@ -577,7 +577,7 @@ namespace JetBrains.FormatRipper.Compound
         _stream.Position = GetSectorPosition(nextSect);
         for (int i = 0; i < Math.Min((1u << header.SectorShift) / DirectoryEntrySize, data.Count); i++)
         {
-          var entry = data[it];
+          var entry = data[it++];
           if (wipe)
           {
             WriteStreamData(entry.Key, new byte[entry.Value.Length], startSector);
