@@ -33,7 +33,7 @@ public class MsiStoringTests
     //
     //
     var tmpFile = Path.GetTempFileName();
-    ResourceUtil.OpenRead(ResourceCategory.Msi, signedResourceName,
+    ResourceUtil.OpenRead(ResourceCategory.Msi, unsignedResourceName,
       stream =>
       {
         using (var fileStream = new FileStream(tmpFile, FileMode.Create, FileAccess.Write))
@@ -44,13 +44,18 @@ public class MsiStoringTests
         return true;
       });
 
+    using (var fileStream = new FileStream(tmpFile, FileMode.Open, FileAccess.ReadWrite))
+    {
+      initialFileInfo!.ModifyFile(fileStream);
+    }
+
     using (var fileStream = new FileStream(tmpFile, FileMode.Open, FileAccess.Read))
     {
       using (var dstStream = new FileStream("/Users/artemkaramysev/Desktop/projects/work/format-ripper/data/msi/tmp",
                FileMode.Create, FileAccess.ReadWrite))
       {
-        initialFileInfo!.ModifyFile(fileStream);
         fileStream.CopyTo(dstStream);
+        Assert.That(ResourceUtil.CompareTwoStreams(fileStream, dstStream));
       }
     }
 

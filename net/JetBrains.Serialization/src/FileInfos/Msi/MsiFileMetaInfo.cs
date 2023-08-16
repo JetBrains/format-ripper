@@ -30,20 +30,22 @@ public class MsiFileMetaInfo : IFileMetaInfo
   public void ModifyFile(Stream stream, byte[] signature)
   {
     var unsignedFile = CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData);
-    // var unsignedEntries = unsignedFile.GetEntries();
-    // var unsignedEntriesMap = new Hashtable();
-    // foreach (var keyValuePair in unsignedEntries)
-    // {
-    //   unsignedEntriesMap.Add(keyValuePair.Key.Name.Trim(new[] { '' }), keyValuePair.Value);
-    // }
-    //
-    // var unsignedRoot = unsignedEntries.Find(
-    //   entry => entry.Key.Name.Trim(new[] { '' }).Equals("Root Entry")
-    // );
-    //
-    // var startSect = unsignedRoot.Key.StartingSectorLocation;
+    var unsignedEntries = unsignedFile.GetEntries();
+    var unsignedEntriesMap = new Hashtable();
+    foreach (var keyValuePair in unsignedEntries)
+    {
+      if (unsignedEntriesMap.Contains(keyValuePair.Key.Name.Trim(new[] { '' })))
+        continue;
+      unsignedEntriesMap.Add(keyValuePair.Key.Name.Trim(new[] { '' }), keyValuePair.Value);
+    }
 
-    // unsignedFile.PutEntries(unsignedEntries, startSect, wipe: true);
+    var unsignedRoot = unsignedEntries.Find(
+      entry => entry.Key.Name.Trim(new[] { '' }).Equals("Root Entry")
+    );
+
+    var startSect = unsignedRoot.Key.StartingSectorLocation;
+
+    unsignedFile.PutEntries(unsignedEntries, startSect, wipe: true);
 
     // unsignedFile = new CompoundFile(CompoundFileHeaderMetaInfo, stream);
     //

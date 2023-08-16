@@ -36,23 +36,23 @@ namespace JetBrains.FormatRipper.Compound
       }
     }
 
-    public readonly FileType Type;
-    public readonly bool HasSignature;
-    public readonly SignatureData SignatureData;
-    public readonly ExtractStream[] ExtractStreams;
-    public readonly ComputeHashInfo? ComputeHashInfo;
-    public CompoundFileHeaderMetaInfo HeaderMetaInfo;
+    public FileType Type { get; private set; }
+    public bool HasSignature { get; private set; }
+    public SignatureData SignatureData { get; private set; }
+    public ExtractStream[] ExtractStreams { get; private set; }
+    public ComputeHashInfo? ComputeHashInfo { get; private set; }
+    public CompoundFileHeaderMetaInfo HeaderMetaInfo { get; private set; }
+    public long fileSize { get; private set; }
 
-    private uint sectorSize;
-    private Stream _stream;
-    private List<REGSECT> diFatTable;
-    private uint entitiesPerSector;
-    private DirectoryEntry rootDirectoryEntry;
-    private REGSECT firstMiniFatSectorLocation;
-    private List<DirectoryEntry> directoryEntries;
-    private uint miniStreamCutoffSize;
-    private static uint DirectoryEntrySize = 0x80u;
-    public long fileSize;
+    private uint sectorSize { get; }
+    private Stream _stream { get; }
+    private List<REGSECT> diFatTable { get; }
+    private uint entitiesPerSector { get; }
+    private DirectoryEntry rootDirectoryEntry { get; }
+    private REGSECT firstMiniFatSectorLocation { get; }
+    private List<DirectoryEntry> directoryEntries { get; }
+    private uint miniStreamCutoffSize { get; }
+    private static uint DirectoryEntrySize { get; } = 0x80u;
 
     public CompoundFile(CompoundFileHeaderMetaInfo headerMetaInfo, Stream stream)
     {
@@ -62,6 +62,7 @@ namespace JetBrains.FormatRipper.Compound
       HeaderMetaInfo = headerMetaInfo;
       sectorSize = 1u << HeaderMetaInfo.Header.SectorShift;
       entitiesPerSector = sectorSize / sizeof(uint);
+      firstMiniFatSectorLocation = (REGSECT)HeaderMetaInfo.Header.FirstDirectorySectorLocation;
 
       WriteHeader(HeaderMetaInfo.Header);
 
@@ -73,8 +74,9 @@ namespace JetBrains.FormatRipper.Compound
         _stream.Write(buf, 0, buf.Length);
       }
 
+      //
       WriteFat();
-
+      //
       WriteMiniFat();
     }
 
@@ -505,7 +507,7 @@ namespace JetBrains.FormatRipper.Compound
       }
 
       PutDirectoryEntries(entries, wipe);
-      PutStreamData(data, startSector, wipe);
+      // PutStreamData(data, startSector, wipe);
     }
 
     public void PutDirectoryEntries(List<DirectoryEntry> data, bool wipe)
@@ -636,8 +638,7 @@ namespace JetBrains.FormatRipper.Compound
 
     public List<KeyValuePair<DirectoryEntry, byte[]>> GetEntries()
     {
-      var entries = GetDirectoryEntryChildren(rootDirectoryEntry, _ => true);
-      entries.Add(rootDirectoryEntry);
+      var entries = directoryEntries;
 
       List<KeyValuePair<DirectoryEntry, byte[]>> result = new List<KeyValuePair<DirectoryEntry, byte[]>>();
       foreach (var directoryEntry in entries)
