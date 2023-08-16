@@ -50,10 +50,111 @@ namespace JetBrains.FormatRipper.Compound
     private DirectoryEntry rootDirectoryEntry;
     private REGSECT firstMiniFatSectorLocation;
     private List<DirectoryEntry> directoryEntries;
+    private uint miniStreamCutoffSize;
+    private static uint DirectoryEntrySize = 0x80u;
+    public long fileSize;
+
+    public CompoundFile(CompoundFileHeaderMetaInfo headerMetaInfo, Stream stream)
+    {
+      _stream = stream;
+      _stream.Position = 0;
+
+      HeaderMetaInfo = headerMetaInfo;
+      sectorSize = 1u << HeaderMetaInfo.Header.SectorShift;
+      entitiesPerSector = sectorSize / sizeof(uint);
+
+      WriteHeader(HeaderMetaInfo.Header);
+
+      diFatTable = new List<REGSECT>();
+      foreach (var it in HeaderMetaInfo.SectFat)
+      {
+        diFatTable.Add((REGSECT)it);
+        var buf = MemoryUtil.ToByteArray(it);
+        _stream.Write(buf, 0, buf.Length);
+      }
+
+      WriteFat();
+
+      WriteMiniFat();
+    }
+
+    private void WriteMiniFat()
+    {
+      var it = 0;
+      var nextSect = firstMiniFatSectorLocation;
+      while (nextSect != REGSECT.ENDOFCHAIN)
+      {
+        if (nextSect > REGSECT.MAXREGSECT)
+        {
+          break;
+        }
+
+        _stream.Position = GetSectorPosition(nextSect);
+        for (int i = 0; i < (1u << HeaderMetaInfo.Header.SectorShift) >> 2; i++)
+        {
+          var buf = MemoryUtil.ToByteArray(HeaderMetaInfo.MiniFat[it++]);
+          _stream.Write(buf, 0, buf.Length);
+        }
+
+        nextSect = (REGSECT)HeaderMetaInfo.Fat[(int)nextSect];
+      }
+    }
+
+    private void WriteFat()
+    {
+      var it = 0;
+      foreach (var sect in diFatTable)
+      {
+        if (sect > REGSECT.MAXREGSECT)
+        {
+          continue;
+        }
+
+        _stream.Position = GetSectorPosition(sect);
+        for (int i = 0; i < (1u << HeaderMetaInfo.Header.SectorShift) >> 2; i++)
+        {
+          var buf = MemoryUtil.ToByteArray(HeaderMetaInfo.Fat[it++]);
+          _stream.Write(buf, 0, buf.Length);
+        }
+      }
+    }
+
+    private unsafe void WriteHeader(CompoundFileHeader header)
+    {
+      BinaryWriter writer = new BinaryWriter(_stream, Encoding.Unicode);
+
+      for (int i = 0; i < Declarations.HeaderSignatureSize; i++)
+      {
+        writer.Write(header.HeaderSignature[i]);
+      }
+
+      writer.Write(header.HeaderClsid.ToByteArray());
+      writer.Write(header.MinorVersion);
+      writer.Write(header.MajorVersion);
+      writer.Write(header.ByteOrder);
+      writer.Write(header.SectorShift);
+      writer.Write(header.MiniSectorShift);
+
+      for (int i = 0; i < 6; i++)
+      {
+        writer.Write(header.Reserved[i]);
+      }
+
+      writer.Write(header.NumberOfDirectorySectors);
+      writer.Write(header.NumberOfFatSectors);
+      writer.Write(header.FirstDirectorySectorLocation);
+      writer.Write(header.TransactionSignatureNumber);
+      writer.Write(header.MiniStreamCutoffSize);
+      writer.Write(header.FirstMiniFatSectorLocation);
+      writer.Write(header.NumberOfMiniFatSectors);
+      writer.Write(header.FirstDiFatSectorLocation);
+      writer.Write(header.NumberOfDiFatSectors);
+    }
 
     private unsafe CompoundFile(Stream stream, Mode mode = Mode.Default,
       ExtractFilter? extractFilter = null)
     {
+      fileSize = stream.Length;
       _stream = stream;
       _stream.Position = 0;
       CompoundFileHeader cfh;
@@ -124,7 +225,6 @@ namespace JetBrains.FormatRipper.Compound
         }
       }
 
-
       var position = _stream.Position;
       try
       {
@@ -179,7 +279,8 @@ namespace JetBrains.FormatRipper.Compound
               (REGSID)MemoryUtil.GetLeU4(cfdes[n].RightSiblingId),
               (REGSID)MemoryUtil.GetLeU4(cfdes[n].ChildId),
               (REGSECT)MemoryUtil.GetLeU4(cfdes[n].StartingSectorLocation),
-              MemoryUtil.GetLeU8(cfdes[n].StreamSize)));
+              MemoryUtil.GetLeU8(cfdes[n].StreamSize),
+              cfdes[n]));
           }
         }
       }
@@ -198,6 +299,11 @@ namespace JetBrains.FormatRipper.Compound
         var nextSect = firstMiniFatSectorLocation;
         while (nextSect != REGSECT.ENDOFCHAIN)
         {
+          if (nextSect > REGSECT.MAXREGSECT)
+          {
+            break;
+          }
+
           _stream.Position = GetSectorPosition(nextSect);
           for (int i = 0; i < (1u << cfh.SectorShift) >> 2; i++)
           {
@@ -216,7 +322,7 @@ namespace JetBrains.FormatRipper.Compound
 
       _stream.Position = position;
 
-      var miniStreamCutoffSize = MemoryUtil.GetLeU4(cfh.MiniStreamCutoffSize);
+      miniStreamCutoffSize = MemoryUtil.GetLeU4(cfh.MiniStreamCutoffSize);
 
       var extractBlobs = new List<ExtractStream>();
       if (extractFilter != null)
@@ -390,6 +496,119 @@ namespace JetBrains.FormatRipper.Compound
       return res.ToArray();
     }
 
+    public void PutEntries(List<KeyValuePair<DirectoryEntry, byte[]>> data, REGSECT startSector, bool wipe = false)
+    {
+      var entries = new List<DirectoryEntry>();
+      foreach (var kv in data)
+      {
+        entries.Add(kv.Key);
+      }
+
+      PutDirectoryEntries(entries, wipe);
+      PutStreamData(data, startSector, wipe);
+    }
+
+    public void PutDirectoryEntries(List<DirectoryEntry> data, bool wipe)
+    {
+      var header = HeaderMetaInfo.Header;
+      var nextSect = (REGSECT)header.FirstDirectorySectorLocation;
+      var it = 0;
+      while (nextSect != REGSECT.ENDOFCHAIN)
+      {
+        _stream.Position = GetSectorPosition(nextSect);
+        for (int i = 0; i < Math.Min((1u << header.SectorShift) / DirectoryEntrySize, data.Count); i++)
+        {
+          var entry = data[it];
+          if (wipe)
+          {
+            WipeDirectoryEntry();
+          }
+          else
+          {
+            WriteDirectoryEntry(entry);
+          }
+        }
+
+        nextSect = (REGSECT)HeaderMetaInfo.Fat[(int)nextSect];
+      }
+    }
+
+    private void WipeDirectoryEntry()
+    {
+      _stream.Write(new byte[128], 0, 128);
+    }
+
+    private unsafe void WriteDirectoryEntry(DirectoryEntry entry)
+    {
+      BinaryWriter writer = new BinaryWriter(_stream, Encoding.Unicode);
+
+      fixed (Byte* ptr = entry.CompoundFileDirectoryEntry.DirectoryEntryName)
+      {
+        for (int i = 0; i < Declarations.DirectoryEntryNameSize; i++)
+        {
+          writer.Write(ptr[i]);
+        }
+      }
+
+      writer.Write(entry.CompoundFileDirectoryEntry.DirectoryEntryNameLength);
+      writer.Write(entry.CompoundFileDirectoryEntry.ObjectType);
+      writer.Write(entry.CompoundFileDirectoryEntry.ColorFlag);
+      writer.Write(entry.CompoundFileDirectoryEntry.LeftSiblingId);
+      writer.Write(entry.CompoundFileDirectoryEntry.RightSiblingId);
+      writer.Write(entry.CompoundFileDirectoryEntry.ChildId);
+      writer.Write(entry.CompoundFileDirectoryEntry.Clsid.ToByteArray());
+      writer.Write(entry.CompoundFileDirectoryEntry.StateBits);
+      writer.Write(entry.CompoundFileDirectoryEntry.CreationTime);
+      writer.Write(entry.CompoundFileDirectoryEntry.ModifiedTime);
+      writer.Write(entry.CompoundFileDirectoryEntry.StartingSectorLocation);
+      writer.Write(entry.CompoundFileDirectoryEntry.StreamSize);
+    }
+
+    private void PutStreamData(List<KeyValuePair<DirectoryEntry, byte[]>> data, REGSECT startSector, bool wipe = false)
+    {
+      var header = HeaderMetaInfo.Header;
+      var nextSect = (REGSECT)header.FirstDirectorySectorLocation;
+      var it = 0;
+
+      while (nextSect != REGSECT.ENDOFCHAIN)
+      {
+        _stream.Position = GetSectorPosition(nextSect);
+        for (int i = 0; i < Math.Min((1u << header.SectorShift) / DirectoryEntrySize, data.Count); i++)
+        {
+          var entry = data[it];
+          if (wipe)
+          {
+            WriteStreamData(entry.Key, new byte[entry.Value.Length], startSector);
+          }
+          else
+          {
+            WriteStreamData(entry.Key, entry.Value, startSector);
+          }
+        }
+
+        nextSect = (REGSECT)HeaderMetaInfo.Fat[(int)nextSect];
+      }
+    }
+
+    private void WriteStreamData(DirectoryEntry directoryEntry,
+      byte[] data,
+      REGSECT startSector
+    )
+    {
+      var offset = 0;
+      Walk(directoryEntry.StreamSize < miniStreamCutoffSize,
+        directoryEntry.StartingSectorLocation,
+        0,
+        directoryEntry.StreamSize, range =>
+        {
+          _stream.Position = range.Position;
+          ArraySegment<byte> segment = new ArraySegment<byte>(data, offset, (int)range.Size);
+          _stream.Write(segment.Array, 0, (int)range.Size);
+          offset += (int)range.Size;
+        });
+    }
+
+
     List<DirectoryEntry> GetDirectoryEntryChildren(DirectoryEntry entry, FilterDelegate filter)
     {
       if (entry.ObjectType is not (STGTY.STGTY_ROOT or STGTY.STGTY_STORAGE))
@@ -413,6 +632,28 @@ namespace JetBrains.FormatRipper.Compound
       }
 
       return childrenIds;
+    }
+
+    public List<KeyValuePair<DirectoryEntry, byte[]>> GetEntries()
+    {
+      var entries = GetDirectoryEntryChildren(rootDirectoryEntry, _ => true);
+      entries.Add(rootDirectoryEntry);
+
+      List<KeyValuePair<DirectoryEntry, byte[]>> result = new List<KeyValuePair<DirectoryEntry, byte[]>>();
+      foreach (var directoryEntry in entries)
+      {
+        result.Add(
+          new KeyValuePair<DirectoryEntry, byte[]>(
+            directoryEntry,
+            Read(directoryEntry.StreamSize < miniStreamCutoffSize,
+              directoryEntry.StartingSectorLocation,
+              0,
+              directoryEntry.StreamSize)
+          )
+        );
+      }
+
+      return result;
     }
 
     static DirectoryEntry? TakeFirst(IEnumerable<DirectoryEntry> ids)
@@ -455,7 +696,7 @@ namespace JetBrains.FormatRipper.Compound
       }
     }
 
-    private sealed class DirectoryEntry
+    public sealed class DirectoryEntry
     {
       public readonly REGSID ChildId;
       public readonly REGSECT StartingSectorLocation;
@@ -466,6 +707,7 @@ namespace JetBrains.FormatRipper.Compound
       public readonly Guid Clsid;
       public readonly STGTY ObjectType;
       public readonly REGSID RightSiblingId;
+      public readonly CompoundFileDirectoryEntry CompoundFileDirectoryEntry;
 
       internal DirectoryEntry(string name,
         Guid clsid,
@@ -475,7 +717,8 @@ namespace JetBrains.FormatRipper.Compound
         REGSID rightSiblingId,
         REGSID childId,
         REGSECT startingSectorLocation,
-        ulong streamSize)
+        ulong streamSize,
+        CompoundFileDirectoryEntry cfde)
       {
         Name = name;
         Clsid = clsid;
@@ -486,6 +729,7 @@ namespace JetBrains.FormatRipper.Compound
         ChildId = childId;
         StartingSectorLocation = startingSectorLocation;
         StreamSize = streamSize;
+        CompoundFileDirectoryEntry = cfde;
       }
     }
 

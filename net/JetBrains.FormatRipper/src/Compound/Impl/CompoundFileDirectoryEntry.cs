@@ -9,7 +9,7 @@ namespace JetBrains.FormatRipper.Compound.Impl
   [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Global")]
   [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  internal unsafe struct CompoundFileDirectoryEntry
+  public unsafe struct CompoundFileDirectoryEntry
   {
     internal fixed Byte DirectoryEntryName[Declarations.DirectoryEntryNameSize];
     internal UInt16 DirectoryEntryNameLength;

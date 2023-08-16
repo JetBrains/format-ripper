@@ -4,7 +4,7 @@ namespace JetBrains.FormatRipper.Compound.Impl
 {
   [SuppressMessage("ReSharper", "IdentifierTypo")]
   [SuppressMessage("ReSharper", "InconsistentNaming")]
-  internal enum REGSECT : uint
+  public enum REGSECT : uint
   {
     MAXREGSECT = 0xFFFFFFFA,
     DIFSECT = 0xFFFFFFFC,
