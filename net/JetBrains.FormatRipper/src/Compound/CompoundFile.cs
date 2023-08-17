@@ -39,7 +39,7 @@ namespace JetBrains.FormatRipper.Compound
     public FileType Type { get; private set; }
     public bool HasSignature { get; private set; }
     public SignatureData SignatureData { get; private set; }
-    public ExtractStream[] ExtractStreams { get; private set; }
+    public ExtractStream[]? ExtractStreams { get; private set; }
     public ComputeHashInfo? ComputeHashInfo { get; private set; }
     public CompoundFileHeaderMetaInfo HeaderMetaInfo { get; private set; }
     public long fileSize { get; private set; }
@@ -48,9 +48,9 @@ namespace JetBrains.FormatRipper.Compound
     private Stream _stream { get; }
     private List<REGSECT> diFatTable { get; }
     private uint entitiesPerSector { get; }
-    private DirectoryEntry rootDirectoryEntry { get; }
+    private DirectoryEntry? rootDirectoryEntry { get; }
     private REGSECT firstMiniFatSectorLocation { get; }
-    private List<DirectoryEntry> directoryEntries { get; }
+    private List<DirectoryEntry>? directoryEntries { get; }
     private uint miniStreamCutoffSize { get; }
     private static uint DirectoryEntrySize { get; } = 0x80u;
 
@@ -615,7 +615,6 @@ namespace JetBrains.FormatRipper.Compound
       byte[] data
     )
     {
-      var offset = 0;
       var cursor = 0;
       var nextSect = directoryEntry.StartingSectorLocation;
       var isMini = directoryEntry.StreamSize <= miniStreamCutoffSize;
@@ -715,7 +714,7 @@ namespace JetBrains.FormatRipper.Compound
 
     public delegate bool ExtractFilter(string[] namesFromRoot, Guid clsid, ulong size);
 
-    public static unsafe CompoundFile Parse(Stream stream, Mode mode = Mode.Default,
+    public static CompoundFile Parse(Stream stream, Mode mode = Mode.Default,
       ExtractFilter? extractFilter = null)
     {
       return new CompoundFile(stream, mode, extractFilter);

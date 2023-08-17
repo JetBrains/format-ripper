@@ -62,13 +62,13 @@ public class MsiFileMetaInfo : IFileMetaInfo
         {
           var trimmedName = entry.Name.Trim(new[] { '' });
           if (specialEntriesDataMap.Contains(trimmedName))
-            return new KeyValuePair<CompoundFile.DirectoryEntry, byte[]>(entry,
-              (byte[])specialEntriesDataMap[trimmedName]);
+            return new KeyValuePair<CompoundFile.DirectoryEntry, byte[]?>(entry,
+              (byte[])specialEntriesDataMap[trimmedName]!);
           else
-            return new KeyValuePair<CompoundFile.DirectoryEntry, byte[]>(entry,
-              (byte[])unsignedEntriesMap[trimmedName]);
+            return new KeyValuePair<CompoundFile.DirectoryEntry, byte[]?>(entry,
+              (byte[])unsignedEntriesMap[trimmedName]!);
         }
-      ).ToList(), (uint)MiniStreamStartSector
+      ).ToList()!, (uint)MiniStreamStartSector
     );
     //
     foreach (var segment in SpecialSegments)
