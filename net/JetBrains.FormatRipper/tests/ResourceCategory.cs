@@ -7,6 +7,7 @@ namespace JetBrains.FormatRipper.Tests
     Misc,
     Msi,
     Pe,
-    Sh
+    Sh,
+    Dmg
   }
 }

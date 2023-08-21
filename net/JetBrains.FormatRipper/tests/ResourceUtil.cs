@@ -6,19 +6,21 @@ namespace JetBrains.FormatRipper.Tests
 {
   internal static class ResourceUtil
   {
-    internal static TResult OpenRead<TResult>(ResourceCategory category, string resourceName, Func<Stream, TResult> handler)
+    internal static TResult OpenRead<TResult>(ResourceCategory category, string resourceName,
+      Func<Stream, TResult> handler)
     {
       var type = typeof(ResourceUtil);
       var fullResourceName = new StringBuilder(type.Namespace).Append(".Resources.").Append(category switch
-          {
-            ResourceCategory.Elf => "Elf",
-            ResourceCategory.MachO => "MachO",
-            ResourceCategory.Misc => "Misc",
-            ResourceCategory.Msi => "Msi",
-            ResourceCategory.Pe => "Pe",
-            ResourceCategory.Sh => "Sh",
-            _ => new ArgumentOutOfRangeException(nameof(category), category, null)
-          })
+        {
+          ResourceCategory.Elf => "Elf",
+          ResourceCategory.MachO => "MachO",
+          ResourceCategory.Misc => "Misc",
+          ResourceCategory.Msi => "Msi",
+          ResourceCategory.Pe => "Pe",
+          ResourceCategory.Sh => "Sh",
+          ResourceCategory.Dmg => "Dmg",
+          _ => new ArgumentOutOfRangeException(nameof(category), category, null)
+        })
         .Append('.').Append(resourceName).ToString();
       using var stream = type.Assembly.GetManifestResourceStream(fullResourceName);
       if (stream == null)
