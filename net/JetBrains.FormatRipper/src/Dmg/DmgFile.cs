@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using JetBrains.FormatRipper.Impl;
 using JetBrains.FormatRipper.MachO.Impl;
@@ -9,6 +10,7 @@ namespace JetBrains.FormatRipper.Dmg
   {
     private static readonly byte[] ExpectedSignature = new byte[] { 0x6b, 0x6f, 0x6c, 0x79 }; // 'koly'
     public readonly SignatureData? SignatureData;
+    public readonly ComputeHashInfo ComputeHashInfo;
 
     public static unsafe bool Is(Stream stream)
     {
@@ -97,6 +99,30 @@ namespace JetBrains.FormatRipper.Dmg
 
         SignatureData = new SignatureData(codeDirectoryBlob, cmsSignatureBlob);
       }
+
+      var orderedIncludeRanges = new List<StreamRange>();
+      if (HasSignature())
+      {
+        var signatureOffset = (long)MemoryUtil.GetBeU8(header.CodeSignatureOffset);
+        var signatureLength = (long)MemoryUtil.GetBeU8(header.CodeSignatureLength);
+
+        orderedIncludeRanges.Add(new StreamRange(0, signatureOffset));
+
+        var dataBeforeUDIFLength =
+          stream.Length - (signatureOffset + signatureLength) - sizeof(UDIFResourceFile);
+
+        if (dataBeforeUDIFLength > 0)
+        {
+          orderedIncludeRanges.Add(
+            new StreamRange(signatureOffset + signatureLength, dataBeforeUDIFLength));
+        }
+      }
+      else
+      {
+        orderedIncludeRanges.Add(new StreamRange(0, stream.Length - sizeof(UDIFResourceFile)));
+      }
+
+      ComputeHashInfo = new ComputeHashInfo(0, orderedIncludeRanges, 0);
     }
 
     public bool HasSignature() => SignatureData != null;
