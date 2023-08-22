@@ -98,16 +98,11 @@ class DmgFile(@NotNull stream: SeekableByteChannel) {
             stream.Seek(position, SeekOrigin.Begin)
           }
 
-          else -> {
-            val magicEnum = CSMAGIC.getInstance(blobIndexType)
-
+          MachoConsts.CSSLOT_CMS_SIGNATURE -> {
             stream.Seek(superBlobStart, SeekOrigin.Begin)
             stream.Seek(blobIndexOffset.toLong(), SeekOrigin.Current)
-            val data = MachoUtils.ReadBlob(reader)
+            cmsData = MachoUtils.ReadBlob(reader).let { it.sliceArray(0 until it.size - 2 * UInt.SIZE_BYTES) }
             stream.Seek(position, SeekOrigin.Begin)
-            if (magicEnum == CSMAGIC.CMS_SIGNATURE) {
-              cmsData = data
-            }
           }
         }
       }
