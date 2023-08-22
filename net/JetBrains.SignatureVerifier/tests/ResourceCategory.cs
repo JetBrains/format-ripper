@@ -4,6 +4,7 @@ namespace JetBrains.SignatureVerifier.Tests
   {
     MachO,
     Msi,
-    Pe
+    Pe,
+    Dmg
   }
 }

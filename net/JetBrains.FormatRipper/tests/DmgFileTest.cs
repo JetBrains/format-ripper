@@ -7,17 +7,19 @@ namespace JetBrains.FormatRipper.Tests;
 public class DmgFileTest
 {
   // @formatter:off
-    [TestCase("steam.dmg")]
-    [TestCase("steam_not_signed.dmg")]
-    [TestCase("json-viewer.dmg")]
+    [TestCase("steam.dmg", true)]
+    [TestCase("steam_not_signed.dmg", false)]
+    [TestCase("json-viewer.dmg", true)]
   // @formatter:on
   [Test]
-  public void Test(string name)
+  public void Test(string name, bool hasSignature)
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, name, stream =>
     {
       Assert.IsTrue(DmgFile.Is(stream));
-      return true;
+      return DmgFile.Parse(stream);
     });
+
+    Assert.AreEqual(hasSignature, file.HasSignature());
   }
 }
