@@ -32,18 +32,13 @@ class DmgSignatureVerifierTests {
 
   @ParameterizedTest
   @MethodSource("ComputeHashTestProvider")
-  fun ComputeHashTest(signedResource: String, unsignedResource: String, sameFile: Boolean) {
-    getTestByteChannel("dmg", signedResource).use { signedStream ->
+  fun ComputeHashTest(resource: String, algorithm: String, expectedSignature: String) {
+    getTestByteChannel("dmg", resource).use { signedStream ->
       val signedFile = DmgFile(signedStream)
-      getTestByteChannel("dmg", unsignedResource).use { unsignedStream ->
-        val unsignedFile = DmgFile(unsignedStream)
-        listOf("SHA1", "SHA256").forEach { algorithm ->
-          Assertions.assertEquals(
-            sameFile,
-            signedFile.ComputeHash(algorithm).contentEquals(unsignedFile.ComputeHash(algorithm))
-          )
-        }
-      }
+      Assertions.assertEquals(
+        expectedSignature,
+        signedFile.ComputeHash(algorithm).toHexString()
+      )
     }
   }
 
@@ -59,9 +54,28 @@ class DmgSignatureVerifierTests {
     @JvmStatic
     fun ComputeHashTestProvider(): Stream<Arguments> {
       return Stream.of(
-        Arguments.of("steam.dmg", "steam_not_signed.dmg", true),
-        Arguments.of("steam.dmg", "json-viewer.dmg", false),
+        Arguments.of("steam.dmg", "sha1", "02A79BE766434D8D5846840074B732F07B9991B6"),
+        Arguments.of("steam_not_signed.dmg", "sha1", "02A79BE766434D8D5846840074B732F07B9991B6"),
+        Arguments.of("steam.dmg", "sha256", "5BCD5694E10BB1EEDE33414D5A53A243687E524CA48420FCA03F3F0911732F77"),
+        Arguments.of(
+          "steam_not_signed.dmg",
+          "sha256",
+          "5BCD5694E10BB1EEDE33414D5A53A243687E524CA48420FCA03F3F0911732F77"
+        ),
+        Arguments.of("json-viewer.dmg", "sha1", "A4DD9A946EC0973C826FFE78E24E5CF2BCADA774"),
+        Arguments.of("json-viewer.dmg", "sha256", "068878BE00AA22A4056A7976C414DB60D1D874804FDAC1549AB5F883D2C6968B"),
       )
+    }
+
+    fun ByteArray.toHexString(): String {
+      val hexChars = "0123456789ABCDEF"
+      val result = StringBuilder(size * 2)
+      for (byte in this) {
+        val value = byte.toInt() and 0xFF
+        result.append(hexChars[value ushr 4])
+        result.append(hexChars[value and 0x0F])
+      }
+      return result.toString()
     }
   }
 }
