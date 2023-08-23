@@ -93,5 +93,53 @@ namespace JetBrains.FormatRipper.Impl
       Array.Copy(array2, 0, res, array1.Length, array2.Length);
       return res;
     }
+
+    internal static byte[] ToByteArray(int value)
+    {
+      byte[] bytes = BitConverter.GetBytes(value);
+
+      if (!BitConverter.IsLittleEndian)
+      {
+        Array.Reverse(bytes);
+      }
+
+      return bytes;
+    }
+
+    internal static byte[] ToByteArray(long value)
+    {
+      byte[] bytes = BitConverter.GetBytes(value);
+
+      if (!BitConverter.IsLittleEndian)
+      {
+        Array.Reverse(bytes);
+      }
+
+      return bytes;
+    }
+
+    internal static byte[] ToByteArray(uint value)
+    {
+      byte[] bytes = BitConverter.GetBytes(value);
+
+      if (!BitConverter.IsLittleEndian)
+      {
+        Array.Reverse(bytes);
+      }
+
+      return bytes;
+    }
+
+    internal static byte[] ToByteArray(ushort value)
+    {
+      byte[] bytes = BitConverter.GetBytes(value);
+
+      if (!BitConverter.IsLittleEndian)
+      {
+        Array.Reverse(bytes);
+      }
+
+      return bytes;
+    }
   }
 }

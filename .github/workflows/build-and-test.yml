@@ -24,9 +24,11 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: |
-            3.1.x
-            7.0.x
+          # TODO: Workaround for the https://github.com/microsoft/vstest/issues/4549
+          # use dotnet-version: 7.0.x when the 7.0.401+ is avaialble
+           dotnet-version: |
+             3.1.x
+             7.0.307
       - name: Restore
         working-directory: ${{ github.workspace }}/net
         run: dotnet restore

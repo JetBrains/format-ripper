@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.FormatRipper", "J
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.FormatRipper.Tests", "JetBrains.FormatRipper\tests\JetBrains.FormatRipper.Tests.csproj", "{59C57C60-2CF9-4B5E-B291-12D76E093657}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.Serialization", "JetBrains.Serialization\src\JetBrains.Serialization.csproj", "{D16C469C-E230-41DF-996A-2F5416ED4972}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.Serialization.Tests", "JetBrains.Serialization\tests\JetBrains.Serialization.Tests.csproj", "{69A6CA75-5227-42D3-A5CC-D611CD054ADD}"
+EndProject
 	ProjectSection(SolutionItems) = preProject
 		doc\FAQ.md = doc\FAQ.md
 		doc\GettingStarted.md = doc\GettingStarted.md
@@ -47,5 +51,13 @@ Global
 		{59C57C60-2CF9-4B5E-B291-12D76E093657}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59C57C60-2CF9-4B5E-B291-12D76E093657}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59C57C60-2CF9-4B5E-B291-12D76E093657}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D16C469C-E230-41DF-996A-2F5416ED4972}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D16C469C-E230-41DF-996A-2F5416ED4972}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D16C469C-E230-41DF-996A-2F5416ED4972}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D16C469C-E230-41DF-996A-2F5416ED4972}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69A6CA75-5227-42D3-A5CC-D611CD054ADD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69A6CA75-5227-42D3-A5CC-D611CD054ADD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69A6CA75-5227-42D3-A5CC-D611CD054ADD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69A6CA75-5227-42D3-A5CC-D611CD054ADD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
