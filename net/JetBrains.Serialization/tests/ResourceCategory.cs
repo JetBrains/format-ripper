@@ -4,6 +4,7 @@ namespace JetBrains.Serialization.Tests
   {
     MachO,
     Msi,
-    Pe
+    Pe,
+    Dmg
   }
 }

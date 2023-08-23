@@ -24,6 +24,7 @@ namespace JetBrains.Serialization.Tests
           ResourceCategory.MachO => "MachO",
           ResourceCategory.Msi => "Msi",
           ResourceCategory.Pe => "Pe",
+          ResourceCategory.Dmg => "Dmg",
           _ => new ArgumentOutOfRangeException(nameof(category), category, null)
         })
         .Append('.').Append(resourceName).ToString();

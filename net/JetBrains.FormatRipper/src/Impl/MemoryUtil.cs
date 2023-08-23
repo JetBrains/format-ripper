@@ -94,6 +94,24 @@ namespace JetBrains.FormatRipper.Impl
       return res;
     }
 
+    internal static T[] ArrayMerge<T>(params T[][] arrays)
+    {
+      var totalLength = 0;
+      foreach (var array in arrays)
+        totalLength += array.Length;
+
+      var res = new T[totalLength];
+      var offset = 0;
+
+      foreach (var array in arrays)
+      {
+        Array.Copy(array, 0, res, offset, array.Length);
+        offset += array.Length;
+      }
+
+      return res;
+    }
+
     internal static byte[] ToByteArray(int value)
     {
       byte[] bytes = BitConverter.GetBytes(value);

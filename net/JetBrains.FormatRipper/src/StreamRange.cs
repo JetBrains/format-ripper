@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.FormatRipper.Impl;
 
 namespace JetBrains.FormatRipper
 {
@@ -18,5 +19,10 @@ namespace JetBrains.FormatRipper
     }
 
     public override string ToString() => $"[{Position:X}:{Size:X}]";
+
+    public byte[] ToByteArray(bool isBE = false) =>
+      MemoryUtil.ArrayMerge(
+        MemoryUtil.ToByteArray(isBE ? (long)MemoryUtil.GetBeU8((ulong)Position) : Position),
+        MemoryUtil.ToByteArray(isBE ? (long)MemoryUtil.GetBeU8((ulong)Size) : Size));
   }
 }

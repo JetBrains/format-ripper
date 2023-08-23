@@ -10,7 +10,7 @@ namespace JetBrains.FormatRipper.Dmg
   [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Global")]
   [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  internal unsafe struct UDIFResourceFile
+  public unsafe struct UDIFResourceFile
   {
     internal fixed byte udifSignature[4];
     internal UInt32 Version;

@@ -9,8 +9,13 @@ namespace JetBrains.FormatRipper.Dmg
   public sealed class DmgFile
   {
     private static readonly byte[] ExpectedSignature = new byte[] { 0x6b, 0x6f, 0x6c, 0x79 }; // 'koly'
+
+    public static readonly long
+      CodeSignaturePointerOffset = 296L; // counted according to the UDIFResourceFile structure
+
     public readonly SignatureData? SignatureData;
     public readonly ComputeHashInfo ComputeHashInfo;
+    public readonly DmgFileMetadata Metadata;
 
     public static unsafe bool Is(Stream stream)
     {
@@ -35,6 +40,12 @@ namespace JetBrains.FormatRipper.Dmg
       if (!MemoryUtil.ArraysEqual(header.udifSignature, ExpectedSignature.Length, ExpectedSignature))
         throw new FormatException("Invalid KOLY magic");
 
+
+      var signatureOffset = (long)MemoryUtil.GetBeU8(header.CodeSignatureOffset);
+      var signatureLength = (long)MemoryUtil.GetBeU8(header.CodeSignatureLength);
+
+      Metadata = new DmgFileMetadata(stream.Length, new StreamRange(signatureOffset, signatureLength));
+
       byte[]? codeDirectoryBlob = null;
       byte[]? cmsSignatureBlob = null;
       if (MemoryUtil.GetBeU8(header.CodeSignatureOffset) > 0)
@@ -47,12 +58,17 @@ namespace JetBrains.FormatRipper.Dmg
         if ((CSMAGIC)MemoryUtil.GetBeU4(cssb.magic) != CSMAGIC.CSMAGIC_EMBEDDED_SIGNATURE)
           throw new FormatException("Invalid Mach-O code embedded signature magic");
 
+        Metadata.codeSignatureInfo.magic = MemoryUtil.GetBeU4(cssb.magic);
+
         var csLength = MemoryUtil.GetBeU4(cssb.length);
+        Metadata.codeSignatureInfo.length = csLength;
 
         if (csLength < sizeof(CS_SuperBlob))
           throw new FormatException("Too small Mach-O code signature super blob");
 
         var csCount = MemoryUtil.GetBeU4(cssb.count);
+        Metadata.codeSignatureInfo.superBlobCount = (int)csCount;
+        Metadata.codeSignatureInfo.superBlobStart = signatureOffset;
 
         fixed (byte* scBuf = StreamUtil.ReadBytes(stream, checked((int)csLength - sizeof(CS_SuperBlob))))
         {
@@ -75,22 +91,46 @@ namespace JetBrains.FormatRipper.Dmg
 
                 var cscdLength = MemoryUtil.GetBeU4(cscd.length);
                 codeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, checked((int)cscdLength));
+                Metadata.codeSignatureInfo.blobs.Add(
+                  new Blob(
+                    MemoryUtil.GetBeU4(csbi.type),
+                    MemoryUtil.GetBeU4(csbi.offset),
+                    CSMAGIC_CONSTS.CODEDIRECTORY,
+                    MemoryUtil.GetBeU4(cscd.magic),
+                    codeDirectoryBlob
+                  )
+                );
               }
                 break;
-              case CSSLOT.CSSLOT_CMS_SIGNATURE:
+              default:
               {
                 CS_Blob csb;
                 MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
-
-                if ((CSMAGIC)MemoryUtil.GetBeU4(csb.magic) != CSMAGIC.CSMAGIC_BLOBWRAPPER)
-                  throw new FormatException("Invalid Mach-O blob wrapper signature magic");
 
                 var csbLength = MemoryUtil.GetBeU4(csb.length);
                 if (csbLength < sizeof(CS_Blob))
                   throw new FormatException("Too small Mach-O cms signature blob length");
 
-                cmsSignatureBlob = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob),
+                var data = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob),
                   checked((int)csbLength) - sizeof(CS_Blob));
+                var length = data.Length;
+
+                if (MemoryUtil.GetBeU4(csbi.type) == CSSLOT.CSSLOT_CMS_SIGNATURE)
+                {
+                  cmsSignatureBlob = data;
+                  data = new byte[0];
+                }
+
+                Metadata.codeSignatureInfo.blobs.Add(
+                  new Blob(
+                    MemoryUtil.GetBeU4(csbi.type),
+                    MemoryUtil.GetBeU4(csbi.offset),
+                    (CSMAGIC_CONSTS)MemoryUtil.GetBeU4(csbi.type),
+                    MemoryUtil.GetBeU4(csb.magic),
+                    data,
+                    length: length
+                  )
+                );
               }
                 break;
             }
@@ -103,9 +143,6 @@ namespace JetBrains.FormatRipper.Dmg
       var orderedIncludeRanges = new List<StreamRange>();
       if (HasSignature())
       {
-        var signatureOffset = (long)MemoryUtil.GetBeU8(header.CodeSignatureOffset);
-        var signatureLength = (long)MemoryUtil.GetBeU8(header.CodeSignatureLength);
-
         orderedIncludeRanges.Add(new StreamRange(0, signatureOffset));
 
         var dataBeforeUDIFLength =

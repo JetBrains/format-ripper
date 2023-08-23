@@ -5,12 +5,14 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>10</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <ProjectReference Include="..\..\JetBrains.SignatureVerifier\src\JetBrains.SignatureVerifier.csproj" />
     </ItemGroup>
+
 
 
 </Project>
