@@ -23,8 +23,8 @@ public class Blob
 
   public byte[] ToByteArray() =>
     MemoryUtil.ArrayMerge(
-      MemoryUtil.ToByteArray(MemoryUtil.GetBeU4(magicValue)),
-      MemoryUtil.ToByteArray(MemoryUtil.GetBeU4((uint)length)),
+      MemoryUtil.ToByteArray(magicValue, true),
+      MemoryUtil.ToByteArray(length, true),
       content
     );
 }

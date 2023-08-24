@@ -13,9 +13,9 @@ public class CodeSignatureInfo
 
   public byte[] ToByteArray() =>
     MemoryUtil.ArrayMerge(
-      MemoryUtil.ToByteArray(MemoryUtil.GetBeU4(magic)),
-      MemoryUtil.ToByteArray(MemoryUtil.GetBeU4(length)),
-      MemoryUtil.ToByteArray(MemoryUtil.GetBeU4((uint)blobs.Count)),
+      MemoryUtil.ToByteArray(magic, true),
+      MemoryUtil.ToByteArray(length, true),
+      MemoryUtil.ToByteArray(blobs.Count, true),
       BlobsToByteArray()
     );
 
@@ -26,8 +26,8 @@ public class CodeSignatureInfo
     {
       result = MemoryUtil.ArrayMerge(
         result,
-        MemoryUtil.ToByteArray(MemoryUtil.GetBeU4(blob.type)),
-        MemoryUtil.ToByteArray(MemoryUtil.GetBeU4(blob.offset))
+        MemoryUtil.ToByteArray(blob.type, true),
+        MemoryUtil.ToByteArray(blob.offset, true)
       );
     }
 

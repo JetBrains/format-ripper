@@ -112,11 +112,11 @@ namespace JetBrains.FormatRipper.Impl
       return res;
     }
 
-    internal static byte[] ToByteArray(int value)
+    internal static byte[] ToByteArray(int value, bool isBe = false)
     {
       byte[] bytes = BitConverter.GetBytes(value);
 
-      if (!BitConverter.IsLittleEndian)
+      if (BitConverter.IsLittleEndian == isBe)
       {
         Array.Reverse(bytes);
       }
@@ -124,11 +124,11 @@ namespace JetBrains.FormatRipper.Impl
       return bytes;
     }
 
-    internal static byte[] ToByteArray(long value)
+    internal static byte[] ToByteArray(long value, bool isBe = false)
     {
       byte[] bytes = BitConverter.GetBytes(value);
 
-      if (!BitConverter.IsLittleEndian)
+      if (BitConverter.IsLittleEndian == isBe)
       {
         Array.Reverse(bytes);
       }
@@ -136,11 +136,11 @@ namespace JetBrains.FormatRipper.Impl
       return bytes;
     }
 
-    internal static byte[] ToByteArray(uint value)
+    internal static byte[] ToByteArray(uint value, bool isBe = false)
     {
       byte[] bytes = BitConverter.GetBytes(value);
 
-      if (!BitConverter.IsLittleEndian)
+      if (BitConverter.IsLittleEndian == isBe)
       {
         Array.Reverse(bytes);
       }
@@ -148,11 +148,11 @@ namespace JetBrains.FormatRipper.Impl
       return bytes;
     }
 
-    internal static byte[] ToByteArray(ushort value)
+    internal static byte[] ToByteArray(ushort value, bool isBe = false)
     {
       byte[] bytes = BitConverter.GetBytes(value);
 
-      if (!BitConverter.IsLittleEndian)
+      if (BitConverter.IsLittleEndian == isBe)
       {
         Array.Reverse(bytes);
       }
