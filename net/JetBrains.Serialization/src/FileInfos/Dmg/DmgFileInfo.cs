@@ -1,10 +1,16 @@
 using JetBrains.FormatRipper.Dmg;
 using JetBrains.SignatureVerifier.Crypt;
+using Newtonsoft.Json;
 
 namespace JetBrains.Serialization.FileInfos.Dmg;
 
+[JsonObject(MemberSerialization.OptIn)]
 public class DmgFileInfo : FileInfo
 {
+  [JsonProperty("fileMetaInfo")] public override IFileMetaInfo FileMetaInfo { get; }
+
+  [JsonProperty("signedDataInfo")] public override SignedDataInfo SignedDataInfo { get; }
+
   public DmgFileInfo(DmgFile file)
   {
     FileMetaInfo = new DmgFileMetaInfo(file.Metadata);
@@ -18,8 +24,12 @@ public class DmgFileInfo : FileInfo
     SignedDataInfo = new SignedDataInfo(signedData);
   }
 
-  public override IFileMetaInfo FileMetaInfo { get; }
-  public override SignedDataInfo SignedDataInfo { get; }
+  [JsonConstructor]
+  public DmgFileInfo(IFileMetaInfo fileMetaInfo, SignedDataInfo signedDataInfo)
+  {
+    FileMetaInfo = fileMetaInfo;
+    SignedDataInfo = signedDataInfo;
+  }
 
   public override void ModifyFile(Stream stream)
   {

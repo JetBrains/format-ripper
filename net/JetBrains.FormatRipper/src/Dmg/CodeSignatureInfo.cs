@@ -11,6 +11,17 @@ public class CodeSignatureInfo
   public int superBlobCount;
   public readonly List<Blob> blobs = new List<Blob>();
 
+  public CodeSignatureInfo(){}
+
+  public CodeSignatureInfo(uint magic, uint length, long superBlobStart, int superBlobCount, List<Blob> blobs)
+  {
+    this.magic = magic;
+    this.length = length;
+    this.superBlobStart = superBlobStart;
+    this.superBlobCount = superBlobCount;
+    this.blobs = blobs;
+  }
+
   public byte[] ToByteArray() =>
     MemoryUtil.ArrayMerge(
       MemoryUtil.ToByteArray(magic, true),

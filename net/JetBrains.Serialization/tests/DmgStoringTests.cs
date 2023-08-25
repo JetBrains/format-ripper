@@ -17,14 +17,14 @@ public class DmgStoringTests
     var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, signedResourceName,
       stream => DmgFile.Parse(stream));
 
-    var fileInfo = new DmgFileInfo(file);
+    var initialFileInfo = new DmgFileInfo(file);
 
-    // var settings = new JsonSerializerSettings
-    // {
-    //   TypeNameHandling = TypeNameHandling.Auto
-    // };
-    // var json = JsonConvert.SerializeObject(initialFileInfo, settings);
-    // var fileInfo = JsonConvert.DeserializeObject<PeFileInfo>(json, settings)!;
+    var settings = new JsonSerializerSettings
+    {
+      TypeNameHandling = TypeNameHandling.Auto
+    };
+    var json = JsonConvert.SerializeObject(initialFileInfo, settings);
+    var fileInfo = JsonConvert.DeserializeObject<DmgFileInfo>(json, settings)!;
 
 
     var tmpFile = Path.GetTempFileName();

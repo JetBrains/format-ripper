@@ -7,7 +7,7 @@ public class Blob
   public readonly uint type;
   public readonly uint offset;
   public readonly CSMAGIC_CONSTS magic;
-  private uint magicValue;
+  public readonly uint magicValue;
   public int length;
   public byte[] content;
 

@@ -1,13 +1,16 @@
 using JetBrains.FormatRipper;
 using JetBrains.FormatRipper.Dmg;
 using JetBrains.FormatRipper.Impl;
+using Newtonsoft.Json;
 
 namespace JetBrains.Serialization.FileInfos.Dmg;
 
+[JsonObject(MemberSerialization.OptIn)]
 public class DmgFileMetaInfo : IFileMetaInfo
 {
-  private DmgFileMetadata Metadata;
+  [JsonProperty("Metadata")] private DmgFileMetadata Metadata;
 
+  [JsonConstructor]
   public DmgFileMetaInfo(DmgFileMetadata metadata)
   {
     Metadata = metadata;

@@ -8,7 +8,7 @@ namespace JetBrains.FormatRipper
     public readonly long Position;
     public readonly long Size;
 
-    internal StreamRange(long position, long size)
+    public StreamRange(long position, long size)
     {
       if (position < 0)
         throw new ArgumentOutOfRangeException(nameof(position), position, null);
