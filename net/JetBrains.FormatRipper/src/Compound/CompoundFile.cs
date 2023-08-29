@@ -60,10 +60,10 @@ namespace JetBrains.FormatRipper.Compound
       _stream.Position = 0;
 
       HeaderMetaInfo = headerMetaInfo;
-      sectorSize = 1u << HeaderMetaInfo.Header.SectorShift;
+      sectorSize = 1u << MemoryUtil.GetLeU2(HeaderMetaInfo.Header.SectorShift);
       entitiesPerSector = sectorSize / sizeof(uint);
-      firstMiniFatSectorLocation = (REGSECT)HeaderMetaInfo.Header.FirstMiniFatSectorLocation;
-      miniStreamCutoffSize = HeaderMetaInfo.Header.MiniStreamCutoffSize;
+      firstMiniFatSectorLocation = (REGSECT)MemoryUtil.GetLeU4(HeaderMetaInfo.Header.FirstMiniFatSectorLocation);
+      miniStreamCutoffSize = MemoryUtil.GetLeU4(HeaderMetaInfo.Header.MiniStreamCutoffSize);
 
       WriteHeader(HeaderMetaInfo.Header);
 
@@ -92,7 +92,7 @@ namespace JetBrains.FormatRipper.Compound
         }
 
         _stream.Position = GetSectorPosition(nextSect);
-        for (int i = 0; i < (1u << HeaderMetaInfo.Header.SectorShift) >> 2; i++)
+        for (int i = 0; i < (1u << MemoryUtil.GetLeU2(HeaderMetaInfo.Header.SectorShift)) >> 2; i++)
         {
           var buf = MemoryUtil.ToByteArray(HeaderMetaInfo.MiniFat[it++]);
           _stream.Write(buf, 0, buf.Length);
@@ -113,7 +113,7 @@ namespace JetBrains.FormatRipper.Compound
         }
 
         _stream.Position = GetSectorPosition(sect);
-        for (int i = 0; i < (1u << HeaderMetaInfo.Header.SectorShift) >> 2; i++)
+        for (int i = 0; i < (1u << MemoryUtil.GetLeU2(HeaderMetaInfo.Header.SectorShift)) >> 2; i++)
         {
           var buf = MemoryUtil.ToByteArray(HeaderMetaInfo.Fat[it++]);
           _stream.Write(buf, 0, buf.Length);
@@ -130,27 +130,27 @@ namespace JetBrains.FormatRipper.Compound
         writer.Write(header.HeaderSignature[i]);
       }
 
-      writer.Write(header.HeaderClsid.ToByteArray());
-      writer.Write(header.MinorVersion);
-      writer.Write(header.MajorVersion);
-      writer.Write(header.ByteOrder);
-      writer.Write(header.SectorShift);
-      writer.Write(header.MiniSectorShift);
+      writer.Write(MemoryUtil.GetLeGuid(header.HeaderClsid).ToByteArray());
+      writer.Write(MemoryUtil.GetLeU2(header.MinorVersion));
+      writer.Write(MemoryUtil.GetLeU2(header.MajorVersion));
+      writer.Write(MemoryUtil.GetLeU2(header.ByteOrder));
+      writer.Write(MemoryUtil.GetLeU2(header.SectorShift));
+      writer.Write(MemoryUtil.GetLeU2(header.MiniSectorShift));
 
       for (int i = 0; i < 6; i++)
       {
         writer.Write(header.Reserved[i]);
       }
 
-      writer.Write(header.NumberOfDirectorySectors);
-      writer.Write(header.NumberOfFatSectors);
-      writer.Write(header.FirstDirectorySectorLocation);
-      writer.Write(header.TransactionSignatureNumber);
-      writer.Write(header.MiniStreamCutoffSize);
-      writer.Write(header.FirstMiniFatSectorLocation);
-      writer.Write(header.NumberOfMiniFatSectors);
-      writer.Write(header.FirstDiFatSectorLocation);
-      writer.Write(header.NumberOfDiFatSectors);
+      writer.Write(MemoryUtil.GetLeU4(header.NumberOfDirectorySectors));
+      writer.Write(MemoryUtil.GetLeU4(header.NumberOfFatSectors));
+      writer.Write(MemoryUtil.GetLeU4(header.FirstDirectorySectorLocation));
+      writer.Write(MemoryUtil.GetLeU4(header.TransactionSignatureNumber));
+      writer.Write(MemoryUtil.GetLeU4(header.MiniStreamCutoffSize));
+      writer.Write(MemoryUtil.GetLeU4(header.FirstMiniFatSectorLocation));
+      writer.Write(MemoryUtil.GetLeU4(header.NumberOfMiniFatSectors));
+      writer.Write(MemoryUtil.GetLeU4(header.FirstDiFatSectorLocation));
+      writer.Write(MemoryUtil.GetLeU4(header.NumberOfDiFatSectors));
     }
 
     private unsafe CompoundFile(Stream stream, Mode mode = Mode.Default,
@@ -238,7 +238,7 @@ namespace JetBrains.FormatRipper.Compound
           }
 
           _stream.Position = GetSectorPosition(sect);
-          for (int i = 0; i < (1u << cfh.SectorShift) >> 2; i++)
+          for (int i = 0; i < (1u << MemoryUtil.GetLeU2(cfh.SectorShift)) >> 2; i++)
           {
             uint buffer;
             StreamUtil.ReadBytes(_stream, (byte*)&buffer, sizeof(uint));
@@ -307,7 +307,7 @@ namespace JetBrains.FormatRipper.Compound
           }
 
           _stream.Position = GetSectorPosition(nextSect);
-          for (int i = 0; i < (1u << cfh.SectorShift) >> 2; i++)
+          for (int i = 0; i < (1u << MemoryUtil.GetLeU2(cfh.SectorShift)) >> 2; i++)
           {
             uint buffer;
             StreamUtil.ReadBytes(_stream, (byte*)&buffer, sizeof(uint));
@@ -516,12 +516,15 @@ namespace JetBrains.FormatRipper.Compound
     public void PutDirectoryEntries(List<DirectoryEntry> data, bool wipe)
     {
       var header = HeaderMetaInfo.Header;
-      var nextSect = (REGSECT)header.FirstDirectorySectorLocation;
+      var nextSect = (REGSECT)MemoryUtil.GetLeU4(header.FirstDirectorySectorLocation);
+
       var it = 0;
       while (nextSect != REGSECT.ENDOFCHAIN)
       {
         _stream.Position = GetSectorPosition(nextSect);
-        for (int i = 0; i < Math.Min((1u << header.SectorShift) / DirectoryEntrySize, data.Count); i++)
+        for (int i = 0;
+             i < Math.Min((1u << MemoryUtil.GetLeU2(header.SectorShift)) / DirectoryEntrySize, data.Count);
+             i++)
         {
           var entry = data[it++];
           if (wipe)
@@ -555,30 +558,32 @@ namespace JetBrains.FormatRipper.Compound
         }
       }
 
-      writer.Write(entry.CompoundFileDirectoryEntry.DirectoryEntryNameLength);
+      writer.Write(MemoryUtil.GetLeU2(entry.CompoundFileDirectoryEntry.DirectoryEntryNameLength));
       writer.Write(entry.CompoundFileDirectoryEntry.ObjectType);
       writer.Write(entry.CompoundFileDirectoryEntry.ColorFlag);
-      writer.Write(entry.CompoundFileDirectoryEntry.LeftSiblingId);
-      writer.Write(entry.CompoundFileDirectoryEntry.RightSiblingId);
-      writer.Write(entry.CompoundFileDirectoryEntry.ChildId);
-      writer.Write(entry.CompoundFileDirectoryEntry.Clsid.ToByteArray());
-      writer.Write(entry.CompoundFileDirectoryEntry.StateBits);
-      writer.Write(entry.CompoundFileDirectoryEntry.CreationTime);
-      writer.Write(entry.CompoundFileDirectoryEntry.ModifiedTime);
-      writer.Write(entry.CompoundFileDirectoryEntry.StartingSectorLocation);
-      writer.Write(entry.CompoundFileDirectoryEntry.StreamSize);
+      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntry.LeftSiblingId));
+      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntry.RightSiblingId));
+      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntry.ChildId));
+      writer.Write(MemoryUtil.GetLeGuid(entry.CompoundFileDirectoryEntry.Clsid).ToByteArray());
+      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntry.StateBits));
+      writer.Write(MemoryUtil.GetLeU8(entry.CompoundFileDirectoryEntry.CreationTime));
+      writer.Write(MemoryUtil.GetLeU8(entry.CompoundFileDirectoryEntry.ModifiedTime));
+      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntry.StartingSectorLocation));
+      writer.Write(MemoryUtil.GetLeU8(entry.CompoundFileDirectoryEntry.StreamSize));
     }
 
     private void PutStreamData(List<KeyValuePair<DirectoryEntry, byte[]>> data, uint startSector, bool wipe = false)
     {
       var header = HeaderMetaInfo.Header;
-      var nextSect = (REGSECT)header.FirstDirectorySectorLocation;
+      var nextSect = (REGSECT)MemoryUtil.GetLeU4(header.FirstDirectorySectorLocation);
       var it = 0;
 
       while (nextSect != REGSECT.ENDOFCHAIN)
       {
         _stream.Position = GetSectorPosition(nextSect);
-        for (int i = 0; i < Math.Min((1u << header.SectorShift) / DirectoryEntrySize, data.Count); i++)
+        for (int i = 0;
+             i < Math.Min((1u << MemoryUtil.GetLeU2(header.SectorShift)) / DirectoryEntrySize, data.Count);
+             i++)
         {
           var entry = data[it++];
           if (wipe)
@@ -618,18 +623,18 @@ namespace JetBrains.FormatRipper.Compound
       var cursor = 0;
       var nextSect = directoryEntry.StartingSectorLocation;
       var isMini = directoryEntry.StreamSize <= miniStreamCutoffSize;
-      var sectorSize = 1 << HeaderMetaInfo.Header.SectorShift;
+      var sectorSize = 1 << MemoryUtil.GetLeU2(HeaderMetaInfo.Header.SectorShift);
       var streamOffset = 0L;
       if (isMini)
       {
-        sectorSize = 1 << HeaderMetaInfo.Header.MiniSectorShift;
+        sectorSize = 1 << MemoryUtil.GetLeU2(HeaderMetaInfo.Header.MiniSectorShift);
       }
 
       while (nextSect != REGSECT.ENDOFCHAIN)
       {
         if (isMini)
           streamOffset = GetSectorPosition((REGSECT)startSector) +
-                         ((long)nextSect << HeaderMetaInfo.Header.MiniSectorShift);
+                         ((long)nextSect << MemoryUtil.GetLeU2(HeaderMetaInfo.Header.MiniSectorShift));
         else
           streamOffset = GetSectorPosition(nextSect);
 
