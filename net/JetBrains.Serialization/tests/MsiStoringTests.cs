@@ -28,14 +28,13 @@ public class MsiStoringTests
       });
 
 
-    // var settings = new JsonSerializerSettings
-    // {
-    //   TypeNameHandling = TypeNameHandling.Auto
-    // };
-    // var json = JsonConvert.SerializeObject(initialFileInfo, settings);
-    // var fileInfo = JsonConvert.DeserializeObject<MsiFileInfo>(json, settings)!;
-    //
-    //
+    var settings = new JsonSerializerSettings
+    {
+      TypeNameHandling = TypeNameHandling.Auto
+    };
+    var json = JsonConvert.SerializeObject(initialFileInfo, settings);
+    var fileInfo = JsonConvert.DeserializeObject<MsiFileInfo>(json, settings)!;
+
     var tmpFile = Path.GetTempFileName();
     ResourceUtil.OpenRead(ResourceCategory.Msi, unsignedResourceName,
       stream =>
@@ -50,7 +49,7 @@ public class MsiStoringTests
 
     using (var fileStream = new FileStream(tmpFile, FileMode.Open, FileAccess.ReadWrite))
     {
-      initialFileInfo!.ModifyFile(fileStream);
+      fileInfo.ModifyFile(fileStream);
     }
 
     ResourceUtil.OpenRead(ResourceCategory.Msi, signedResourceName,

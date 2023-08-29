@@ -1,13 +1,23 @@
 using System.Text;
 using JetBrains.FormatRipper.Compound;
 using JetBrains.SignatureVerifier.Crypt;
+using Newtonsoft.Json;
 
 namespace JetBrains.Serialization.FileInfos.Msi;
 
+[JsonObject(MemberSerialization.OptIn)]
 public class MsiFileInfo : FileInfo
 {
-  public override IFileMetaInfo FileMetaInfo { get; }
-  public override SignedDataInfo SignedDataInfo { get; }
+  [JsonProperty("fileMetaInfo")] public override IFileMetaInfo FileMetaInfo { get; }
+
+  [JsonProperty("signedDataInfo")] public override SignedDataInfo SignedDataInfo { get; }
+
+  [JsonConstructor]
+  public MsiFileInfo(IFileMetaInfo fileMetaInfo, SignedDataInfo signedDataInfo)
+  {
+    FileMetaInfo = fileMetaInfo;
+    SignedDataInfo = signedDataInfo;
+  }
 
   public MsiFileInfo(CompoundFile compoundFile)
   {

@@ -121,7 +121,7 @@ namespace JetBrains.FormatRipper.Compound
       }
     }
 
-    private unsafe void WriteHeader(CompoundFileHeader header)
+    private void WriteHeader(CompoundFileHeaderData header)
     {
       BinaryWriter writer = new BinaryWriter(_stream, Encoding.Unicode);
 
@@ -193,7 +193,7 @@ namespace JetBrains.FormatRipper.Compound
         throw new FormatException("Invalid CF mini stream cutoff size");
 
 
-      var metaInfo = new CompoundFileHeaderMetaInfo(cfh);
+      var metaInfo = CompoundFileHeaderMetaInfo.GetInstance(cfh);
 
       sectorSize = 1u << MemoryUtil.GetLeU2(cfh.SectorShift);
       entitiesPerSector = sectorSize / sizeof(uint);
@@ -282,7 +282,7 @@ namespace JetBrains.FormatRipper.Compound
               (REGSID)MemoryUtil.GetLeU4(cfdes[n].ChildId),
               (REGSECT)MemoryUtil.GetLeU4(cfdes[n].StartingSectorLocation),
               MemoryUtil.GetLeU8(cfdes[n].StreamSize),
-              cfdes[n]));
+              CompoundFileDirectoryEntryDataHolder.GetInstance(cfdes[n])));
           }
         }
       }
@@ -550,26 +550,23 @@ namespace JetBrains.FormatRipper.Compound
     {
       BinaryWriter writer = new BinaryWriter(_stream, Encoding.Unicode);
 
-      fixed (Byte* ptr = entry.CompoundFileDirectoryEntry.DirectoryEntryName)
+      for (int i = 0; i < Declarations.DirectoryEntryNameSize; i++)
       {
-        for (int i = 0; i < Declarations.DirectoryEntryNameSize; i++)
-        {
-          writer.Write(ptr[i]);
-        }
+        writer.Write(entry.CompoundFileDirectoryEntryDataHolder.DirectoryEntryName[i]);
       }
 
-      writer.Write(MemoryUtil.GetLeU2(entry.CompoundFileDirectoryEntry.DirectoryEntryNameLength));
-      writer.Write(entry.CompoundFileDirectoryEntry.ObjectType);
-      writer.Write(entry.CompoundFileDirectoryEntry.ColorFlag);
-      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntry.LeftSiblingId));
-      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntry.RightSiblingId));
-      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntry.ChildId));
-      writer.Write(MemoryUtil.GetLeGuid(entry.CompoundFileDirectoryEntry.Clsid).ToByteArray());
-      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntry.StateBits));
-      writer.Write(MemoryUtil.GetLeU8(entry.CompoundFileDirectoryEntry.CreationTime));
-      writer.Write(MemoryUtil.GetLeU8(entry.CompoundFileDirectoryEntry.ModifiedTime));
-      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntry.StartingSectorLocation));
-      writer.Write(MemoryUtil.GetLeU8(entry.CompoundFileDirectoryEntry.StreamSize));
+      writer.Write(MemoryUtil.GetLeU2(entry.CompoundFileDirectoryEntryDataHolder.DirectoryEntryNameLength));
+      writer.Write(entry.CompoundFileDirectoryEntryDataHolder.ObjectType);
+      writer.Write(entry.CompoundFileDirectoryEntryDataHolder.ColorFlag);
+      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntryDataHolder.LeftSiblingId));
+      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntryDataHolder.RightSiblingId));
+      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntryDataHolder.ChildId));
+      writer.Write(MemoryUtil.GetLeGuid(entry.CompoundFileDirectoryEntryDataHolder.Clsid).ToByteArray());
+      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntryDataHolder.StateBits));
+      writer.Write(MemoryUtil.GetLeU8(entry.CompoundFileDirectoryEntryDataHolder.CreationTime));
+      writer.Write(MemoryUtil.GetLeU8(entry.CompoundFileDirectoryEntryDataHolder.ModifiedTime));
+      writer.Write(MemoryUtil.GetLeU4(entry.CompoundFileDirectoryEntryDataHolder.StartingSectorLocation));
+      writer.Write(MemoryUtil.GetLeU8(entry.CompoundFileDirectoryEntryDataHolder.StreamSize));
     }
 
     private void PutStreamData(List<KeyValuePair<DirectoryEntry, byte[]>> data, uint startSector, bool wipe = false)
@@ -754,9 +751,9 @@ namespace JetBrains.FormatRipper.Compound
       public readonly Guid Clsid;
       public readonly STGTY ObjectType;
       public readonly REGSID RightSiblingId;
-      public readonly CompoundFileDirectoryEntry CompoundFileDirectoryEntry;
+      public CompoundFileDirectoryEntryDataHolder CompoundFileDirectoryEntryDataHolder;
 
-      internal DirectoryEntry(string name,
+      public DirectoryEntry(string name,
         Guid clsid,
         STGTY objectType,
         CF colorFlag,
@@ -765,7 +762,7 @@ namespace JetBrains.FormatRipper.Compound
         REGSID childId,
         REGSECT startingSectorLocation,
         ulong streamSize,
-        CompoundFileDirectoryEntry cfde)
+        CompoundFileDirectoryEntryDataHolder cfdeDataHolder)
       {
         Name = name;
         Clsid = clsid;
@@ -776,7 +773,7 @@ namespace JetBrains.FormatRipper.Compound
         ChildId = childId;
         StartingSectorLocation = startingSectorLocation;
         StreamSize = streamSize;
-        CompoundFileDirectoryEntry = cfde;
+        CompoundFileDirectoryEntryDataHolder = cfdeDataHolder;
       }
     }
 

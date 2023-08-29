@@ -1,19 +1,29 @@
 using System.Collections;
 using JetBrains.FormatRipper.Compound;
 using JetBrains.FormatRipper.Compound.Impl;
+using Newtonsoft.Json;
 
 namespace JetBrains.Serialization.FileInfos.Msi;
 
+[JsonObject(MemberSerialization.OptIn)]
 public class MsiFileMetaInfo : IFileMetaInfo
 {
-  public long FileSize { get; set; }
+  [JsonProperty("FileSize")] public long FileSize { get; set; }
+
+  [JsonProperty("CompoundFileHeaderMetaInfo")]
   private CompoundFileHeaderMetaInfo CompoundFileHeaderMetaInfo { get; set; }
-  private List<CompoundFile.DirectoryEntry> Entries { get; set; }
-  private List<KeyValuePair<string, byte[]>> SpecialEntries { get; set; }
-  private List<KeyValuePair<long, byte[]>> SpecialSegments { get; set; }
+
+  [JsonProperty("Entries")] private List<CompoundFile.DirectoryEntry> Entries { get; set; }
+  [JsonProperty("SpecialEntries")] private List<KeyValuePair<string, byte[]>> SpecialEntries { get; set; }
+  [JsonProperty("SpecialSegments")] private List<KeyValuePair<long, byte[]>> SpecialSegments { get; set; }
+
+  [JsonProperty("DigitalSignatureExData")]
   private byte[] DigitalSignatureExData { get; set; } // Nullable
+
+  [JsonProperty("MiniStreamStartSector")]
   private int MiniStreamStartSector { get; set; }
 
+  [JsonConstructor]
   public MsiFileMetaInfo(long fileSize, CompoundFileHeaderMetaInfo compoundFileHeaderMetaInfo,
     List<CompoundFile.DirectoryEntry> entries, List<KeyValuePair<string, byte[]>> specialEntries,
     List<KeyValuePair<long, byte[]>> specialSegments, byte[] digitalSignatureExData, int miniStreamStartSector)
@@ -76,6 +86,7 @@ public class MsiFileMetaInfo : IFileMetaInfo
       stream.Position = segment.Key;
       stream.Write(segment.Value, 0, segment.Value.Length);
     }
+
     //
     if (FileSize < stream.Length)
     {
