@@ -41,11 +41,14 @@ import java.security.PrivateKey
 import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
+import java.util.logging.Level
+import java.util.logging.LogManager
+import java.util.logging.Logger
 import java.util.stream.Stream
 
 class FakePkiTest {
   private val utc = Clock.systemUTC()
-
+  val LOG = Logger.getLogger(FakePki::javaClass.name)
   private fun nowPlusDays(days: Long): Date = LocalDateTime.now(utc).plusDays(days).ConvertToDate()
   private fun nowPlusSeconds(seconds: Long): Date = LocalDateTime.now(utc).plusSeconds(seconds).ConvertToDate()
 
@@ -67,6 +70,7 @@ class FakePkiTest {
           val signedMessageVerifier = SignedMessageVerifier(ConsoleLogger.Instance)
           val res = runBlocking { signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams) }
 
+          LOG.log(Level.INFO, "Received state: ${res.Message} ${res.Status}")
           Assertions.assertEquals(VerifySignatureStatus.InvalidSignature, res.Status)
         }
       }
