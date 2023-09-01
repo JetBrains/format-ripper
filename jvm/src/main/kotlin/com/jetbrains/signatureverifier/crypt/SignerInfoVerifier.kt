@@ -53,7 +53,7 @@ open class SignerInfoVerifier {
 
   suspend fun VerifyAsync(@NotNull signatureVerificationParams: SignatureVerificationParams): VerifySignatureResult {
     val certList = ArrayList(_certs.getMatches(_signer.sID as Selector<X509CertificateHolder>))
-    if (certList.count() < 1) {
+    if (certList.isEmpty()) {
       _logger.Error(Messages.signer_cert_not_found)
       return VerifySignatureResult(VerifySignatureStatus.InvalidSignature, Messages.signer_cert_not_found)
     }

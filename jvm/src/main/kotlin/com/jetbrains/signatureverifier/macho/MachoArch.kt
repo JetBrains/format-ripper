@@ -3,7 +3,6 @@ package com.jetbrains.signatureverifier.macho
 import com.jetbrains.signatureverifier.*
 import com.jetbrains.util.*
 import org.jetbrains.annotations.NotNull
-import java.nio.ByteOrder
 import java.nio.channels.SeekableByteChannel
 import java.text.ParseException
 
@@ -23,8 +22,6 @@ open class MachoArch {
    *     in which data is stored in this computer architecture is not Little Endian.
    */
   constructor(@NotNull stream: SeekableByteChannel, logger: ILogger? = null) {
-    if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN))
-      throw ParseException("Only Little endian is expected", 0)
     _stream = stream
     _logger = logger ?: NullLogger.Instance
   }

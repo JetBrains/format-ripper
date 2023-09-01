@@ -2,9 +2,7 @@ package com.jetbrains.util.filetype
 
 import com.jetbrains.util.*
 import java.io.IOException
-import java.nio.ByteOrder
 import java.nio.channels.SeekableByteChannel
-import java.text.ParseException
 import java.util.*
 
 object FileTypeDetector {
@@ -33,8 +31,6 @@ object FileTypeDetector {
   }
 
   private fun IsPe(stream: SeekableByteChannel): EnumSet<FileProperties>? {
-    if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN))
-      throw ParseException("Only Little endian is expected", 0)
     try {
       val reader = BinaryReader(stream.Rewind())
 
@@ -91,8 +87,6 @@ object FileTypeDetector {
   }
 
   private fun IsMsi(stream: SeekableByteChannel): EnumSet<FileProperties>? {
-    if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN))
-      throw ParseException("Only Little endian is expected", 0)
     // Note: Object Linking and Embedding (OLE) Compound File (CF) (i.e., OLECF) or Compound Binary File format by Microsoft
     try {
       val reader = BinaryReader(stream.Rewind())
@@ -107,8 +101,6 @@ object FileTypeDetector {
   }
 
   private fun IsElf(stream: SeekableByteChannel): EnumSet<FileProperties>? {
-    if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN))
-      throw ParseException("Only Little endian is expected", 0)
     try {
       val reader = BinaryReader(stream.Rewind())
 
@@ -173,8 +165,6 @@ object FileTypeDetector {
   }
 
   private fun TryParseMachO(stream: SeekableByteChannel): Pair<EnumSet<FileProperties>, List<ProcessorArchitecture>>? {
-    if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN))
-      throw ParseException("Only Little endian is expected", 0)
     try {
       val reader = BinaryReader(stream.Rewind())
 
