@@ -43,13 +43,15 @@ namespace JetBrains.FormatRipper.MachO
 
     public readonly bool? IsFatLittleEndian;
     public readonly Section[] Sections;
+    public readonly List<MachoFileMetadata> Metadatas;
 
     [Flags]
     public enum Mode : uint
     {
       Default = 0x0,
       SignatureData = 0x1,
-      ComputeHashInfo = 0x2
+      ComputeHashInfo = 0x2,
+      Serialization = 0x3
     }
 
     private MachOFile(bool? isFatLittleEndian, Section[] sections)
@@ -191,8 +193,11 @@ namespace JetBrains.FormatRipper.MachO
       if (magic is not (MH.MH_MAGIC or MH.MH_MAGIC_64 or MH.MH_CIGAM or MH.MH_CIGAM_64))
         throw new FormatException("Unknown Mach-O magic numbers");
 
+
       var isLittleEndian = magic is MH.MH_MAGIC or MH.MH_MAGIC_64;
       var needSwap = BitConverter.IsLittleEndian != isLittleEndian;
+
+      var metadata = new MachoFileMetadata(imageRange.Position, imageRange.Size, !isLittleEndian);
 
       uint GetU4(uint v) => needSwap ? MemoryUtil.SwapU4(v) : v;
 
@@ -203,48 +208,107 @@ namespace JetBrains.FormatRipper.MachO
         var hasSignature = false;
         byte[]? codeDirectoryBlob = null;
         byte[]? cmsSignatureBlob = null;
+
         fixed (byte* buf = StreamUtil.ReadBytes(stream, checked((int)sizeOfCmds)))
         {
           for (var cmdPtr = buf; nCmds-- > 0;)
           {
             load_command lc;
+            var streamPosition = cmdOffset + (cmdPtr - buf);
             MemoryUtil.CopyBytes(cmdPtr, (byte*)&lc, sizeof(load_command));
             var payloadLcPtr = cmdPtr + sizeof(load_command);
-
             switch ((LC)GetU4(lc.cmd))
             {
               case LC.LC_SEGMENT:
-                if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+
+                if ((mode & (Mode.ComputeHashInfo | Mode.Serialization)) != 0)
                 {
-                  segment_command sc;
-                  MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command));
-                  var segNameBuf = MemoryUtil.CopyBytes(sc.segname, 16);
+                  segment_command segmentCommand;
+
+                  MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&segmentCommand, sizeof(segment_command));
+
+                  var segNameBuf = MemoryUtil.CopyBytes(segmentCommand.segname, 16);
                   var segName =
                     new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
-                  if (segName == SEG.SEG_LINKEDIT)
+
+                  if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
                   {
-                    excludeRanges.Add(new StreamRange(
-                      checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.vmsize - (byte*)&sc)), sizeof(uint)));
-                    excludeRanges.Add(new StreamRange(
-                      checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.filesize - (byte*)&sc)), sizeof(uint)));
+                    if (segName == SEG.SEG_LINKEDIT)
+                    {
+                      excludeRanges.Add(new StreamRange(
+                        checked(cmdOffset + (payloadLcPtr - buf) +
+                                ((byte*)&segmentCommand.vmsize - (byte*)&segmentCommand)), sizeof(uint)));
+                      excludeRanges.Add(new StreamRange(
+                        checked(cmdOffset + (payloadLcPtr - buf) +
+                                ((byte*)&segmentCommand.filesize - (byte*)&segmentCommand)), sizeof(uint)));
+                    }
+                  }
+
+                  if ((mode & Mode.Serialization) == Mode.Serialization)
+                  {
+                    if (segName == SEG.SEG_LINKEDIT)
+                    {
+                      metadata.LoadCommands.Add(new LoadCommandLinkeditInfo(
+                        streamPosition,
+                        lc.cmd, // U4?
+                        lc.cmdsize,
+                        segNameBuf,
+                        segmentCommand.vmaddr,
+                        segmentCommand.vmsize,
+                        segmentCommand.fileoff,
+                        segmentCommand.filesize,
+                        segmentCommand.maxprot,
+                        segmentCommand.initprot,
+                        segmentCommand.nsects,
+                        segmentCommand.flags
+                      ));
+                    }
                   }
                 }
 
                 break;
               case LC.LC_SEGMENT_64:
-                if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+
+                if ((mode & (Mode.ComputeHashInfo | Mode.Serialization)) != 0)
                 {
-                  segment_command_64 sc;
-                  MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command_64));
-                  var segNameBuf = MemoryUtil.CopyBytes(sc.segname, 16);
+                  segment_command_64 segmentCommand64;
+                  MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&segmentCommand64, sizeof(segment_command));
+                  var segNameBuf = MemoryUtil.CopyBytes(segmentCommand64.segname, 16);
                   var segName =
                     new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
-                  if (segName == SEG.SEG_LINKEDIT)
+
+                  if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
                   {
-                    excludeRanges.Add(new StreamRange(
-                      checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.vmsize - (byte*)&sc)), sizeof(ulong)));
-                    excludeRanges.Add(new StreamRange(
-                      checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.filesize - (byte*)&sc)), sizeof(ulong)));
+                    if (segName == SEG.SEG_LINKEDIT)
+                    {
+                      excludeRanges.Add(new StreamRange(
+                        checked(cmdOffset + (payloadLcPtr - buf) +
+                                ((byte*)&segmentCommand64.vmsize - (byte*)&segmentCommand64)), sizeof(ulong)));
+                      excludeRanges.Add(new StreamRange(
+                        checked(cmdOffset + (payloadLcPtr - buf) +
+                                ((byte*)&segmentCommand64.filesize - (byte*)&segmentCommand64)), sizeof(ulong)));
+                    }
+                  }
+
+                  if ((mode & Mode.Serialization) == Mode.Serialization)
+                  {
+                    if (segName == SEG.SEG_LINKEDIT)
+                    {
+                      metadata.LoadCommands.Add(new LoadCommandLinkeditInfo(
+                        streamPosition,
+                        lc.cmd, // U4?
+                        lc.cmdsize,
+                        segNameBuf,
+                        segmentCommand64.vmaddr,
+                        segmentCommand64.vmsize,
+                        segmentCommand64.fileoff,
+                        segmentCommand64.filesize,
+                        segmentCommand64.maxprot,
+                        segmentCommand64.initprot,
+                        segmentCommand64.nsects,
+                        segmentCommand64.flags
+                      ));
+                    }
                   }
                 }
 
@@ -253,6 +317,16 @@ namespace JetBrains.FormatRipper.MachO
               {
                 linkedit_data_command ldc;
                 MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&ldc, sizeof(linkedit_data_command));
+
+                metadata.LoadCommands.Add(new LoadCommandSignatureInfo(
+                  streamPosition,
+                  lc.cmd,
+                  lc.cmdsize,
+                  ldc.dataoff,
+                  ldc.datasize
+                ));
+
+
                 if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
                 {
                   excludeRanges.Add(new StreamRange(checked(cmdOffset + (cmdPtr - buf)), GetU4(lc.cmdsize)));
@@ -337,6 +411,18 @@ namespace JetBrains.FormatRipper.MachO
       {
         mach_header_64 mh;
         StreamUtil.ReadBytes(stream, (byte*)&mh, sizeof(mach_header_64));
+
+        metadata.HeaderMetainfo = new MachoHeaderMetainfo(
+          (uint)magic,
+          mh.cputype,
+          mh.cpusubtype,
+          mh.filetype,
+          mh.ncmds,
+          mh.sizeofcmds,
+          mh.flags,
+          mh.reserved
+        );
+
         if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
         {
           excludeRanges.Add(new StreamRange(checked(sizeof(MH) + ((byte*)&mh.ncmds - (byte*)&mh)), sizeof(uint)));
@@ -369,6 +455,17 @@ namespace JetBrains.FormatRipper.MachO
       {
         mach_header mh;
         StreamUtil.ReadBytes(stream, (byte*)&mh, sizeof(mach_header));
+
+        metadata.HeaderMetainfo = new MachoHeaderMetainfo(
+          (uint)magic,
+          mh.cputype,
+          mh.cpusubtype,
+          mh.filetype,
+          mh.ncmds,
+          mh.sizeofcmds,
+          mh.flags
+        );
+
         if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
         {
           excludeRanges.Add(new StreamRange(checked(sizeof(MH) + ((byte*)&mh.ncmds - (byte*)&mh)), sizeof(uint)));
