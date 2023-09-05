@@ -12,7 +12,7 @@ public class DmgStoringTests
   [TestCase("steam.dmg", "steam_not_signed.dmg")]
   [TestCase("dd.dmg", "dd_not_signed.dmg")]
   // @formatter:on
-  public Task PeStoringTest(string signedResourceName, string unsignedResourceName)
+  public Task DmgStoringTest(string signedResourceName, string unsignedResourceName)
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, signedResourceName,
       stream => DmgFile.Parse(stream));
