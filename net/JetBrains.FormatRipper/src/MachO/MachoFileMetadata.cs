@@ -14,6 +14,9 @@ public class MachoFileMetadata
   public MachoFileMetadata(long machoOffset, long fileSize, bool isBe, MachoHeaderMetainfo? headerMetainfo = null,
     List<LoadCommandInfo>? loadCommands = null, CodeSignatureInfo? codeSignatureInfo = null)
   {
+    MachoOffset = machoOffset;
+    FileSize = fileSize;
+    IsBe = isBe;
     HeaderMetainfo = headerMetainfo ?? new MachoHeaderMetainfo();
     LoadCommands = loadCommands ?? new List<LoadCommandInfo>();
     CodeSignatureInfo = codeSignatureInfo ?? new CodeSignatureInfo();

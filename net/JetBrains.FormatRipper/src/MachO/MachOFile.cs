@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using JetBrains.FormatRipper.Dmg;
 using JetBrains.FormatRipper.Impl;
 using JetBrains.FormatRipper.MachO.Impl;
 
@@ -19,6 +20,7 @@ namespace JetBrains.FormatRipper.MachO
       public readonly bool HasSignature;
       public readonly SignatureData SignatureData;
       public readonly ComputeHashInfo? ComputeHashInfo;
+      public readonly MachoFileMetadata? Metadata;
 
       internal Section(
         bool isLittleEndian,
@@ -28,7 +30,9 @@ namespace JetBrains.FormatRipper.MachO
         MH_Flags mhFlags,
         bool hasSignature,
         SignatureData signatureData,
-        ComputeHashInfo? computeHashInfo)
+        ComputeHashInfo? computeHashInfo,
+        MachoFileMetadata? metadata = null
+      )
       {
         IsLittleEndian = isLittleEndian;
         CpuType = cpuType;
@@ -38,12 +42,15 @@ namespace JetBrains.FormatRipper.MachO
         HasSignature = hasSignature;
         SignatureData = signatureData;
         ComputeHashInfo = computeHashInfo;
+        Metadata = metadata;
       }
     }
 
     public readonly bool? IsFatLittleEndian;
     public readonly Section[] Sections;
-    public readonly List<MachoFileMetadata> Metadatas;
+    public readonly FatHeaderInfo? FatHeaderInfo;
+    public readonly List<MachoFileMetadata> Metadatas = new List<MachoFileMetadata>();
+
 
     [Flags]
     public enum Mode : uint
@@ -54,10 +61,16 @@ namespace JetBrains.FormatRipper.MachO
       Serialization = 0x3
     }
 
-    private MachOFile(bool? isFatLittleEndian, Section[] sections)
+    private MachOFile(bool? isFatLittleEndian, Section[] sections, FatHeaderInfo? fatHeaderInfo = null)
     {
       IsFatLittleEndian = isFatLittleEndian;
       Sections = sections;
+      foreach (var section in sections)
+      {
+        if (section.Metadata != null) Metadatas.Add(section.Metadata);
+      }
+
+      FatHeaderInfo = fatHeaderInfo;
     }
 
     public static unsafe bool Is(Stream stream)
@@ -127,6 +140,8 @@ namespace JetBrains.FormatRipper.MachO
       StreamUtil.ReadBytes(stream, (byte*)&rawMagic, sizeof(uint));
       var magic = (MH)MemoryUtil.GetLeU4(rawMagic);
 
+      var fatArchInfos = new List<FatArchInfo>();
+
       if (magic is MH.FAT_MAGIC or MH.FAT_MAGIC_64 or MH.FAT_CIGAM or MH.FAT_CIGAM_64)
       {
         var isFatLittleEndian = magic is MH.FAT_MAGIC or MH.FAT_MAGIC_64;
@@ -147,6 +162,8 @@ namespace JetBrains.FormatRipper.MachO
             StreamUtil.ReadBytes(stream, (byte*)ptr, checked((int)nFatArch * sizeof(fat_arch_64)));
           for (var n = 0; n < nFatArch; n++)
           {
+            fatArchInfos.Add(new FatArchInfo64(fatNodes[n].cputype, fatNodes[n].cpusubtype, fatNodes[n].offset,
+              fatNodes[n].size, fatNodes[n].align));
             var position = checked((long)GetU8(fatNodes[n].offset));
             stream.Position = position;
             uint rawSubMagic;
@@ -168,6 +185,8 @@ namespace JetBrains.FormatRipper.MachO
             StreamUtil.ReadBytes(stream, (byte*)ptr, checked((int)nFatArch * sizeof(fat_arch)));
           for (var n = 0; n < nFatArch; n++)
           {
+            fatArchInfos.Add(new FatArchInfo32(fatNodes[n].cputype, fatNodes[n].cpusubtype, fatNodes[n].offset,
+              fatNodes[n].size, fatNodes[n].align));
             var position = GetU4(fatNodes[n].offset);
             stream.Position = position;
             uint rawSubMagic;
@@ -182,7 +201,8 @@ namespace JetBrains.FormatRipper.MachO
           }
         }
 
-        return new(isFatLittleEndian, sections);
+        return new(isFatLittleEndian, sections,
+          new FatHeaderInfo(rawMagic, !isFatLittleEndian, nFatArch, fatArchInfos));
       }
 
       return new(null, new[] { Read(new StreamRange(0, stream.Length), magic, stream, mode) });
@@ -318,13 +338,16 @@ namespace JetBrains.FormatRipper.MachO
                 linkedit_data_command ldc;
                 MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&ldc, sizeof(linkedit_data_command));
 
-                metadata.LoadCommands.Add(new LoadCommandSignatureInfo(
-                  streamPosition,
-                  lc.cmd,
-                  lc.cmdsize,
-                  ldc.dataoff,
-                  ldc.datasize
-                ));
+                if ((mode & Mode.Serialization) == Mode.Serialization)
+                {
+                  metadata.LoadCommands.Add(new LoadCommandSignatureInfo(
+                    streamPosition,
+                    lc.cmd,
+                    lc.cmdsize,
+                    ldc.dataoff,
+                    ldc.datasize
+                  ));
+                }
 
 
                 if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
@@ -337,6 +360,7 @@ namespace JetBrains.FormatRipper.MachO
                 {
                   stream.Position = checked(imageRange.Position + GetU4(ldc.dataoff));
 
+                  metadata.CodeSignatureInfo.SuperBlobStart = stream.Position;
                   CS_SuperBlob cssb;
                   StreamUtil.ReadBytes(stream, (byte*)&cssb, sizeof(CS_SuperBlob));
                   if ((CSMAGIC)MemoryUtil.GetBeU4(cssb.magic) != CSMAGIC.CSMAGIC_EMBEDDED_SIGNATURE)
@@ -344,6 +368,10 @@ namespace JetBrains.FormatRipper.MachO
                   var csLength = MemoryUtil.GetBeU4(cssb.length);
                   if (csLength < sizeof(CS_SuperBlob))
                     throw new FormatException("Too small Mach-O code signature super blob");
+
+                  metadata.CodeSignatureInfo.Magic = cssb.magic;
+                  metadata.CodeSignatureInfo.Length = cssb.length;
+                  metadata.CodeSignatureInfo.SuperBlobCount = (int)cssb.count;
 
                   var csCount = MemoryUtil.GetBeU4(cssb.count);
                   fixed (byte* scBuf = StreamUtil.ReadBytes(stream, checked((int)csLength - sizeof(CS_SuperBlob))))
@@ -363,19 +391,47 @@ namespace JetBrains.FormatRipper.MachO
                             throw new FormatException("Invalid Mach-O code directory signature magic");
                           var cscdLength = MemoryUtil.GetBeU4(cscd.length);
                           codeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, checked((int)cscdLength));
+
+                          if ((mode & Mode.Serialization) == Mode.Serialization)
+                          {
+                            metadata.CodeSignatureInfo.Blobs.Add(new Blob(
+                              csbi.type,
+                              csbi.offset,
+                              CSMAGIC_CONSTS.CODEDIRECTORY,
+                              cssb.magic,
+                              codeDirectoryBlob
+                            ));
+                          }
                         }
                           break;
-                        case CSSLOT.CSSLOT_CMS_SIGNATURE:
+                        default: // CSSLOT.CSSLOT_CMS_SIGNATURE:
                         {
+                          var isSignature = MemoryUtil.GetBeU4(csbi.type) == CSSLOT.CSSLOT_CMS_SIGNATURE;
                           CS_Blob csb;
                           MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
-                          if ((CSMAGIC)MemoryUtil.GetBeU4(csb.magic) != CSMAGIC.CSMAGIC_BLOBWRAPPER)
+                          if (isSignature && (CSMAGIC)MemoryUtil.GetBeU4(csb.magic) != CSMAGIC.CSMAGIC_BLOBWRAPPER)
                             throw new FormatException("Invalid Mach-O blob wrapper signature magic");
                           var csbLength = MemoryUtil.GetBeU4(csb.length);
                           if (csbLength < sizeof(CS_Blob))
                             throw new FormatException("Too small Mach-O cms signature blob length");
-                          cmsSignatureBlob = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob),
+
+                          var data = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob),
                             checked((int)csbLength - sizeof(CS_Blob)));
+                          if (isSignature)
+                          {
+                            cmsSignatureBlob = data;
+                          }
+
+                          if ((mode & Mode.Serialization) == Mode.Serialization)
+                          {
+                            metadata.CodeSignatureInfo.Blobs.Add(new Blob(
+                              csbi.type,
+                              csbi.offset,
+                              (CSMAGIC_CONSTS)MemoryUtil.GetBeU4(csbi.type),
+                              cssb.magic,
+                              isSignature ? new byte[0] : data
+                            ));
+                          }
                         }
                           break;
                       }
@@ -396,7 +452,7 @@ namespace JetBrains.FormatRipper.MachO
                 sizeof(load_command) + sizeof(linkedit_data_command)));
         }
 
-        return new(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob));
+        return new(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob), metadata);
       }
 
       int GetZeroPadding(bool hasCodeSignature)
@@ -449,7 +505,9 @@ namespace JetBrains.FormatRipper.MachO
           (MH_Flags)GetU4(mh.flags),
           loadCommands.HasSignature,
           loadCommands.SignatureData,
-          computeHashInfo);
+          computeHashInfo,
+          (mode & Mode.Serialization) == Mode.Serialization ? metadata : null
+        );
       }
       else
       {
@@ -492,7 +550,9 @@ namespace JetBrains.FormatRipper.MachO
           (MH_Flags)GetU4(mh.flags),
           loadCommands.HasSignature,
           loadCommands.SignatureData,
-          computeHashInfo);
+          computeHashInfo,
+          (mode & Mode.Serialization) == Mode.Serialization ? metadata : null
+        );
       }
     }
 
@@ -500,11 +560,13 @@ namespace JetBrains.FormatRipper.MachO
     {
       public readonly bool HasSignature;
       public readonly SignatureData SignatureData;
+      public readonly MachoFileMetadata? Metadata;
 
-      public LoadCommandsInfo(bool hasSignature, SignatureData signatureData)
+      public LoadCommandsInfo(bool hasSignature, SignatureData signatureData, MachoFileMetadata? metadata = null)
       {
         HasSignature = hasSignature;
         SignatureData = signatureData;
+        Metadata = metadata;
       }
     }
   }
