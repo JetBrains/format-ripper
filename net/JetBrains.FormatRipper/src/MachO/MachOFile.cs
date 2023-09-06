@@ -50,7 +50,7 @@ namespace JetBrains.FormatRipper.MachO
     public readonly Section[] Sections;
     public readonly FatHeaderInfo? FatHeaderInfo;
     public readonly List<MachoFileMetadata> Metadatas = new List<MachoFileMetadata>();
-
+    public readonly long FileSize;
 
     [Flags]
     public enum Mode : uint
@@ -61,7 +61,7 @@ namespace JetBrains.FormatRipper.MachO
       Serialization = 0x3
     }
 
-    private MachOFile(bool? isFatLittleEndian, Section[] sections, FatHeaderInfo? fatHeaderInfo = null)
+    private MachOFile(bool? isFatLittleEndian, Section[] sections, long fileSize, FatHeaderInfo? fatHeaderInfo = null)
     {
       IsFatLittleEndian = isFatLittleEndian;
       Sections = sections;
@@ -69,6 +69,8 @@ namespace JetBrains.FormatRipper.MachO
       {
         if (section.Metadata != null) Metadatas.Add(section.Metadata);
       }
+
+      FileSize = fileSize;
 
       FatHeaderInfo = fatHeaderInfo;
     }
@@ -201,11 +203,11 @@ namespace JetBrains.FormatRipper.MachO
           }
         }
 
-        return new(isFatLittleEndian, sections,
+        return new(isFatLittleEndian, sections, stream.Length,
           new FatHeaderInfo(rawMagic, !isFatLittleEndian, nFatArch, fatArchInfos));
       }
 
-      return new(null, new[] { Read(new StreamRange(0, stream.Length), magic, stream, mode) });
+      return new(null, new[] { Read(new StreamRange(0, stream.Length), magic, stream, mode) }, stream.Length);
     }
 
     private unsafe static Section Read(StreamRange imageRange, MH magic, Stream stream, Mode mode)
@@ -292,7 +294,8 @@ namespace JetBrains.FormatRipper.MachO
                 if ((mode & (Mode.ComputeHashInfo | Mode.Serialization)) != 0)
                 {
                   segment_command_64 segmentCommand64;
-                  MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&segmentCommand64, sizeof(segment_command));
+
+                  MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&segmentCommand64, sizeof(segment_command_64));
                   var segNameBuf = MemoryUtil.CopyBytes(segmentCommand64.segname, 16);
                   var segName =
                     new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
@@ -369,8 +372,8 @@ namespace JetBrains.FormatRipper.MachO
                   if (csLength < sizeof(CS_SuperBlob))
                     throw new FormatException("Too small Mach-O code signature super blob");
 
-                  metadata.CodeSignatureInfo.Magic = cssb.magic;
-                  metadata.CodeSignatureInfo.Length = cssb.length;
+                  metadata.CodeSignatureInfo.Magic = MemoryUtil.GetBeU4(cssb.magic);
+                  metadata.CodeSignatureInfo.Length = MemoryUtil.GetBeU4(cssb.length);
                   metadata.CodeSignatureInfo.SuperBlobCount = (int)cssb.count;
 
                   var csCount = MemoryUtil.GetBeU4(cssb.count);
@@ -395,10 +398,10 @@ namespace JetBrains.FormatRipper.MachO
                           if ((mode & Mode.Serialization) == Mode.Serialization)
                           {
                             metadata.CodeSignatureInfo.Blobs.Add(new Blob(
-                              csbi.type,
-                              csbi.offset,
+                              MemoryUtil.GetBeU4(csbi.type),
+                              MemoryUtil.GetBeU4(csbi.offset),
                               CSMAGIC_CONSTS.CODEDIRECTORY,
-                              cssb.magic,
+                              MemoryUtil.GetBeU4(cscd.magic),
                               codeDirectoryBlob
                             ));
                           }
@@ -416,7 +419,7 @@ namespace JetBrains.FormatRipper.MachO
                             throw new FormatException("Too small Mach-O cms signature blob length");
 
                           var data = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob),
-                            checked((int)csbLength - sizeof(CS_Blob)));
+                            checked((int)csbLength));
                           if (isSignature)
                           {
                             cmsSignatureBlob = data;
@@ -425,10 +428,10 @@ namespace JetBrains.FormatRipper.MachO
                           if ((mode & Mode.Serialization) == Mode.Serialization)
                           {
                             metadata.CodeSignatureInfo.Blobs.Add(new Blob(
-                              csbi.type,
-                              csbi.offset,
+                              MemoryUtil.GetBeU4(csbi.type),
+                              MemoryUtil.GetBeU4(csbi.offset),
                               (CSMAGIC_CONSTS)MemoryUtil.GetBeU4(csbi.type),
-                              cssb.magic,
+                              MemoryUtil.GetBeU4(csb.magic),
                               isSignature ? new byte[0] : data
                             ));
                           }

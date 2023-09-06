@@ -2,9 +2,9 @@
 
 namespace JetBrains.FormatRipper.Impl
 {
-  internal static class StreamUtil
+  public static class StreamUtil
   {
-    internal static void Read(Stream stream, byte[] buffer, int index, int size)
+    private static void Read(Stream stream, byte[] buffer, int index, int size)
     {
       while (size > 0)
       {
@@ -16,7 +16,7 @@ namespace JetBrains.FormatRipper.Impl
       }
     }
 
-    internal static byte[] ReadBytes(Stream stream, int size)
+    public static byte[] ReadBytes(Stream stream, int size)
     {
       var buffer = new byte[size];
       Read(stream, buffer, 0, buffer.Length);

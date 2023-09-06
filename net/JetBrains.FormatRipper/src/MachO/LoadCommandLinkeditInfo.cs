@@ -1,4 +1,5 @@
 using System;
+using JetBrains.FormatRipper.Impl;
 
 namespace JetBrains.FormatRipper.MachO;
 
@@ -17,7 +18,9 @@ public class LoadCommandLinkeditInfo : LoadCommandInfo
   public uint SectionsNum { get; set; }
   public uint SegmentFlags { get; set; }
 
-  public LoadCommandLinkeditInfo(long offset, uint command, uint commandSize, byte[] segmentName, ulong vmAddress, ulong vmSize, ulong vmFileOff, ulong fileSize, uint vmProcMaximumProtection, uint vmProcInitialProtection, uint sectionsNum, uint segmentFlags)
+  public LoadCommandLinkeditInfo(long offset, uint command, uint commandSize, byte[] segmentName, ulong vmAddress,
+    ulong vmSize, ulong vmFileOff, ulong fileSize, uint vmProcMaximumProtection, uint vmProcInitialProtection,
+    uint sectionsNum, uint segmentFlags)
   {
     Offset = offset;
     Command = command;
@@ -33,8 +36,18 @@ public class LoadCommandLinkeditInfo : LoadCommandInfo
     SegmentFlags = segmentFlags;
   }
 
-  public override byte[] ToByteArray()
-  {
-    throw new NotImplementedException();
-  }
+  public override byte[] ToByteArray() =>
+    MemoryUtil.ArrayMerge(
+      MemoryUtil.ToByteArray(Command),
+      MemoryUtil.ToByteArray(CommandSize),
+      SegmentName,
+      MemoryUtil.ToByteArray((long)VmAddress),
+      MemoryUtil.ToByteArray((long)VmSize),
+      MemoryUtil.ToByteArray((long)VmFileOff),
+      MemoryUtil.ToByteArray((long)FileSize),
+      MemoryUtil.ToByteArray(VmProcMaximumProtection),
+      MemoryUtil.ToByteArray(VmProcInitialProtection),
+      MemoryUtil.ToByteArray(SectionsNum),
+      MemoryUtil.ToByteArray(SegmentFlags)
+    );
 }

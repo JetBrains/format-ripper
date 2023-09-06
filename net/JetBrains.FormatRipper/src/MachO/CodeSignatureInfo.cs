@@ -25,8 +25,8 @@ public class CodeSignatureInfo
     foreach (var blob in Blobs)
     {
       result = MemoryUtil.ArrayMerge(result,
-        MemoryUtil.ToByteArray(blob.type),
-        MemoryUtil.ToByteArray(blob.offset));
+        MemoryUtil.ToByteArray(blob.type, true),
+        MemoryUtil.ToByteArray(blob.offset, true));
     }
 
     return result;

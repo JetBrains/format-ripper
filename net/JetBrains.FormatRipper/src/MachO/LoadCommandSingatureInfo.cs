@@ -1,4 +1,5 @@
 using System;
+using JetBrains.FormatRipper.Impl;
 
 namespace JetBrains.FormatRipper.MachO;
 
@@ -19,8 +20,11 @@ public class LoadCommandSignatureInfo : LoadCommandInfo
     DataSize = dataSize;
   }
 
-  public override byte[] ToByteArray()
-  {
-    throw new NotImplementedException();
-  }
+  public override byte[] ToByteArray() =>
+    MemoryUtil.ArrayMerge(
+      MemoryUtil.ToByteArray(Command),
+      MemoryUtil.ToByteArray(CommandSize),
+      MemoryUtil.ToByteArray(DataOffset),
+      MemoryUtil.ToByteArray(DataSize)
+    );
 }
