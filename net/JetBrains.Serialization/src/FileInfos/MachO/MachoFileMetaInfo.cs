@@ -14,7 +14,6 @@ public class MachoFileMetaInfo : IFileMetaInfo
 
   public void ModifyFile(Stream stream, byte[] signature)
   {
-    stream.Position = 0;
 
     if (Metadata.FileSize > stream.Length)
     {
@@ -22,7 +21,9 @@ public class MachoFileMetaInfo : IFileMetaInfo
     }
 
     stream.Position = Metadata.MachoOffset;
+
     var headerBytes = Metadata.HeaderMetainfo.ToByteArray(Metadata.IsBe);
+
     stream.Write(headerBytes, 0, headerBytes.Length);
 
     foreach (var metadataLoadCommand in Metadata.LoadCommands)

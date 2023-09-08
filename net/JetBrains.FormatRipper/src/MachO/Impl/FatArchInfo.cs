@@ -27,11 +27,11 @@ public class FatArchInfo64 : FatArchInfo
   }
 
   public override byte[] ToByteArray(bool isBe) => MemoryUtil.ArrayMerge(
-    MemoryUtil.ToByteArray(CpuType),
-    MemoryUtil.ToByteArray(CpuSubType),
-    MemoryUtil.ToByteArray((long)FileOffset, true),
-    MemoryUtil.ToByteArray((long)Size, true),
-    MemoryUtil.ToByteArray((long)Align, true)
+    MemoryUtil.ToByteArray(CpuType, isBe),
+    MemoryUtil.ToByteArray(CpuSubType, isBe),
+    MemoryUtil.ToByteArray((long)FileOffset, isBe),
+    MemoryUtil.ToByteArray((long)Size, isBe),
+    MemoryUtil.ToByteArray((long)Align, isBe)
   );
 }
 
@@ -51,10 +51,10 @@ public class FatArchInfo32 : FatArchInfo
   }
 
   public override byte[] ToByteArray(bool isBe) => MemoryUtil.ArrayMerge(
-    MemoryUtil.ToByteArray(CpuType),
-    MemoryUtil.ToByteArray(CpuSubType),
-    MemoryUtil.ToByteArray(FileOffset, true),
-    MemoryUtil.ToByteArray(Size, true),
-    MemoryUtil.ToByteArray(Align, true)
+    MemoryUtil.ToByteArray(CpuType, isBe),
+    MemoryUtil.ToByteArray(CpuSubType, isBe),
+    MemoryUtil.ToByteArray(FileOffset, isBe),
+    MemoryUtil.ToByteArray(Size, isBe),
+    MemoryUtil.ToByteArray(Align, isBe)
   );
 }

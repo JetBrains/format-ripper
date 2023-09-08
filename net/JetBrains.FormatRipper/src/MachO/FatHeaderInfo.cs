@@ -21,7 +21,7 @@ public class FatHeaderInfo
 
   public byte[] ToByteArray() => MemoryUtil.ArrayMerge(
     MemoryUtil.ToByteArray(Magic),
-    MemoryUtil.ToByteArray(FatArchSize),
+    MemoryUtil.ToByteArray(FatArchSize, IsBe),
     InfosToByteArray()
   );
 

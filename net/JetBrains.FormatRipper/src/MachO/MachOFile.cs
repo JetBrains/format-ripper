@@ -164,8 +164,14 @@ namespace JetBrains.FormatRipper.MachO
             StreamUtil.ReadBytes(stream, (byte*)ptr, checked((int)nFatArch * sizeof(fat_arch_64)));
           for (var n = 0; n < nFatArch; n++)
           {
-            fatArchInfos.Add(new FatArchInfo64(fatNodes[n].cputype, fatNodes[n].cpusubtype, fatNodes[n].offset,
-              fatNodes[n].size, fatNodes[n].align));
+            fatArchInfos.Add(new FatArchInfo64(
+                GetU4(fatNodes[n].cputype),
+                GetU4(fatNodes[n].cpusubtype),
+                GetU8(fatNodes[n].offset),
+                GetU8(fatNodes[n].size),
+                GetU4(fatNodes[n].align)
+              )
+            );
             var position = checked((long)GetU8(fatNodes[n].offset));
             stream.Position = position;
             uint rawSubMagic;
@@ -187,8 +193,15 @@ namespace JetBrains.FormatRipper.MachO
             StreamUtil.ReadBytes(stream, (byte*)ptr, checked((int)nFatArch * sizeof(fat_arch)));
           for (var n = 0; n < nFatArch; n++)
           {
-            fatArchInfos.Add(new FatArchInfo32(fatNodes[n].cputype, fatNodes[n].cpusubtype, fatNodes[n].offset,
-              fatNodes[n].size, fatNodes[n].align));
+            fatArchInfos.Add(
+              new FatArchInfo32(
+                GetU4(fatNodes[n].cputype),
+                GetU4(fatNodes[n].cpusubtype),
+                GetU4(fatNodes[n].offset),
+                GetU4(fatNodes[n].size),
+                GetU4(fatNodes[n].align)
+              )
+            );
             var position = GetU4(fatNodes[n].offset);
             stream.Position = position;
             uint rawSubMagic;
@@ -204,7 +217,7 @@ namespace JetBrains.FormatRipper.MachO
         }
 
         return new(isFatLittleEndian, sections, stream.Length,
-          new FatHeaderInfo(rawMagic, !isFatLittleEndian, nFatArch, fatArchInfos));
+          new FatHeaderInfo(MemoryUtil.GetLeU4(rawMagic), !isFatLittleEndian, nFatArch, fatArchInfos));
       }
 
       return new(null, new[] { Read(new StreamRange(0, stream.Length), magic, stream, mode) }, stream.Length);
@@ -270,19 +283,21 @@ namespace JetBrains.FormatRipper.MachO
                   {
                     if (segName == SEG.SEG_LINKEDIT)
                     {
+                      segment_command_64 command64;
+                      MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&command64, sizeof(segment_command_64));
                       metadata.LoadCommands.Add(new LoadCommandLinkeditInfo(
                         streamPosition,
                         lc.cmd, // U4?
                         lc.cmdsize,
                         segNameBuf,
-                        segmentCommand.vmaddr,
-                        segmentCommand.vmsize,
-                        segmentCommand.fileoff,
-                        segmentCommand.filesize,
-                        segmentCommand.maxprot,
-                        segmentCommand.initprot,
-                        segmentCommand.nsects,
-                        segmentCommand.flags
+                        command64.vmaddr,
+                        command64.vmsize,
+                        command64.fileoff,
+                        command64.filesize,
+                        command64.maxprot,
+                        command64.initprot,
+                        command64.nsects,
+                        command64.flags
                       ));
                     }
                   }
@@ -363,7 +378,7 @@ namespace JetBrains.FormatRipper.MachO
                 {
                   stream.Position = checked(imageRange.Position + GetU4(ldc.dataoff));
 
-                  metadata.CodeSignatureInfo.SuperBlobStart = stream.Position;
+                  metadata.CodeSignatureInfo.SuperBlobStart = GetU4(ldc.dataoff);
                   CS_SuperBlob cssb;
                   StreamUtil.ReadBytes(stream, (byte*)&cssb, sizeof(CS_SuperBlob));
                   if ((CSMAGIC)MemoryUtil.GetBeU4(cssb.magic) != CSMAGIC.CSMAGIC_EMBEDDED_SIGNATURE)
@@ -473,13 +488,13 @@ namespace JetBrains.FormatRipper.MachO
 
         metadata.HeaderMetainfo = new MachoHeaderMetainfo(
           (uint)magic,
-          mh.cputype,
-          mh.cpusubtype,
-          mh.filetype,
-          mh.ncmds,
-          mh.sizeofcmds,
-          mh.flags,
-          mh.reserved
+          GetU4(mh.cputype),
+          GetU4(mh.cpusubtype),
+          GetU4(mh.filetype),
+          GetU4(mh.ncmds),
+          GetU4(mh.sizeofcmds),
+          GetU4(mh.flags),
+          GetU4(mh.reserved)
         );
 
         if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
@@ -517,14 +532,19 @@ namespace JetBrains.FormatRipper.MachO
         mach_header mh;
         StreamUtil.ReadBytes(stream, (byte*)&mh, sizeof(mach_header));
 
+        UInt32 reserved;
+        StreamUtil.ReadBytes(stream, (byte*)&reserved, sizeof(UInt32));
+        stream.Position -= sizeof(UInt32);
+
         metadata.HeaderMetainfo = new MachoHeaderMetainfo(
           (uint)magic,
-          mh.cputype,
-          mh.cpusubtype,
-          mh.filetype,
-          mh.ncmds,
-          mh.sizeofcmds,
-          mh.flags
+          GetU4(mh.cputype),
+          GetU4(mh.cpusubtype),
+          GetU4(mh.filetype),
+          GetU4(mh.ncmds),
+          GetU4(mh.sizeofcmds),
+          GetU4(mh.flags),
+          GetU4(reserved)
         );
 
         if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)

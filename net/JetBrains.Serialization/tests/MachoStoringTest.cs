@@ -11,14 +11,14 @@ public class MachoStoringTest
     resourceName, stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData | MachOFile.Mode.Serialization));
 
   // @formatter:off
-   // [TestCase("addhoc_resigned", "addhoc")]
-   // [TestCase("nosigned_resigned", "notsigned")]
-   // [TestCase("fat.dylib_signed", "fat.dylib")]
-   // [TestCase("JetBrains.Profiler.PdbServer", "JetBrains.Profiler.PdbServer")]
+   [TestCase("addhoc_resigned", "addhoc")]
+   [TestCase("nosigned_resigned", "notsigned")]
+   [TestCase("fat.dylib_signed", "fat.dylib")]
+   [TestCase("JetBrains.Profiler.PdbServer", "JetBrains.Profiler.PdbServer")]
    [TestCase("cat", "cat")]
-   // [TestCase("env-wrapper.x64", "env-wrapper.x64")]
-   // [TestCase("libMonoSupportW.x64.dylib", "libMonoSupportW.x64.dylib")]
-   // [TestCase("libhostfxr.dylib", "libhostfxr.dylib")]
+   [TestCase("env-wrapper.x64", "env-wrapper.x64")]
+   [TestCase("libMonoSupportW.x64.dylib", "libMonoSupportW.x64.dylib")]
+   [TestCase("libhostfxr.dylib", "libhostfxr.dylib")]
   // @formatter:on
   public Task PeStoringTest(string signedResourceName, string unsignedResourceName)
   {
