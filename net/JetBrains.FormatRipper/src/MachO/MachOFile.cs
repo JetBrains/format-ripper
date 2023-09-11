@@ -235,6 +235,7 @@ namespace JetBrains.FormatRipper.MachO
       var metadata = new MachoFileMetadata(imageRange.Position, imageRange.Size, !isLittleEndian);
 
       uint GetU4(uint v) => needSwap ? MemoryUtil.SwapU4(v) : v;
+      ulong GetU8(ulong v) => needSwap ? MemoryUtil.SwapU8(v) : v;
 
       var excludeRanges = new List<StreamRange>();
 
@@ -287,17 +288,17 @@ namespace JetBrains.FormatRipper.MachO
                       MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&command64, sizeof(segment_command_64));
                       metadata.LoadCommands.Add(new LoadCommandLinkeditInfo(
                         streamPosition,
-                        lc.cmd, // U4?
-                        lc.cmdsize,
+                        GetU4(lc.cmd), // U4?
+                        GetU4(lc.cmdsize),
                         segNameBuf,
-                        command64.vmaddr,
-                        command64.vmsize,
-                        command64.fileoff,
-                        command64.filesize,
-                        command64.maxprot,
-                        command64.initprot,
-                        command64.nsects,
-                        command64.flags
+                        GetU8(command64.vmaddr),
+                        GetU8(command64.vmsize),
+                        GetU8(command64.fileoff),
+                        GetU8(command64.filesize),
+                        GetU4(command64.maxprot),
+                        GetU4(command64.initprot),
+                        GetU4(command64.nsects),
+                        GetU4(command64.flags)
                       ));
                     }
                   }
@@ -334,17 +335,17 @@ namespace JetBrains.FormatRipper.MachO
                     {
                       metadata.LoadCommands.Add(new LoadCommandLinkeditInfo(
                         streamPosition,
-                        lc.cmd, // U4?
-                        lc.cmdsize,
+                        GetU4(lc.cmd), // U4?
+                        GetU4(lc.cmdsize),
                         segNameBuf,
-                        segmentCommand64.vmaddr,
-                        segmentCommand64.vmsize,
-                        segmentCommand64.fileoff,
-                        segmentCommand64.filesize,
-                        segmentCommand64.maxprot,
-                        segmentCommand64.initprot,
-                        segmentCommand64.nsects,
-                        segmentCommand64.flags
+                        GetU8(segmentCommand64.vmaddr),
+                        GetU8(segmentCommand64.vmsize),
+                        GetU8(segmentCommand64.fileoff),
+                        GetU8(segmentCommand64.filesize),
+                        GetU4(segmentCommand64.maxprot),
+                        GetU4(segmentCommand64.initprot),
+                        GetU4(segmentCommand64.nsects),
+                        GetU4(segmentCommand64.flags)
                       ));
                     }
                   }
@@ -360,10 +361,10 @@ namespace JetBrains.FormatRipper.MachO
                 {
                   metadata.LoadCommands.Add(new LoadCommandSignatureInfo(
                     streamPosition,
-                    lc.cmd,
-                    lc.cmdsize,
-                    ldc.dataoff,
-                    ldc.datasize
+                    GetU4(lc.cmd),
+                    GetU4(lc.cmdsize),
+                    GetU4(ldc.dataoff),
+                    GetU4(ldc.datasize)
                   ));
                 }
 

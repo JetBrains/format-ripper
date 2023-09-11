@@ -42,12 +42,14 @@ public class MachoStoringTest
       fileInfo.ModifyFile(fileStream);
     }
 
-    // using (var targetPath = new FileStream("./tmps/tmp", FileMode.Create, FileAccess.ReadWrite))
+    // Directory.CreateDirectory("./tmps");
+    //
+    // using (var targetPath = new FileStream("./tmps/tmp-" + signedResourceName, FileMode.Create, FileAccess.ReadWrite))
     // {
-      // using (var fileStream = new FileStream(tmpFile, FileMode.Open, FileAccess.ReadWrite))
-      // {
-        // fileStream.CopyTo(targetPath);
-      // }
+    //   using (var fileStream = new FileStream(tmpFile, FileMode.Open, FileAccess.ReadWrite))
+    //   {
+    //     fileStream.CopyTo(targetPath);
+    //   }
     // }
 
 
