@@ -435,9 +435,13 @@ namespace JetBrains.FormatRipper.MachO
 
                           var data = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob),
                             checked((int)csbLength));
+
                           if (isSignature)
                           {
-                            cmsSignatureBlob = data;
+                            // FIXME: this is done for compatability with the original version but it just seems wrong
+                            // to offset CS_Blob from both left and right
+                            cmsSignatureBlob = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob),
+                              checked((int)csbLength) - sizeof(CS_Blob));
                           }
 
                           if ((mode & Mode.Serialization) == Mode.Serialization)

@@ -20,7 +20,7 @@ public class MachoStoringTest
    [TestCase("libMonoSupportW.x64.dylib", "libMonoSupportW.x64.dylib")]
    [TestCase("libhostfxr.dylib", "libhostfxr.dylib")]
   // @formatter:on
-  public Task PeStoringTest(string signedResourceName, string unsignedResourceName)
+  public Task StoringTest(string signedResourceName, string unsignedResourceName)
   {
     var file = GetMachOFile(signedResourceName);
     var fileInfo = new MachoArchInfo(file);
@@ -42,13 +42,13 @@ public class MachoStoringTest
       fileInfo.ModifyFile(fileStream);
     }
 
-    using (var targetPath = new FileStream("./tmps/tmp", FileMode.Create, FileAccess.ReadWrite))
-    {
-      using (var fileStream = new FileStream(tmpFile, FileMode.Open, FileAccess.ReadWrite))
-      {
-        fileStream.CopyTo(targetPath);
-      }
-    }
+    // using (var targetPath = new FileStream("./tmps/tmp", FileMode.Create, FileAccess.ReadWrite))
+    // {
+      // using (var fileStream = new FileStream(tmpFile, FileMode.Open, FileAccess.ReadWrite))
+      // {
+        // fileStream.CopyTo(targetPath);
+      // }
+    // }
 
 
     ResourceUtil.OpenRead(ResourceCategory.MachO, signedResourceName,
