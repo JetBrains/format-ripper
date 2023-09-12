@@ -1,12 +1,14 @@
 using JetBrains.FormatRipper.MachO;
 using JetBrains.SignatureVerifier.Crypt;
+using Newtonsoft.Json;
 
 namespace JetBrains.Serialization.FileInfos.MachO;
 
+[JsonObject(MemberSerialization.OptIn)]
 public class MachoFileInfo : FileInfo
 {
-  public override IFileMetaInfo FileMetaInfo { get; }
-  public override SignedDataInfo SignedDataInfo { get; }
+  [JsonProperty("FileMetaInfo")] public override IFileMetaInfo FileMetaInfo { get; }
+  [JsonProperty("SignedDataInfo")] public override SignedDataInfo SignedDataInfo { get; }
 
   public MachoFileInfo(MachOFile.Section section)
   {
@@ -16,6 +18,13 @@ public class MachoFileInfo : FileInfo
       throw new Exception("Metadata can not be null");
 
     FileMetaInfo = new MachoFileMetaInfo(section.Metadata);
+  }
+
+  [JsonConstructor]
+  public MachoFileInfo(IFileMetaInfo fileMetaInfo, SignedDataInfo signedDataInfo)
+  {
+    FileMetaInfo = fileMetaInfo;
+    SignedDataInfo = signedDataInfo;
   }
 
   public override void ModifyFile(Stream stream)

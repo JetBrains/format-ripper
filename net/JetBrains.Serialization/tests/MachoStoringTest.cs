@@ -23,7 +23,7 @@ public class MachoStoringTest
   public Task StoringTest(string signedResourceName, string unsignedResourceName)
   {
     var file = GetMachOFile(signedResourceName);
-    var fileInfo = new MachoArchInfo(file);
+    var initialFileInfo = new MachoArchInfo(file);
 
     var tmpFile = Path.GetTempFileName();
     ResourceUtil.OpenRead(ResourceCategory.MachO, unsignedResourceName,
@@ -37,21 +37,18 @@ public class MachoStoringTest
         return true;
       });
 
+    var settings = new JsonSerializerSettings
+    {
+      TypeNameHandling = TypeNameHandling.Auto
+    };
+    var json = JsonConvert.SerializeObject(initialFileInfo, settings);
+    var fileInfo = JsonConvert.DeserializeObject<MachoArchInfo>(json, settings)!;
+
+
     using (var fileStream = new FileStream(tmpFile, FileMode.Open, FileAccess.ReadWrite))
     {
       fileInfo.ModifyFile(fileStream);
     }
-
-    // Directory.CreateDirectory("./tmps");
-    //
-    // using (var targetPath = new FileStream("./tmps/tmp-" + signedResourceName, FileMode.Create, FileAccess.ReadWrite))
-    // {
-    //   using (var fileStream = new FileStream(tmpFile, FileMode.Open, FileAccess.ReadWrite))
-    //   {
-    //     fileStream.CopyTo(targetPath);
-    //   }
-    // }
-
 
     ResourceUtil.OpenRead(ResourceCategory.MachO, signedResourceName,
       stream =>

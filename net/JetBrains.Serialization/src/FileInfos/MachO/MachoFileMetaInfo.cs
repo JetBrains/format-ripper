@@ -1,12 +1,15 @@
 using JetBrains.FormatRipper.Dmg;
 using JetBrains.FormatRipper.MachO;
+using Newtonsoft.Json;
 
 namespace JetBrains.Serialization.FileInfos.MachO;
 
+[JsonObject(MemberSerialization.OptIn)]
 public class MachoFileMetaInfo : IFileMetaInfo
 {
-  public MachoFileMetadata Metadata;
+  [JsonProperty("Metadata")] public MachoFileMetadata Metadata;
 
+  [JsonConstructor]
   public MachoFileMetaInfo(MachoFileMetadata metadata)
   {
     Metadata = metadata;

@@ -1,13 +1,23 @@
 using JetBrains.FormatRipper.Impl;
 using JetBrains.FormatRipper.MachO;
+using Newtonsoft.Json;
 
 namespace JetBrains.Serialization.FileInfos.MachO;
 
+[JsonObject(MemberSerialization.OptIn)]
 public class MachoArchInfo
 {
-  private List<MachoFileInfo> _fileInfos = new List<MachoFileInfo>();
-  private FatHeaderInfo? _headerInfo;
-  private long size;
+  [JsonProperty("fileInfos")] private List<MachoFileInfo> _fileInfos = new List<MachoFileInfo>();
+  [JsonProperty("headerInfo")] private FatHeaderInfo? _headerInfo;
+  [JsonProperty("size")] private long size;
+
+  [JsonConstructor]
+  public MachoArchInfo(List<MachoFileInfo> fileInfos, FatHeaderInfo? headerInfo, long size)
+  {
+    _fileInfos = fileInfos;
+    _headerInfo = headerInfo;
+    this.size = size;
+  }
 
   public MachoArchInfo(MachOFile file)
   {
