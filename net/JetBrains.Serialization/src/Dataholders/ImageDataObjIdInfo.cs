@@ -87,8 +87,7 @@ public class ImageDataObjIdInfo : IEncodableInfo
         ? new List<Asn1Encodable?> { HexCode.ToPrimitive() }
           .Concat(
             ((SequenceInfo)Content)
-            .Content
-            .ToPrimitiveList()
+            .PrimitiveContent()
           )
           .ToDerSequence()
         : new List<IEncodableInfo?> { HexCode, Content }.ToPrimitiveDerSequence()

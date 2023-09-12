@@ -9,47 +9,36 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.OptIn)]
 public abstract class TextualInfo : IEncodableInfo
 {
+  private static readonly Dictionary<Type, Func<Asn1Encodable, TextualInfo>> FactoryMethods
+    = new Dictionary<Type, Func<Asn1Encodable, TextualInfo>>
+    {
+      { typeof(DerBitString), x => new DerBitStringInfo(((DerBitString)x).GetOctets()) },
+      { typeof(DerEnumerated), x => new EnumeratedInfo(((DerEnumerated)x).Value) },
+      { typeof(DerInteger), x => new IntegerInfo(((DerInteger)x).ToString()) },
+      { typeof(DerBoolean), x => new BooleanInfo(((DerBoolean)x).IsTrue) },
+      { typeof(DerObjectIdentifier), x => new Asn1ObjectIdentifierInfo(((DerObjectIdentifier)x).Id) },
+      { typeof(DerGeneralString), x => new DerGeneralStringInfo(((DerGeneralString)x).GetString()) },
+      { typeof(DerNumericString), x => new DerNumericStringInfo(((DerNumericString)x).ToString()) },
+      { typeof(DerVisibleString), x => new DerVisibleStringInfo(((DerVisibleString)x).GetString()) },
+      { typeof(DerBmpString), x => new DerBmpStringInfo(((DerBmpString)x).GetString()) },
+      { typeof(DerIA5String), x => new DerIA5StringInfo(((DerIA5String)x).GetString()) },
+      { typeof(DerUtf8String), x => new DerUTF8StringInfo(((DerUtf8String)x).GetString()) },
+      { typeof(DerPrintableString), x => new DerPrintableStringInfo(((DerPrintableString)x).GetString()) },
+      { typeof(DerOctetString), x => new DerOctetStringInfo(((DerOctetString)x).GetOctets()) },
+      { typeof(DerUniversalString), x => new DerUniversalStringInfo(((DerUniversalString)x).GetOctets()) },
+      { typeof(DerGeneralizedTime), x => new Asn1GeneralizedTimeInfo(((DerGeneralizedTime)x).ToDateTime()) },
+      { typeof(DerUtcTime), x => new Asn1UtcTimeInfo(((DerUtcTime)x).ToDateTime()) },
+      { typeof(DerNull), x => new Asn1NullInfo("NULL") }
+    };
+
   public static TextualInfo GetInstance(Asn1Encodable value)
   {
-    switch (value)
+    if (FactoryMethods.TryGetValue(value.GetType(), out var factoryMethod))
     {
-      case DerUtcTime utcTime:
-        return new Asn1UtcTimeInfo(utcTime.ToDateTime());
-      case DerGeneralizedTime generalizedTime:
-        return new Asn1GeneralizedTimeInfo(generalizedTime.ToDateTime());
-      case DerUniversalString universalString:
-        return new DerUniversalStringInfo(universalString.GetOctets());
-      case DerOctetString octetString:
-        return new DerOctetStringInfo(octetString.GetOctets());
-      case DerBitString bitString:
-        return new DerBitStringInfo(bitString.GetOctets());
-      case DerPrintableString printableString:
-        return new DerPrintableStringInfo(printableString.GetString());
-      case DerUtf8String utf8String:
-        return new DerUTF8StringInfo(utf8String.GetString());
-      case DerIA5String ia5String:
-        return new DerIA5StringInfo(ia5String.GetString());
-      case DerBmpString bmpString:
-        return new DerBmpStringInfo(bmpString.GetString());
-      case DerVisibleString visibleString:
-        return new DerVisibleStringInfo(visibleString.GetString());
-      case DerNumericString numericString:
-        return new DerNumericStringInfo(numericString.ToString());
-      case DerGeneralString generalString:
-        return new DerGeneralStringInfo(generalString.ToString());
-      case DerObjectIdentifier objectId:
-        return new Asn1ObjectIdentifierInfo(objectId.ToString());
-      case DerBoolean boolean:
-        return new BooleanInfo(boolean.IsTrue);
-      case DerInteger integer:
-        return new IntegerInfo(integer.ToString());
-      case DerEnumerated enumerated:
-        return new EnumeratedInfo(enumerated.Value);
-      case DerNull _:
-        return new Asn1NullInfo("NULL");
-      default:
-        throw new Exception($"{value.GetType().Name} is not handled in the factory method.");
+      return factoryMethod(value);
     }
+
+    throw new Exception($"{value.GetType().Name} is not handled in the factory method.");
   }
 
   protected abstract Asn1Encodable ToEncodable();

@@ -15,7 +15,7 @@ namespace JetBrains.Serialization;
 
 public static class AsnExtensions
 {
-  public static List<Asn1Encodable?> ToPrimitiveList(this IEnumerable<IEncodableInfo?> source) =>
+  public static IList<Asn1Encodable?> ToPrimitiveList(this IEnumerable<IEncodableInfo?> source) =>
     source.Select(item => item?.ToPrimitive()).ToList();
 
   public static DerSequence ToPrimitiveDerSequence(this IEnumerable<IEncodableInfo?> source) =>
