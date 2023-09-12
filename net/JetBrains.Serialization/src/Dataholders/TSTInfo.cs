@@ -1,19 +1,18 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
-using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class TSTInfo : IEncodableInfo
 {
-  [JsonProperty("Identifier")] public TextualInfo Identifier { get; }
-  [JsonProperty("Content")] public TaggedObjectInfo Content { get; }
+  [JsonProperty("Identifier")] private TextualInfo _identifier;
+  [JsonProperty("Content")] private TaggedObjectInfo _content;
 
   [JsonConstructor]
   public TSTInfo(TextualInfo identifier, TaggedObjectInfo content)
   {
-    Identifier = identifier;
-    Content = content;
+    _identifier = identifier;
+    _content = content;
   }
 
   public TSTInfo(DerSequence sequence)
@@ -29,7 +28,7 @@ public class TSTInfo : IEncodableInfo
   public virtual Asn1Encodable ToPrimitive() =>
     new List<IEncodableInfo?>
     {
-      Identifier,
-      Content
+      _identifier,
+      _content
     }.ToPrimitiveDerSequence();
 }

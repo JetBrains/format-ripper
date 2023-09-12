@@ -8,13 +8,13 @@ namespace JetBrains.Serialization;
 public class UnknownEncapContentInfo : EncapContentInfo
 {
   [JsonProperty("ContentType")] protected override TextualInfo ContentType { get; }
-  [JsonProperty("Content")] private IEncodableInfo? Content { get; }
+  [JsonProperty("Content")] private IEncodableInfo? _content;
 
   [JsonConstructor]
   public UnknownEncapContentInfo(TextualInfo contentType, IEncodableInfo? content)
   {
     ContentType = contentType;
-    Content = content;
+    _content = content;
   }
 
   public UnknownEncapContentInfo(ContentInfo contentInfo)
@@ -23,5 +23,5 @@ public class UnknownEncapContentInfo : EncapContentInfo
   {
   }
 
-  protected override Asn1Encodable? GetContentPrimitive() => Content?.ToPrimitive();
+  protected override Asn1Encodable? GetContentPrimitive() => _content?.ToPrimitive();
 }

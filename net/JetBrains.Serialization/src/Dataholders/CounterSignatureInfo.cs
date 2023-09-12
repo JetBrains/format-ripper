@@ -1,33 +1,25 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Cms;
-using Org.BouncyCastle.Math;
-using Org.BouncyCastle.X509.Store;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
-using System.Collections.Generic;
 
 namespace JetBrains.Serialization;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class CounterSignatureInfo : IEncodableInfo
 {
-  [JsonProperty("Version")] public int Version { get; }
-
-  [JsonProperty("Sid")] public SignerIdentifierInfo Sid { get; }
-
-  [JsonProperty("DigestAlgorithm")] public AlgorithmInfo DigestAlgorithm { get; }
+  [JsonProperty("Version")] private int _version;
+  [JsonProperty("Sid")] private SignerIdentifierInfo _sid;
+  [JsonProperty("DigestAlgorithm")] private AlgorithmInfo _digestAlgorithm;
 
   [JsonProperty("AuthenticatedAttributes")]
-  public List<AttributeInfo> AuthenticatedAttributes { get; }
+  private List<AttributeInfo> _authenticatedAttributes;
 
   [JsonProperty("DigestEncryptionAlgorithm")]
-  public AlgorithmInfo DigestEncryptionAlgorithm { get; }
+  private AlgorithmInfo _digestEncryptionAlgorithm;
 
-  [JsonProperty("EncryptedDigest")] public TextualInfo EncryptedDigest { get; }
-
-  [JsonProperty("CounterSignature")] public TaggedObjectInfo CounterSignature { get; }
+  [JsonProperty("EncryptedDigest")] private TextualInfo _encryptedDigest;
+  [JsonProperty("CounterSignature")] private TaggedObjectInfo? _counterSignature;
 
   [JsonConstructor]
   public CounterSignatureInfo(
@@ -37,15 +29,15 @@ public class CounterSignatureInfo : IEncodableInfo
     List<AttributeInfo> authenticatedAttributes,
     AlgorithmInfo digestEncryptionAlgorithm,
     TextualInfo encryptedDigest,
-    TaggedObjectInfo counterSignature = null)
+    TaggedObjectInfo? counterSignature = null)
   {
-    Version = version;
-    Sid = sid;
-    DigestAlgorithm = digestAlgorithm;
-    AuthenticatedAttributes = authenticatedAttributes;
-    DigestEncryptionAlgorithm = digestEncryptionAlgorithm;
-    EncryptedDigest = encryptedDigest;
-    CounterSignature = counterSignature;
+    _version = version;
+    _sid = sid;
+    _digestAlgorithm = digestAlgorithm;
+    _authenticatedAttributes = authenticatedAttributes;
+    _digestEncryptionAlgorithm = digestEncryptionAlgorithm;
+    _encryptedDigest = encryptedDigest;
+    _counterSignature = counterSignature;
   }
 
   public static CounterSignatureInfo GetInstance(DerSequence sequence)
@@ -102,17 +94,17 @@ public class CounterSignatureInfo : IEncodableInfo
   {
     var primitiveValues = new List<Asn1Encodable>
     {
-      new DerInteger(Version),
-      Sid.ToPrimitive(),
-      DigestAlgorithm.ToPrimitive(),
-      TaggedObjectInfo.GetTaggedObject(false, 0, AuthenticatedAttributes.ToPrimitiveDerSet()),
-      DigestEncryptionAlgorithm.ToPrimitive(),
-      EncryptedDigest.ToPrimitive()
+      new DerInteger(_version),
+      _sid.ToPrimitive(),
+      _digestAlgorithm.ToPrimitive(),
+      TaggedObjectInfo.GetTaggedObject(false, 0, _authenticatedAttributes.ToPrimitiveDerSet()),
+      _digestEncryptionAlgorithm.ToPrimitive(),
+      _encryptedDigest.ToPrimitive()
     };
 
-    if (CounterSignature != null)
+    if (_counterSignature != null)
     {
-      primitiveValues.Add(CounterSignature.ToPrimitive());
+      primitiveValues.Add(_counterSignature.ToPrimitive());
     }
 
     return primitiveValues.ToDerSequence();

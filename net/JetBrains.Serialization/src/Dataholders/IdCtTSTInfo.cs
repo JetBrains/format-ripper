@@ -9,13 +9,13 @@ public class IdCtTSTInfo : EncapContentInfo
 {
   [JsonProperty("ContentType")] protected override TextualInfo ContentType { get; }
 
-  [JsonProperty("Content")] public TextualInfo Content { get; }
+  [JsonProperty("Content")] private TextualInfo _content;
 
   [JsonConstructor]
   public IdCtTSTInfo(TextualInfo contentType, TextualInfo content)
   {
     ContentType = contentType;
-    Content = content;
+    _content = content;
   }
 
   public IdCtTSTInfo(ContentInfo contentInfo)
@@ -23,5 +23,5 @@ public class IdCtTSTInfo : EncapContentInfo
   {
   }
 
-  protected override Asn1Encodable GetContentPrimitive() => Content.ToPrimitive();
+  protected override Asn1Encodable GetContentPrimitive() => _content.ToPrimitive();
 }

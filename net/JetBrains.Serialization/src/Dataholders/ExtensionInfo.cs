@@ -1,29 +1,26 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
-using System.Collections.Generic;
 
 namespace JetBrains.Serialization;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class ExtensionInfo : IEncodableInfo
 {
-  [JsonProperty("Key")] public TextualInfo Key { get; }
-
-  [JsonProperty("Critical")] public bool Critical { get; }
-
-  [JsonProperty("Value")] public TextualInfo Value { get; }
+  [JsonProperty("Key")] private TextualInfo _key;
+  [JsonProperty("Critical")] private bool _critical;
+  [JsonProperty("Value")] private TextualInfo _value;
 
   [JsonConstructor]
   public ExtensionInfo(TextualInfo key, bool critical, TextualInfo value)
   {
-    Key = key;
-    Critical = critical;
-    Value = value;
+    _key = key;
+    _critical = critical;
+    _value = value;
   }
 
   private DerSequence ToDLSequence() =>
-    new List<Asn1Encodable>
-      { Key.ToPrimitive(), Critical ? DerBoolean.True : null, Value.ToPrimitive() }.ToDerSequence();
+    new List<Asn1Encodable?>
+      { _key.ToPrimitive(), _critical ? DerBoolean.True : null, _value.ToPrimitive() }.ToDerSequence();
 
   public Asn1Encodable ToPrimitive() => ToDLSequence();
 }

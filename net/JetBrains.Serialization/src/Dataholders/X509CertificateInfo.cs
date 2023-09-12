@@ -7,25 +7,16 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.OptIn)]
 public class X509CertificateInfo : XCertificateInfo
 {
-  [JsonProperty("Version")] public int Version { get; }
-
-  [JsonProperty("SerialNumber")] public TextualInfo SerialNumber { get; }
-
-  [JsonProperty("SignatureAlgorithm")] public AlgorithmInfo SignatureAlgorithm { get; }
-
-  [JsonProperty("Issuer")] public X509NameInfo Issuer { get; }
-
-  [JsonProperty("StartDate")] public DateTime StartDate { get; }
-
-  [JsonProperty("EndDate")] public DateTime EndDate { get; }
-
-  [JsonProperty("Subject")] public X509NameInfo Subject { get; }
-
-  [JsonProperty("SubjectAlgorithm")] public AlgorithmInfo SubjectAlgorithm { get; }
-
-  [JsonProperty("SubjectData")] public TextualInfo SubjectData { get; }
-
-  [JsonProperty("Extensions")] public List<ExtensionInfo>? Extensions { get; }
+  [JsonProperty("Version")] private int _version;
+  [JsonProperty("SerialNumber")] private TextualInfo _serialNumber;
+  [JsonProperty("SignatureAlgorithm")] private AlgorithmInfo _signatureAlgorithm;
+  [JsonProperty("Issuer")] private X509NameInfo _issuer;
+  [JsonProperty("StartDate")] private DateTime _startDate;
+  [JsonProperty("EndDate")] private DateTime _endDate;
+  [JsonProperty("Subject")] private X509NameInfo _subject;
+  [JsonProperty("SubjectAlgorithm")] private AlgorithmInfo _subjectAlgorithm;
+  [JsonProperty("SubjectData")] private TextualInfo _subjectData;
+  [JsonProperty("Extensions")] private List<ExtensionInfo>? _extensions;
 
   [JsonConstructor]
   public X509CertificateInfo(
@@ -40,16 +31,16 @@ public class X509CertificateInfo : XCertificateInfo
     TextualInfo subjectData,
     List<ExtensionInfo>? extensions)
   {
-    Version = version;
-    SerialNumber = serialNumber;
-    SignatureAlgorithm = signatureAlgorithm;
-    Issuer = issuer;
-    StartDate = startDate;
-    EndDate = endDate;
-    Subject = subject;
-    SubjectAlgorithm = subjectAlgorithm;
-    SubjectData = subjectData;
-    Extensions = extensions;
+    _version = version;
+    _serialNumber = serialNumber;
+    _signatureAlgorithm = signatureAlgorithm;
+    _issuer = issuer;
+    _startDate = startDate;
+    _endDate = endDate;
+    _subject = subject;
+    _subjectAlgorithm = subjectAlgorithm;
+    _subjectData = subjectData;
+    _extensions = extensions;
   }
 
   public static X509CertificateInfo GetInstance(TbsCertificateStructure certificateHolder)
@@ -78,29 +69,29 @@ public class X509CertificateInfo : XCertificateInfo
   // However, ASN1Integer, DLSequence, DLTaggedObjects and such are from BouncyCastle's ASN1 libraries.
   // So, be sure to include an appropriate library which can handle these structures.
   private DerSequence ToDLSequence() =>
-    new List<Asn1Encodable>
+    new List<Asn1Encodable?>
     {
       TaggedObjectInfo.GetTaggedObject(
-        true, 0, new DerInteger(Version - 1)),
-      SerialNumber.ToPrimitive(),
-      SignatureAlgorithm.ToPrimitive(),
-      Issuer.ToPrimitive(),
+        true, 0, new DerInteger(_version - 1)),
+      _serialNumber.ToPrimitive(),
+      _signatureAlgorithm.ToPrimitive(),
+      _issuer.ToPrimitive(),
       new List<Asn1Encodable>
       {
-        new DerUtcTime(StartDate),
-        new DerUtcTime(EndDate)
+        new DerUtcTime(_startDate),
+        new DerUtcTime(_endDate)
       }.ToDerSequence(),
-      Subject.ToPrimitive(),
+      _subject.ToPrimitive(),
       new List<IEncodableInfo>
       {
-        SubjectAlgorithm,
-        SubjectData
+        _subjectAlgorithm,
+        _subjectData
       }.ToPrimitiveDerSequence(),
-      Extensions != null
+      _extensions != null
         ? TaggedObjectInfo.GetTaggedObject(
           true,
           3,
-          Extensions.ToPrimitiveDerSequence())
+          _extensions.ToPrimitiveDerSequence())
         : null
     }.ToDerSequence();
 

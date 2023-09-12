@@ -6,19 +6,19 @@ using JetBrains.Serialization;
 [JsonObject(MemberSerialization.OptIn)]
 public class MsCounterSignAttributeInfo : AttributeInfo
 {
-  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
+  [JsonProperty("Identifier")] protected override TextualInfo Identifier { get; }
 
-  [JsonProperty("ContentIdentifier")] public List<TextualInfo> ContentIdentifier { get; }
+  [JsonProperty("ContentIdentifier")] private List<TextualInfo> _contentIdentifier;
 
-  [JsonProperty("Content")] public List<TaggedObjectInfo> Content { get; }
+  [JsonProperty("Content")] private List<TaggedObjectInfo> _content;
 
   [JsonConstructor]
   public MsCounterSignAttributeInfo(TextualInfo identifier, List<TextualInfo> contentIdentifier,
     List<TaggedObjectInfo> content)
   {
     Identifier = identifier;
-    ContentIdentifier = contentIdentifier;
-    Content = content;
+    _contentIdentifier = contentIdentifier;
+    _content = content;
   }
 
   public MsCounterSignAttributeInfo(Attribute attribute)
@@ -40,10 +40,10 @@ public class MsCounterSignAttributeInfo : AttributeInfo
   }
 
   public override Asn1Encodable GetPrimitiveContent() =>
-    ContentIdentifier
+    _contentIdentifier
       .ToPrimitiveList()
       .Zip(
-        Content.ToPrimitiveList(),
+        _content.ToPrimitiveList(),
         (first, second) => new List<Asn1Encodable?> { first, second }.ToDerSequence())
       .ToDerSet();
 }

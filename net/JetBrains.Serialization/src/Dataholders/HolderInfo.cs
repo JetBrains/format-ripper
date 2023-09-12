@@ -1,20 +1,15 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
-using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
 using Org.BouncyCastle.Asn1.X509;
-using System.Collections.Generic;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class HolderInfo : IEncodableInfo
 {
-  [JsonProperty("BaseCertificateId")] public IssuerSerialInfo? BaseCertificateId { get; set; }
-
-  [JsonProperty("EntityName")] public List<GeneralNameInfo>? EntityName { get; set; }
-
-  [JsonProperty("ObjectDigestInfo")] public ObjectDigestInfo? ObjectDigestInfo { get; set; }
-
-  [JsonProperty("Version")] public int Version { get; set; }
+  [JsonProperty("BaseCertificateId")] private IssuerSerialInfo? _baseCertificateId;
+  [JsonProperty("EntityName")] private List<GeneralNameInfo>? _entityName;
+  [JsonProperty("ObjectDigestInfo")] private ObjectDigestInfo? _objectDigestInfo;
+  [JsonProperty("Version")] private int _version;
 
   [JsonConstructor]
   public HolderInfo(
@@ -24,53 +19,52 @@ public class HolderInfo : IEncodableInfo
     int version
   )
   {
-    BaseCertificateId = baseCertificateId;
-    EntityName = entityName;
-    ObjectDigestInfo = objectDigestInfo;
-    Version = version;
+    _baseCertificateId = baseCertificateId;
+    _entityName = entityName;
+    _objectDigestInfo = objectDigestInfo;
+    _version = version;
   }
 
   public HolderInfo(Holder holder)
   {
-    BaseCertificateId = holder.BaseCertificateID != null ? new IssuerSerialInfo(holder.BaseCertificateID) : null;
-    EntityName = holder.EntityName != null
-      ? holder.EntityName.GetNames().Select(name => new GeneralNameInfo(name)).ToList()
-      : null;
-    ObjectDigestInfo = holder.ObjectDigestInfo != null ? new ObjectDigestInfo(holder.ObjectDigestInfo) : null;
-    Version = holder.Version;
+    _baseCertificateId = holder.BaseCertificateID != null ? new IssuerSerialInfo(holder.BaseCertificateID) : null;
+    _entityName = holder.EntityName?.GetNames().Select(name => new GeneralNameInfo(name)).ToList();
+    _objectDigestInfo = holder.ObjectDigestInfo != null ? new ObjectDigestInfo(holder.ObjectDigestInfo) : null;
+    _version = holder.Version;
   }
 
   public Asn1Encodable ToPrimitive()
   {
-    switch (Version)
+    switch (_version)
     {
       case 0:
-        if (EntityName == null)
+        if (_entityName == null)
         {
-          return TaggedObjectInfo.GetTaggedObject(true, 0, BaseCertificateId?.ToPrimitive());
+          return TaggedObjectInfo.GetTaggedObject(true, 0,
+            _baseCertificateId?.ToPrimitive() ?? throw new InvalidOperationException());
         }
 
-        return TaggedObjectInfo.GetTaggedObject(true, 1, EntityName.ToPrimitiveDerSequence());
+        return TaggedObjectInfo.GetTaggedObject(true, 1, _entityName.ToPrimitiveDerSequence());
       case 1:
         var items = new List<Asn1Encodable>();
-        if (BaseCertificateId != null)
+        if (_baseCertificateId != null)
         {
-          items.Add(TaggedObjectInfo.GetTaggedObject(false, 0, BaseCertificateId.ToPrimitive()));
+          items.Add(TaggedObjectInfo.GetTaggedObject(false, 0, _baseCertificateId.ToPrimitive()));
         }
 
-        if (EntityName != null)
+        if (_entityName != null)
         {
-          items.Add(TaggedObjectInfo.GetTaggedObject(false, 1, EntityName.ToPrimitiveDerSequence()));
+          items.Add(TaggedObjectInfo.GetTaggedObject(false, 1, _entityName.ToPrimitiveDerSequence()));
         }
 
-        if (ObjectDigestInfo != null)
+        if (_objectDigestInfo != null)
         {
-          items.Add(TaggedObjectInfo.GetTaggedObject(false, 2, ObjectDigestInfo.ToPrimitive()));
+          items.Add(TaggedObjectInfo.GetTaggedObject(false, 2, _objectDigestInfo.ToPrimitive()));
         }
 
         return items.ToDerSequence();
       default:
-        throw new ArgumentException($"Unexpected version {Version}");
+        throw new ArgumentException($"Unexpected version {_version}");
     }
   }
 }

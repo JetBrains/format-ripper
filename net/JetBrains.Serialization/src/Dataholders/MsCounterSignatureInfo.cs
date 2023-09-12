@@ -1,20 +1,19 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
-using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
 using Org.BouncyCastle.Asn1.X509;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class MsCounterSignatureInfo : IEncodableInfo
 {
-  [JsonProperty("Version")] public int Version { get; }
-  [JsonProperty("Algorithms")] public List<AlgorithmInfo> Algorithms { get; }
-  [JsonProperty("TstInfo")] public TSTInfo TstInfo { get; }
+  [JsonProperty("Version")] private int _version;
+  [JsonProperty("Algorithms")] private List<AlgorithmInfo> _algorithms;
+  [JsonProperty("TstInfo")] private TSTInfo _tstInfo;
 
   [JsonProperty("TaggedCertificateInfo")]
-  public TaggedObjectInfo TaggedCertificateInfo { get; }
+  private TaggedObjectInfo _taggedCertificateInfo;
 
-  [JsonProperty("CounterSignatures")] public List<CounterSignatureInfo> CounterSignatures { get; }
+  [JsonProperty("CounterSignatures")] private List<CounterSignatureInfo> _counterSignatures;
 
   [JsonConstructor]
   public MsCounterSignatureInfo(
@@ -24,11 +23,11 @@ public class MsCounterSignatureInfo : IEncodableInfo
     TaggedObjectInfo taggedCertificateInfo,
     List<CounterSignatureInfo> counterSignatures)
   {
-    Version = version;
-    Algorithms = algorithms;
-    TstInfo = tstInfo;
-    TaggedCertificateInfo = taggedCertificateInfo;
-    CounterSignatures = counterSignatures;
+    _version = version;
+    _algorithms = algorithms;
+    _tstInfo = tstInfo;
+    _taggedCertificateInfo = taggedCertificateInfo;
+    _counterSignatures = counterSignatures;
   }
 
   public static MsCounterSignatureInfo GetInstance(DerSequence sequence)
@@ -42,18 +41,13 @@ public class MsCounterSignatureInfo : IEncodableInfo
     var algorithms = ((DerSet)enumerator.Current)
       .OfType<DerSequence>()
       .ToList()
-      .Select(sequence => new AlgorithmInfo(AlgorithmIdentifier.GetInstance(sequence)))
+      .Select(derSequence => new AlgorithmInfo(AlgorithmIdentifier.GetInstance(derSequence)))
       .ToList();
 
     enumerator.MoveNext();
     var tstInfo = new TSTInfo((DerSequence)enumerator.Current);
 
     enumerator.MoveNext();
-    var certificateSequence = (DerSequence)((DerTaggedObject)enumerator.Current).GetObject();
-    var certificateInfos = certificateSequence
-      .OfType<DerSequence>()
-      .Select(CertificateInfo.GetInstance)
-      .ToList();
 
     TaggedObjectInfo certificateInfoTagged = new TaggedObjectInfo(
       ((DerTaggedObject)enumerator.Current).IsExplicit(),
@@ -67,7 +61,7 @@ public class MsCounterSignatureInfo : IEncodableInfo
     enumerator.MoveNext();
     var counterSignatures = ((DerSet)enumerator.Current)
       .OfType<DerSequence>()
-      .Select(sequence => CounterSignatureInfo.GetInstance(sequence))
+      .Select(CounterSignatureInfo.GetInstance)
       .ToList();
 
     return new MsCounterSignatureInfo(
@@ -81,10 +75,10 @@ public class MsCounterSignatureInfo : IEncodableInfo
   public virtual Asn1Encodable ToPrimitive() =>
     new List<Asn1Encodable>
     {
-      new DerInteger(Version),
-      Algorithms.ToPrimitiveDerSet(),
-      TstInfo.ToPrimitive(),
-      TaggedCertificateInfo.ToPrimitive(),
-      CounterSignatures.ToPrimitiveDerSet()
+      new DerInteger(_version),
+      _algorithms.ToPrimitiveDerSet(),
+      _tstInfo.ToPrimitive(),
+      _taggedCertificateInfo.ToPrimitive(),
+      _counterSignatures.ToPrimitiveDerSet()
     }.ToDerSequence();
 }

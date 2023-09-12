@@ -8,13 +8,13 @@ namespace JetBrains.Serialization;
 public class RsaEncapContentInfo : EncapContentInfo
 {
   [JsonProperty("ContentType")] protected override TextualInfo ContentType { get; }
-  [JsonProperty("Content")] public TextualInfo? Content { get; }
+  [JsonProperty("Content")] private TextualInfo? _content;
 
   [JsonConstructor]
   public RsaEncapContentInfo(TextualInfo contentType, TextualInfo? content)
   {
     ContentType = contentType;
-    Content = content;
+    _content = content;
   }
 
   public RsaEncapContentInfo(ContentInfo contentInfo)
@@ -23,5 +23,5 @@ public class RsaEncapContentInfo : EncapContentInfo
   {
   }
 
-  protected override Asn1Encodable? GetContentPrimitive() => Content?.ToPrimitive();
+  protected override Asn1Encodable? GetContentPrimitive() => _content?.ToPrimitive();
 }

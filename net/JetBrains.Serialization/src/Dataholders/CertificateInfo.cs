@@ -1,27 +1,25 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.X509;
-using System.Collections.Generic;
 
 namespace JetBrains.Serialization;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class CertificateInfo : IEncodableInfo
 {
-  [JsonProperty("XCertificateInfo")] public XCertificateInfo XCertificateInfo { get; }
+  [JsonProperty("XCertificateInfo")] private XCertificateInfo _xCertificateInfo;
 
-  [JsonProperty("SignatureAlgorithm")] public AlgorithmInfo SignatureAlgorithm { get; }
+  [JsonProperty("SignatureAlgorithm")] private AlgorithmInfo _signatureAlgorithm;
 
-  [JsonProperty("SignatureData")] public TextualInfo SignatureData { get; }
+  [JsonProperty("SignatureData")] private TextualInfo _signatureData;
 
   [JsonConstructor]
   private CertificateInfo(XCertificateInfo xCertificateInfo, AlgorithmInfo signatureAlgorithm,
     TextualInfo signatureData)
   {
-    this.XCertificateInfo = xCertificateInfo;
-    SignatureAlgorithm = signatureAlgorithm;
-    SignatureData = signatureData;
+    _xCertificateInfo = xCertificateInfo;
+    _signatureAlgorithm = signatureAlgorithm;
+    _signatureData = signatureData;
   }
 
   public static CertificateInfo GetInstance(X509CertificateStructure x509CertificateStructure)
@@ -60,20 +58,10 @@ public class CertificateInfo : IEncodableInfo
   private DerSequence ToDLSequence() =>
     new List<IEncodableInfo?>
     {
-      XCertificateInfo,
-      SignatureAlgorithm,
-      SignatureData
+      _xCertificateInfo,
+      _signatureAlgorithm,
+      _signatureData
     }.ToPrimitiveDerSequence();
 
-
-  // public X509CertificateHolder toX509CertificateHolder() => new X509CertificateHolder(
-  //   Certificate.GetInstance(ToPrimitive()));
-
   public Asn1Encodable ToPrimitive() => ToDLSequence();
-
-  // public static Asn1Set RecreateCertificatesFromStore(IStore<X509CertificateHolder> store)
-  // {
-  //   var matches = store.GetMatches(null).ToList();
-  //   return new DerSet(matches.Select(c => c.ToAsn1Structure()).ToArray());
-  // }
 }

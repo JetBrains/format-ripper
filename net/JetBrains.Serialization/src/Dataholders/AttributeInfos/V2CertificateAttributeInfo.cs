@@ -7,15 +7,15 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.OptIn)]
 public class V2CertificateAttributeInfo : AttributeInfo
 {
-  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
+  [JsonProperty("Identifier")] protected override TextualInfo Identifier { get; }
 
-  [JsonProperty("Content")] public IEncodableInfo Content { get; }
+  [JsonProperty("Content")] private IEncodableInfo _content;
 
   [JsonConstructor]
   public V2CertificateAttributeInfo(TextualInfo identifier, IEncodableInfo content)
   {
     Identifier = identifier;
-    Content = content;
+    _content = content;
   }
 
   public V2CertificateAttributeInfo(Attribute attribute)
@@ -23,5 +23,5 @@ public class V2CertificateAttributeInfo : AttributeInfo
   {
   }
 
-  public override Asn1Encodable GetPrimitiveContent() => Content.ToPrimitive();
+  public override Asn1Encodable GetPrimitiveContent() => _content.ToPrimitive();
 }

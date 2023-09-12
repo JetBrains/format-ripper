@@ -6,16 +6,16 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.OptIn)]
 public class RdNInfo : IEncodableInfo
 {
-  [JsonProperty("Type")] public TextualInfo Type { get; }
-  [JsonProperty("Value")] public TextualInfo Value { get; }
+  [JsonProperty("Type")] private TextualInfo _type;
+  [JsonProperty("Value")] private TextualInfo _value;
 
   [JsonConstructor]
   public RdNInfo(TextualInfo type, TextualInfo value)
   {
-    Type = type;
-    Value = value;
+    _type = type;
+    _value = value;
   }
 
   public Asn1Encodable ToPrimitive() =>
-    new List<IEncodableInfo> { Type, Value }.ToPrimitiveDerSequence();
+    new List<IEncodableInfo> { _type, _value }.ToPrimitiveDerSequence();
 }

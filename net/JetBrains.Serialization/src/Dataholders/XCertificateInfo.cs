@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
-using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
 
 [JsonObject(MemberSerialization.OptIn)]
@@ -16,7 +15,7 @@ public abstract class XCertificateInfo : IEncodableInfo
       case AttributeCertificate attributeCertificate:
         return X509AttributeCertificateInfo.GetInstance(attributeCertificate);
       default:
-        throw new ArgumentException("Unexpected certificate type", nameof(obj));
+        throw new ArgumentException(@"Unexpected certificate type", nameof(obj));
     }
   }
 

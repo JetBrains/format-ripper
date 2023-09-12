@@ -1,34 +1,33 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Math;
 
 namespace JetBrains.Serialization;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class SignerIdentifierInfo : IEncodableInfo
 {
-  [JsonProperty("IssuerInfo")] public X509NameInfo IssuerInfo { get; }
-  [JsonProperty("SerialNumber")] public TextualInfo SerialNumber { get; }
+  [JsonProperty("IssuerInfo")] private X509NameInfo _issuerInfo;
+  [JsonProperty("SerialNumber")] private TextualInfo _serialNumber;
 
   [JsonConstructor]
   public SignerIdentifierInfo(X509NameInfo issuerInfo, TextualInfo serialNumber)
   {
-    IssuerInfo = issuerInfo;
-    SerialNumber = serialNumber;
+    _issuerInfo = issuerInfo;
+    _serialNumber = serialNumber;
   }
 
   public SignerIdentifierInfo(
     X509Name issuerName,
     DerInteger serialNumber)
   {
-    IssuerInfo = new X509NameInfo(issuerName);
-    SerialNumber = TextualInfo.GetInstance(serialNumber);
+    _issuerInfo = new X509NameInfo(issuerName);
+    _serialNumber = TextualInfo.GetInstance(serialNumber);
   }
 
   public Asn1Encodable ToPrimitive() => new List<IEncodableInfo?>
   {
-    IssuerInfo,
-    SerialNumber
+    _issuerInfo,
+    _serialNumber
   }.ToPrimitiveDerSequence();
 }

@@ -1,42 +1,41 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
-using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
 using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Math;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class IssuerSerialInfo : IEncodableInfo
 {
-  [JsonProperty("GeneralNames")] public List<GeneralNameInfo> GeneralNames { get; set; }
-  [JsonProperty("Serial")] public TextualInfo Serial { get; set; }
-  [JsonProperty("IssuerUID")] public TextualInfo? IssuerUID { get; set; }
+  [JsonProperty("GeneralNames")] private List<GeneralNameInfo> _generalNames;
+  [JsonProperty("Serial")] private TextualInfo _serial;
+  [JsonProperty("IssuerUID")] private TextualInfo? _issuerUid;
 
   [JsonConstructor]
-  public IssuerSerialInfo(List<GeneralNameInfo> generalNames, TextualInfo serial)
+  public IssuerSerialInfo(List<GeneralNameInfo> generalNames, TextualInfo serial, TextualInfo? issuerUid)
   {
-    GeneralNames = generalNames;
-    Serial = serial;
+    _generalNames = generalNames;
+    _serial = serial;
+    _issuerUid = issuerUid;
   }
 
   public IssuerSerialInfo(IssuerSerial issuer)
   {
-    GeneralNames = issuer.Issuer.GetNames().Select(name => new GeneralNameInfo(name)).ToList();
-    Serial = TextualInfo.GetInstance(issuer.Serial);
-    IssuerUID = issuer.IssuerUid != null ? TextualInfo.GetInstance(issuer.IssuerUid) : null;
+    _generalNames = issuer.Issuer.GetNames().Select(name => new GeneralNameInfo(name)).ToList();
+    _serial = TextualInfo.GetInstance(issuer.Serial);
+    _issuerUid = issuer.IssuerUid != null ? TextualInfo.GetInstance(issuer.IssuerUid) : null;
   }
 
   public Asn1Encodable ToPrimitive()
   {
     var asn1Items = new List<Asn1Encodable>
     {
-      GeneralNames.ToPrimitiveDerSequence(),
-      Serial.ToPrimitive()
+      _generalNames.ToPrimitiveDerSequence(),
+      _serial.ToPrimitive()
     };
 
-    if (IssuerUID != null)
+    if (_issuerUid != null)
     {
-      asn1Items.Add(IssuerUID.ToPrimitive());
+      asn1Items.Add(_issuerUid.ToPrimitive());
     }
 
     return asn1Items.ToDerSequence();

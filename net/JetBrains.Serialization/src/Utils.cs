@@ -7,7 +7,6 @@ using Org.BouncyCastle.Asn1.Nist;
 using Org.BouncyCastle.Asn1.Oiw;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Asn1.TeleTrust;
-using Org.BouncyCastle.Math;
 using ContentInfo = Org.BouncyCastle.Asn1.Pkcs.ContentInfo;
 using SignedData = Org.BouncyCastle.Asn1.Cms.SignedData;
 
@@ -26,8 +25,7 @@ public static class AsnExtensions
 
   public static DerSequence ToDerSequence(this IEnumerable<Asn1Encodable?> source)
   {
-    Asn1EncodableVector vector = new Asn1EncodableVector();
-    vector.Add(source.Where(item => item != null).ToArray());
+    Asn1EncodableVector vector = new Asn1EncodableVector { source.Where(item => item != null).ToArray() };
 
     return new DerSequence(vector);
   }
@@ -47,13 +45,11 @@ public static class AsnExtensions
   public static ContentInfo ToContentInfo(this SignedData signedData, string encoding = "BER")
   {
     var signedDataBytes = signedData.GetEncoded(encoding);
-    using (var memoryStream = new MemoryStream(signedDataBytes))
-    {
-      var asn1Stream = new Asn1InputStream(memoryStream);
-      var asn1Object = asn1Stream.ReadObject();
+    using var memoryStream = new MemoryStream(signedDataBytes);
+    var asn1Stream = new Asn1InputStream(memoryStream);
+    var asn1Object = asn1Stream.ReadObject();
 
-      return new ContentInfo(CmsObjectIdentifiers.SignedData, asn1Object);
-    }
+    return new ContentInfo(CmsObjectIdentifiers.SignedData, asn1Object);
   }
 
   public static string ToHexString(this byte[] bytes)

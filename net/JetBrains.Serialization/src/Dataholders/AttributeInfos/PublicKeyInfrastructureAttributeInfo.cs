@@ -7,15 +7,15 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.OptIn)]
 public class PublicKeyInfrastructureAttributeInfo : AttributeInfo
 {
-  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
+  [JsonProperty("Identifier")] protected override TextualInfo Identifier { get; }
 
-  [JsonProperty("Content")] public IEncodableInfo Content { get; }
+  [JsonProperty("Content")] private IEncodableInfo _content;
 
   [JsonConstructor]
   public PublicKeyInfrastructureAttributeInfo(TextualInfo identifier, IEncodableInfo content)
   {
     Identifier = identifier;
-    Content = content;
+    _content = content;
   }
 
   public PublicKeyInfrastructureAttributeInfo(Attribute attribute)
@@ -23,5 +23,5 @@ public class PublicKeyInfrastructureAttributeInfo : AttributeInfo
   {
   }
 
-  public override Asn1Encodable GetPrimitiveContent() => Content.ToPrimitive();
+  public override Asn1Encodable GetPrimitiveContent() => _content.ToPrimitive();
 }

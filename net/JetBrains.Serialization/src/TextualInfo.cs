@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Math;
@@ -28,7 +26,7 @@ public abstract class TextualInfo : IEncodableInfo
       { typeof(DerUniversalString), x => new DerUniversalStringInfo(((DerUniversalString)x).GetOctets()) },
       { typeof(DerGeneralizedTime), x => new Asn1GeneralizedTimeInfo(((DerGeneralizedTime)x).ToDateTime()) },
       { typeof(DerUtcTime), x => new Asn1UtcTimeInfo(((DerUtcTime)x).ToDateTime()) },
-      { typeof(DerNull), x => new Asn1NullInfo("NULL") }
+      { typeof(DerNull), _ => new Asn1NullInfo("NULL") }
     };
 
   public static TextualInfo GetInstance(Asn1Encodable value)

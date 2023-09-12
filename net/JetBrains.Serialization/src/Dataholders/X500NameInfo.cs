@@ -1,6 +1,5 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.X500;
 using Org.BouncyCastle.Asn1.X509;
 
 namespace JetBrains.Serialization;
@@ -8,14 +7,14 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.OptIn)]
 public class X500NameInfo : IEncodableInfo
 {
-  [JsonProperty("Name")] public string Name { get; }
-  [JsonProperty("RdNs")] public List<List<RdNInfo>> RdNs { get; }
+  [JsonProperty("Name")] private string _name;
+  [JsonProperty("RdNs")] private List<List<RdNInfo>> _rdNs;
 
   [JsonConstructor]
   public X500NameInfo(string name, List<List<RdNInfo>> rdNs)
   {
-    Name = name;
-    RdNs = rdNs;
+    _name = name;
+    _rdNs = rdNs;
   }
 
   public X500NameInfo(X509Name issuer)
@@ -30,7 +29,7 @@ public class X500NameInfo : IEncodableInfo
   private DerSequence ToDLSequence()
   {
     return
-      RdNs.Select(
+      _rdNs.Select(
         rdnList => rdnList.Cast<IEncodableInfo?>().ToList().ToPrimitiveList().ToDerSet()
       ).Cast<Asn1Encodable>().ToList()!.ToDerSequence();
   }

@@ -7,7 +7,7 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.OptIn)]
 public abstract class EncapContentInfo : IEncodableInfo
 {
-  [JsonProperty("isBer")] private Boolean isBer;
+  [JsonProperty("isBer")] private Boolean _isBer;
 
   protected abstract Asn1Encodable? GetContentPrimitive();
 

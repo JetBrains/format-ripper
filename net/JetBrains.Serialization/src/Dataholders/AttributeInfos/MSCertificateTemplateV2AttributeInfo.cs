@@ -2,27 +2,25 @@ using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 using JetBrains.Serialization;
-using System.Collections.Generic;
-using System.Linq;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class MSCertificateTemplateV2AttributeInfo : AttributeInfo
 {
-  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
+  [JsonProperty("Identifier")] protected override TextualInfo Identifier { get; }
 
-  [JsonProperty("Content")] public List<List<TaggedObjectInfo>> Content { get; }
+  [JsonProperty("Content")] private List<List<TaggedObjectInfo>> _content;
 
   [JsonConstructor]
   public MSCertificateTemplateV2AttributeInfo(TextualInfo identifier, List<List<TaggedObjectInfo>> content)
   {
     Identifier = identifier;
-    Content = content;
+    _content = content;
   }
 
   public MSCertificateTemplateV2AttributeInfo(Attribute attribute)
   {
     Identifier = TextualInfo.GetInstance(attribute.AttrType);
-    Content = attribute.AttrValues.ToArray().OfType<Asn1Sequence>().Select(seq =>
+    _content = attribute.AttrValues.ToArray().OfType<Asn1Sequence>().Select(seq =>
         seq.OfType<DerTaggedObject>()
           .Select(outer => new TaggedObjectInfo(outer.IsExplicit(), outer.TagNo, new TaggedObjectInfo(
             ((DerTaggedObject)outer.GetObject()).IsExplicit(),
@@ -33,5 +31,5 @@ public class MSCertificateTemplateV2AttributeInfo : AttributeInfo
   }
 
   public override Asn1Encodable GetPrimitiveContent() =>
-    Content.Select(list => list.ToPrimitiveDerSequence()).ToDerSet();
+    _content.Select(list => list.ToPrimitiveDerSequence()).ToDerSet();
 }

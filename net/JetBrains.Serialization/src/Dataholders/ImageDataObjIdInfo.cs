@@ -1,25 +1,21 @@
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace JetBrains.Serialization;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class ImageDataObjIdInfo : IEncodableInfo
 {
-  [JsonProperty("Identifier")] public TextualInfo Identifier { get; }
-
-  [JsonProperty("HexCode")] public TextualInfo HexCode { get; }
-
-  [JsonProperty("Content")] public IEncodableInfo Content { get; }
+  [JsonProperty("Identifier")] private TextualInfo _identifier;
+  [JsonProperty("HexCode")] private TextualInfo _hexCode;
+  [JsonProperty("Content")] private IEncodableInfo _content;
 
   [JsonConstructor]
   public ImageDataObjIdInfo(TextualInfo identifier, TextualInfo hexCode, IEncodableInfo content)
   {
-    Identifier = identifier;
-    HexCode = hexCode;
-    Content = content;
+    _identifier = identifier;
+    _hexCode = hexCode;
+    _content = content;
   }
 
   public static ImageDataObjIdInfo GetInstance(DerSequence sequence)
@@ -50,7 +46,7 @@ public class ImageDataObjIdInfo : IEncodableInfo
         DerSequence seqObj => new SequenceInfo(
           seqObj
             .Cast<Asn1Encodable>()
-            .Select(it => TextualInfo.GetInstance(it))
+            .Select(TextualInfo.GetInstance)
             .Cast<IEncodableInfo>()
             .ToList()
         ),
@@ -82,14 +78,14 @@ public class ImageDataObjIdInfo : IEncodableInfo
   public Asn1Encodable ToPrimitive()
     => new List<Asn1Encodable?>
     {
-      Identifier.ToPrimitive(),
-      Content is SequenceInfo
-        ? new List<Asn1Encodable?> { HexCode.ToPrimitive() }
+      _identifier.ToPrimitive(),
+      _content is SequenceInfo sequenceInfo
+        ? new List<Asn1Encodable?> { _hexCode.ToPrimitive() }
           .Concat(
-            ((SequenceInfo)Content)
-            .PrimitiveContent()
+            sequenceInfo
+              .PrimitiveContent()
           )
           .ToDerSequence()
-        : new List<IEncodableInfo?> { HexCode, Content }.ToPrimitiveDerSequence()
+        : new List<IEncodableInfo?> { _hexCode, _content }.ToPrimitiveDerSequence()
     }.ToDerSequence();
 }

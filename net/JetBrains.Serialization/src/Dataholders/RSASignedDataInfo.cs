@@ -8,14 +8,16 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.Fields)]
 public class RSASignedDataInfo : IEncodableInfo
 {
-  [JsonProperty("Identifier")] public TextualInfo Identifier { get; }
-  [JsonProperty("Explicit")] public bool Explicit { get; }
-  [JsonProperty("TagNo")] public int TagNo { get; }
-  [JsonProperty("Version")] public TextualInfo Version { get; }
-  [JsonProperty("DigestAlgorithmsInfo")] public List<AlgorithmInfo> DigestAlgorithmsInfo { get; }
-  [JsonProperty("EncapContentInfo")] public EncapContentInfo EncapContentInfo { get; }
-  [JsonProperty("Certificates")] public TaggedObjectInfo Certificates { get; }
-  [JsonProperty("CounterSignatureInfos")] public List<CounterSignatureInfo> CounterSignatureInfos { get; }
+  [JsonProperty("Identifier")] private TextualInfo _identifier;
+  [JsonProperty("Explicit")] private bool _explicit;
+  [JsonProperty("TagNo")] private int _tagNo;
+  [JsonProperty("Version")] private TextualInfo _version;
+  [JsonProperty("DigestAlgorithmsInfo")] private List<AlgorithmInfo> _digestAlgorithmsInfo;
+  [JsonProperty("EncapContentInfo")] private EncapContentInfo _encapContentInfo;
+  [JsonProperty("Certificates")] private TaggedObjectInfo _certificates;
+
+  [JsonProperty("CounterSignatureInfos")]
+  private List<CounterSignatureInfo> _counterSignatureInfos;
 
   [JsonConstructor]
   public RSASignedDataInfo(
@@ -28,14 +30,14 @@ public class RSASignedDataInfo : IEncodableInfo
     TaggedObjectInfo certificates,
     List<CounterSignatureInfo> counterSignatureInfos)
   {
-    Identifier = identifier;
-    Explicit = isExplicit;
-    TagNo = tagNo;
-    Version = version;
-    DigestAlgorithmsInfo = digestAlgorithmsInfo;
-    EncapContentInfo = encapContentInfo;
-    Certificates = certificates;
-    CounterSignatureInfos = counterSignatureInfos;
+    _identifier = identifier;
+    _explicit = isExplicit;
+    _tagNo = tagNo;
+    _version = version;
+    _digestAlgorithmsInfo = digestAlgorithmsInfo;
+    _encapContentInfo = encapContentInfo;
+    _certificates = certificates;
+    _counterSignatureInfos = counterSignatureInfos;
   }
 
   public static RSASignedDataInfo GetInstance(Asn1Sequence originalSequence)
@@ -43,11 +45,11 @@ public class RSASignedDataInfo : IEncodableInfo
     var identifier = TextualInfo.GetInstance(originalSequence[0]);
 
     var tagged = originalSequence[1] as DerTaggedObject;
-    int tagNo = tagged.TagNo;
+    int tagNo = tagged!.TagNo;
 
     var sequence = tagged.GetObject() as DerSequence;
 
-    var iterator = sequence.GetEnumerator();
+    var iterator = sequence!.GetEnumerator();
     iterator.MoveNext();
 
     var version = TextualInfo.GetInstance((Asn1Encodable)iterator.Current!);
@@ -91,17 +93,17 @@ public class RSASignedDataInfo : IEncodableInfo
 
   public Asn1Encodable ToPrimitive() => new List<Asn1Encodable?>
     {
-      Identifier.ToPrimitive(),
+      _identifier.ToPrimitive(),
       TaggedObjectInfo.GetTaggedObject(
-        Explicit,
-        TagNo,
+        _explicit,
+        _tagNo,
         new List<Asn1Encodable?>
         {
-          Version.ToPrimitive(),
-          DigestAlgorithmsInfo.ToPrimitiveDerSet(),
-          EncapContentInfo.ToPrimitive(),
-          Certificates.ToPrimitive(),
-          CounterSignatureInfos.ToPrimitiveDerSet()
+          _version.ToPrimitive(),
+          _digestAlgorithmsInfo.ToPrimitiveDerSet(),
+          _encapContentInfo.ToPrimitive(),
+          _certificates.ToPrimitive(),
+          _counterSignatureInfos.ToPrimitiveDerSet()
         }.ToDerSequence()
       )
     }

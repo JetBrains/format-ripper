@@ -7,15 +7,15 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.OptIn)]
 public class SignatureTimeStampAttributeInfo : AttributeInfo
 {
-  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
+  [JsonProperty("Identifier")] protected override TextualInfo Identifier { get; }
 
-  [JsonProperty("Content")] public List<RSASignedDataInfo> Content { get; }
+  [JsonProperty("Content")] private List<RSASignedDataInfo> _content;
 
   [JsonConstructor]
   public SignatureTimeStampAttributeInfo(TextualInfo identifier, List<RSASignedDataInfo> content)
   {
     Identifier = identifier;
-    Content = content;
+    _content = content;
   }
 
   public SignatureTimeStampAttributeInfo(Attribute attribute)
@@ -25,5 +25,5 @@ public class SignatureTimeStampAttributeInfo : AttributeInfo
   }
 
   public override Asn1Encodable GetPrimitiveContent() =>
-    Content.ToPrimitiveDerSet();
+    _content.ToPrimitiveDerSet();
 }

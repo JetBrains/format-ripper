@@ -7,14 +7,14 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.OptIn)]
 public class MSSpcNestedSignatureInfo : AttributeInfo
 {
-  [JsonProperty("Identifier")] public override TextualInfo Identifier { get; }
-  [JsonProperty("Content")] public List<RSASignedDataInfo> Content { get; }
+  [JsonProperty("Identifier")] protected override TextualInfo Identifier { get; }
+  [JsonProperty("Content")] private List<RSASignedDataInfo> _content;
 
   [JsonConstructor]
   public MSSpcNestedSignatureInfo(TextualInfo identifier, List<RSASignedDataInfo> content)
   {
     Identifier = identifier;
-    Content = content;
+    _content = content;
   }
 
   public MSSpcNestedSignatureInfo(Attribute attribute)
@@ -24,5 +24,5 @@ public class MSSpcNestedSignatureInfo : AttributeInfo
   }
 
   public override Asn1Encodable GetPrimitiveContent()
-    => Content.ToPrimitiveDerSet();
+    => _content.ToPrimitiveDerSet();
 }

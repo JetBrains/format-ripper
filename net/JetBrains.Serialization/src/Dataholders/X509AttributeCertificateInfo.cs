@@ -8,73 +8,66 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.OptIn)]
 public class X509AttributeCertificateInfo : XCertificateInfo, IEncodableInfo
 {
-  [JsonProperty("Version")] public TextualInfo Version { get; set; }
-
-  [JsonProperty("HolderInfo")] public HolderInfo HolderInfo { get; set; }
-
-  [JsonProperty("Issuer")] public AttCertIssuerInfo Issuer { get; set; }
-
-  [JsonProperty("SignatureInfo")] public AlgorithmInfo SignatureInfo { get; set; }
-
-  [JsonProperty("SerialNumber")] public TextualInfo SerialNumber { get; set; }
-
-  [JsonProperty("StartDate")] public DateTime StartDate { get; set; }
-
-  [JsonProperty("EndDate")] public DateTime EndDate { get; set; }
-
-  [JsonProperty("Attributes")] public List<AttributeInfo> Attributes { get; set; }
-
-  [JsonProperty("IssuerUniqueId")] public TextualInfo? IssuerUniqueId { get; set; }
-
-  [JsonProperty("Extensions")] public List<ExtensionInfo>? Extensions { get; set; }
+  [JsonProperty("Version")] private TextualInfo _version;
+  [JsonProperty("HolderInfo")] private HolderInfo _holderInfo;
+  [JsonProperty("Issuer")] private AttCertIssuerInfo _issuer;
+  [JsonProperty("SignatureInfo")] private AlgorithmInfo _signatureInfo;
+  [JsonProperty("SerialNumber")] private TextualInfo _serialNumber;
+  [JsonProperty("StartDate")] private DateTime _startDate;
+  [JsonProperty("EndDate")] private DateTime _endDate;
+  [JsonProperty("Attributes")] private List<AttributeInfo> _attributes;
+  [JsonProperty("IssuerUniqueId")] private TextualInfo? _issuerUniqueId;
+  [JsonProperty("Extensions")] private List<ExtensionInfo>? _extensions;
 
   [JsonConstructor]
   public X509AttributeCertificateInfo(TextualInfo version, HolderInfo holderInfo, AttCertIssuerInfo issuer,
     AlgorithmInfo signatureInfo, TextualInfo serialNumber, DateTime startDate, DateTime endDate,
     List<AttributeInfo> attributes, TextualInfo? issuerUniqueId, List<ExtensionInfo>? extensions)
   {
-    Version = version;
-    HolderInfo = holderInfo;
-    Issuer = issuer;
-    SignatureInfo = signatureInfo;
-    SerialNumber = serialNumber;
-    StartDate = startDate;
-    EndDate = endDate;
-    Attributes = attributes;
-    IssuerUniqueId = issuerUniqueId;
-    Extensions = extensions;
+    _version = version;
+    _holderInfo = holderInfo;
+    _issuer = issuer;
+    _signatureInfo = signatureInfo;
+    _serialNumber = serialNumber;
+    _startDate = startDate;
+    _endDate = endDate;
+    _attributes = attributes;
+    _issuerUniqueId = issuerUniqueId;
+    _extensions = extensions;
   }
 
-  public X509AttributeCertificateInfo()
+  private X509AttributeCertificateInfo()
   {
   }
 
   public static X509AttributeCertificateInfo GetInstance(AttributeCertificate attributeCertificate)
   {
-    var acinfo = attributeCertificate.ACInfo;
+    var attributeCertificateAcInfo = attributeCertificate.ACInfo;
     return new X509AttributeCertificateInfo
     {
-      Version = TextualInfo.GetInstance(acinfo.Version),
-      HolderInfo = new HolderInfo(acinfo.Holder),
-      Issuer = new AttCertIssuerInfo(acinfo.Issuer),
-      SignatureInfo = new AlgorithmInfo(acinfo.Signature),
-      SerialNumber = TextualInfo.GetInstance(acinfo.SerialNumber),
-      StartDate = acinfo.AttrCertValidityPeriod.NotBeforeTime.ToDateTime(),
-      EndDate = acinfo.AttrCertValidityPeriod.NotAfterTime.ToDateTime(),
-      Attributes = acinfo.Attributes.ToArray().Select(it => AttributeInfo.GetInstance(Attribute.GetInstance(it)))
+      _version = TextualInfo.GetInstance(attributeCertificateAcInfo.Version),
+      _holderInfo = new HolderInfo(attributeCertificateAcInfo.Holder),
+      _issuer = new AttCertIssuerInfo(attributeCertificateAcInfo.Issuer),
+      _signatureInfo = new AlgorithmInfo(attributeCertificateAcInfo.Signature),
+      _serialNumber = TextualInfo.GetInstance(attributeCertificateAcInfo.SerialNumber),
+      _startDate = attributeCertificateAcInfo.AttrCertValidityPeriod.NotBeforeTime.ToDateTime(),
+      _endDate = attributeCertificateAcInfo.AttrCertValidityPeriod.NotAfterTime.ToDateTime(),
+      _attributes = attributeCertificateAcInfo.Attributes.ToArray()
+        .Select(it => AttributeInfo.GetInstance(Attribute.GetInstance(it)))
         .ToList(),
-      IssuerUniqueId = acinfo.IssuerUniqueID != null ? TextualInfo.GetInstance(acinfo.IssuerUniqueID) : null,
-      Extensions = acinfo.Extensions != null
-        ? acinfo.Extensions.ExtensionOids.OfType<DerObjectIdentifier>().ToArray().Select(oid =>
+      _issuerUniqueId = attributeCertificateAcInfo.IssuerUniqueID != null
+        ? TextualInfo.GetInstance(attributeCertificateAcInfo.IssuerUniqueID)
+        : null,
+      _extensions = attributeCertificateAcInfo.Extensions?.ExtensionOids.OfType<DerObjectIdentifier>().ToArray().Select(
+        oid =>
         {
-          var extension = acinfo.Extensions.GetExtension(oid);
+          var extension = attributeCertificateAcInfo.Extensions.GetExtension(oid);
           return new ExtensionInfo(
             TextualInfo.GetInstance(oid),
             extension.IsCritical,
             TextualInfo.GetInstance(extension.Value)
           );
         }).ToList()
-        : null
     };
   }
 
@@ -82,26 +75,26 @@ public class X509AttributeCertificateInfo : XCertificateInfo, IEncodableInfo
   {
     var asn1List = new List<Asn1Encodable>
     {
-      Version.ToPrimitive(),
-      HolderInfo.ToPrimitive(),
-      Issuer.ToPrimitive(),
-      SignatureInfo.ToPrimitive(),
-      SerialNumber.ToPrimitive(),
+      _version.ToPrimitive(),
+      _holderInfo.ToPrimitive(),
+      _issuer.ToPrimitive(),
+      _signatureInfo.ToPrimitive(),
+      _serialNumber.ToPrimitive(),
       new AttCertValidityPeriod(
-        new DerGeneralizedTime(StartDate),
-        new DerGeneralizedTime(EndDate)
+        new DerGeneralizedTime(_startDate),
+        new DerGeneralizedTime(_endDate)
       ),
-      Attributes.ToPrimitiveDerSequence()
+      _attributes.ToPrimitiveDerSequence()
     };
 
-    if (IssuerUniqueId != null)
+    if (_issuerUniqueId != null)
     {
-      asn1List.Add(IssuerUniqueId.ToPrimitive());
+      asn1List.Add(_issuerUniqueId.ToPrimitive());
     }
 
-    if (Extensions != null && Extensions.Any())
+    if (_extensions != null && _extensions.Any())
     {
-      asn1List.Add(Extensions.ToPrimitiveDerSequence());
+      asn1List.Add(_extensions.ToPrimitiveDerSequence());
     }
 
     return asn1List.ToDerSequence();

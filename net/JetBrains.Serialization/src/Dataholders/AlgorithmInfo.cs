@@ -13,8 +13,7 @@ public class AlgorithmInfo : IEncodableInfo
 {
   [JsonProperty("name")] private String _name;
 
-  [JsonProperty("additionalValue")] [CanBeNull]
-  private IEncodableInfo _additionalValue = null;
+  [JsonProperty("additionalValue")] private IEncodableInfo? _additionalValue = null;
 
   [JsonProperty("algorithmIdentifier")] private TextualInfo _algorithmIdentifier;
 
@@ -32,7 +31,7 @@ public class AlgorithmInfo : IEncodableInfo
     _algorithmIdentifier = TextualInfo.GetInstance(signatureAlgorithm.Algorithm);
   }
 
-  public Asn1Encodable ToPrimitive() => new List<IEncodableInfo> { _algorithmIdentifier, _additionalValue }
+  public Asn1Encodable ToPrimitive() => new List<IEncodableInfo?> { _algorithmIdentifier, _additionalValue }
     .ToPrimitiveDerSequence()
     .ToAsn1Object();
 }
