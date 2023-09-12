@@ -7,9 +7,9 @@ namespace JetBrains.Serialization;
 [JsonObject(MemberSerialization.OptIn)]
 public class TaggedObjectInfo : IEncodableInfo
 {
-  [JsonProperty("Explicit")] private readonly bool _explicit;
-  [JsonProperty("TagNo")] private readonly int _tagNo;
-  [JsonProperty("Content")] private readonly IEncodableInfo _content;
+  [JsonProperty("Explicit")] private bool _explicit;
+  [JsonProperty("TagNo")] private int _tagNo;
+  [JsonProperty("Content")] private IEncodableInfo _content;
 
   [JsonConstructor]
   public TaggedObjectInfo(bool explicitness, int tagNo, IEncodableInfo content)
