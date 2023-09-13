@@ -17,7 +17,7 @@ namespace JetBrains.FormatRipper.Pe
     public readonly ComputeHashInfo? ComputeHashInfo;
     public readonly bool HasMetadata;
     public readonly StreamRange SecurityDataDirectoryRange;
-    public PeFileMetadata? FileMetadata { get; }
+    public PeFileMetadata? FileMetadata;
 
     private PeFile(
       IMAGE_FILE_MACHINE machine,

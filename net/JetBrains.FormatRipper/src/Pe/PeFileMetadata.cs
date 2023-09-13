@@ -2,13 +2,13 @@ namespace JetBrains.FormatRipper.Pe;
 
 public class PeFileMetadata
 {
-  public DataValue CheckSum { get; set; }
-  public DataValue SecurityRva { get; set; }
-  public DataValue SecuritySize { get; set; }
-  public DataValue DwLength { get; set; }
-  public DataValue WRevision { get; set; }
-  public DataValue WCertificateType { get; set; }
-  public long SignaturePosition { get; set; }
+  public DataValue CheckSum;
+  public DataValue SecurityRva;
+  public DataValue SecuritySize;
+  public DataValue DwLength;
+  public DataValue WRevision;
+  public DataValue WCertificateType;
+  public long SignaturePosition;
 
   public PeFileMetadata(
     DataValue? checkSum = null,

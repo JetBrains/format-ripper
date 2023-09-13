@@ -21,7 +21,8 @@ public class PeFileInfo : FileInfo
   public PeFileInfo(PeFile peFile)
   {
     FileMetaInfo = new PeFileMetaInfo(peFile.FileMetadata ??
-                                      throw new ArgumentNullException("FileMetadata", "FileMetadata can not be null"));
+                                      throw new ArgumentNullException("peFile.FileMetadata",
+                                        "FileMetadata can not be null"));
 
     SignedMessage signedMessage = SignedMessage.CreateInstance(peFile.SignatureData);
 
