@@ -22,31 +22,31 @@ public class DmgFileMetaInfo : IFileMetaInfo
     byte[] unsignedUDIFResourceFileBytes = new byte[sizeof(UDIFResourceFile)];
     stream.Read(unsignedUDIFResourceFileBytes, 0, sizeof(UDIFResourceFile));
 
-    if (Metadata.fileSize > stream.Length)
+    if (Metadata.FileSize > stream.Length)
     {
       stream.Position = stream.Length;
-      stream.Write(new byte[(int)(Metadata.fileSize - stream.Length)], 0,
-        (int)(Metadata.fileSize - stream.Length));
+      stream.Write(new byte[(int)(Metadata.FileSize - stream.Length)], 0,
+        (int)(Metadata.FileSize - stream.Length));
     }
 
-    stream.Position = Metadata.codeSignaturePointer.Position;
-    var codeSignatureInfoBytes = Metadata.codeSignatureInfo.ToByteArray();
+    stream.Position = Metadata.CodeSignaturePointer.Position;
+    var codeSignatureInfoBytes = Metadata.CodeSignatureInfo.ToByteArray();
     stream.Write(codeSignatureInfoBytes, 0, codeSignatureInfoBytes.Length);
 
-    foreach (var blob in Metadata.codeSignatureInfo.blobs)
+    foreach (var blob in Metadata.CodeSignatureInfo.Blobs)
     {
-      stream.Position = Metadata.codeSignatureInfo.superBlobStart + blob.offset;
+      stream.Position = Metadata.CodeSignatureInfo.SuperBlobStart + blob.Offset;
 
-      blob.length += 2 * sizeof(UInt32);
+      blob.Length += 2 * sizeof(UInt32);
 
-      if (blob.magic == CSMAGIC_CONSTS.CMS_SIGNATURE)
+      if (blob.Magic == CSMAGIC_CONSTS.CMS_SIGNATURE)
       {
-        blob.content = signature;
+        blob.Content = signature;
       }
 
-      if (blob.type == (uint)CSMAGIC_CONSTS.CODEDIRECTORY)
+      if (blob.Type == (uint)CSMAGIC_CONSTS.CODEDIRECTORY)
       {
-        stream.Write(blob.content, 0, blob.content.Length);
+        stream.Write(blob.Content, 0, blob.Content.Length);
       }
       else
       {
@@ -58,7 +58,7 @@ public class DmgFileMetaInfo : IFileMetaInfo
     stream.Position = stream.Length - sizeof(UDIFResourceFile);
     stream.Write(unsignedUDIFResourceFileBytes, 0, unsignedUDIFResourceFileBytes.Length);
 
-    var codeSignaturePointerBytes = Metadata.codeSignaturePointer.ToByteArray(isBe: true);
+    var codeSignaturePointerBytes = Metadata.CodeSignaturePointer.ToByteArray(isBe: true);
     stream.Position = stream.Length - sizeof(UDIFResourceFile) + DmgFile.CODE_SIGNATURE_POINTER_OFFSET;
     stream.Write(codeSignaturePointerBytes, 0, codeSignaturePointerBytes.Length);
   }

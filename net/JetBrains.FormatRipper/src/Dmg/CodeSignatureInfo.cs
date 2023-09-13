@@ -5,40 +5,40 @@ namespace JetBrains.FormatRipper.Dmg;
 
 public class CodeSignatureInfo
 {
-  public uint magic;
-  public uint length;
-  public long superBlobStart;
-  public int superBlobCount;
-  public readonly List<Blob> blobs = new List<Blob>();
+  public uint Magic;
+  public uint Length;
+  public long SuperBlobStart;
+  public int SuperBlobCount;
+  public readonly List<Blob> Blobs = new List<Blob>();
 
   public CodeSignatureInfo(){}
 
   public CodeSignatureInfo(uint magic, uint length, long superBlobStart, int superBlobCount, List<Blob> blobs)
   {
-    this.magic = magic;
-    this.length = length;
-    this.superBlobStart = superBlobStart;
-    this.superBlobCount = superBlobCount;
-    this.blobs = blobs;
+    Magic = magic;
+    Length = length;
+    SuperBlobStart = superBlobStart;
+    SuperBlobCount = superBlobCount;
+    Blobs = blobs;
   }
 
   public byte[] ToByteArray() =>
     MemoryUtil.ArrayMerge(
-      MemoryUtil.ToByteArray(magic, true),
-      MemoryUtil.ToByteArray(length, true),
-      MemoryUtil.ToByteArray(blobs.Count, true),
+      MemoryUtil.ToByteArray(Magic, true),
+      MemoryUtil.ToByteArray(Length, true),
+      MemoryUtil.ToByteArray(Blobs.Count, true),
       BlobsToByteArray()
     );
 
   private byte[] BlobsToByteArray()
   {
     byte[] result = new byte[0];
-    foreach (var blob in blobs)
+    foreach (var blob in Blobs)
     {
       result = MemoryUtil.ArrayMerge(
         result,
-        MemoryUtil.ToByteArray(blob.type, true),
-        MemoryUtil.ToByteArray(blob.offset, true)
+        MemoryUtil.ToByteArray(blob.Type, true),
+        MemoryUtil.ToByteArray(blob.Offset, true)
       );
     }
 

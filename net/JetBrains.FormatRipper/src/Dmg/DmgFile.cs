@@ -48,9 +48,9 @@ namespace JetBrains.FormatRipper.Dmg
       var signatureLength = (long)MemoryUtil.GetBeU8(header.CodeSignatureLength);
       Metadata = new DmgFileMetadata(stream.Length, new StreamRange(signatureOffset, signatureLength))
         {
-          codeSignatureInfo =
+          CodeSignatureInfo =
           {
-            superBlobStart = signatureOffset
+            SuperBlobStart = signatureOffset
           }
         };
 
@@ -115,8 +115,8 @@ namespace JetBrains.FormatRipper.Dmg
 
       ValidateCssbSize(csLength);
 
-      Metadata.codeSignatureInfo.magic = MemoryUtil.GetBeU4(csSuperBlob.magic);
-      Metadata.codeSignatureInfo.length = csLength;
+      Metadata.CodeSignatureInfo.Magic = MemoryUtil.GetBeU4(csSuperBlob.magic);
+      Metadata.CodeSignatureInfo.Length = csLength;
 
       var csCount = MemoryUtil.GetBeU4(csSuperBlob.count);
       ProcessSignatureBlobs(csCount, csLength, ref codeDirectoryBlob, ref cmsSignatureBlob);
@@ -137,7 +137,7 @@ namespace JetBrains.FormatRipper.Dmg
     private unsafe void ProcessSignatureBlobs(uint csCount, uint csLength,
       ref byte[]? codeDirectoryBlob, ref byte[]? cmsSignatureBlob)
     {
-      Metadata.codeSignatureInfo.superBlobCount = (int)csCount;
+      Metadata.CodeSignatureInfo.SuperBlobCount = (int)csCount;
       fixed (byte* scBuf = StreamUtil.ReadBytes(_stream, checked((int)csLength - sizeof(CS_SuperBlob))))
       {
         for (var scPtr = scBuf; csCount-- > 0; scPtr += sizeof(CS_BlobIndex))
@@ -152,8 +152,8 @@ namespace JetBrains.FormatRipper.Dmg
             case CSSLOT.CSSLOT_CODEDIRECTORY:
             {
               var blob = ProcessCodeDirectory(csOffsetPtr, csbi);
-              codeDirectoryBlob = blob.content;
-              Metadata.codeSignatureInfo.blobs.Add(
+              codeDirectoryBlob = blob.Content;
+              Metadata.CodeSignatureInfo.Blobs.Add(
                 blob
               );
             }
@@ -164,11 +164,11 @@ namespace JetBrains.FormatRipper.Dmg
 
               if (MemoryUtil.GetBeU4(csbi.type) == CSSLOT.CSSLOT_CMS_SIGNATURE)
               {
-                cmsSignatureBlob = blob.content;
-                blob.content = new byte[0];
+                cmsSignatureBlob = blob.Content;
+                blob.Content = new byte[0];
               }
 
-              Metadata.codeSignatureInfo.blobs.Add(
+              Metadata.CodeSignatureInfo.Blobs.Add(
                 blob
               );
             }
