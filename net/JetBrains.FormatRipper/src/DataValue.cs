@@ -2,9 +2,9 @@ namespace JetBrains.FormatRipper;
 
 public class DataValue
 {
-  public long Offset { get; }
+  public readonly long Offset;
 
-  public byte[]? Value { get; }
+  public readonly byte[]? Value;
 
   public DataValue(long offset = 0, byte[]? value = null)
   {

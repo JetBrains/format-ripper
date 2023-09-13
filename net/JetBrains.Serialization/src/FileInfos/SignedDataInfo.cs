@@ -34,7 +34,6 @@ public class SignedDataInfo
     {
       case "DER":
         return _dataDer;
-      case "BER":
       default:
         return _dataBer;
     }
