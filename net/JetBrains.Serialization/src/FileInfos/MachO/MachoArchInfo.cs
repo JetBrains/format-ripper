@@ -9,14 +9,14 @@ public class MachoArchInfo
 {
   [JsonProperty("fileInfos")] private List<MachoFileInfo> _fileInfos = new List<MachoFileInfo>();
   [JsonProperty("headerInfo")] private FatHeaderInfo? _headerInfo;
-  [JsonProperty("size")] private long size;
+  [JsonProperty("size")] private long _size;
 
   [JsonConstructor]
   public MachoArchInfo(List<MachoFileInfo> fileInfos, FatHeaderInfo? headerInfo, long size)
   {
     _fileInfos = fileInfos;
     _headerInfo = headerInfo;
-    this.size = size;
+    this._size = size;
   }
 
   public MachoArchInfo(MachOFile file)
@@ -27,7 +27,7 @@ public class MachoArchInfo
       _fileInfos.Add(new MachoFileInfo(fileSection));
     }
 
-    size = file.FileSize;
+    _size = file.FileSize;
   }
 
   public void ModifyFile(Stream stream)
@@ -39,9 +39,9 @@ public class MachoArchInfo
 
       stream.Position = 0;
 
-      if (size > stream.Length)
+      if (_size > stream.Length)
       {
-        stream.SetLength(size);
+        stream.SetLength(_size);
       }
 
       stream.Position = 0;

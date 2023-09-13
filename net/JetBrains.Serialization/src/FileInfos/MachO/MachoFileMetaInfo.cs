@@ -17,7 +17,6 @@ public class MachoFileMetaInfo : IFileMetaInfo
 
   public void ModifyFile(Stream stream, byte[] signature)
   {
-
     if (Metadata.FileSize > stream.Length)
     {
       stream.SetLength(Metadata.FileSize);
@@ -42,16 +41,16 @@ public class MachoFileMetaInfo : IFileMetaInfo
 
     foreach (var blob in Metadata.CodeSignatureInfo.Blobs)
     {
-      stream.Position = Metadata.CodeSignatureInfo.SuperBlobStart + Metadata.MachoOffset + blob.offset;
-      if (blob.magic == CSMAGIC_CONSTS.CMS_SIGNATURE)
+      stream.Position = Metadata.CodeSignatureInfo.SuperBlobStart + Metadata.MachoOffset + blob.Offset;
+      if (blob.Magic == CSMAGIC_CONSTS.CMS_SIGNATURE)
       {
-        blob.length = signature.Length + 8;
-        blob.content = signature;
+        blob.Length = signature.Length + 8;
+        blob.Content = signature;
       }
 
-      if (blob.type == (uint)CSMAGIC_CONSTS.CODEDIRECTORY)
+      if (blob.Type == (uint)CSMAGIC_CONSTS.CODEDIRECTORY)
       {
-        stream.Write(blob.content, 0, blob.content.Length);
+        stream.Write(blob.Content, 0, blob.Content.Length);
       }
       else
       {

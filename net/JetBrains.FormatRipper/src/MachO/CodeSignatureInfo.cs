@@ -6,11 +6,11 @@ namespace JetBrains.FormatRipper.MachO;
 
 public class CodeSignatureInfo
 {
-  public uint Magic { get; set; } = 0;
-  public uint Length { get; set; } = 0;
-  public long SuperBlobStart { get; set; } = 0;
-  public int SuperBlobCount { get; set; } = 0;
-  public List<Blob> Blobs { get; set; } = new List<Blob>();
+  public uint Magic = 0;
+  public uint Length = 0;
+  public long SuperBlobStart = 0;
+  public int SuperBlobCount = 0;
+  public readonly List<Blob> Blobs = new List<Blob>();
 
   public byte[] ToByteArray() => MemoryUtil.ArrayMerge(
     MemoryUtil.ToByteArray(Magic, true),
@@ -25,8 +25,8 @@ public class CodeSignatureInfo
     foreach (var blob in Blobs)
     {
       result = MemoryUtil.ArrayMerge(result,
-        MemoryUtil.ToByteArray(blob.type, true),
-        MemoryUtil.ToByteArray(blob.offset, true));
+        MemoryUtil.ToByteArray(blob.Type, true),
+        MemoryUtil.ToByteArray(blob.Offset, true));
     }
 
     return result;

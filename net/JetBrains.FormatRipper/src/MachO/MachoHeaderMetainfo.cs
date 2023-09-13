@@ -4,14 +4,14 @@ namespace JetBrains.FormatRipper.MachO;
 
 public class MachoHeaderMetainfo
 {
-  public uint Magic;
-  public uint CpuType;
-  public uint CpuSubType;
-  public uint FileType;
-  public uint NumLoadCommands;
-  public uint SizeLoadCommands;
-  public uint Flags;
-  public uint Reserved;
+  public readonly uint Magic;
+  public readonly uint CpuType;
+  public readonly uint CpuSubType;
+  public readonly uint FileType;
+  public readonly uint NumLoadCommands;
+  public readonly uint SizeLoadCommands;
+  public readonly uint Flags;
+  public readonly uint Reserved;
 
   public MachoHeaderMetainfo(uint magic = 0, uint cpuType = 0, uint cpuSubType = 0, uint fileType = 0,
     uint numLoadCommands = 0, uint sizeLoadCommands = 0, uint flags = 0, uint reserved = 0)

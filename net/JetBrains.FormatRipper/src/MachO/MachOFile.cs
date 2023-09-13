@@ -49,7 +49,6 @@ namespace JetBrains.FormatRipper.MachO
     public readonly bool? IsFatLittleEndian;
     public readonly Section[] Sections;
     public readonly FatHeaderInfo? FatHeaderInfo;
-    public readonly List<MachoFileMetadata> Metadatas = new List<MachoFileMetadata>();
     public readonly long FileSize;
 
     [Flags]
@@ -65,10 +64,6 @@ namespace JetBrains.FormatRipper.MachO
     {
       IsFatLittleEndian = isFatLittleEndian;
       Sections = sections;
-      foreach (var section in sections)
-      {
-        if (section.Metadata != null) Metadatas.Add(section.Metadata);
-      }
 
       FileSize = fileSize;
 
@@ -223,7 +218,7 @@ namespace JetBrains.FormatRipper.MachO
       return new(null, new[] { Read(new StreamRange(0, stream.Length), magic, stream, mode) }, stream.Length);
     }
 
-    private unsafe static Section Read(StreamRange imageRange, MH magic, Stream stream, Mode mode)
+    private static unsafe Section Read(StreamRange imageRange, MH magic, Stream stream, Mode mode)
     {
       if (magic is not (MH.MH_MAGIC or MH.MH_MAGIC_64 or MH.MH_CIGAM or MH.MH_CIGAM_64))
         throw new FormatException("Unknown Mach-O magic numbers");
@@ -475,7 +470,7 @@ namespace JetBrains.FormatRipper.MachO
                 sizeof(load_command) + sizeof(linkedit_data_command)));
         }
 
-        return new(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob), metadata);
+        return new(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob));
       }
 
       int GetZeroPadding(bool hasCodeSignature)
@@ -588,13 +583,11 @@ namespace JetBrains.FormatRipper.MachO
     {
       public readonly bool HasSignature;
       public readonly SignatureData SignatureData;
-      public readonly MachoFileMetadata? Metadata;
 
-      public LoadCommandsInfo(bool hasSignature, SignatureData signatureData, MachoFileMetadata? metadata = null)
+      public LoadCommandsInfo(bool hasSignature, SignatureData signatureData)
       {
         HasSignature = hasSignature;
         SignatureData = signatureData;
-        Metadata = metadata;
       }
     }
   }

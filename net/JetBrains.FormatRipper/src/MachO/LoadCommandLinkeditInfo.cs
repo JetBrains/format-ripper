@@ -8,15 +8,15 @@ public class LoadCommandLinkeditInfo : LoadCommandInfo
   public override long Offset { get; }
   public override uint Command { get; }
   public override uint CommandSize { get; }
-  public byte[] SegmentName { get; set; }
-  public ulong VmAddress { get; set; }
-  public ulong VmSize { get; set; }
-  public ulong VmFileOff { get; set; }
-  public ulong FileSize { get; set; }
-  public uint VmProcMaximumProtection { get; set; }
-  public uint VmProcInitialProtection { get; set; }
-  public uint SectionsNum { get; set; }
-  public uint SegmentFlags { get; set; }
+  public readonly byte[] SegmentName;
+  public readonly ulong VmAddress;
+  public readonly ulong VmSize;
+  public readonly ulong VmFileOff;
+  public readonly ulong FileSize;
+  public readonly uint VmProcMaximumProtection;
+  public readonly uint VmProcInitialProtection;
+  public readonly uint SectionsNum;
+  public readonly uint SegmentFlags;
 
   public LoadCommandLinkeditInfo(long offset, uint command, uint commandSize, byte[] segmentName, ulong vmAddress,
     ulong vmSize, ulong vmFileOff, ulong fileSize, uint vmProcMaximumProtection, uint vmProcInitialProtection,

@@ -6,10 +6,10 @@ namespace JetBrains.FormatRipper.MachO;
 
 public class FatHeaderInfo
 {
-  public uint Magic;
-  public bool IsBe;
-  public uint FatArchSize;
-  public List<FatArchInfo> FatArchInfos;
+  public readonly uint Magic;
+  public readonly bool IsBe;
+  public readonly uint FatArchSize;
+  public readonly List<FatArchInfo> FatArchInfos;
 
   public FatHeaderInfo(uint magic, bool isBe, uint fatArchSize, List<FatArchInfo> fatArchInfos)
   {
