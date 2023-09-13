@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using JetBrains.FormatRipper.Dmg;
-using JetBrains.FormatRipper.Pe;
 using JetBrains.SignatureVerifier.Crypt;
 using NUnit.Framework;
 
@@ -15,13 +14,13 @@ public class DmgSignatureVerifierTests
   // @formatter:on
   public async Task VerifySignTest(VerifySignatureStatus expectedResult, string resourceName)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream => DmgFile.Parse(stream));
+    var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName, DmgFile.Parse);
 
     var verificationParams = new SignatureVerificationParams(null, null, false, false);
 
     Assert.IsTrue(file.HasSignature());
 
-    var signedMessage = SignedMessage.CreateInstance(file.SignatureData.Value);
+    var signedMessage = SignedMessage.CreateInstance(file.SignatureData().Value);
     var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
     var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 
