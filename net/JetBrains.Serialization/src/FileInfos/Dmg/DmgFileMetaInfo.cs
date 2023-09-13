@@ -59,7 +59,7 @@ public class DmgFileMetaInfo : IFileMetaInfo
     stream.Write(unsignedUDIFResourceFileBytes, 0, unsignedUDIFResourceFileBytes.Length);
 
     var codeSignaturePointerBytes = Metadata.codeSignaturePointer.ToByteArray(isBe: true);
-    stream.Position = stream.Length - sizeof(UDIFResourceFile) + DmgFile.CodeSignaturePointerOffset;
+    stream.Position = stream.Length - sizeof(UDIFResourceFile) + DmgFile.CODE_SIGNATURE_POINTER_OFFSET;
     stream.Write(codeSignaturePointerBytes, 0, codeSignaturePointerBytes.Length);
   }
 }

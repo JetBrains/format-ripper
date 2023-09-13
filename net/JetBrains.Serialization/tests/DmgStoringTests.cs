@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace JetBrains.Serialization.Tests;
 
-public class DmgStoringTests
+public class  DmgStoringTests
 {
   // @formatter:off
   [TestCase("steam.dmg", "steam_not_signed.dmg")]

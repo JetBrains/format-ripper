@@ -17,7 +17,7 @@ public class DmgFileInfo : FileInfo
     if (file.SignatureData == null)
       throw new Exception("Signature data is empty");
 
-    SignedMessage signedMessage = SignedMessage.CreateInstance(file.SignatureData.Value);
+    SignedMessage signedMessage = SignedMessage.CreateInstance(file.SignatureData().Value);
 
     var signedData = signedMessage.SignedData;
 
