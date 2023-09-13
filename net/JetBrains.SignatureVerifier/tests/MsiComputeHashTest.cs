@@ -16,7 +16,7 @@ namespace JetBrains.SignatureVerifier.Tests
     {
       var hash = ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
         {
-          var file = CompoundFile.Parse(stream, CompoundFile.Mode.ComputeHashInfo);
+          var file = CompoundFile.Parse(stream, CompoundFile.Mode.COMPUTE_HASH_INFO);
           Assert.IsNotNull(file.ComputeHashInfo);
           return HashUtil.ComputeHash(stream, file.ComputeHashInfo, new HashAlgorithmName(hashAlgorithmName));
         });

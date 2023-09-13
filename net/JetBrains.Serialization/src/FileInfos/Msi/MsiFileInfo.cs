@@ -36,7 +36,7 @@ public class MsiFileInfo : FileInfo
 
     var specialEntries = entries.FindAll(
       entry =>
-        specialValues.Contains(entry.Key.Name.Trim(new[] { '' }))
+        _specialValues.Contains(entry.Key.Name.Trim(new[] { '' }))
     ).Select(kv => new KeyValuePair<string, byte[]>(kv.Key.Name, kv.Value)).ToList();
     var rootEntry = entries.Find(
       entry => entry.Key.Name.Trim(new[] { '' }).Equals("Root Entry")
@@ -55,7 +55,7 @@ public class MsiFileInfo : FileInfo
 
 
     FileMetaInfo = new MsiFileMetaInfo(
-      compoundFile.fileSize,
+      compoundFile.FileSize,
       compoundFile.HeaderMetaInfo,
       entries.Select(entry => entry.Key).ToList(),
       specialEntries,
@@ -63,11 +63,9 @@ public class MsiFileInfo : FileInfo
       digitalSignatureExData,
       (int)rootEntry.Key.StartingSectorLocation
     );
-
-    return;
   }
 
-  public static HashSet<string> specialValues = new()
+  private static HashSet<string> _specialValues = new()
   {
     new string(Encoding.Unicode.GetChars(new byte[] { 64, 72, 63, 59, 242, 67, 56, 68, 177, 69 })),
     new string(Encoding.Unicode.GetChars(new byte[] { 64, 72, 63, 63, 119, 69, 108, 68, 106, 62, 178, 68, 47, 72 })),
@@ -80,8 +78,7 @@ public class MsiFileInfo : FileInfo
     // Sort the segments by Key.
     segments.Sort((x, y) => x.Key.CompareTo(y.Key));
 
-    var result = new List<KeyValuePair<long, long>>();
-    result.Add(segments[0]);
+    var result = new List<KeyValuePair<long, long>> { segments[0] };
 
     for (var i = 1; i < segments.Count; i++)
     {

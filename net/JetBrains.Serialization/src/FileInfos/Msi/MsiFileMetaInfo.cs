@@ -1,6 +1,5 @@
 using System.Collections;
 using JetBrains.FormatRipper.Compound;
-using JetBrains.FormatRipper.Compound.Impl;
 using Newtonsoft.Json;
 
 namespace JetBrains.Serialization.FileInfos.Msi;
@@ -39,7 +38,7 @@ public class MsiFileMetaInfo : IFileMetaInfo
 
   public void ModifyFile(Stream stream, byte[] signature)
   {
-    var unsignedFile = CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData);
+    var unsignedFile = CompoundFile.Parse(stream, CompoundFile.Mode.SIGNATURE_DATA);
     var unsignedEntries = unsignedFile.GetEntries();
     var unsignedEntriesMap = new Hashtable();
     foreach (var keyValuePair in unsignedEntries)
@@ -58,10 +57,12 @@ public class MsiFileMetaInfo : IFileMetaInfo
     unsignedFile.PutEntries(unsignedEntries, (uint)startSect, wipe: true);
 
     unsignedFile = new CompoundFile(CompoundFileHeaderMetaInfo, stream);
-    //
-    var specialEntriesDataMap = new Hashtable();
-    specialEntriesDataMap.Add("MsiDigitalSignatureEx", DigitalSignatureExData);
-    specialEntriesDataMap.Add("DigitalSignature", signature);
+
+    var specialEntriesDataMap = new Hashtable
+    {
+      { "MsiDigitalSignatureEx", DigitalSignatureExData },
+      { "DigitalSignature", signature }
+    };
     foreach (var kv in SpecialEntries)
     {
       specialEntriesDataMap.Add(kv.Key, kv.Value);

@@ -22,7 +22,7 @@ public class MsiStoringTests
     var file = ResourceUtil.OpenRead(ResourceCategory.Msi, signedResourceName,
       stream =>
       {
-        var compoundFile = CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData);
+        var compoundFile = CompoundFile.Parse(stream, CompoundFile.Mode.SIGNATURE_DATA);
         initialFileInfo = new MsiFileInfo(compoundFile);
         return compoundFile;
       });

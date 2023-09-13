@@ -12,14 +12,14 @@ namespace JetBrains.FormatRipper.Compound
   /// </summary>
   public sealed class CompoundFile
   {
-    private const string RootEntryName = "Root Entry";
+    private const string ROOT_ENTRY_NAME = "Root Entry";
 
-    private static readonly byte[] ourHeaderSignature = { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 };
+    private static readonly byte[] OurHeaderSignature = { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 };
 
     public enum FileType
     {
-      Unknown,
-      Msi
+      UNKNOWN,
+      MSI
     }
 
     public readonly struct ExtractStream
@@ -36,23 +36,23 @@ namespace JetBrains.FormatRipper.Compound
       }
     }
 
-    public FileType Type { get; private set; }
-    public bool HasSignature { get; private set; }
-    public SignatureData SignatureData { get; private set; }
-    public ExtractStream[]? ExtractStreams { get; private set; }
-    public ComputeHashInfo? ComputeHashInfo { get; private set; }
-    public CompoundFileHeaderMetaInfo HeaderMetaInfo { get; private set; }
-    public long fileSize { get; private set; }
+    public readonly FileType Type;
+    public readonly bool HasSignature;
+    public SignatureData SignatureData;
+    public ExtractStream[]? ExtractStreams;
+    public ComputeHashInfo? ComputeHashInfo;
+    public readonly CompoundFileHeaderMetaInfo HeaderMetaInfo;
+    public long FileSize;
 
-    private uint sectorSize { get; }
-    private Stream _stream { get; }
-    private List<REGSECT> diFatTable { get; }
-    private uint entitiesPerSector { get; }
-    private DirectoryEntry? rootDirectoryEntry { get; }
-    private REGSECT firstMiniFatSectorLocation { get; }
-    private List<DirectoryEntry>? directoryEntries { get; }
-    private uint miniStreamCutoffSize { get; }
-    private static uint DirectoryEntrySize { get; } = 0x80u;
+    private readonly uint _sectorSize;
+    private readonly Stream _stream;
+    private readonly List<REGSECT> _diFatTable;
+    private readonly uint _entitiesPerSector;
+    private readonly DirectoryEntry? _rootDirectoryEntry;
+    private readonly REGSECT _firstMiniFatSectorLocation;
+    private readonly List<DirectoryEntry>? _directoryEntries;
+    private readonly uint _miniStreamCutoffSize;
+    private static readonly uint DirectoryEntrySize = 0x80u;
 
     public CompoundFile(CompoundFileHeaderMetaInfo headerMetaInfo, Stream stream)
     {
@@ -60,17 +60,17 @@ namespace JetBrains.FormatRipper.Compound
       _stream.Position = 0;
 
       HeaderMetaInfo = headerMetaInfo;
-      sectorSize = 1u << MemoryUtil.GetLeU2(HeaderMetaInfo.Header.SectorShift);
-      entitiesPerSector = sectorSize / sizeof(uint);
-      firstMiniFatSectorLocation = (REGSECT)MemoryUtil.GetLeU4(HeaderMetaInfo.Header.FirstMiniFatSectorLocation);
-      miniStreamCutoffSize = MemoryUtil.GetLeU4(HeaderMetaInfo.Header.MiniStreamCutoffSize);
+      _sectorSize = 1u << MemoryUtil.GetLeU2(HeaderMetaInfo.Header.SectorShift);
+      _entitiesPerSector = _sectorSize / sizeof(uint);
+      _firstMiniFatSectorLocation = (REGSECT)MemoryUtil.GetLeU4(HeaderMetaInfo.Header.FirstMiniFatSectorLocation);
+      _miniStreamCutoffSize = MemoryUtil.GetLeU4(HeaderMetaInfo.Header.MiniStreamCutoffSize);
 
       WriteHeader(HeaderMetaInfo.Header);
 
-      diFatTable = new List<REGSECT>();
+      _diFatTable = new List<REGSECT>();
       foreach (var it in HeaderMetaInfo.SectFat)
       {
-        diFatTable.Add((REGSECT)it);
+        _diFatTable.Add((REGSECT)it);
         var buf = MemoryUtil.ToByteArray(it);
         _stream.Write(buf, 0, buf.Length);
       }
@@ -83,7 +83,7 @@ namespace JetBrains.FormatRipper.Compound
     private void WriteMiniFat()
     {
       var it = 0;
-      var nextSect = firstMiniFatSectorLocation;
+      var nextSect = _firstMiniFatSectorLocation;
       while (nextSect != REGSECT.ENDOFCHAIN)
       {
         if (nextSect > REGSECT.MAXREGSECT)
@@ -105,7 +105,7 @@ namespace JetBrains.FormatRipper.Compound
     private void WriteFat()
     {
       var it = 0;
-      foreach (var sect in diFatTable)
+      foreach (var sect in _diFatTable)
       {
         if (sect > REGSECT.MAXREGSECT)
         {
@@ -153,15 +153,15 @@ namespace JetBrains.FormatRipper.Compound
       writer.Write(MemoryUtil.GetLeU4(header.NumberOfDiFatSectors));
     }
 
-    private unsafe CompoundFile(Stream stream, Mode mode = Mode.Default,
+    private unsafe CompoundFile(Stream stream, Mode mode = Mode.DEFAULT,
       ExtractFilter? extractFilter = null)
     {
-      fileSize = stream.Length;
+      FileSize = stream.Length;
       _stream = stream;
       _stream.Position = 0;
       CompoundFileHeader cfh;
       StreamUtil.ReadBytes(_stream, (byte*)&cfh, sizeof(CompoundFileHeader));
-      if (!MemoryUtil.ArraysEqual(cfh.HeaderSignature, Declarations.HeaderSignatureSize, ourHeaderSignature))
+      if (!MemoryUtil.ArraysEqual(cfh.HeaderSignature, Declarations.HeaderSignatureSize, OurHeaderSignature))
         throw new FormatException("Invalid CF header signature");
       if (MemoryUtil.GetLeGuid(cfh.HeaderClsid) != Guid.Empty)
         throw new FormatException("Invalid CF header CLSID");
@@ -195,13 +195,13 @@ namespace JetBrains.FormatRipper.Compound
 
       var metaInfo = CompoundFileHeaderMetaInfo.GetInstance(cfh);
 
-      sectorSize = 1u << MemoryUtil.GetLeU2(cfh.SectorShift);
-      entitiesPerSector = sectorSize / sizeof(uint);
-      var entitiesPerDirectorySector = sectorSize / sizeof(CompoundFileDirectoryEntry);
+      _sectorSize = 1u << MemoryUtil.GetLeU2(cfh.SectorShift);
+      _entitiesPerSector = _sectorSize / sizeof(uint);
+      var entitiesPerDirectorySector = _sectorSize / sizeof(CompoundFileDirectoryEntry);
 
-      diFatTable = new List<REGSECT>(Declarations.HeaderDiFatSize);
+      _diFatTable = new List<REGSECT>(Declarations.HeaderDiFatSize);
       {
-        var buffer = stackalloc uint[checked((int)entitiesPerSector)];
+        var buffer = stackalloc uint[checked((int)_entitiesPerSector)];
         StreamUtil.ReadBytes(_stream, (byte*)buffer, sizeof(uint) * Declarations.HeaderDiFatSize);
         for (var n = 0; n < Declarations.HeaderDiFatSize; ++n)
         {
@@ -212,17 +212,17 @@ namespace JetBrains.FormatRipper.Compound
           }
 
           metaInfo.SectFat.Add((uint)sect);
-          diFatTable.Add(sect);
+          _diFatTable.Add(sect);
         }
 
         var diFatSectorLocation = (REGSECT)MemoryUtil.GetLeU4(cfh.FirstDiFatSectorLocation);
         for (var k = MemoryUtil.GetLeU4(cfh.NumberOfDiFatSectors); k-- > 0;)
         {
           _stream.Position = GetSectorPosition(diFatSectorLocation);
-          StreamUtil.ReadBytes(_stream, (byte*)buffer, checked((int)sectorSize));
+          StreamUtil.ReadBytes(_stream, (byte*)buffer, checked((int)_sectorSize));
           var n = 0;
-          for (; n < entitiesPerSector - 1; ++n)
-            diFatTable.Add((REGSECT)MemoryUtil.GetLeU4(buffer[n]));
+          for (; n < _entitiesPerSector - 1; ++n)
+            _diFatTable.Add((REGSECT)MemoryUtil.GetLeU4(buffer[n]));
           diFatSectorLocation = (REGSECT)MemoryUtil.GetLeU4(buffer[n]);
         }
       }
@@ -230,7 +230,7 @@ namespace JetBrains.FormatRipper.Compound
       var position = _stream.Position;
       try
       {
-        foreach (var sect in diFatTable)
+        foreach (var sect in _diFatTable)
         {
           if (sect > REGSECT.MAXREGSECT)
           {
@@ -253,7 +253,7 @@ namespace JetBrains.FormatRipper.Compound
 
       _stream.Position = position;
       var firstDirectorySectorLocation = (REGSECT)MemoryUtil.GetLeU4(cfh.FirstDirectorySectorLocation);
-      directoryEntries = new List<DirectoryEntry>();
+      _directoryEntries = new List<DirectoryEntry>();
       {
         var cfdes = stackalloc CompoundFileDirectoryEntry[checked((int)entitiesPerDirectorySector)];
         for (var directorySectorLocation = firstDirectorySectorLocation;
@@ -261,7 +261,7 @@ namespace JetBrains.FormatRipper.Compound
              directorySectorLocation = GetNextSector(directorySectorLocation))
         {
           _stream.Position = GetSectorPosition(directorySectorLocation);
-          StreamUtil.ReadBytes(_stream, (byte*)cfdes, checked((int)sectorSize));
+          StreamUtil.ReadBytes(_stream, (byte*)cfdes, checked((int)_sectorSize));
           for (var n = 0; n < entitiesPerDirectorySector; ++n)
           {
             var directoryEntryNameLength = MemoryUtil.GetLeU2(cfdes[n].DirectoryEntryNameLength);
@@ -272,7 +272,7 @@ namespace JetBrains.FormatRipper.Compound
               ? ""
               : new string(Encoding.Unicode.GetChars(MemoryUtil.CopyBytes(cfdes[n].DirectoryEntryName,
                 directoryEntryNameLength - 2)));
-            directoryEntries.Add(new DirectoryEntry(
+            _directoryEntries.Add(new DirectoryEntry(
               name,
               MemoryUtil.GetLeGuid(cfdes[n].Clsid),
               (STGTY)cfdes[n].ObjectType,
@@ -287,18 +287,18 @@ namespace JetBrains.FormatRipper.Compound
         }
       }
 
-      if (directoryEntries.Count == 0)
+      if (_directoryEntries.Count == 0)
         throw new FormatException("No CF root directory");
-      rootDirectoryEntry = directoryEntries[0];
-      if (rootDirectoryEntry.Name != RootEntryName)
+      _rootDirectoryEntry = _directoryEntries[0];
+      if (_rootDirectoryEntry.Name != ROOT_ENTRY_NAME)
         throw new FormatException("Invalid CF root directory name");
 
-      firstMiniFatSectorLocation = (REGSECT)MemoryUtil.GetLeU4(cfh.FirstMiniFatSectorLocation);
+      _firstMiniFatSectorLocation = (REGSECT)MemoryUtil.GetLeU4(cfh.FirstMiniFatSectorLocation);
 
       position = _stream.Position;
       try
       {
-        var nextSect = firstMiniFatSectorLocation;
+        var nextSect = _firstMiniFatSectorLocation;
         while (nextSect != REGSECT.ENDOFCHAIN)
         {
           if (nextSect > REGSECT.MAXREGSECT)
@@ -324,22 +324,22 @@ namespace JetBrains.FormatRipper.Compound
 
       _stream.Position = position;
 
-      miniStreamCutoffSize = MemoryUtil.GetLeU4(cfh.MiniStreamCutoffSize);
+      _miniStreamCutoffSize = MemoryUtil.GetLeU4(cfh.MiniStreamCutoffSize);
 
       var extractBlobs = new List<ExtractStream>();
       if (extractFilter != null)
       {
         var stack = new Stack<StackWalk>();
-        stack.Push(new StackWalk(new string[0], rootDirectoryEntry));
+        stack.Push(new StackWalk(new string[0], _rootDirectoryEntry));
         while (stack.Count > 0)
         {
           var (names, entry) = stack.Pop();
           foreach (var child in GetDirectoryEntryChildren(entry,
-                     _ => _ is { ObjectType: STGTY.STGTY_STREAM } &&
-                          extractFilter(MemoryUtil.ArrayMerge(names, entry.Name), _.Clsid, _.StreamSize)))
+                     directoryEntry => directoryEntry is { ObjectType: STGTY.STGTY_STREAM } &&
+                          extractFilter(MemoryUtil.ArrayMerge(names, entry.Name), directoryEntry.Clsid, directoryEntry.StreamSize)))
             extractBlobs.Add(new ExtractStream(MemoryUtil.ArrayMerge(names, child.Name), child.Clsid,
-              Read(child.StreamSize < miniStreamCutoffSize, child.StartingSectorLocation, 0, child.StreamSize)));
-          foreach (var child in GetDirectoryEntryChildren(entry, _ => _ is { ObjectType: STGTY.STGTY_STORAGE }))
+              Read(child.StreamSize < _miniStreamCutoffSize, child.StartingSectorLocation, 0, child.StreamSize)));
+          foreach (var child in GetDirectoryEntryChildren(entry, directoryEntry => directoryEntry is { ObjectType: STGTY.STGTY_STORAGE }))
             stack.Push(new StackWalk(MemoryUtil.ArrayMerge(names, child.Name), child));
         }
       }
@@ -348,22 +348,22 @@ namespace JetBrains.FormatRipper.Compound
 
       var signatureData = new SignatureData();
       {
-        var entry = TakeFirst(GetDirectoryEntryChildren(rootDirectoryEntry,
-          _ => _ is { ObjectType: STGTY.STGTY_STREAM, Name: DirectoryNames.DigitalSignatureName }));
+        var entry = TakeFirst(GetDirectoryEntryChildren(_rootDirectoryEntry,
+          directoryEntry => directoryEntry is { ObjectType: STGTY.STGTY_STREAM, Name: DirectoryNames.DigitalSignatureName }));
         if (entry != null)
         {
           hasSignature = true;
-          if ((mode & Mode.SignatureData) == Mode.SignatureData)
+          if ((mode & Mode.SIGNATURE_DATA) == Mode.SIGNATURE_DATA)
             signatureData = new SignatureData(null,
-              Read(entry.StreamSize < miniStreamCutoffSize, entry.StartingSectorLocation, 0, entry.StreamSize));
+              Read(entry.StreamSize < _miniStreamCutoffSize, entry.StartingSectorLocation, 0, entry.StreamSize));
         }
       }
 
       ComputeHashInfo? computeHashInfo = null;
-      if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+      if ((mode & Mode.COMPUTE_HASH_INFO) == Mode.COMPUTE_HASH_INFO)
       {
         var sortedDirectoryEntries = new List<DirectoryEntry>();
-        foreach (var entry in directoryEntries)
+        foreach (var entry in _directoryEntries)
           if (entry is
               {
                 ObjectType: STGTY.STGTY_STREAM, StreamSize: > 0,
@@ -384,8 +384,8 @@ namespace JetBrains.FormatRipper.Compound
 
         var orderedIncludeRanges = new List<StreamRange>();
         foreach (var entry in sortedDirectoryEntries)
-          Walk(entry.StreamSize < miniStreamCutoffSize, entry.StartingSectorLocation, 0, entry.StreamSize,
-            _ => orderedIncludeRanges.Add(_));
+          Walk(entry.StreamSize < _miniStreamCutoffSize, entry.StartingSectorLocation, 0, entry.StreamSize,
+            streamRange => orderedIncludeRanges.Add(streamRange));
 
         CompoundFileDirectoryEntry cfde;
         orderedIncludeRanges.Add(new StreamRange(
@@ -395,14 +395,14 @@ namespace JetBrains.FormatRipper.Compound
         computeHashInfo = new ComputeHashInfo(0, orderedIncludeRanges, 0);
       }
 
-      var type = GetDirectoryEntryChildren(rootDirectoryEntry, entry => entry is
+      var type = GetDirectoryEntryChildren(_rootDirectoryEntry, entry => entry is
       {
         ObjectType: STGTY.STGTY_STREAM,
         Name: DirectoryNames.䡀_ValidationName or DirectoryNames.䡀_TablesName or DirectoryNames.䡀_ColumnsName
         or DirectoryNames.䡀_StringPoolName or DirectoryNames.䡀_StringDataName
       }).Count >= 5
-        ? FileType.Msi
-        : FileType.Unknown;
+        ? FileType.MSI
+        : FileType.UNKNOWN;
 
       Type = type;
       HasSignature = hasSignature;
@@ -416,17 +416,17 @@ namespace JetBrains.FormatRipper.Compound
     {
       if (sectorNumber > REGSECT.MAXREGSECT)
         throw new FormatException("Invalid CF sector number");
-      if (offset >= sectorSize)
+      if (offset >= _sectorSize)
         throw new FormatException("Invalid CF sector offset");
-      return (1 + (uint)sectorNumber) * sectorSize + offset;
+      return (1 + (uint)sectorNumber) * _sectorSize + offset;
     }
 
     unsafe REGSECT GetNextSector(REGSECT sectorNumber)
     {
       if (sectorNumber > REGSECT.MAXREGSECT)
         throw new FormatException("Invalid CF FAT sector number");
-      _stream.Position = GetSectorPosition(diFatTable![checked((int)((uint)sectorNumber / entitiesPerSector))],
-        (uint)sectorNumber % entitiesPerSector * sizeof(uint));
+      _stream.Position = GetSectorPosition(_diFatTable[checked((int)((uint)sectorNumber / _entitiesPerSector))],
+        (uint)sectorNumber % _entitiesPerSector * sizeof(uint));
       uint buffer;
       StreamUtil.ReadBytes(_stream, (byte*)&buffer, sizeof(uint));
       return (REGSECT)MemoryUtil.GetLeU4(buffer);
@@ -439,21 +439,21 @@ namespace JetBrains.FormatRipper.Compound
       if (offset >= 64)
         throw new FormatException("Invalid CF mini sector offset");
       var absoluteOffset = (uint)miniSectorNumber * 64 + offset;
-      var fatSectorLocation = rootDirectoryEntry!.StartingSectorLocation;
-      for (var n = absoluteOffset / sectorSize; n-- > 0;)
+      var fatSectorLocation = _rootDirectoryEntry!.StartingSectorLocation;
+      for (var n = absoluteOffset / _sectorSize; n-- > 0;)
         fatSectorLocation = GetNextSector(fatSectorLocation);
-      return GetSectorPosition(fatSectorLocation, absoluteOffset % sectorSize);
+      return GetSectorPosition(fatSectorLocation, absoluteOffset % _sectorSize);
     }
 
     unsafe REGSECT GetNextMiniSector(REGSECT miniSectorNumber)
     {
       if (miniSectorNumber > REGSECT.MAXREGSECT)
         throw new FormatException("Invalid CF mini FAT sector number");
-      var miniFatSectorLocation = firstMiniFatSectorLocation;
-      for (var n = (uint)miniSectorNumber / entitiesPerSector; n-- > 0;)
+      var miniFatSectorLocation = _firstMiniFatSectorLocation;
+      for (var n = (uint)miniSectorNumber / _entitiesPerSector; n-- > 0;)
         miniFatSectorLocation = GetNextSector(miniFatSectorLocation);
       _stream.Position =
-        GetSectorPosition(miniFatSectorLocation, (uint)miniSectorNumber % entitiesPerSector * sizeof(uint));
+        GetSectorPosition(miniFatSectorLocation, (uint)miniSectorNumber % _entitiesPerSector * sizeof(uint));
       uint buffer;
       StreamUtil.ReadBytes(_stream, (byte*)&buffer, sizeof(uint));
       return (REGSECT)MemoryUtil.GetLeU4(buffer);
@@ -464,13 +464,13 @@ namespace JetBrains.FormatRipper.Compound
       stream.Position = 0;
       CompoundFileHeader cfh;
       StreamUtil.ReadBytes(stream, (byte*)&cfh, sizeof(CompoundFileHeader));
-      return MemoryUtil.ArraysEqual(cfh.HeaderSignature, Declarations.HeaderSignatureSize, ourHeaderSignature);
+      return MemoryUtil.ArraysEqual(cfh.HeaderSignature, Declarations.HeaderSignatureSize, OurHeaderSignature);
     }
 
     void Walk(bool isMiniStream, REGSECT firstSectorNumber, ulong index, ulong size, SubmitDelegate submit)
     {
       var sectorNumber = firstSectorNumber;
-      var blockSize = isMiniStream ? 64 : sectorSize;
+      var blockSize = isMiniStream ? 64 : _sectorSize;
       for (var n = index / blockSize; n-- > 0;)
         sectorNumber = isMiniStream ? GetNextMiniSector(sectorNumber) : GetNextSector(sectorNumber);
       var offset = (uint)(index % blockSize);
@@ -513,7 +513,7 @@ namespace JetBrains.FormatRipper.Compound
       PutStreamData(data, startSector, wipe);
     }
 
-    public void PutDirectoryEntries(List<DirectoryEntry> data, bool wipe)
+    private void PutDirectoryEntries(List<DirectoryEntry> data, bool wipe)
     {
       var header = HeaderMetaInfo.Header;
       var nextSect = (REGSECT)MemoryUtil.GetLeU4(header.FirstDirectorySectorLocation);
@@ -546,7 +546,7 @@ namespace JetBrains.FormatRipper.Compound
       _stream.Write(new byte[128], 0, 128);
     }
 
-    private unsafe void WriteDirectoryEntry(DirectoryEntry entry)
+    private void WriteDirectoryEntry(DirectoryEntry entry)
     {
       BinaryWriter writer = new BinaryWriter(_stream, Encoding.Unicode);
 
@@ -587,7 +587,7 @@ namespace JetBrains.FormatRipper.Compound
           {
             WriteStreamData(entry.Key, startSector, new byte[entry.Value.Length]);
           }
-          else if (entry.Key.Name != RootEntryName && entry.Value is { Length: > 0 })
+          else if (entry.Key.Name != ROOT_ENTRY_NAME && entry.Value is { Length: > 0 })
           {
             WriteStreamData(entry.Key, startSector, entry.Value);
           }
@@ -619,9 +619,8 @@ namespace JetBrains.FormatRipper.Compound
     {
       var cursor = 0;
       var nextSect = directoryEntry.StartingSectorLocation;
-      var isMini = directoryEntry.StreamSize <= miniStreamCutoffSize;
+      var isMini = directoryEntry.StreamSize <= _miniStreamCutoffSize;
       var sectorSize = 1 << MemoryUtil.GetLeU2(HeaderMetaInfo.Header.SectorShift);
-      var streamOffset = 0L;
       if (isMini)
       {
         sectorSize = 1 << MemoryUtil.GetLeU2(HeaderMetaInfo.Header.MiniSectorShift);
@@ -629,6 +628,7 @@ namespace JetBrains.FormatRipper.Compound
 
       while (nextSect != REGSECT.ENDOFCHAIN)
       {
+        var streamOffset = 0L;
         if (isMini)
           streamOffset = GetSectorPosition((REGSECT)startSector) +
                          ((long)nextSect << MemoryUtil.GetLeU2(HeaderMetaInfo.Header.MiniSectorShift));
@@ -663,7 +663,7 @@ namespace JetBrains.FormatRipper.Compound
         while (stack.Count > 0)
         {
           var currId = stack.Pop();
-          var currEntry = directoryEntries[checked((int)currId)];
+          var currEntry = _directoryEntries[checked((int)currId)];
           if (filter(currEntry))
             childrenIds.Add(currEntry);
           if (currEntry.LeftSiblingId != REGSID.NOSTREAM)
@@ -679,7 +679,7 @@ namespace JetBrains.FormatRipper.Compound
     public List<KeyValuePair<DirectoryEntry, byte[]>> GetEntries(List<KeyValuePair<long, long>>? visitedSegments = null,
       List<KeyValuePair<long, long>>? rootSegments = null)
     {
-      var entries = directoryEntries;
+      var entries = _directoryEntries;
 
       List<KeyValuePair<DirectoryEntry, byte[]>> result = new List<KeyValuePair<DirectoryEntry, byte[]>>();
       foreach (var directoryEntry in entries)
@@ -687,11 +687,11 @@ namespace JetBrains.FormatRipper.Compound
         result.Add(
           new KeyValuePair<DirectoryEntry, byte[]>(
             directoryEntry,
-            Read(directoryEntry.StreamSize < miniStreamCutoffSize,
+            Read(directoryEntry.StreamSize < _miniStreamCutoffSize,
               directoryEntry.StartingSectorLocation,
               0,
               directoryEntry.StreamSize,
-              directoryEntry.Name == RootEntryName ? rootSegments : visitedSegments
+              directoryEntry.Name == ROOT_ENTRY_NAME ? rootSegments : visitedSegments
             )
           )
         );
@@ -709,14 +709,14 @@ namespace JetBrains.FormatRipper.Compound
     [Flags]
     public enum Mode : uint
     {
-      Default = 0x0,
-      SignatureData = 0x1,
-      ComputeHashInfo = 0x2
+      DEFAULT = 0x0,
+      SIGNATURE_DATA = 0x1,
+      COMPUTE_HASH_INFO = 0x2
     }
 
     public delegate bool ExtractFilter(string[] namesFromRoot, Guid clsid, ulong size);
 
-    public static CompoundFile Parse(Stream stream, Mode mode = Mode.Default,
+    public static CompoundFile Parse(Stream stream, Mode mode = Mode.DEFAULT,
       ExtractFilter? extractFilter = null)
     {
       return new CompoundFile(stream, mode, extractFilter);

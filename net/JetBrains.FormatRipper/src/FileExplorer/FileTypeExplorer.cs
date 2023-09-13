@@ -152,7 +152,7 @@ namespace JetBrains.FormatRipper.FileExplorer
         if (CompoundFile.Is(stream))
         {
           var file = CompoundFile.Parse(stream);
-          if (file.Type == CompoundFile.FileType.Msi)
+          if (file.Type == CompoundFile.FileType.MSI)
           {
             properties = file.HasSignature
               ? FileProperties.Signed

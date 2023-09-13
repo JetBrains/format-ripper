@@ -20,10 +20,10 @@ namespace JetBrains.SignatureVerifier.Tests
     public async Task VerifySignTest(VerifySignatureStatus expectedResult, string resourceName)
     {
       var file = ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
-        {
-          Assert.IsTrue(CompoundFile.Is(stream));
-          return CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData);
-        });
+      {
+        Assert.IsTrue(CompoundFile.Is(stream));
+        return CompoundFile.Parse(stream, CompoundFile.Mode.SIGNATURE_DATA);
+      });
 
       var verificationParams = new SignatureVerificationParams(null, null, false, false);
       var signedMessage = SignedMessage.CreateInstance(file.SignatureData);

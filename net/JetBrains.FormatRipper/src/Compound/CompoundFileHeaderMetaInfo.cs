@@ -1,16 +1,14 @@
-using System;
 using System.Collections.Generic;
-using JetBrains.FormatRipper.Compound;
 using JetBrains.FormatRipper.Compound.Impl;
 
 namespace JetBrains.FormatRipper.Compound;
 
 public class CompoundFileHeaderMetaInfo
 {
-  public List<uint> SectFat { get; set; }
-  public List<uint> Fat { get; set; }
-  public List<uint> MiniFat { get; set; }
-  public CompoundFileHeaderData Header { get; }
+  public readonly List<uint> SectFat;
+  public readonly List<uint> Fat;
+  public readonly List<uint> MiniFat;
+  public readonly CompoundFileHeaderData Header;
 
   public static CompoundFileHeaderMetaInfo GetInstance(
     CompoundFileHeader header,
