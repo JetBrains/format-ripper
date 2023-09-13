@@ -14,10 +14,10 @@ public class DmgFileInfo : FileInfo
   public DmgFileInfo(DmgFile file)
   {
     FileMetaInfo = new DmgFileMetaInfo(file.Metadata);
-    if (file.SignatureData == null)
+    if (file.SignatureData() == null)
       throw new Exception("Signature data is empty");
 
-    SignedMessage signedMessage = SignedMessage.CreateInstance(file.SignatureData().Value);
+    SignedMessage signedMessage = SignedMessage.CreateInstance(file.SignatureData()!.Value);
 
     var signedData = signedMessage.SignedData;
 
