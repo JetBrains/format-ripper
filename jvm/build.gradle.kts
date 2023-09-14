@@ -1,6 +1,6 @@
 import jetbrains.sign.GpgSignSignatoryProvider
 
-val kotlinVersion = "1.6.10"
+val kotlinVersion = "1.8.21"
 val junitVersion = "5.8.2"
 val mockitoVersion = "4.2.0"
 val isUnderTeamCity = System.getenv("TEAMCITY_VERSION") != null
@@ -15,10 +15,11 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version "1.8.21"
     signing
     `maven-publish`
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    kotlin("plugin.serialization") version "1.8.21"
 }
 
 repositories {
@@ -35,6 +36,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
     implementation("org.apache.commons:commons-compress:1.21")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
