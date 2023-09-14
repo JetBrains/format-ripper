@@ -5,6 +5,7 @@ import com.jetbrains.signatureverifier.cf.MsiFile
 import com.jetbrains.signatureverifier.crypt.SignedMessage
 import com.jetbrains.signatureverifier.macho.MachoArch
 import com.jetbrains.signatureverifier.serialization.compareBytes
+import com.jetbrains.signatureverifier.serialization.dataholders.SequenceInfo
 import com.jetbrains.signatureverifier.serialization.toContentInfo
 import com.jetbrains.signatureverifier.serialization.toEncodableInfo
 import com.jetbrains.util.TestUtil
@@ -77,23 +78,23 @@ class SignatureRecreationTests {
     val innerSignedData = signedData.signedData
 
     val contentInfo = signedData.contentInfo
-    val signedDataInfo = signedData.signedData.toASN1Primitive().toEncodableInfo()
-//    val json = Json.encodeToString(signedDataInfo)
-//    val deserializedSignedDataInfo = Json.decodeFromString<SignedDataInfo>(json)
-
-//    val copy = SignedData.getInstance(deserializedSignedDataInfo.toPrimitive())
+    val initialSignedDataInfo = signedData.signedData.toASN1Primitive().toEncodableInfo()
+    val json = Json.encodeToString(initialSignedDataInfo)
+    val deserializedSignedDataInfo = Json { ignoreUnknownKeys = true }.decodeFromString<SequenceInfo>(json)
+//
+    val signedDataInfo = SignedData.getInstance(deserializedSignedDataInfo.toPrimitive())
 
     if (isMacho) {
       Assertions.assertEquals(
         true,
         compareBytes(
           innerSignedData.getEncoded("DER"),
-          signedDataInfo.toPrimitive().getEncoded("DER"),
+          signedDataInfo.getEncoded("DER"),
           verbose = true
         )
       )
 
-      val recreatedInfo = SignedData.getInstance(signedDataInfo.toPrimitive()).toContentInfo()
+      val recreatedInfo = SignedData.getInstance(signedDataInfo).toContentInfo()
 
       Assertions.assertEquals(
         true,
@@ -120,12 +121,12 @@ class SignatureRecreationTests {
         true,
         compareBytes(
           innerSignedData.getEncoded("DER"),
-          signedDataInfo.toPrimitive().getEncoded("DER"),
+          signedDataInfo.getEncoded("DER"),
           verbose = true
         )
       )
 
-      val recreatedInfo = SignedData.getInstance(signedDataInfo.toPrimitive()).toContentInfo()
+      val recreatedInfo = SignedData.getInstance(signedDataInfo).toContentInfo()
 
       Assertions.assertEquals(
         true,
