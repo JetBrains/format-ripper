@@ -86,6 +86,18 @@ data class DERUniversalStringInfo(
   override val content: ByteArray
 ) : HexTextualInfo() {
   override fun toEncodable(): ASN1Encodable = DERUniversalString(content)
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as DERUniversalStringInfo
+
+    return content.contentEquals(other.content)
+  }
+
+  override fun hashCode(): Int {
+    return content.contentHashCode()
+  }
 }
 
 @Serializable
@@ -94,6 +106,18 @@ data class DEROctetStringInfo(
   override val content: ByteArray
 ) : HexTextualInfo() {
   override fun toEncodable(): ASN1Encodable = DEROctetString(content)
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as DEROctetStringInfo
+
+    return content.contentEquals(other.content)
+  }
+
+  override fun hashCode(): Int {
+    return content.contentHashCode()
+  }
 }
 
 @Serializable
@@ -102,6 +126,18 @@ data class DERBitStringInfo(
   override val content: ByteArray
 ) : HexTextualInfo() {
   override fun toEncodable(): ASN1Encodable = DERBitString(content)
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as DERBitStringInfo
+
+    return content.contentEquals(other.content)
+  }
+
+  override fun hashCode(): Int {
+    return content.contentHashCode()
+  }
 }
 
 @Serializable
