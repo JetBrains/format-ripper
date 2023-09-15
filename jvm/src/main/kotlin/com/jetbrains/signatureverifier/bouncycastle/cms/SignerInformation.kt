@@ -50,7 +50,7 @@ class SignerInformation {
   private var resultDigest: ByteArray?
   protected val info: SignerInfo
   val digestAlgorithmID: AlgorithmIdentifier
-  protected var encryptionAlgorithm: AlgorithmIdentifier
+  var encryptionAlgorithm: AlgorithmIdentifier
   protected var signedAttributeSet: ASN1Set?
   protected var unsignedAttributeSet: ASN1Set?
 
@@ -505,7 +505,7 @@ class SignerInformation {
     ) {
       throw CMSException(
         "The " + printableName
-            + " attribute MUST NOT be an unsigned attribute"
+          + " attribute MUST NOT be an unsigned attribute"
       )
     }
     val signedAttrTable = signedAttributes ?: return null
@@ -518,14 +518,14 @@ class SignerInformation {
         if (attrValues.size() != 1) {
           throw CMSException(
             "A " + printableName
-                + " attribute MUST have a single attribute value"
+              + " attribute MUST have a single attribute value"
           )
         }
         attrValues.getObjectAt(0).toASN1Primitive()
       }
       else -> throw CMSException(
         "The SignedAttributes in a signerInfo MUST NOT include multiple instances of the "
-            + printableName + " attribute"
+          + printableName + " attribute"
       )
     }
   }
