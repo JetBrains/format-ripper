@@ -25,4 +25,24 @@ data class SignerInformation(
 
   override fun toPrimitive(): ASN1Primitive =
     toBouncySignerInformation().toASN1Structure().toASN1Primitive()
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as SignerInformation
+
+    if (signerInfo != other.signerInfo) return false
+    if (contentType != other.contentType) return false
+    if (!content.contentEquals(other.content)) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = signerInfo.hashCode()
+    result = 31 * result + contentType.hashCode()
+    result = 31 * result + content.contentHashCode()
+    return result
+  }
 }

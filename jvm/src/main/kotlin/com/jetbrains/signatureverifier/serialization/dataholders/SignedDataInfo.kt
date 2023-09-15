@@ -44,6 +44,6 @@ data class SignedDataInfo(
       signerInfos.toPrimitiveDLSet().toASN1Primitive()
     ).toDLSequence()
 
-  fun toSignature(encoding: String = "DER") =
+  fun toSignature(encoding: String = "DER"): ByteArray =
     SignedData.getInstance(toPrimitive()).toContentInfo().getEncoded(encoding)
 }
