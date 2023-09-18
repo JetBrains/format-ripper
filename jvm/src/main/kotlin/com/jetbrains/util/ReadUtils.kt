@@ -16,6 +16,10 @@ fun SeekableByteChannel.Jump(len: UInt) {
   this.Seek(len.toLong(), SeekOrigin.Begin)
 }
 
+fun SeekableByteChannel.Jump(len: Long) {
+  this.Seek(len, SeekOrigin.Begin)
+}
+
 fun SeekableByteChannel.Seek(position: Long, origin: SeekOrigin) {
   when (origin) {
     SeekOrigin.Begin -> this.position(position)
@@ -74,6 +78,10 @@ fun BinaryReader.ReadUInt32Be(): UInt {
 fun BinaryReader.ReadUInt64Le(isBe: Boolean): ULong {
   val value = this.ReadUInt64()
   return if (isBe) SwapBytes(value) else value
+}
+
+fun BinaryReader.ReadUInt64Be(): ULong {
+  return SwapBytes(this.ReadUInt64())
 }
 
 private fun SwapBytes(v: UShort): UShort = (((v.toInt() and 0xFF) shl 8) or ((v.toInt() ushr 8) and 0xFF)).toUShort()

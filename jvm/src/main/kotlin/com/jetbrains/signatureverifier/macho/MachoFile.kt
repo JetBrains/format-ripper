@@ -189,12 +189,14 @@ open class MachoFile {
           if (CS_BlobIndex_type.toInt() == MachoConsts.CSSLOT_CODEDIRECTORY) {
             _stream.Seek(CS_SuperBlob_start, SeekOrigin.Begin)
             _stream.Seek(CS_BlobIndex_offset.toLong(), SeekOrigin.Current)
-            signedData = MachoUtils.ReadCodeDirectoryBlob(reader)
+            val (_, data) = MachoUtils.ReadCodeDirectoryBlob(reader)
+            signedData = data
             _stream.Seek(position, SeekOrigin.Begin)
           } else if (CS_BlobIndex_type.toInt() == MachoConsts.CSSLOT_CMS_SIGNATURE) {
             _stream.Seek(CS_SuperBlob_start, SeekOrigin.Begin)
             _stream.Seek(CS_BlobIndex_offset.toLong(), SeekOrigin.Current)
-            cmsData = MachoUtils.ReadBlob(reader)
+            val (_, data) = MachoUtils.ReadBlob(reader)
+            cmsData = data
             _stream.Seek(position, SeekOrigin.Begin)
           }
         }
