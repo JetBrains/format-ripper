@@ -15,8 +15,15 @@ internal object TestUtil {
     return Files.newByteChannel(getTestDataFile(name), StandardOpenOption.READ)
   }
 
-  fun getTestByteChannel(dir: String, name: String): SeekableByteChannel {
-    return Files.newByteChannel(getTestDataFile(dir, name), StandardOpenOption.READ)
+  fun getTestByteChannel(
+    dir: String,
+    name: String,
+    write: Boolean = false
+  ): SeekableByteChannel {
+    val params = mutableSetOf(StandardOpenOption.READ)
+    if (write)
+      params.add(StandardOpenOption.WRITE)
+    return Files.newByteChannel(getTestDataFile(dir, name), params)
   }
 
   fun getTestByteChannelCopy(dir: String, name: String): SeekableByteChannel {
@@ -39,7 +46,8 @@ internal object TestUtil {
 
   fun getTestDataFile(name: String): Path {
     val getTestDataDir = getTestDataDir()
-    val path = Files.walk(getTestDataDir, 2).filter { path -> path.fileName.toString() == name }.findFirst()
+    val path =
+      Files.walk(getTestDataDir, 2).filter { path -> path.fileName.toString() == name }.findFirst()
     if (path.isEmpty) {
       error("Test data file '$name' was not found at $getTestDataDir")
     }
