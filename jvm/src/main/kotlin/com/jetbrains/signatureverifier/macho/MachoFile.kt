@@ -1,6 +1,9 @@
 package com.jetbrains.signatureverifier.macho
 
-import com.jetbrains.signatureverifier.*
+import com.jetbrains.signatureverifier.DataInfo
+import com.jetbrains.signatureverifier.InvalidDataException
+import com.jetbrains.signatureverifier.SignatureData
+import com.jetbrains.signatureverifier.serialization.fileInfos.*
 import com.jetbrains.util.*
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel
 import org.jetbrains.annotations.NotNull
@@ -29,6 +32,7 @@ open class MachoFile {
   private var ncmds: Long = 0
   private var sizeofcmds: Long = 0
   private var firstLoadCommandPosition: Long = 0
+  val metaInfo = MachoFileMetaInfo()
 
   /**
    * Initializes a new instance of the MachoFile
@@ -53,10 +57,12 @@ open class MachoFile {
    *      in which data is stored in this computer architecture is not Little Endian.
    * @exception InvalidDataException  If the input data not contain MachO
    */
-  constructor(@NotNull data: ByteArray) {
+  constructor(@NotNull data: ByteArray, fileSize: Long, offset: Long = 0) {
     if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN))
       throw ParseException("Only Little endian is expected", 0)
     _stream = SeekableInMemoryByteChannel(data)
+    metaInfo.machoOffset = offset
+    metaInfo.fileSize = fileSize
     setMagic()
   }
 
@@ -64,13 +70,33 @@ open class MachoFile {
     val reader = BinaryReader(_stream.Rewind())
     Magic = reader.ReadUInt32().toLong() // mach_header::magic / mach_header64::magic
 
+    metaInfo.isBe = isBe
     if (!MachoUtils.IsMacho(Magic))
       throw InvalidDataException("Unknown format")
 
-    _stream.Seek(ncmdsOffset.Offset.toLong(), SeekOrigin.Begin)
+
+//    _stream.Seek(ncmdsOffset.Offset.toLong(), SeekOrigin.Begin)
+    val cpuType = reader.ReadUInt32Le(isBe)
+    val cpuSubType = reader.ReadUInt32Le(isBe)
+    val fileType = reader.ReadUInt32Le(isBe)
+
     ncmds = reader.ReadUInt32Le(isBe).toLong() // mach_header::ncmds / mach_header_64::ncmds
     sizeofcmds = reader.ReadUInt32Le(isBe).toLong() // mach_header::sizeofcmds / mach_header_64::sizeofcmds
     firstLoadCommandPosition = _stream.position() + (if (is32) 4 else 8)// load_command[0]
+
+    val flags = reader.ReadUInt32Le(isBe)
+    val reserved = reader.ReadUInt32Le(isBe)
+
+    metaInfo.headerMetaInfo = MachoHeaderMetaInfo(
+      Magic.toUInt(),
+      cpuType,
+      cpuSubType,
+      fileType,
+      ncmds.toUInt(),
+      sizeofcmds.toUInt(),
+      flags,
+      reserved
+    )
   }
 
   fun ComputeHash(algName: String): ByteArray {
@@ -166,40 +192,112 @@ open class MachoFile {
     // Note: See https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h
     var signedData: ByteArray? = null
     var cmsData: ByteArray? = null
+    var requirementsData: ByteArray? = null
+
     val reader = BinaryReader(_stream)
     _stream.Seek(firstLoadCommandPosition, SeekOrigin.Begin)// load_command[0]
 
     var _ncmds = ncmds
     while (_ncmds-- > 0) {
+      val cmdStreamPosition = _stream.position()
       val cmd = reader.ReadUInt32Le(isBe32 || isBe64)
       // load_command::cmd
       val cmdsize = reader.ReadUInt32Le(isBe32 || isBe64)
       // load_command::cmdsize
-      if (cmd.toInt() == MachoConsts.LC_CODE_SIGNATURE) {
-        val dataoff = reader.ReadUInt32Le(isBe32 || isBe64)
+      if (cmd.toInt() == MachoConsts.LC_SEGMENT_64 || cmd.toInt() == MachoConsts.LC_SEGMENT) {
+        val name = reader.ReadBytes(16)
+        if (name.contentEquals(MachoConsts.LINKEDIT_SEGMENT_NAME)) {
+          metaInfo.loadCommands.add(
+            LoadCommandLinkeditInfo(
+              cmdStreamPosition,
+              cmd,
+              cmdsize,
+              name,
+              reader.ReadUInt64Le(false),
+              reader.ReadUInt64Le(false),
+              reader.ReadUInt64Le(false),
+              reader.ReadUInt64Le(false),
+              reader.ReadUInt32Le(true),
+              reader.ReadUInt32Le(true),
+              reader.ReadUInt32Le(true),
+              reader.ReadUInt32Le(true),
+            )
+          )
+        }
+      } else if (cmd.toInt() == MachoConsts.LC_CODE_SIGNATURE) {
+        val dataOff = reader.ReadUInt32Le(isBe32 || isBe64)
+        val dataSize = reader.ReadUInt32Le(isBe32 || isBe64)
+        metaInfo.loadCommands.add(
+          LoadCommandSignatureInfo(
+            cmdStreamPosition,
+            cmd,
+            cmdsize,
+            dataOff,
+            dataSize
+          )
+        )
+
         // load_command::dataoff
-        _stream.Seek(dataoff.toLong(), SeekOrigin.Begin)
+        _stream.Seek(dataOff.toLong(), SeekOrigin.Begin)
         val CS_SuperBlob_start = _stream.position()
-        _stream.Seek(8, SeekOrigin.Current)
+
+        metaInfo.codeSignatureInfo.superBlobStart = CS_SuperBlob_start
+
+//        _stream.Seek(8, SeekOrigin.Current)
+        metaInfo.codeSignatureInfo.magic = reader.ReadUInt32Le(true)
+        metaInfo.codeSignatureInfo.length = reader.ReadUInt32Le(true)
+
         var CS_SuperBlob_count = reader.ReadUInt32Le(true).toInt()
+        metaInfo.codeSignatureInfo.superBlobCount = CS_SuperBlob_count
+
         while (CS_SuperBlob_count-- > 0) {
           val CS_BlobIndex_type = reader.ReadUInt32Le(true)
           val CS_BlobIndex_offset = reader.ReadUInt32Le(true)
           val position = _stream.position()
-          if (CS_BlobIndex_type.toInt() == MachoConsts.CSSLOT_CODEDIRECTORY) {
-            _stream.Seek(CS_SuperBlob_start, SeekOrigin.Begin)
-            _stream.Seek(CS_BlobIndex_offset.toLong(), SeekOrigin.Current)
-            signedData = MachoUtils.ReadCodeDirectoryBlob(reader)
-            _stream.Seek(position, SeekOrigin.Begin)
-          } else if (CS_BlobIndex_type.toInt() == MachoConsts.CSSLOT_CMS_SIGNATURE) {
-            _stream.Seek(CS_SuperBlob_start, SeekOrigin.Begin)
-            _stream.Seek(CS_BlobIndex_offset.toLong(), SeekOrigin.Current)
-            cmsData = MachoUtils.ReadBlob(reader)
-            _stream.Seek(position, SeekOrigin.Begin)
+          when (CS_BlobIndex_type.toLong()) {
+            MachoConsts.CSSLOT_CODEDIRECTORY -> {
+              _stream.Seek(CS_SuperBlob_start, SeekOrigin.Begin)
+              _stream.Seek(CS_BlobIndex_offset.toLong(), SeekOrigin.Current)
+              val (blobMagic, data) = MachoUtils.ReadCodeDirectoryBlob(reader)
+              signedData = data
+              _stream.Seek(position, SeekOrigin.Begin)
+
+              metaInfo.codeSignatureInfo.blobs.add(
+                Blob(
+                  CS_BlobIndex_type,
+                  CS_BlobIndex_offset,
+                  CSMAGIC.CODEDIRECTORY,
+                  blobMagic,
+                  signedData
+                )
+              )
+            }
+
+            else -> {
+              val magicEnum = CSMAGIC.getInstance(CS_BlobIndex_type)
+
+              _stream.Seek(CS_SuperBlob_start, SeekOrigin.Begin)
+              _stream.Seek(CS_BlobIndex_offset.toLong(), SeekOrigin.Current)
+              val (blobMagic, data) = MachoUtils.ReadBlob(reader)
+              _stream.Seek(position, SeekOrigin.Begin)
+
+              metaInfo.codeSignatureInfo.blobs.add(
+                Blob(
+                  CS_BlobIndex_type,
+                  CS_BlobIndex_offset,
+                  magicEnum,
+                  blobMagic,
+                  if (magicEnum == CSMAGIC.CMS_SIGNATURE) {
+                    cmsData = data
+                    byteArrayOf()
+                  } else data
+                )
+              )
+            }
           }
         }
       }
-      _stream.Seek((cmdsize.toLong() - 8), SeekOrigin.Current)
+      _stream.Jump(cmdStreamPosition + cmdsize.toLong())
     }
     return SignatureData(signedData, cmsData)
   }
