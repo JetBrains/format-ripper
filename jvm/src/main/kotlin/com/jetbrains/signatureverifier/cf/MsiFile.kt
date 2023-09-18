@@ -1,6 +1,7 @@
 package com.jetbrains.signatureverifier.cf
 
 import com.jetbrains.signatureverifier.SignatureData
+import com.jetbrains.signatureverifier.serialization.toHexString
 import org.jetbrains.annotations.NotNull
 import java.nio.channels.SeekableByteChannel
 import java.security.MessageDigest
@@ -10,19 +11,33 @@ import java.security.MessageDigest
  */
 open class MsiFile {
   private val _cf: CompoundFile
+  val fileSize: Long
 
-  //\u0005DigitalSignature
-  private val _digitalSignatureEntryName = arrayOf<Byte>(
-    0x5, 0x0, 0x44, 0x00, 0x69, 0x00, 0x67, 0x00, 0x69, 0x00, 0x74, 0x00, 0x61, 0x00, 0x6C, 0x00, 0x53,
-    0x00, 0x69, 0x00, 0x67, 0x00, 0x6E, 0x00, 0x61, 0x00, 0x74, 0x00, 0x75, 0x00, 0x72, 0x00, 0x65, 0x00
-  ).toByteArray()
+  companion object {
+    //\u0005DigitalSignature
+    val digitalSignatureEntryName = arrayOf<Byte>(
+      0x5, 0x0, 0x44, 0x00, 0x69, 0x00, 0x67, 0x00, 0x69, 0x00, 0x74, 0x00, 0x61, 0x00, 0x6C, 0x00, 0x53,
+      0x00, 0x69, 0x00, 0x67, 0x00, 0x6E, 0x00, 0x61, 0x00, 0x74, 0x00, 0x75, 0x00, 0x72, 0x00, 0x65, 0x00
+    ).toByteArray()
 
-  //\u0005MsiDigitalSignatureEx
-  private val _msiDigitalSignatureExEntryName = arrayOf<Byte>(
-    0x5, 0x0, 0x4D, 0x00, 0x73, 0x00, 0x69, 0x00, 0x44, 0x00, 0x69, 0x00, 0x67, 0x00, 0x69, 0x00, 0x74, 0x00, 0x61,
-    0x00, 0x6C, 0x00, 0x53, 0x00, 0x69, 0x00, 0x67, 0x00, 0x6E, 0x00, 0x61, 0x00, 0x74, 0x00, 0x75, 0x00, 0x72, 0x00,
-    0x65, 0x00, 0x45, 0x00, 0x78, 0x00
-  ).toByteArray()
+    //\u0005MsiDigitalSignatureEx
+    val msiDigitalSignatureExEntryName = arrayOf<Byte>(
+      0x5, 0x0, 0x4D, 0x00, 0x73, 0x00, 0x69, 0x00, 0x44, 0x00, 0x69, 0x00, 0x67, 0x00, 0x69, 0x00, 0x74, 0x00, 0x61,
+      0x00, 0x6C, 0x00, 0x53, 0x00, 0x69, 0x00, 0x67, 0x00, 0x6E, 0x00, 0x61, 0x00, 0x74, 0x00, 0x75, 0x00, 0x72, 0x00,
+      0x65, 0x00, 0x45, 0x00, 0x78, 0x00
+    ).toByteArray()
+
+    val rootEntryName = arrayOf<Byte>(
+      0x52, 0x00, 0x6F, 0x00, 0x6F, 0x00, 0x74, 0x00, 0x20, 0x00, 0x45, 0x00, 0x6E, 0x00, 0x74, 0x00, 0x72, 0x00,
+      0x79, 0x00
+    ).toByteArray()
+
+    val hexNamesSet = setOf(
+      digitalSignatureEntryName.toHexString(),
+      msiDigitalSignatureExEntryName.toHexString(),
+      rootEntryName.toHexString()
+    )
+  }
 
   /**
    * Initializes a new instance of the MsiFile
@@ -34,13 +49,34 @@ open class MsiFile {
    */
   constructor(@NotNull stream: SeekableByteChannel) {
     _cf = CompoundFile(stream)
+    fileSize = stream.size()
   }
+
+  /***
+   * Initializes a new instance of the MsiFile from compound file json dump
+   */
+  constructor(compoundFileMetaInfo: CompoundFile.Companion.CompoundFileMetaInfo, stream: SeekableByteChannel) {
+    _cf = CompoundFile(compoundFileMetaInfo, stream)
+    fileSize = stream.size()
+  }
+
+  fun getCFMetaInfo() = _cf.getMetaInfo()
+
+  fun getEntries(visitedSectors: MutableList<Pair<Int, Int>>? = null) = _cf.getEntries(visitedSectors)
+  fun getRootEntry(visitedSectors: MutableList<Pair<Int, Int>>? = null) = _cf.getRootEntry(visitedSectors)
+
+  fun putEntries(
+    data: List<Pair<DirectoryEntry, ByteArray>>,
+    miniStreamStartSector: Int,
+    wipe: Boolean = false
+  ) =
+    _cf.putEntries(data, miniStreamStartSector, wipe)
 
   /**
    * Retrieve the signature data from MSI
    */
   fun GetSignatureData(): SignatureData {
-    val data = _cf.GetStreamData(_digitalSignatureEntryName)
+    val data = _cf.GetStreamData(digitalSignatureEntryName)
 
     if (data == null)
       return SignatureData.Empty
@@ -61,10 +97,9 @@ open class MsiFile {
     val hash = MessageDigest.getInstance(algName)
 
     for (entry in entries) {
-      if (entry.Name.contentEquals(_digitalSignatureEntryName))
-        continue
-
-      if (skipMsiDigitalSignatureExEntry && entry.Name.contentEquals(_msiDigitalSignatureExEntryName))
+      if (entry.Name.contentEquals(digitalSignatureEntryName) ||
+        (skipMsiDigitalSignatureExEntry && entry.Name.contentEquals(msiDigitalSignatureExEntryName))
+      )
         continue
 
       val data = _cf.GetStreamData(entry)
