@@ -28,17 +28,17 @@ jobs:
             3.1.x
             7.0.x
       - name: Restore
-        working-directory: ./net
+        working-directory: ${{ github.workspace }}/net
         run: dotnet restore
       - name: Build and run tests
-        working-directory: ./net
+        working-directory: ${{ github.workspace }}/net
         run: dotnet test --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results'
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: net-test-results-${{ matrix.os }}
-          path: ${{ github.workspace }}/**/tests/TestResults/*
+          path: ${{ github.workspace }}/net/**/tests/TestResults/*
           if-no-files-found: error
 
   net-qemu:
@@ -58,7 +58,7 @@ jobs:
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       - name: Setup .NET SDK, Restore, Build and Tests under QEMU ${{ matrix.arch }}
         run: >
-          docker run --rm -v "$(pwd):/work" --platform linux/${{ matrix.arch }} ${{ matrix.arch }}/fedora:39 /bin/bash -c " \
+          docker run --rm -v "${{ github.workspace }}:/work" --platform linux/${{ matrix.arch }} ${{ matrix.arch }}/fedora:39 /bin/bash -c " \
             dnf install -y dotnet-sdk-7.0 && \
             cd /work/net && \
             dotnet restore && \
@@ -69,7 +69,33 @@ jobs:
         if: always()
         with:
           name: net-test-results-qemu-${{ matrix.arch }}
-          path: ${{ github.workspace }}/**/tests/TestResults/*
+          path: ${{ github.workspace }}/net/**/tests/TestResults/*
+          if-no-files-found: error
+
+  jvm-qemu:
+    name: JVM QEMU
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [ s390x ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install QEMU static executables formats
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      - name: Setup JDK and Tests under QEMU ${{ matrix.arch }}
+        run: >
+          docker run --rm -e JAVA_OPTS="-Djdk.lang.Process.launchMechanism=vfork" -v ${PWD}:/home/gradle/project -w /home/gradle/project/jvm --platform linux/${{ matrix.arch }} gradle:jdk17 gradle test
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: jvm-test-results-qemu-${{ matrix.arch }}
+          path: ${{ github.workspace }}/jvm/build/test-results/test/*
           if-no-files-found: error
 
   jvm:
@@ -96,11 +122,11 @@ jobs:
         uses: gradle/gradle-build-action@v2.5.1
         with:
           arguments: test
-          build-root-directory: ./jvm
+          build-root-directory: ${{ github.workspace }}/jvm
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: jvm-test-results-${{ matrix.os }}
-          path: ./jvm/build/test-results/test/*
+          path: ${{ github.workspace }}/jvm/build/test-results/test/*
           if-no-files-found: error
