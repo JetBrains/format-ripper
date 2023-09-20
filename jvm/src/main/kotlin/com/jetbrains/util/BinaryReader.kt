@@ -23,6 +23,13 @@ class BinaryReader(private val channel: ByteChannel) {
     return buffer.int.toUInt()
   }
 
+  fun ReadUInt32AlwaysLE(): UInt {
+    fill(4)
+
+    if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN))
+    return buffer.int.toUInt()
+  }
+
   fun ReadInt64(): Long {
     fill(8)
     return buffer.long
