@@ -1,6 +1,7 @@
 ﻿package com.jetbrains.util
 
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.channels.SeekableByteChannel
 
 fun SeekableByteChannel.Rewind(): SeekableByteChannel {
@@ -56,6 +57,10 @@ fun BinaryReader.ReadUInt64(isBe: Boolean): ULong {
   return if (isBe) SwapBytes(value) else value
 }
 
+fun BinaryReader.ReadUInt32AsLE(): UInt {
+  val value = this.ReadUInt32()
+  return if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)) SwapBytes(value) else value
+}
 
 fun BinaryReader.ReadUInt16Le(isBe: Boolean): UShort {
   val value = this.ReadUInt16()
