@@ -70,7 +70,6 @@ class FakePkiTest {
           val signedMessageVerifier = SignedMessageVerifier(ConsoleLogger.Instance)
           val res = runBlocking { signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams) }
 
-          LOG.log(Level.INFO, "Received state: ${res.Message} ${res.Status}")
           Assertions.assertEquals(VerifySignatureStatus.InvalidSignature, res.Status)
         }
       }
