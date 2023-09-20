@@ -2,12 +2,13 @@ package com.jetbrains.util
 
 import java.io.EOFException
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.channels.ByteChannel
 import java.nio.charset.StandardCharsets
 
 class BinaryReader(private val channel: ByteChannel) {
   /** Reusable buffer */
-  private val buffer = ByteBuffer.allocateDirect(8).also { it.order(java.nio.ByteOrder.LITTLE_ENDIAN) }
+  private val buffer = ByteBuffer.allocateDirect(8).also { it.order(ByteOrder.nativeOrder()) }
 
   val BaseStream: ByteChannel
     get() = channel
