@@ -2,6 +2,7 @@ package com.jetbrains.util
 
 import java.io.EOFException
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.channels.ByteChannel
 import java.nio.charset.StandardCharsets
 
@@ -19,6 +20,13 @@ class BinaryReader(private val channel: ByteChannel) {
 
   fun ReadUInt32(): UInt {
     fill(4)
+    return buffer.int.toUInt()
+  }
+
+  fun ReadUInt32AlwaysLE(): UInt {
+    fill(4)
+
+    if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN))
     return buffer.int.toUInt()
   }
 
