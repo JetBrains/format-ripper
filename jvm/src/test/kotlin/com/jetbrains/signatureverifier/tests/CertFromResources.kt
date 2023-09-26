@@ -66,7 +66,7 @@ class CertFromResources {
     }?.forEach {
       Assertions.assertTrue(
         expectations.containsKey(it.serialNumber),
-        "Certificate serial number is on the known serial numbers list"
+        "Certificate serial number ${it.serialNumber.toString(16)} is on the known serial numbers list"
       )
       Assertions.assertTrue(
         certContentMatches(expectations[it.serialNumber].toString(), it.issuerDN.toString()),
