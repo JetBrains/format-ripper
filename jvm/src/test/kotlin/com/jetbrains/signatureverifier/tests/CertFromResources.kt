@@ -8,7 +8,7 @@ import java.math.BigInteger
 
 class CertFromResources {
 
-  private val expectations = mapOf(
+  private val expectations = setOf(
 
     Pair(
       BigInteger("0444c0", 16),
@@ -63,14 +63,20 @@ class CertFromResources {
       withRevocationCheck = false
     ).RootCertificates?.map {
       it.trustedCert
-    }?.forEach {
+    }?.forEach { cert ->
       Assertions.assertTrue(
-        expectations.containsKey(it.serialNumber),
-        "Certificate serial number ${it.serialNumber.toString(16)} is on the known serial numbers list"
+        {
+          expectations.any { it.first == cert.serialNumber }
+        },
+        "Certificate serial number ${cert.serialNumber.toString(16)} is on the known serial numbers list"
       )
       Assertions.assertTrue(
-        certContentMatches(expectations[it.serialNumber].toString(), it.issuerDN.toString()),
-        "Certificate with serial number ${it.serialNumber.toString(16)} contents matches what we expect"
+        {
+          expectations.filter { it.first == cert.serialNumber }.any {
+            certContentMatches(cert.issuerDN.toString(), it.second)
+          }
+        },
+        "Certificate with serial number ${cert.serialNumber.toString(16)} contents matches what we expect"
       )
     }
   }
