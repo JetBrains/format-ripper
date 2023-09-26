@@ -21,6 +21,10 @@ plugins {
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
+sourceSets.main {
+    resources.srcDirs(/*"src/main/resources/",*/ "../cert/") // Note(ww898): Please uncomment if you need standart resources in project
+}
+
 repositories {
     mavenCentral()
     gradlePluginPortal()

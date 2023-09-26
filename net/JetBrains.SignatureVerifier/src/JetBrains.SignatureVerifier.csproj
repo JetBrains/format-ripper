@@ -28,7 +28,7 @@
       <LastGenOutput>Messages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Remove="DefaultRoots.p7b" />
-    <EmbeddedResource Include="DefaultRoots.p7b" Link="Resources\DefaultRoots.p7b" />
+    <EmbeddedResource Include="../../../cert/DefaultRoots.p7b" Link="Resources\DefaultRoots.p7b" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Messages.Designer.cs">
