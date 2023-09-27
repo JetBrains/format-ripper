@@ -1,4 +1,6 @@
 import jetbrains.sign.GpgSignSignatoryProvider
+import java.io.FileOutputStream
+import java.security.KeyStore
 
 val kotlinVersion = "1.6.10"
 val junitVersion = "5.8.2"
@@ -49,6 +51,20 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.register("prepareStore") {
+    val storePassword = "storePassword";
+    val storeName = "emptyStore.jks";
+    val storeType = "jks";
+    try {
+        val fileOutputStream = FileOutputStream(storeName)
+        val keystore = KeyStore.getInstance(storeType);
+        keystore.load(null, storePassword.toCharArray());
+        keystore.store(fileOutputStream, storePassword.toCharArray());
+    } catch (e: Throwable) {
+        e.printStackTrace();
+    }
 }
 
 java {
