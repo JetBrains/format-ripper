@@ -51,19 +51,19 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-}
-
-tasks.register("prepareStore") {
-    val storePassword = "storePassword";
-    val storeName = "emptyStore.jks";
-    val storeType = "jks";
-    try {
-        val fileOutputStream = FileOutputStream(storeName)
-        val keystore = KeyStore.getInstance(storeType);
-        keystore.load(null, storePassword.toCharArray());
-        keystore.store(fileOutputStream, storePassword.toCharArray());
-    } catch (e: Throwable) {
-        e.printStackTrace();
+    doFirst {
+        val storePassword = "storePassword";
+        val storeName = "emptyStore.jks";
+        val storeType = "jks";
+        try {
+            println("Trying to init the store")
+            val fileOutputStream = FileOutputStream(storeName)
+            val keystore = KeyStore.getInstance(storeType);
+            keystore.load(null, storePassword.toCharArray());
+            keystore.store(fileOutputStream, storePassword.toCharArray());
+        } catch (e: Throwable) {
+            e.printStackTrace();
+        }
     }
 }
 
