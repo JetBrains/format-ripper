@@ -196,7 +196,7 @@ namespace JetBrains.FormatRipper.FileExplorer
         if (DmgFile.Is(stream))
         {
           var file = DmgFile.Parse(stream);
-          properties = file.SignatureData != null
+          properties = file.HasSignature
             ? FileProperties.Signed
             : FileProperties.UnknownType;
           return true;
