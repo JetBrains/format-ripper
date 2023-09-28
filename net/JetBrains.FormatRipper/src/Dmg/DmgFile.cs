@@ -31,10 +31,12 @@ namespace JetBrains.FormatRipper.Dmg
       return new DmgFile(stream);
     }
 
-    private DmgFile(Stream stream)
+    private unsafe DmgFile(Stream stream)
     {
       UDIFResourceFile header = GetHeader(stream);
-      IsValidFormat(header);
+
+      if (!MemoryUtil.ArraysEqual(header.udifSignature, ExpectedSignature.Length, ExpectedSignature))
+        throw new FormatException("Invalid KOLY magic");
 
       if (MemoryUtil.GetBeU8(header.CodeSignatureOffset) > 0)
       {
@@ -51,12 +53,6 @@ namespace JetBrains.FormatRipper.Dmg
       UDIFResourceFile headerBuffer;
       StreamUtil.ReadBytes(stream, (byte*)&headerBuffer, sizeof(UDIFResourceFile));
       return headerBuffer;
-    }
-
-    private unsafe void IsValidFormat(UDIFResourceFile header)
-    {
-      if (!MemoryUtil.ArraysEqual(header.udifSignature, ExpectedSignature.Length, ExpectedSignature))
-        throw new FormatException("Invalid KOLY magic");
     }
 
     private List<StreamRange> SetHashRanges(UDIFResourceFile header, Stream stream)
@@ -86,7 +82,7 @@ namespace JetBrains.FormatRipper.Dmg
       return orderedIncludeRanges;
     }
 
-    private void ReadSignatureData(UDIFResourceFile header, Stream stream)
+    private unsafe void ReadSignatureData(UDIFResourceFile header, Stream stream)
     {
       byte[]? codeDirectoryBlob = null;
       byte[]? cmsSignatureBlob = null;
@@ -95,7 +91,8 @@ namespace JetBrains.FormatRipper.Dmg
       CS_SuperBlob csSuperBlob = GetCssb(stream);
       var csLength = MemoryUtil.GetBeU4(csSuperBlob.length);
 
-      ValidateCssbSize(csLength);
+      if (csLength < sizeof(CS_SuperBlob))
+        throw new FormatException("Too small Mach-O code signature super blob");
 
       var csCount = MemoryUtil.GetBeU4(csSuperBlob.count);
       ProcessSignatureBlobs(csCount, csLength, ref codeDirectoryBlob, ref cmsSignatureBlob, stream);
@@ -108,7 +105,8 @@ namespace JetBrains.FormatRipper.Dmg
       CS_SuperBlob csSuperBlob;
       StreamUtil.ReadBytes(stream, (byte*)&csSuperBlob, sizeof(CS_SuperBlob));
 
-      ValidateCssbMagic((CSMAGIC)MemoryUtil.GetBeU4(csSuperBlob.magic));
+      if ((CSMAGIC)MemoryUtil.GetBeU4(csSuperBlob.magic) != CSMAGIC.CSMAGIC_EMBEDDED_SIGNATURE)
+        throw new FormatException("Invalid Mach-O code embedded signature magic");
 
       return csSuperBlob;
     }
@@ -143,7 +141,9 @@ namespace JetBrains.FormatRipper.Dmg
       CS_CodeDirectory cscd;
       MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&cscd, sizeof(CS_CodeDirectory));
 
-      ValidateCodeDirectoryMagic((CSMAGIC)MemoryUtil.GetBeU4(cscd.magic));
+
+      if ((CSMAGIC)MemoryUtil.GetBeU4(cscd.magic) != CSMAGIC.CSMAGIC_CODEDIRECTORY)
+        throw new FormatException("Invalid Mach-O code directory signature magic");
 
       var cscdLength = MemoryUtil.GetBeU4(cscd.length);
       return MemoryUtil.CopyBytes(csOffsetPtr, checked((int)cscdLength));
@@ -154,43 +154,16 @@ namespace JetBrains.FormatRipper.Dmg
       CS_Blob csb;
       MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
 
-      ValidateCsbMagic((CSMAGIC)MemoryUtil.GetBeU4(csb.magic));
+
+      if ((CSMAGIC)MemoryUtil.GetBeU4(csb.magic) != CSMAGIC.CSMAGIC_BLOBWRAPPER)
+        throw new FormatException("Invalid Mach-O blob wrapper signature magic");
 
       var csbLength = MemoryUtil.GetBeU4(csb.length);
-      ValidateCsbSize(csbLength);
+      if (csbLength < sizeof(CS_Blob))
+        throw new FormatException("Too small Mach-O cms signature blob length");
 
       return MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob),
         checked((int)csbLength) - sizeof(CS_Blob));
-    }
-
-    private void ValidateCodeDirectoryMagic(CSMAGIC magic)
-    {
-      if (magic != CSMAGIC.CSMAGIC_CODEDIRECTORY)
-        throw new FormatException("Invalid Mach-O code directory signature magic");
-    }
-
-    private void ValidateCsbMagic(CSMAGIC magic)
-    {
-      if (magic != CSMAGIC.CSMAGIC_BLOBWRAPPER)
-        throw new FormatException("Invalid Mach-O blob wrapper signature magic");
-    }
-
-    private unsafe void ValidateCsbSize(uint csbLength)
-    {
-      if (csbLength < sizeof(CS_Blob))
-        throw new FormatException("Too small Mach-O cms signature blob length");
-    }
-
-    private void ValidateCssbMagic(CSMAGIC magic)
-    {
-      if (magic != CSMAGIC.CSMAGIC_EMBEDDED_SIGNATURE)
-        throw new FormatException("Invalid Mach-O code embedded signature magic");
-    }
-
-    private unsafe void ValidateCssbSize(uint csLength)
-    {
-      if (csLength < sizeof(CS_SuperBlob))
-        throw new FormatException("Too small Mach-O code signature super blob");
     }
   }
 }
