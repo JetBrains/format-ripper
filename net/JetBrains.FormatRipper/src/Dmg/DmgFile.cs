@@ -15,6 +15,9 @@ namespace JetBrains.FormatRipper.Dmg
 
     public static unsafe bool Is(Stream stream)
     {
+      if (stream.Length < HeaderSize)
+        return false;
+
       stream.Position = stream.Length - HeaderSize;
       UDIFResourceFile header;
       StreamUtil.ReadBytes(stream, (byte*)&header, HeaderSize);
@@ -44,6 +47,9 @@ namespace JetBrains.FormatRipper.Dmg
 
     private unsafe UDIFResourceFile GetHeader(Stream stream)
     {
+      if (stream.Length < HeaderSize)
+        throw new FormatException("Stream is less then header size");
+
       stream.Position = stream.Length - HeaderSize;
       UDIFResourceFile headerBuffer;
       StreamUtil.ReadBytes(stream, (byte*)&headerBuffer, sizeof(UDIFResourceFile));
@@ -81,7 +87,7 @@ namespace JetBrains.FormatRipper.Dmg
     {
       byte[]? codeDirectoryBlob = null;
       byte[]? cmsSignatureBlob = null;
-      stream.Position = (long)MemoryUtil.GetBeU8(header.CodeSignatureOffset);
+      stream.Position = checked((long)MemoryUtil.GetBeU8(header.CodeSignatureOffset));
 
       CS_SuperBlob csSuperBlob = GetCssb(stream);
       var csLength = MemoryUtil.GetBeU4(csSuperBlob.length);
