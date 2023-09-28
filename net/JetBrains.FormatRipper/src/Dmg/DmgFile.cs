@@ -33,6 +33,9 @@ namespace JetBrains.FormatRipper.Dmg
     {
       UDIFResourceFile header = GetHeader(stream);
 
+      if (header.HeaderSize != HeaderSize)
+        throw new FormatException("Invalid header size");
+
       if (!MemoryUtil.ArraysEqual(header.udifSignature, ExpectedSignature.Length, ExpectedSignature))
         throw new FormatException("Invalid KOLY magic");
 
