@@ -11,6 +11,7 @@ namespace JetBrains.FormatRipper.FileExplorer
     Msi,
     MachO,
     Elf,
-    Sh
+    Sh,
+    Dmg
   }
 }
