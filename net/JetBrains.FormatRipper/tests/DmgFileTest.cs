@@ -20,6 +20,6 @@ public class DmgFileTest
       return DmgFile.Parse(stream);
     });
 
-    Assert.AreEqual(hasSignature, file.HasSignature());
+    Assert.AreEqual(hasSignature, file.SignatureData != null);
   }
 }

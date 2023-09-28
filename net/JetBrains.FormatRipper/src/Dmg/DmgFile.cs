@@ -9,14 +9,9 @@ namespace JetBrains.FormatRipper.Dmg
   public sealed class DmgFile
   {
     private static readonly byte[] ExpectedSignature = new byte[] { 0x6b, 0x6f, 0x6c, 0x79 }; // 'koly'
-    private SignatureData? _signatureData;
+    public SignatureData? SignatureData;
     public readonly ComputeHashInfo ComputeHashInfo;
     private static readonly unsafe int HeaderSize = sizeof(UDIFResourceFile);
-
-
-    public bool HasSignature() => _signatureData != null;
-
-    public SignatureData? SignatureData() => _signatureData;
 
     public static unsafe bool Is(Stream stream)
     {
@@ -58,7 +53,7 @@ namespace JetBrains.FormatRipper.Dmg
     private List<StreamRange> SetHashRanges(UDIFResourceFile header, Stream stream)
     {
       var orderedIncludeRanges = new List<StreamRange>();
-      if (HasSignature())
+      if (SignatureData != null)
       {
         var signatureOffset = (long)MemoryUtil.GetBeU8(header.CodeSignatureOffset);
         var signatureLength = (long)MemoryUtil.GetBeU8(header.CodeSignatureLength);
@@ -97,7 +92,7 @@ namespace JetBrains.FormatRipper.Dmg
       var csCount = MemoryUtil.GetBeU4(csSuperBlob.count);
       ProcessSignatureBlobs(csCount, csLength, ref codeDirectoryBlob, ref cmsSignatureBlob, stream);
 
-      _signatureData = new SignatureData(codeDirectoryBlob, cmsSignatureBlob);
+      SignatureData = new SignatureData(codeDirectoryBlob, cmsSignatureBlob);
     }
 
     private unsafe CS_SuperBlob GetCssb(Stream stream)

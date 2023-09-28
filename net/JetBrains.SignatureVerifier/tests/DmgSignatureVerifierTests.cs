@@ -18,9 +18,9 @@ public class DmgSignatureVerifierTests
 
     var verificationParams = new SignatureVerificationParams(null, null, false, false);
 
-    Assert.IsTrue(file.HasSignature());
+    Assert.IsTrue(file.SignatureData != null);
 
-    var signedMessage = SignedMessage.CreateInstance(file.SignatureData().Value);
+    var signedMessage = SignedMessage.CreateInstance(file.SignatureData.Value);
     var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
     var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 
