@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Text;
+using System.Xml.Linq;
 using JetBrains.FormatRipper.Impl;
 using JetBrains.FormatRipper.MachO.Impl;
 
@@ -11,6 +14,7 @@ namespace JetBrains.FormatRipper.Dmg
     private static readonly byte[] ExpectedSignature = new byte[] { 0x6b, 0x6f, 0x6c, 0x79 }; // 'koly'
     public readonly SignatureData SignatureData;
     public readonly bool HasSignature;
+    public readonly List<MishBlock> MishBlocks = new List<MishBlock>();
     public readonly ComputeHashInfo ComputeHashInfo;
     private static readonly unsafe int HeaderSize = sizeof(UDIFResourceFile);
 
@@ -44,6 +48,11 @@ namespace JetBrains.FormatRipper.Dmg
       {
         SignatureData = ReadSignatureData(header, stream);
         HasSignature = true;
+      }
+
+      if (MemoryUtil.GetBeU8(header.PlistOffset) > 0)
+      {
+        ReadXml(stream, header);
       }
 
       var orderedIncludeRanges = SetHashRanges(header, stream);
@@ -86,6 +95,34 @@ namespace JetBrains.FormatRipper.Dmg
       }
 
       return orderedIncludeRanges;
+    }
+
+
+    private void ReadXml(Stream stream, UDIFResourceFile header)
+    {
+      stream.Position = checked((long)MemoryUtil.GetBeU8(header.PlistOffset));
+
+      byte[] xmlBytes = StreamUtil.ReadBytes(stream, checked((int)MemoryUtil.GetBeU8(header.PlistLength)));
+
+      using (MemoryStream ms = new MemoryStream(xmlBytes))
+      {
+        XDocument doc = XDocument.Load(ms);
+
+        var base64Data = Plist.GetDataByKey(doc, "Data");
+        var cfNames = Plist.GetDataByKey(doc, "CFName");
+
+        for (int i = 0; i < cfNames.Count; i++)
+        {
+          var s = base64Data[i].Replace("\n", string.Empty).Replace("\t", string.Empty);
+          var bytes = Convert.FromBase64String(s);
+
+          using MemoryStream mishStream = new MemoryStream(bytes);
+          using BinaryReader reader = new BinaryReader(mishStream);
+
+          var mishBlock = new MishBlock(reader);
+          MishBlocks.Add(mishBlock);
+        }
+      }
     }
 
     private unsafe SignatureData ReadSignatureData(UDIFResourceFile header, Stream stream)

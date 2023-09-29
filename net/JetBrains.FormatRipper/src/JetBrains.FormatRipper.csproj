@@ -29,4 +29,13 @@
       <_Parameter1>$(AssemblyName).Tests, PublicKey=0024000004800000140100000602000000240000525341310008000001000100819ed322584ebfa67a9849b24b05d08bddfcca36cb049c0c13a52b334be1b1af2202300751fad4150fb88c25b4b02383be018a1d300f90c1cec52f91418104e3f3b493539c903aad9f832ad91ef27d68872e2282837ca392a45ce37ed65c7c0d10a4ba909ec7ea37a0a189c4dd4575e5d9d89d1f5c6f8d031ee9a186c73749f13dfa918851ccaa50827ac8883000a128480660bd045a5b840dd0555f31cf6507072d77a4bccd659083d808af8a717ab05aefb505ecfc59a4270fc7d3a4f31e4115e0411295f68a5f53c3c31539fca437d7d2d2b9be52ef32c222c08e85dabb90fe6b686d308da740076c72215da74ccaec2e9ad34a91af23eb413a290e7bf582</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net20'">
+    <PackageReference Include="System.Xml.Linq" Version="3.5.21022.801" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
+    <PackageReference Include="System.Xml.Linq" Version="3.5.21022.801" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.0'">
+    <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
+  </ItemGroup>
 </Project>
