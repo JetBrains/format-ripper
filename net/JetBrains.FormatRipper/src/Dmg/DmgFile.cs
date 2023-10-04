@@ -117,7 +117,8 @@ namespace JetBrains.FormatRipper.Dmg
           var bytes = Convert.FromBase64String(s);
 
           using MemoryStream mishStream = new MemoryStream(bytes);
-          using BinaryReader reader = new BinaryReader(mishStream);
+          using BinaryReader reader = new BinaryReader(mishStream,
+            BitConverter.IsLittleEndian ? Encoding.Unicode : Encoding.BigEndianUnicode);
 
           var mishBlock = new MishBlock(reader);
           MishBlocks.Add(mishBlock);

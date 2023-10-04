@@ -35,11 +35,19 @@ public unsafe struct MishBlock
 
   public BLKXChunkEntry[] BlkxChunkEntries;
 
+  private static byte[] expectedSignature = new byte[] { 0x6D, 0x69, 0x73, 0x68 };
+
   internal MishBlock(BinaryReader reader)
   {
     Signature = reader.ReadUInt32();
-    if (MemoryUtil.GetBeU4(Signature) != 1835627368)
-      throw new FormatException("Wrong Mish header");
+
+    byte[] signatureBytes = BitConverter.GetBytes(MemoryUtil.GetLeU4(Signature));
+
+    fixed (byte* p = signatureBytes)
+    {
+      if (!MemoryUtil.ArraysEqual(p, expectedSignature.Length, expectedSignature))
+        throw new FormatException("Wrong Mish header: " + BitConverter.ToString(signatureBytes));
+    }
 
     Version = reader.ReadUInt32();
     SectorNumber = reader.ReadUInt64();
@@ -61,10 +69,18 @@ public unsafe struct MishBlock
       checksum[i] = checksumBytes[i];
 
     NumberOfBlockChunks = reader.ReadUInt32();
-    BlkxChunkEntries = new BLKXChunkEntry[MemoryUtil.GetBeU4(NumberOfBlockChunks)];
-    for (int i = 0; i < MemoryUtil.GetBeU4(NumberOfBlockChunks); i++)
+
+    // FIXME: I am not sure why, but it only works if we swap in both LE and BE.
+    BlkxChunkEntries = new BLKXChunkEntry[MemoryUtil.SwapU4(NumberOfBlockChunks)];
+
+    for (int i = 0; i < MemoryUtil.SwapU4(NumberOfBlockChunks); i++)
     {
       var bytes = reader.ReadBytes(sizeof(BLKXChunkEntry));
+      if (bytes.Length != sizeof(BLKXChunkEntry))
+      {
+        throw new FormatException("Couldn't read full BLKXChunk");
+      }
+
       using MemoryStream ms = new MemoryStream(bytes);
 
       BLKXChunkEntry bufferEntry;
