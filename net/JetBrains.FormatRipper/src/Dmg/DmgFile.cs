@@ -14,7 +14,7 @@ namespace JetBrains.FormatRipper.Dmg
     private static readonly byte[] ExpectedSignature = new byte[] { 0x6b, 0x6f, 0x6c, 0x79 }; // 'koly'
     public readonly SignatureData SignatureData;
     public readonly bool HasSignature;
-    public readonly List<MishBlock> MishBlocks = new List<MishBlock>();
+    public readonly List<BLKXEntry> BlkxEntries = new List<BLKXEntry>();
     public readonly ComputeHashInfo ComputeHashInfo;
     private static readonly unsafe int HeaderSize = sizeof(UDIFResourceFile);
 
@@ -108,20 +108,19 @@ namespace JetBrains.FormatRipper.Dmg
       {
         XDocument doc = XDocument.Load(ms);
 
-        var base64Data = Plist.GetDataByKey(doc, "Data");
-        var cfNames = Plist.GetDataByKey(doc, "CFName");
-
-        for (int i = 0; i < cfNames.Count; i++)
+        foreach (var entry in Plist.ParseBlkxArray(doc))
         {
-          var s = base64Data[i].Replace("\n", string.Empty).Replace("\t", string.Empty);
-          var bytes = Convert.FromBase64String(s);
+          BlkxEntries.Add(entry);
+        }
+      }
 
-          using MemoryStream mishStream = new MemoryStream(bytes);
-          using BinaryReader reader = new BinaryReader(mishStream,
-            BitConverter.IsLittleEndian ? Encoding.Unicode : Encoding.BigEndianUnicode);
-
-          var mishBlock = new MishBlock(reader);
-          MishBlocks.Add(mishBlock);
+      foreach (var blkxEntry in BlkxEntries)
+      {
+        foreach (var blkxChunkEntry in blkxEntry.Data.BlkxChunkEntries)
+        {
+          stream.Position = (long)MemoryUtil.GetBeU8(blkxChunkEntry.CompressedOffset);
+          blkxEntry.CompressedChunks.Add(StreamUtil.ReadBytes(stream,
+            (int)MemoryUtil.GetBeU8(blkxChunkEntry.CompressedLength)));
         }
       }
     }
