@@ -118,9 +118,12 @@ namespace JetBrains.FormatRipper.Dmg
       {
         foreach (var blkxChunkEntry in blkxEntry.Data.BlkxChunkEntries)
         {
-          stream.Position = (long)MemoryUtil.GetBeU8(blkxChunkEntry.CompressedOffset);
-          blkxEntry.CompressedChunks.Add(StreamUtil.ReadBytes(stream,
-            (int)MemoryUtil.GetBeU8(blkxChunkEntry.CompressedLength)));
+          if ((int)MemoryUtil.GetBeU8(blkxChunkEntry.SectorCount) > 0)
+          {
+            stream.Position = (long)MemoryUtil.GetBeU8(blkxChunkEntry.CompressedOffset);
+            blkxEntry.CompressedChunks.Add(StreamUtil.ReadBytes(stream,
+              (int)MemoryUtil.GetBeU8(blkxChunkEntry.CompressedLength)));
+          }
         }
       }
     }

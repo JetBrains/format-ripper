@@ -30,13 +30,14 @@ public unsafe struct MishBlock
   public UInt32 reserved5;
   public UInt32 reserved6;
 
-  public fixed byte checksum[136]; // Using the existing UDIFChecksum definition from your sample
+  public fixed byte checksum[checksumSize];
 
   public UInt32 NumberOfBlockChunks;
 
   public BLKXChunkEntry[] BlkxChunkEntries;
 
   private static byte[] expectedSignature = new byte[] { 0x6D, 0x69, 0x73, 0x68 };
+  public const int checksumSize = 136;
 
   internal MishBlock(BinaryReader reader)
   {
