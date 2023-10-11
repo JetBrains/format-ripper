@@ -16,6 +16,7 @@ namespace JetBrains.FormatRipper.Dmg
     public readonly bool HasSignature;
     public readonly ComputeHashInfo? ComputeHashInfo = null;
     public readonly StreamRange PList;
+    public readonly byte[]? PListData;
     public readonly StreamRange DataFork;
     public readonly StreamRange RsrcFork;
     private static readonly unsafe int HeaderSize = sizeof(UDIFResourceFile);
@@ -25,7 +26,8 @@ namespace JetBrains.FormatRipper.Dmg
     {
       Default = 0x0,
       SignatureData = 0x1,
-      ComputeHashInfo = 0x2
+      ComputeHashInfo = 0x2,
+      PList = 0x3
     }
 
     public static unsafe bool Is(Stream stream)
@@ -72,6 +74,15 @@ namespace JetBrains.FormatRipper.Dmg
       {
         var orderedIncludeRanges = SetHashRanges(header, stream);
         ComputeHashInfo = new ComputeHashInfo(0, orderedIncludeRanges, 0);
+      }
+
+      if ((mode & Mode.PList) == Mode.PList)
+      {
+        if (PList.Position > 0)
+        {
+          stream.Position = PList.Position;
+          PListData = StreamUtil.ReadBytes(stream, checked((int)PList.Size));
+        }
       }
     }
 
