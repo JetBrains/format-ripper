@@ -14,8 +14,10 @@ namespace JetBrains.FormatRipper.Dmg
     private static readonly byte[] ExpectedSignature = new byte[] { 0x6b, 0x6f, 0x6c, 0x79 }; // 'koly'
     public readonly SignatureData SignatureData;
     public readonly bool HasSignature;
-    public readonly List<BLKXEntry> BlkxEntries = new List<BLKXEntry>();
     public readonly ComputeHashInfo ComputeHashInfo;
+    public readonly StreamRange PList;
+    public readonly StreamRange DataFork;
+    public readonly StreamRange RsrcFork;
     private static readonly unsafe int HeaderSize = sizeof(UDIFResourceFile);
 
     public static unsafe bool Is(Stream stream)
@@ -50,10 +52,12 @@ namespace JetBrains.FormatRipper.Dmg
         HasSignature = true;
       }
 
-      if (MemoryUtil.GetBeU8(header.PlistOffset) > 0)
-      {
-        ReadXml(stream, header);
-      }
+      PList = new StreamRange((long)MemoryUtil.GetBeU8(header.PlistOffset),
+        (long)MemoryUtil.GetBeU8(header.PlistLength));
+      DataFork = new StreamRange((long)MemoryUtil.GetBeU8(header.DataForkOffset),
+        (long)MemoryUtil.GetBeU8(header.DataForkLength));
+      RsrcFork = new StreamRange((long)MemoryUtil.GetBeU8(header.RsrcForkOffset),
+        (long)MemoryUtil.GetBeU8(header.RsrcForkLength));
 
       var orderedIncludeRanges = SetHashRanges(header, stream);
       ComputeHashInfo = new ComputeHashInfo(0, orderedIncludeRanges, 0);
@@ -95,37 +99,6 @@ namespace JetBrains.FormatRipper.Dmg
       }
 
       return orderedIncludeRanges;
-    }
-
-
-    private void ReadXml(Stream stream, UDIFResourceFile header)
-    {
-      stream.Position = checked((long)MemoryUtil.GetBeU8(header.PlistOffset));
-
-      byte[] xmlBytes = StreamUtil.ReadBytes(stream, checked((int)MemoryUtil.GetBeU8(header.PlistLength)));
-
-      using (MemoryStream ms = new MemoryStream(xmlBytes))
-      {
-        XDocument doc = XDocument.Load(ms);
-
-        foreach (var entry in Plist.ParseBlkxArray(doc))
-        {
-          BlkxEntries.Add(entry);
-        }
-      }
-
-      foreach (var blkxEntry in BlkxEntries)
-      {
-        foreach (var blkxChunkEntry in blkxEntry.Data.BlkxChunkEntries)
-        {
-          if ((int)MemoryUtil.GetBeU8(blkxChunkEntry.SectorCount) > 0)
-          {
-            stream.Position = (long)MemoryUtil.GetBeU8(blkxChunkEntry.CompressedOffset);
-            blkxEntry.CompressedChunks.Add(StreamUtil.ReadBytes(stream,
-              (int)MemoryUtil.GetBeU8(blkxChunkEntry.CompressedLength)));
-          }
-        }
-      }
     }
 
     private unsafe SignatureData ReadSignatureData(UDIFResourceFile header, Stream stream)
