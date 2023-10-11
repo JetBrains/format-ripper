@@ -14,7 +14,8 @@ public class DmgSignatureVerifierTests
   // @formatter:on
   public async Task VerifySignTest(VerifySignatureStatus expectedResult, string resourceName)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName, DmgFile.Parse);
+    var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName,
+      stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData));
 
     var verificationParams = new SignatureVerificationParams(null, null, false, false);
 

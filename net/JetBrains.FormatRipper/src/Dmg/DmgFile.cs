@@ -14,11 +14,19 @@ namespace JetBrains.FormatRipper.Dmg
     private static readonly byte[] ExpectedSignature = new byte[] { 0x6b, 0x6f, 0x6c, 0x79 }; // 'koly'
     public readonly SignatureData SignatureData;
     public readonly bool HasSignature;
-    public readonly ComputeHashInfo ComputeHashInfo;
+    public readonly ComputeHashInfo? ComputeHashInfo = null;
     public readonly StreamRange PList;
     public readonly StreamRange DataFork;
     public readonly StreamRange RsrcFork;
     private static readonly unsafe int HeaderSize = sizeof(UDIFResourceFile);
+
+    [Flags]
+    public enum Mode : uint
+    {
+      Default = 0x0,
+      SignatureData = 0x1,
+      ComputeHashInfo = 0x2
+    }
 
     public static unsafe bool Is(Stream stream)
     {
@@ -31,12 +39,12 @@ namespace JetBrains.FormatRipper.Dmg
       return MemoryUtil.ArraysEqual(header.udifSignature, ExpectedSignature.Length, ExpectedSignature);
     }
 
-    public static DmgFile Parse(Stream stream)
+    public static DmgFile Parse(Stream stream, Mode mode = Mode.Default)
     {
-      return new DmgFile(stream);
+      return new DmgFile(stream, mode);
     }
 
-    private unsafe DmgFile(Stream stream)
+    private unsafe DmgFile(Stream stream, Mode mode)
     {
       UDIFResourceFile header = GetHeader(stream);
 
@@ -48,8 +56,9 @@ namespace JetBrains.FormatRipper.Dmg
 
       if (MemoryUtil.GetBeU8(header.CodeSignatureOffset) > 0)
       {
-        SignatureData = ReadSignatureData(header, stream);
         HasSignature = true;
+        if ((Mode.SignatureData & mode) == Mode.SignatureData)
+          SignatureData = ReadSignatureData(header, stream);
       }
 
       PList = new StreamRange((long)MemoryUtil.GetBeU8(header.PlistOffset),
@@ -59,8 +68,11 @@ namespace JetBrains.FormatRipper.Dmg
       RsrcFork = new StreamRange((long)MemoryUtil.GetBeU8(header.RsrcForkOffset),
         (long)MemoryUtil.GetBeU8(header.RsrcForkLength));
 
-      var orderedIncludeRanges = SetHashRanges(header, stream);
-      ComputeHashInfo = new ComputeHashInfo(0, orderedIncludeRanges, 0);
+      if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+      {
+        var orderedIncludeRanges = SetHashRanges(header, stream);
+        ComputeHashInfo = new ComputeHashInfo(0, orderedIncludeRanges, 0);
+      }
     }
 
     private unsafe UDIFResourceFile GetHeader(Stream stream)
