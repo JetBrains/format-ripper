@@ -42,15 +42,14 @@ import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
 import java.util.logging.Level
-import java.util.logging.LogManager
 import java.util.logging.Logger
 import java.util.stream.Stream
 
 class FakePkiTest {
-  private val utc = Clock.systemUTC()
+  private val localClock = Clock.systemDefaultZone()
   val LOG = Logger.getLogger(FakePki::javaClass.name)
-  private fun nowPlusDays(days: Long): Date = LocalDateTime.now(utc).plusDays(days).ConvertToDate()
-  private fun nowPlusSeconds(seconds: Long): Date = LocalDateTime.now(utc).plusSeconds(seconds).ConvertToDate()
+  private fun nowPlusDays(days: Long): Date = LocalDateTime.now(localClock).plusDays(days).ConvertToDate()
+  private fun nowPlusSeconds(seconds: Long): Date = LocalDateTime.now(localClock).plusSeconds(seconds).ConvertToDate()
 
   @ParameterizedTest
   @MethodSource("FakePkiTestProvider")
@@ -80,7 +79,7 @@ class FakePkiTest {
   @MethodSource("FakePkiTestProvider")
   fun InvalidChainCertRevoked(peResourceName: String) {
     val pki = FakePki.CreateRoot("fakeroot", nowPlusDays(-1), nowPlusDays(10))
-    val (keyPair, cert) = pki.Enroll("sub", nowPlusDays(0), nowPlusDays(9), true)
+    val (keyPair, cert) = pki.Enroll("sub", nowPlusDays(-1), nowPlusDays(10), true)
 
     pki.Revoke(cert, true)
     runBlocking { delay(2000) }
