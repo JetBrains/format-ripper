@@ -25,9 +25,7 @@ namespace JetBrains.FormatRipper.Dmg
     internal UInt32 SegmentCount;
     internal Guid SegmentID;
 
-    internal UInt32 DataChecksumType;
-    internal UInt32 DataChecksumSize;
-    internal fixed UInt32 DataChecksum[32];
+    internal UDIFChecksum DataChecksum;
 
     internal UInt64 PlistOffset;
     internal UInt64 PlistLength;

@@ -26,7 +26,7 @@ public class DmgFileTest
 
   [TestCaseSource(typeof(DmgFileTest), nameof(Sources))]
   [Test]
-  public unsafe void Test(string name, bool hasSignature)
+  public void Test(string name, bool hasSignature)
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, name, stream =>
     {
