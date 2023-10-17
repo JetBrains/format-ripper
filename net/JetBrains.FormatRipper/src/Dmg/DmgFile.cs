@@ -16,6 +16,8 @@ namespace JetBrains.FormatRipper.Dmg
     public readonly bool HasSignature;
     public readonly ComputeHashInfo? ComputeHashInfo = null;
     public readonly StreamRange PList;
+    public readonly UDIFChecksum MasterChecksum;
+    public readonly UDIFChecksum DataChecksum;
     public readonly byte[]? PListData;
     public readonly StreamRange DataFork;
     public readonly StreamRange RsrcFork;
@@ -62,6 +64,9 @@ namespace JetBrains.FormatRipper.Dmg
         if ((Mode.SignatureData & mode) == Mode.SignatureData)
           SignatureData = ReadSignatureData(header, stream);
       }
+
+      MasterChecksum = header.MasterChecksum;
+      DataChecksum = header.DataChecksum;
 
       PList = new StreamRange((long)MemoryUtil.GetBeU8(header.PlistOffset),
         (long)MemoryUtil.GetBeU8(header.PlistLength));
