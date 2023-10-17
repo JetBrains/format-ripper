@@ -9,7 +9,7 @@ namespace JetBrains.FormatRipper.Dmg
   [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Global")]
   [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  internal unsafe struct UDIFChecksum
+  public unsafe struct UDIFChecksum
   {
     internal UInt32 type;
     internal UInt32 size;
