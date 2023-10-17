@@ -40,7 +40,8 @@ public class DmgSignatureVerifierTests
   {
     var result = ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream =>
     {
-      var file = DmgFile.Parse(stream);
+      var file = DmgFile.Parse(stream, DmgFile.Mode.ComputeHashInfo);
+
       return HashUtil.ComputeHash(stream, file.ComputeHashInfo, new HashAlgorithmName(hashAlgorithmName));
     });
     Assert.AreEqual(expectedResult, HexUtil.ConvertToHexString(result));
