@@ -3,8 +3,6 @@ package com.jetbrains.signatureverifier.crypt
 import com.jetbrains.signatureverifier.ILogger
 import com.jetbrains.signatureverifier.Messages
 import com.jetbrains.signatureverifier.NullLogger
-import org.bouncycastle.cms.SignerInformation
-import org.bouncycastle.tsp.TimeStampToken
 import com.jetbrains.signatureverifier.crypt.BcExt.FormatId
 import com.jetbrains.signatureverifier.crypt.BcExt.GetFirstAttributeValue
 import com.jetbrains.signatureverifier.crypt.BcExt.ToJavaX509Certificate
@@ -22,9 +20,11 @@ import org.bouncycastle.asn1.cms.Time
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.cms.CMSException
 import org.bouncycastle.cms.CMSSignedData
+import org.bouncycastle.cms.SignerInformation
 import org.bouncycastle.cms.jcajce.JcaSignerInfoVerifierBuilder
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder
 import org.bouncycastle.tsp.TSPException
+import org.bouncycastle.tsp.TimeStampToken
 import org.bouncycastle.util.Selector
 import org.bouncycastle.util.Store
 import org.jetbrains.annotations.NotNull

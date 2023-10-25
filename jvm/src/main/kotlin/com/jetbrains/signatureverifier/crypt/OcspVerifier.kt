@@ -2,7 +2,6 @@ package com.jetbrains.signatureverifier.crypt
 
 import com.jetbrains.signatureverifier.ILogger
 import com.jetbrains.signatureverifier.Messages
-import com.jetbrains.signatureverifier.NullLogger
 import com.jetbrains.signatureverifier.crypt.BcExt.CanSignOcspResponses
 import com.jetbrains.signatureverifier.crypt.BcExt.FormatId
 import com.jetbrains.signatureverifier.crypt.BcExt.GetOcspUrl

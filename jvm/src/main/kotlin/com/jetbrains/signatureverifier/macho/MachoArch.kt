@@ -1,6 +1,9 @@
 package com.jetbrains.signatureverifier.macho
 
-import com.jetbrains.signatureverifier.*
+import com.jetbrains.signatureverifier.DataInfo
+import com.jetbrains.signatureverifier.ILogger
+import com.jetbrains.signatureverifier.InvalidDataException
+import com.jetbrains.signatureverifier.NullLogger
 import com.jetbrains.util.*
 import org.jetbrains.annotations.NotNull
 import java.nio.channels.SeekableByteChannel

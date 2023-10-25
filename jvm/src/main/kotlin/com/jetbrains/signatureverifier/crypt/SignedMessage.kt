@@ -1,11 +1,11 @@
 ﻿package com.jetbrains.signatureverifier.crypt
 
 import com.jetbrains.signatureverifier.SignatureData
-import org.bouncycastle.cms.CMSSignedData
 import org.bouncycastle.asn1.ASN1InputStream
 import org.bouncycastle.asn1.ASN1Object
 import org.bouncycastle.asn1.cms.ContentInfo
 import org.bouncycastle.cms.CMSProcessableByteArray
+import org.bouncycastle.cms.CMSSignedData
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
 

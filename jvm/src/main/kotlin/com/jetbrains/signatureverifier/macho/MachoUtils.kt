@@ -1,6 +1,9 @@
 package com.jetbrains.signatureverifier.macho
 
-import com.jetbrains.util.*
+import com.jetbrains.util.BinaryReader
+import com.jetbrains.util.ReadUInt32Le
+import com.jetbrains.util.Seek
+import com.jetbrains.util.SeekOrigin
 import java.nio.channels.SeekableByteChannel
 
 open class MachoUtils {
