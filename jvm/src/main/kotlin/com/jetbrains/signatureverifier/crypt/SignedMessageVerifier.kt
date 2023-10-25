@@ -2,7 +2,7 @@ package com.jetbrains.signatureverifier.crypt
 
 import com.jetbrains.signatureverifier.ILogger
 import com.jetbrains.signatureverifier.NullLogger
-import com.jetbrains.signatureverifier.bouncycastle.cms.SignerInformationStore
+import org.bouncycastle.cms.SignerInformationStore
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.util.Store
 import org.jetbrains.annotations.NotNull

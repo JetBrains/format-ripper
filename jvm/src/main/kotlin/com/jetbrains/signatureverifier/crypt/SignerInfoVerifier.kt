@@ -3,8 +3,8 @@ package com.jetbrains.signatureverifier.crypt
 import com.jetbrains.signatureverifier.ILogger
 import com.jetbrains.signatureverifier.Messages
 import com.jetbrains.signatureverifier.NullLogger
-import com.jetbrains.signatureverifier.bouncycastle.cms.SignerInformation
-import com.jetbrains.signatureverifier.bouncycastle.tsp.TimeStampToken
+import org.bouncycastle.cms.SignerInformation
+import org.bouncycastle.tsp.TimeStampToken
 import com.jetbrains.signatureverifier.crypt.BcExt.FormatId
 import com.jetbrains.signatureverifier.crypt.BcExt.GetFirstAttributeValue
 import com.jetbrains.signatureverifier.crypt.BcExt.ToJavaX509Certificate
@@ -31,28 +31,25 @@ import org.jetbrains.annotations.NotNull
 import java.security.cert.*
 import java.util.*
 
-open class SignerInfoVerifier {
-  private val _signer: SignerInformation
-  private val _certs: Store<X509CertificateHolder>
-  private val _crlProvider: CrlProvider
+open class SignerInfoVerifier(
+  @NotNull signer: SignerInformation,
+  @NotNull certs: Store<X509CertificateHolder>,
+  @NotNull crlProvider: CrlProvider,
+  logger: ILogger?
+) {
+  private val _signer: SignerInformation = signer
+  private val _certs: Store<X509CertificateHolder> = certs
+  private val _crlProvider: CrlProvider = crlProvider
   private val _logger: ILogger
   private val TimeStampToken by lazy { timeStampToken() }
   private val CounterSignatures by lazy { counterSignatures() }
 
-  constructor(
-    @NotNull signer: SignerInformation,
-    @NotNull certs: Store<X509CertificateHolder>,
-    @NotNull crlProvider: CrlProvider,
-    logger: ILogger?
-  ) {
-    _signer = signer
-    _certs = certs
-    _crlProvider = crlProvider
+  init {
     _logger = logger ?: NullLogger.Instance
   }
 
   suspend fun VerifyAsync(@NotNull signatureVerificationParams: SignatureVerificationParams): VerifySignatureResult {
-    val certList = ArrayList(_certs.getMatches(_signer.sID as Selector<X509CertificateHolder>))
+    val certList = ArrayList(_certs.getMatches(_signer.sid as Selector<X509CertificateHolder>))
     if (certList.isEmpty()) {
       _logger.Error(Messages.signer_cert_not_found)
       return VerifySignatureResult(VerifySignatureStatus.InvalidSignature, Messages.signer_cert_not_found)
@@ -154,7 +151,7 @@ open class SignerInfoVerifier {
   private suspend fun verifyTimeStampAsync(signatureVerificationParams: SignatureVerificationParams): VerifySignatureResult {
     val tst = TimeStampToken ?: return VerifySignatureResult.Valid
     val tstCerts = tst.certificates
-    val tstCertsList = ArrayList(tstCerts.getMatches(tst.sID as Selector<X509CertificateHolder>))
+    val tstCertsList = ArrayList(tstCerts.getMatches(tst.sid as Selector<X509CertificateHolder>))
     if (tstCertsList.count() < 1)
       return VerifySignatureResult(VerifySignatureStatus.InvalidTimestamp, Messages.signer_cert_not_found)
 
@@ -163,12 +160,12 @@ open class SignerInfoVerifier {
       val verifier = JcaSignerInfoVerifierBuilder(JcaDigestCalculatorProviderBuilder().build()).build(tstCert)
       tst.validate(verifier)
       if (signatureVerificationParams.BuildChain)
-        try {
+        return try {
           val tstCmsSignedData = tst.toCMSSignedData()
           val certs = tstCmsSignedData.certificates
-          return buildCertificateChainAsync(tstCert, certs, signatureVerificationParams)
+          buildCertificateChainAsync(tstCert, certs, signatureVerificationParams)
         } catch (ex: CertPathBuilderException) {
-          return VerifySignatureResult.InvalidChain(ex.FlatMessages())
+          VerifySignatureResult.InvalidChain(ex.FlatMessages())
         }
     } catch (ex: TSPException) {
       return VerifySignatureResult(VerifySignatureStatus.InvalidTimestamp, ex.FlatMessages())

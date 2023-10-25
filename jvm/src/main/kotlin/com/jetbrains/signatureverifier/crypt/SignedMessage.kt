@@ -1,7 +1,7 @@
 ﻿package com.jetbrains.signatureverifier.crypt
 
 import com.jetbrains.signatureverifier.SignatureData
-import com.jetbrains.signatureverifier.bouncycastle.cms.CMSSignedData
+import org.bouncycastle.cms.CMSSignedData
 import org.bouncycastle.asn1.ASN1InputStream
 import org.bouncycastle.asn1.ASN1Object
 import org.bouncycastle.asn1.cms.ContentInfo
