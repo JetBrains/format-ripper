@@ -7,6 +7,7 @@ using Org.BouncyCastle.Math;
 namespace JetBrains.Serialization;
 
 [JsonObject(MemberSerialization.OptIn)]
+[JsonConverter(typeof(AsnJsonConverter))]
 public abstract class TextualInfo : IEncodableInfo
 {
   private static readonly Dictionary<Type, Func<Asn1Encodable, TextualInfo>> FactoryMethods

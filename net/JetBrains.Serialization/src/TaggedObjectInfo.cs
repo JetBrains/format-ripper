@@ -5,6 +5,7 @@ using Org.BouncyCastle.Asn1;
 namespace JetBrains.Serialization;
 
 [JsonObject(MemberSerialization.OptIn)]
+[JsonConverter(typeof(AsnJsonConverter))]
 public class TaggedObjectInfo : IEncodableInfo
 {
   [JsonProperty("Explicit")] private bool _explicit;

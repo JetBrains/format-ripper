@@ -7,6 +7,7 @@ using Org.BouncyCastle.Asn1;
 namespace JetBrains.Serialization;
 
 [JsonObject(MemberSerialization.OptIn)]
+[JsonConverter(typeof(AsnJsonConverter))]
 public class SetInfo : IEncodableInfo
 {
   [JsonProperty("Content")] private readonly List<IEncodableInfo> _content;
