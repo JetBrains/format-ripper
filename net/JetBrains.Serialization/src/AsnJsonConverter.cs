@@ -9,15 +9,12 @@ public class AsnJsonConverter : JsonConverter
 {
   public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
   {
-    if (value is Asn1Object)
+    if (value is Asn1Object asnValue)
     {
-      writer.WriteStartObject();
-
       switch (value)
       {
         case Asn1TaggedObject taggedObject:
-          writer.WritePropertyName("type");
-          writer.WriteValue("TAGGED");
+          writer.WriteStartObject();
 
           writer.WritePropertyName("explicit");
           writer.WriteValue(taggedObject.IsExplicit());
@@ -27,25 +24,27 @@ public class AsnJsonConverter : JsonConverter
 
           writer.WritePropertyName("object");
           serializer.Serialize(writer, taggedObject.GetObject().ToAsn1Object());
+          writer.WriteEndObject();
           break;
 
         case Asn1Sequence sequence:
-          writer.WritePropertyName("type");
-          writer.WriteValue("SEQ");
+          writer.WriteStartObject();
 
-          writer.WritePropertyName("content");
-          serializer.Serialize(writer,
-            sequence
-              .ToArray()
-              .Select(item => item.ToAsn1Object())
-              .ToList());
+          var content = sequence
+            .ToArray()
+            .Select(item => item.ToAsn1Object())
+            .ToList();
+
+          for (int i = 0; i < content.Count; i++)
+          {
+            writer.WritePropertyName(i.ToString());
+            serializer.Serialize(writer, content[i]);
+          }
+
+          writer.WriteEndObject();
           break;
 
         case Asn1Set set:
-          writer.WritePropertyName("type");
-          writer.WriteValue("SET");
-
-          writer.WritePropertyName("content");
           serializer.Serialize(writer,
             set
               .ToArray()
@@ -53,15 +52,20 @@ public class AsnJsonConverter : JsonConverter
               .ToList());
           break;
 
+        case DerNull:
+          writer.WriteNull();
+          break;
+
         default:
+          writer.WriteStartObject();
           writer.WritePropertyName("type");
-          writer.WriteValue(value.GetType().Name);
+          writer.WriteValue(TextualInfo.GetType(asnValue));
+
           writer.WritePropertyName("value");
-          writer.WriteValue(value.ToString());
+          writer.WriteValue(TextualInfo.GetStringValue(asnValue));
+          writer.WriteEndObject();
           break;
       }
-
-      writer.WriteEndObject();
     }
     else if (value is List<Asn1Object> list)
     {
@@ -76,9 +80,50 @@ public class AsnJsonConverter : JsonConverter
     }
   }
 
+
+  private Asn1Object ConvertObject(JToken? jsonToken)
+  {
+    if (jsonToken == null)
+    {
+      return DerNull.Instance;
+    }
+
+    switch (jsonToken.Type)
+    {
+      case JTokenType.Null:
+        return DerNull.Instance;
+      case JTokenType.Array:
+        return jsonToken.Select(it => ConvertObject(it.Value<JToken>())).ToDerSet();
+      case JTokenType.Object:
+        var properties = ((JObject)jsonToken).Properties().ToList();
+        switch (properties[0].Name)
+        {
+          case "type":
+            if (properties.Count != 2)
+              throw new Exception();
+            return TextualInfo.GetEncodable(properties[0].Value.ToString(), properties[1].Value.ToString())
+              .ToAsn1Object();
+          case "explicit":
+            if (properties.Count != 3)
+            {
+              throw new Exception();
+            }
+
+            return new DerTaggedObject((bool)properties[0].Value, (int)properties[1].Value,
+              ConvertObject(properties[2].Value));
+
+          default:
+            return properties.Select(it => ConvertObject(it.Value)).ToDerSequence();
+        }
+    }
+
+    return DerNull.Instance;
+  }
+
   public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
   {
-    throw new NotImplementedException();
+    JObject jsonObject = JObject.Load(reader);
+    return ConvertObject(jsonObject);
   }
 
   public override bool CanConvert(Type objectType)
