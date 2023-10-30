@@ -5,48 +5,79 @@ namespace JetBrains.Serialization;
 
 public abstract class TextualInfo
 {
-  private static readonly Dictionary<Type, Func<Asn1Encodable, string>> ToStringMethods
-    = new Dictionary<Type, Func<Asn1Encodable, string>>
+  private static readonly Dictionary<Type, KeyValuePair<string, Func<Asn1Encodable, string>>> AsnToString
+    = new Dictionary<Type, KeyValuePair<string, Func<Asn1Encodable, string>>>
     {
-      { typeof(DerBitString), x => ((DerBitString)x).GetOctets().ToHexString() },
-      { typeof(DerEnumerated), x => ((DerEnumerated)x).Value.ToString() },
-      { typeof(DerInteger), x => ((DerInteger)x).Value.ToString() },
-      { typeof(DerBoolean), x => ((DerBoolean)x).IsTrue.ToString() },
-      { typeof(DerObjectIdentifier), x => ((DerObjectIdentifier)x).Id },
-      { typeof(DerGeneralString), x => ((DerGeneralString)x).GetString() },
-      { typeof(DerNumericString), x => ((DerNumericString)x).GetString() },
-      { typeof(DerVisibleString), x => ((DerVisibleString)x).GetString() },
-      { typeof(DerBmpString), x => ((DerBmpString)x).GetString() },
-      { typeof(DerIA5String), x => ((DerIA5String)x).GetString() },
-      { typeof(DerUtf8String), x => ((DerUtf8String)x).GetString() },
-      { typeof(DerPrintableString), x => ((DerPrintableString)x).GetString() },
-      { typeof(DerOctetString), x => ((DerOctetString)x).GetOctets().ToHexString() },
-      { typeof(DerUniversalString), x => ((DerUniversalString)x).GetOctets().ToHexString() },
-      { typeof(DerGeneralizedTime), x => ((DerGeneralizedTime)x).ToDateTime().ToString() },
-      { typeof(DerUtcTime), x => ((DerUtcTime)x).ToDateTime().ToString() },
-      { typeof(DerNull), x => "NULL" }
-    };
-
-  private static readonly Dictionary<Type, string> AsnTypeNames
-    = new Dictionary<Type, string>
-    {
-      { typeof(DerBitString), "BitString" },
-      { typeof(DerEnumerated), "Enumerated" },
-      { typeof(DerInteger), "Integer" },
-      { typeof(DerBoolean), "Boolean" },
-      { typeof(DerObjectIdentifier), "ObjectIdentifier" },
-      { typeof(DerGeneralString), "GeneralString" },
-      { typeof(DerNumericString), "NumericString" },
-      { typeof(DerVisibleString), "VisibleString" },
-      { typeof(DerBmpString), "BmpString" },
-      { typeof(DerIA5String), "IA5String" },
-      { typeof(DerUtf8String), "Utf8String" },
-      { typeof(DerPrintableString), "PrintableString" },
-      { typeof(DerOctetString), "OctetString" },
-      { typeof(DerUniversalString), "UniversalString" },
-      { typeof(DerGeneralizedTime), "GeneralizedTime" },
-      { typeof(DerUtcTime), "UtcTime" },
-      { typeof(DerNull), "Null" }
+      {
+        typeof(DerBitString),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("BitString",
+          x => ((DerBitString)x).GetOctets().ToHexString())
+      },
+      {
+        typeof(DerEnumerated),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("Enumerated", x => ((DerEnumerated)x).Value.ToString())
+      },
+      {
+        typeof(DerInteger),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("Integer", x => ((DerInteger)x).Value.ToString())
+      },
+      {
+        typeof(DerBoolean),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("Boolean", x => ((DerBoolean)x).IsTrue.ToString())
+      },
+      {
+        typeof(DerObjectIdentifier),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("ObjectIdentifier", x => ((DerObjectIdentifier)x).Id)
+      },
+      {
+        typeof(DerGeneralString),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("GeneralString", x => ((DerGeneralString)x).GetString())
+      },
+      {
+        typeof(DerNumericString),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("NumericString", x => ((DerNumericString)x).GetString())
+      },
+      {
+        typeof(DerVisibleString),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("VisibleString", x => ((DerVisibleString)x).GetString())
+      },
+      {
+        typeof(DerBmpString),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("BmpString", x => ((DerBmpString)x).GetString())
+      },
+      {
+        typeof(DerIA5String),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("IA5String", x => ((DerIA5String)x).GetString())
+      },
+      {
+        typeof(DerUtf8String),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("Utf8String", x => ((DerUtf8String)x).GetString())
+      },
+      {
+        typeof(DerPrintableString),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("PrintableString",
+          x => ((DerPrintableString)x).GetString())
+      },
+      {
+        typeof(DerOctetString),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("OctetString",
+          x => ((DerOctetString)x).GetOctets().ToHexString())
+      },
+      {
+        typeof(DerUniversalString),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("UniversalString",
+          x => ((DerUniversalString)x).GetOctets().ToHexString())
+      },
+      {
+        typeof(DerGeneralizedTime),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("GeneralizedTime",
+          x => ((DerGeneralizedTime)x).ToDateTime().ToString())
+      },
+      {
+        typeof(DerUtcTime),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("UtcTime", x => ((DerUtcTime)x).ToDateTime().ToString())
+      },
+      { typeof(DerNull), new KeyValuePair<string, Func<Asn1Encodable, string>>("Null", x => "NULL") }
     };
 
   private static readonly Dictionary<string, Func<string, Asn1Encodable>> FromStringMethods
@@ -74,9 +105,9 @@ public abstract class TextualInfo
 
   public static String GetType(Asn1Object value)
   {
-    if (AsnTypeNames.TryGetValue(value.GetType(), out var typeName))
+    if (AsnToString.TryGetValue(value.GetType(), out var entry))
     {
-      return typeName;
+      return entry.Key;
     }
 
     return "unknown";
@@ -84,9 +115,9 @@ public abstract class TextualInfo
 
   public static String GetStringValue(Asn1Object value)
   {
-    if (ToStringMethods.TryGetValue(value.GetType(), out var func))
+    if (AsnToString.TryGetValue(value.GetType(), out var entry))
     {
-      return func(value);
+      return entry.Value(value);
     }
 
     return "unknown";
