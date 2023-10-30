@@ -22,10 +22,6 @@ public abstract class TextualInfo
         new KeyValuePair<string, Func<Asn1Encodable, string>>("Integer", x => ((DerInteger)x).Value.ToString())
       },
       {
-        typeof(DerBoolean),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("Boolean", x => ((DerBoolean)x).IsTrue.ToString())
-      },
-      {
         typeof(DerObjectIdentifier),
         new KeyValuePair<string, Func<Asn1Encodable, string>>("ObjectIdentifier", x => ((DerObjectIdentifier)x).Id)
       },
@@ -86,7 +82,6 @@ public abstract class TextualInfo
       { "BitString", str => new DerBitString(str.HexToBytes()) },
       { "Enumerated", str => new DerEnumerated(new BigInteger(str)) },
       { "Integer", str => new DerInteger(new BigInteger(str)) },
-      { "Boolean", str => DerBoolean.GetInstance(bool.Parse(str)) },
       { "ObjectIdentifier", str => new DerObjectIdentifier(str) },
       { "GeneralString", str => new DerGeneralString(str) },
       { "NumericString", str => new DerNumericString(str) },

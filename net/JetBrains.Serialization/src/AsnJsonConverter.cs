@@ -56,6 +56,10 @@ public class AsnJsonConverter : JsonConverter
           writer.WriteNull();
           break;
 
+        case DerBoolean boolean:
+          writer.WriteValue(boolean.IsTrue);
+          break;
+
         default:
           writer.WriteValue("[" + TextualInfo.GetType(asnValue) + "] " + TextualInfo.GetStringValue(asnValue));
           break;
@@ -86,6 +90,8 @@ public class AsnJsonConverter : JsonConverter
     {
       case JTokenType.Null:
         return DerNull.Instance;
+      case JTokenType.Boolean:
+        return jsonToken.Value<bool>() ? DerBoolean.True : DerBoolean.False;
       case JTokenType.Array:
         return jsonToken.Select(it => ConvertObject(it.Value<JToken>())).ToDerSet();
       case JTokenType.Object:
