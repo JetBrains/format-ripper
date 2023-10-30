@@ -57,13 +57,7 @@ public class AsnJsonConverter : JsonConverter
           break;
 
         default:
-          writer.WriteStartObject();
-          writer.WritePropertyName("type");
-          writer.WriteValue(TextualInfo.GetType(asnValue));
-
-          writer.WritePropertyName("value");
-          writer.WriteValue(TextualInfo.GetStringValue(asnValue));
-          writer.WriteEndObject();
+          writer.WriteValue("[" + TextualInfo.GetType(asnValue) + "] " + TextualInfo.GetStringValue(asnValue));
           break;
       }
     }
@@ -98,11 +92,6 @@ public class AsnJsonConverter : JsonConverter
         var properties = ((JObject)jsonToken).Properties().ToList();
         switch (properties[0].Name)
         {
-          case "type":
-            if (properties.Count != 2)
-              throw new Exception();
-            return TextualInfo.GetEncodable(properties[0].Value.ToString(), properties[1].Value.ToString())
-              .ToAsn1Object();
           case "explicit":
             if (properties.Count != 3)
             {
@@ -115,6 +104,25 @@ public class AsnJsonConverter : JsonConverter
           default:
             return properties.Select(it => ConvertObject(it.Value)).ToDerSequence();
         }
+      case JTokenType.String:
+        var token = jsonToken.ToString();
+        if (token[0] != '[')
+        {
+          throw new FormatException();
+        }
+
+        var tagEndIndex = token.IndexOf("]", StringComparison.Ordinal);
+        var type = token.Substring(1, tagEndIndex - 1);
+
+        if (tagEndIndex + 2 > token.Length)
+        {
+          throw new FormatException();
+        }
+
+        var value = token.Substring(tagEndIndex + 2);
+
+        return TextualInfo.GetEncodable(type, value)
+          .ToAsn1Object();
     }
 
     return DerNull.Instance;

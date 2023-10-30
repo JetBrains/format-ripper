@@ -78,10 +78,8 @@ public abstract class TextualInfo
     {
       return typeName;
     }
-    else
-    {
-      return "unknown";
-    }
+
+    return "unknown";
   }
 
   public static String GetStringValue(Asn1Object value)
@@ -90,10 +88,8 @@ public abstract class TextualInfo
     {
       return func(value);
     }
-    else
-    {
-      return "unknown";
-    }
+
+    return "unknown";
   }
 
   public static Asn1Encodable GetEncodable(string type, string value)
@@ -102,9 +98,7 @@ public abstract class TextualInfo
     {
       return func(value);
     }
-    else
-    {
-      return DerNull.Instance;
-    }
+
+    return DerNull.Instance;
   }
 }
