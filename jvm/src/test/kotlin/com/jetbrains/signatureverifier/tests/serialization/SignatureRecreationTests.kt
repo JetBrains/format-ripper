@@ -83,18 +83,9 @@ class SignatureRecreationTests {
     val contentInfo = signedData.contentInfo
     val initialSignedDataInfo = signedData.signedData.toASN1Primitive()
 
-//    val module = SerializersModule {
-//      polymorphic(ASN1Primitive::class) {
-//        subclass(ASN1Primitive::class, Asn1PrimitiveSerializer)
-//        subclass(ASN1Sequence::class, Asn1SequenceSerializer)
-////        subclass(C::class, C.serializer())
-//      }
-//    }
-
-//    val format = Json { serializersModule = module ; encodeDefaults = true }
     val json = Json.encodeToString(Asn1PrimitiveSerializer, initialSignedDataInfo)
-    val deserializedSignedDataInfo = Json { }.decodeFromString<ASN1Primitive>(json)
-//
+    val deserializedSignedDataInfo = Json.decodeFromString(Asn1PrimitiveSerializer, json)
+
     val signedDataInfo = SignedData.getInstance(deserializedSignedDataInfo)
 
     if (isMacho) {

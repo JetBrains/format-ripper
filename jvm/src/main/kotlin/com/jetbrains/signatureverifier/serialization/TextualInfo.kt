@@ -62,7 +62,7 @@ abstract class TextualInfo {
       Pair(org.bouncycastle.asn1.DERNull::class.java, Pair("Null") { _ -> "NULL" })
     )
 
-    private val fromStringMethods = mapOf<String, (String) -> ASN1Encodable>(
+    private val fromStringMethods = mapOf<String, (String) -> ASN1Primitive>(
       "BitString" to { str -> DERBitString(str.toByteArray()) },
       "Enumerated" to { str -> ASN1Enumerated(BigInteger(str)) },
       "Integer" to { str -> ASN1Integer(BigInteger(str)) },
@@ -76,8 +76,8 @@ abstract class TextualInfo {
       "PrintableString" to { str -> DERPrintableString(str) },
       "OctetString" to { str -> DEROctetString(str.toByteArray()) },
       "UniversalString" to { str -> DERUniversalString(str.toByteArray()) },
-      "GeneralizedTime" to { str -> DERGeneralizedTime(str) },
-      "UtcTime" to { str -> DERUTCTime(str) },
+      "GeneralizedTime" to { str -> DERGeneralizedTime(dateFormat.parse(str)) },
+      "UtcTime" to { str -> DERUTCTime(dateFormat.parse(str)) },
       "Null" to { _ -> DERNull.INSTANCE }
     )
 
@@ -89,7 +89,7 @@ abstract class TextualInfo {
       return asnToString[value.javaClass]?.second?.invoke(value) ?: "unknown"
     }
 
-    fun getEncodable(type: String, value: String): ASN1Encodable {
+    fun getEncodable(type: String, value: String): ASN1Primitive {
       return fromStringMethods[type]?.invoke(value) ?: DERNull.INSTANCE
     }
   }
