@@ -15,7 +15,7 @@
     <PackageTags>jetbrains signature verify netstandard</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <Version>2.0.2</Version>
+    <Version>2.0.3</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
@@ -28,7 +28,7 @@
       <LastGenOutput>Messages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Remove="DefaultRoots.p7b" />
-    <EmbeddedResource Include="DefaultRoots.p7b" Link="Resources\DefaultRoots.p7b" />
+    <EmbeddedResource Include="../../../cert/DefaultRoots.p7b" Link="Resources\DefaultRoots.p7b" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Messages.Designer.cs">

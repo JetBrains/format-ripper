@@ -21,7 +21,7 @@ open class FakePki {
   companion object {
     private val RSA_ENCRYPTION = ASN1ObjectIdentifier("1.2.840.113549.1.1.1")
     private val SHA1_WITH_RSA_SIGNATURE = ASN1ObjectIdentifier("1.2.840.113549.1.1.5")
-    private val publicKeyLength = 1024
+    private const val publicKeyLength = 1024
 
     fun CreateRoot(@NotNull name: String, utcValidFrom: Date, utcValidTo: Date): FakePki {
       if (utcValidFrom >= utcValidTo)
@@ -33,8 +33,7 @@ open class FakePki {
     private fun getNewPair(): KeyPair {
       val keyGen = KeyPairGenerator.getInstance("RSA")
       keyGen.initialize(publicKeyLength, SecureRandom.getInstance("SHA1PRNG"))
-      val keyPair = keyGen.generateKeyPair()
-      return keyPair
+      return keyGen.generateKeyPair()
     }
   }
 

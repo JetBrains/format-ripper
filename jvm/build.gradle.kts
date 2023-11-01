@@ -22,6 +22,10 @@ plugins {
     kotlin("plugin.serialization") version "1.8.21"
 }
 
+sourceSets.main {
+    resources.srcDirs(/*"src/main/resources/",*/ "../cert/") // Note(ww898): Please uncomment if you need standart resources in project
+}
+
 repositories {
     mavenCentral()
     gradlePluginPortal()

@@ -44,10 +44,10 @@ import java.util.*
 import java.util.stream.Stream
 
 class FakePkiTest {
-  private val utc = Clock.systemUTC()
+  private val localClock = Clock.systemDefaultZone()
 
-  private fun nowPlusDays(days: Long): Date = LocalDateTime.now(utc).plusDays(days).ConvertToDate()
-  private fun nowPlusSeconds(seconds: Long): Date = LocalDateTime.now(utc).plusSeconds(seconds).ConvertToDate()
+  private fun nowPlusDays(days: Long): Date = LocalDateTime.now(localClock).plusDays(days).ConvertToDate()
+  private fun nowPlusSeconds(seconds: Long): Date = LocalDateTime.now(localClock).plusSeconds(seconds).ConvertToDate()
 
   @ParameterizedTest
   @MethodSource("FakePkiTestProvider")
