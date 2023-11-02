@@ -1,12 +1,9 @@
 package com.jetbrains.signatureverifier.serialization
 
 import kotlinx.serialization.*
-import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.json.*
-import kotlinx.serialization.json.Json.Default.encodeToJsonElement
 import org.bouncycastle.asn1.ASN1Boolean
 import org.bouncycastle.asn1.ASN1Null
 import org.bouncycastle.asn1.ASN1Primitive
@@ -15,13 +12,6 @@ import org.bouncycastle.asn1.ASN1Set
 import org.bouncycastle.asn1.ASN1TaggedObject
 import org.bouncycastle.asn1.DERNull
 import org.bouncycastle.asn1.DLTaggedObject
-
-//object AsnSerializer : JsonContentPolymorphicSerializer<ASN1Primitive>(ASN1Primitive::class) {
-//  override fun selectDeserializer(element: JsonElement) = when {
-//    "cardName" in element.jsonObject -> CreditCardPaymentDetails.serializer()
-//    else -> StandardPaymentDetails.serializer()
-//  }
-//}
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializer(forClass = ASN1Primitive::class)
@@ -48,7 +38,6 @@ object Asn1PrimitiveSerializer : KSerializer<ASN1Primitive> {
       }
 
       is JsonArray -> {
-        // Deserialize ASN1Set
         val elements = jsonElement.map { json ->
           Json.decodeFromJsonElement(Asn1PrimitiveSerializer, json)
         }
@@ -124,27 +113,3 @@ object Asn1PrimitiveSerializer : KSerializer<ASN1Primitive> {
     }
   }
 }
-
-//@OptIn(ExperimentalSerializationApi::class)
-//@Serializer(forClass = ASN1Sequence::class)
-//object Asn1SequenceSerializer : KSerializer<ASN1Sequence> {
-//  @OptIn(ExperimentalSerializationApi::class)
-//  override val descriptor = ContextualSerializer(ASN1Primitive::class).descriptor
-//
-//  override fun deserialize(decoder: Decoder): ASN1Sequence {
-//    TODO("Not yet implemented")
-//  }
-//
-//  override fun serialize(encoder: Encoder, value: ASN1Sequence) {
-//    val jsonOutput = encoder as? JsonEncoder
-//      ?: throw SerializationException("Only JSON format is supported")
-//
-//    val content = value.toList().map { it.toASN1Primitive() }
-//
-//    jsonOutput.encodeJsonElement(buildJsonObject {
-//      content.forEachIndexed { index, item ->
-//        put(index.toString(), Json.encodeToJsonElement(Asn1PrimitiveSerializer, item))
-//      }
-//    })
-//  }
-//}

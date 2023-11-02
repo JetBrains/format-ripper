@@ -1,7 +1,6 @@
 package com.jetbrains.signatureverifier.serialization
 
 import org.bouncycastle.asn1.*
-import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
 import java.text.DateFormat
 import java.text.SimpleDateFormat

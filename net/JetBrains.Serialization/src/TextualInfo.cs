@@ -106,7 +106,6 @@ public abstract class TextualInfo
     }
 
     throw new Exception();
-    // return "unknown";
   }
 
   public static String GetStringValue(Asn1Object value)
@@ -117,7 +116,6 @@ public abstract class TextualInfo
     }
 
     throw new Exception();
-    // return "unknown";
   }
 
   public static Asn1Encodable GetEncodable(string type, string value)
