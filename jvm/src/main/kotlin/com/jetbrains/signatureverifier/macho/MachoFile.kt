@@ -5,7 +5,6 @@ import com.jetbrains.util.*
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
-import java.nio.ByteOrder
 import java.nio.channels.SeekableByteChannel
 import java.security.MessageDigest
 import java.text.ParseException
@@ -39,8 +38,6 @@ open class MachoFile {
    * @exception InvalidDataException  If the input stream not contain MachO
    */
   constructor(@NotNull stream: SeekableByteChannel) {
-    if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN))
-      throw ParseException("Only Little endian is expected", 0)
     _stream = stream
     setMagic()
   }
@@ -54,8 +51,6 @@ open class MachoFile {
    * @exception InvalidDataException  If the input data not contain MachO
    */
   constructor(@NotNull data: ByteArray) {
-    if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN))
-      throw ParseException("Only Little endian is expected", 0)
     _stream = SeekableInMemoryByteChannel(data)
     setMagic()
   }

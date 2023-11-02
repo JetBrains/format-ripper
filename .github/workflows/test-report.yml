@@ -1,6 +1,7 @@
 name: Generate test reports
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: [ 'Build and run tests' ]
     types:
@@ -23,7 +24,6 @@ jobs:
           artifact: /net-test-results-(.*)/
           path: '**/*.trx'
           reporter: dotnet-trx
-          list-tests: failed
 
   jvm:
     name: JVM
@@ -38,4 +38,3 @@ jobs:
           artifact: /jvm-test-results-(.*)/
           path: '*.xml'
           reporter: java-junit
-          list-tests: failed

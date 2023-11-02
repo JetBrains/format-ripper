@@ -5,9 +5,7 @@ import com.jetbrains.util.BinaryReader
 import com.jetbrains.util.Jump
 import com.jetbrains.util.Rewind
 import com.jetbrains.util.Skip
-import java.nio.ByteOrder
 import java.nio.channels.SeekableByteChannel
-import java.text.ParseException
 
 open class CompoundFile {
   // Note: Object Linking and Embedding (OLE) Compound File (CF) (i.e., OLECF) or Compound Binary File format by Microsoft
@@ -23,9 +21,6 @@ open class CompoundFile {
   private val _miniFat: List<UInt>
 
   constructor(stream: SeekableByteChannel) {
-    if (ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN))
-      throw ParseException("Only Little endian is expected", 0)
-
     _stream = stream
     val reader = BinaryReader(stream.Rewind())
     _header = CompoundFileHeader(_stream, reader)
