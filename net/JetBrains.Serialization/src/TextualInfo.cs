@@ -65,6 +65,11 @@ public abstract class TextualInfo
           x => ((DerUniversalString)x).GetOctets().ToHexString())
       },
       {
+        typeof(DerGraphicString),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("GraphicString",
+          x => ((DerGraphicString)x).GetOctets().ToHexString())
+      },
+      {
         typeof(DerGeneralizedTime),
         new KeyValuePair<string, Func<Asn1Encodable, string>>("GeneralizedTime",
           x => ((DerGeneralizedTime)x).ToDateTime().ToString())
@@ -92,6 +97,7 @@ public abstract class TextualInfo
       { "PrintableString", str => new DerPrintableString(str) },
       { "OctetString", str => new DerOctetString(str.HexToBytes()) },
       { "UniversalString", str => new DerUniversalString(str.HexToBytes()) },
+      { "GraphicString", str => new DerGraphicString(str.HexToBytes()) },
       { "GeneralizedTime", str => new DerGeneralizedTime(DateTime.Parse(str)) },
       { "UtcTime", str => new DerUtcTime(DateTime.Parse(str)) },
       { "Null", _ => DerNull.Instance }
