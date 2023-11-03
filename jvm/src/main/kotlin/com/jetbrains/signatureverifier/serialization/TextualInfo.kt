@@ -36,6 +36,10 @@ abstract class TextualInfo {
                 Pair("VisibleString") { x -> (x as DERVisibleString).toString() }
             ),
             Pair(
+                org.bouncycastle.asn1.DERT61String::class.java,
+                Pair("T61String") { x -> (x as DERT61String).toString() }
+            ),
+            Pair(
                 org.bouncycastle.asn1.DERBMPString::class.java,
                 Pair("BmpString") { x -> (x as DERBMPString).toString() }),
             Pair(
@@ -79,6 +83,7 @@ abstract class TextualInfo {
             "GeneralString" to { str -> DERGeneralString(str) },
             "NumericString" to { str -> DERNumericString(str) },
             "VisibleString" to { str -> DERVisibleString(str) },
+            "T61String" to { str -> DERT61String(str) },
             "BmpString" to { str -> DERBMPString(str) },
             "IA5String" to { str -> DERIA5String(str) },
             "Utf8String" to { str -> DERUTF8String(str) },

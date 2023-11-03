@@ -38,6 +38,10 @@ public abstract class TextualInfo
         new KeyValuePair<string, Func<Asn1Encodable, string>>("VisibleString", x => ((DerVisibleString)x).GetString())
       },
       {
+        typeof(DerT61String),
+        new KeyValuePair<string, Func<Asn1Encodable, string>>("T61String", x => ((DerT61String)x).GetString())
+      },
+      {
         typeof(DerBmpString),
         new KeyValuePair<string, Func<Asn1Encodable, string>>("BmpString", x => ((DerBmpString)x).GetString())
       },
@@ -91,6 +95,7 @@ public abstract class TextualInfo
       { "GeneralString", str => new DerGeneralString(str) },
       { "NumericString", str => new DerNumericString(str) },
       { "VisibleString", str => new DerVisibleString(str) },
+      { "T61String", str => new DerT61String(str) },
       { "BmpString", str => new DerBmpString(str) },
       { "IA5String", str => new DerIA5String(str) },
       { "Utf8String", str => new DerUtf8String(str) },
