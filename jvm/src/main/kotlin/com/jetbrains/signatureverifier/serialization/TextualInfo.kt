@@ -58,6 +58,10 @@ abstract class TextualInfo {
                 Pair("OctetString") { x -> (x as DEROctetString).octets.toHexString() }
             ),
             Pair(
+                org.bouncycastle.asn1.DERVideotexString::class.java,
+                Pair("VideotexString") { x -> (x as DERVideotexString).octets.toHexString() }
+            ),
+            Pair(
                 org.bouncycastle.asn1.DERUniversalString::class.java,
                 Pair("UniversalString") { x -> (x as DERUniversalString).octets.toHexString() }
             ),
@@ -89,6 +93,7 @@ abstract class TextualInfo {
             "Utf8String" to { str -> DERUTF8String(str) },
             "PrintableString" to { str -> DERPrintableString(str) },
             "OctetString" to { str -> DEROctetString(str.toByteArray()) },
+            "VideotexString" to { str -> DERVideotexString(str.toByteArray()) },
             "UniversalString" to { str -> DERUniversalString(str.toByteArray()) },
             "GraphicString" to { str -> DERGraphicString(str.toByteArray()) },
             "GeneralizedTime" to { str -> DERGeneralizedTime(dateFormat.parse(str)) },
