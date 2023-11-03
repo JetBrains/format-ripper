@@ -56,7 +56,7 @@ object Asn1PrimitiveSerializer : KSerializer<ASN1Primitive> {
 
           val textualValue = value.substring(tagEnd + 2)
 
-          TextualInfo.getEncodable(tag, textualValue)
+          TextualInfo.getPrimitive(tag, textualValue)
         } else {
 
           return ASN1Boolean.getInstance(

@@ -11,7 +11,7 @@ abstract class TextualInfo {
     private val dateFormat: DateFormat =
       SimpleDateFormat("dd.MM.yyy HH:mm:ss").apply { timeZone = TimeZone.getTimeZone("UTC") }
 
-    private val asnToString = mapOf<Class<out ASN1Encodable>, Pair<String, (ASN1Encodable) -> String>>(
+    private val asnToString = mapOf<Class<out ASN1Primitive>, Pair<String, (ASN1Primitive) -> String>>(
       Pair(
         org.bouncycastle.asn1.DERBitString::class.java,
         Pair("BitString") { x -> (x as DERBitString).octets.toHexString() }),
@@ -88,7 +88,7 @@ abstract class TextualInfo {
       return asnToString[value.javaClass]?.second?.invoke(value) ?: "unknown"
     }
 
-    fun getEncodable(type: String, value: String): ASN1Primitive {
+    fun getPrimitive(type: String, value: String): ASN1Primitive {
       return fromStringMethods[type]?.invoke(value) ?: DERNull.INSTANCE
     }
   }
