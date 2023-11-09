@@ -5,143 +5,97 @@ namespace JetBrains.Serialization;
 
 public abstract class TextualInfo
 {
-  private static readonly Dictionary<Type, KeyValuePair<string, Func<Asn1Encodable, string>>> AsnToString
-    = new Dictionary<Type, KeyValuePair<string, Func<Asn1Encodable, string>>>
-    {
-      {
-        typeof(DerBitString),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("BitString",
-          x => ((DerBitString)x).GetOctets().ToHexString())
-      },
-      {
-        typeof(DerEnumerated),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("Enumerated", x => ((DerEnumerated)x).Value.ToString())
-      },
-      {
-        typeof(DerInteger),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("Integer", x => ((DerInteger)x).Value.ToString())
-      },
-      {
-        typeof(DerObjectIdentifier),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("ObjectIdentifier", x => ((DerObjectIdentifier)x).Id)
-      },
-      {
-        typeof(DerGeneralString),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("GeneralString", x => ((DerGeneralString)x).GetString())
-      },
-      {
-        typeof(DerNumericString),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("NumericString", x => ((DerNumericString)x).GetString())
-      },
-      {
-        typeof(DerVisibleString),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("VisibleString", x => ((DerVisibleString)x).GetString())
-      },
-      {
-        typeof(DerT61String),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("T61String", x => ((DerT61String)x).GetString())
-      },
-      {
-        typeof(DerBmpString),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("BmpString", x => ((DerBmpString)x).GetString())
-      },
-      {
-        typeof(DerIA5String),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("IA5String", x => ((DerIA5String)x).GetString())
-      },
-      {
-        typeof(DerUtf8String),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("Utf8String", x => ((DerUtf8String)x).GetString())
-      },
-      {
-        typeof(DerPrintableString),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("PrintableString",
-          x => ((DerPrintableString)x).GetString())
-      },
-      {
-        typeof(DerOctetString),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("OctetString",
-          x => ((DerOctetString)x).GetOctets().ToHexString())
-      },
-      {
-        typeof(DerUniversalString),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("UniversalString",
-          x => ((DerUniversalString)x).GetOctets().ToHexString())
-      },
-      {
-        typeof(DerGraphicString),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("GraphicString",
-          x => ((DerGraphicString)x).GetOctets().ToHexString())
-      },
-      {
-        typeof(DerVideotexString),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("VideotexString",
-          x => ((DerVideotexString)x).GetOctets().ToHexString())
-      },
-      {
-        typeof(DerGeneralizedTime),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("GeneralizedTime",
-          x => ((DerGeneralizedTime)x).ToDateTime().ToString())
-      },
-      {
-        typeof(DerUtcTime),
-        new KeyValuePair<string, Func<Asn1Encodable, string>>("UtcTime", x => ((DerUtcTime)x).ToDateTime().ToString())
-      },
-      { typeof(DerNull), new KeyValuePair<string, Func<Asn1Encodable, string>>("Null", x => "NULL") }
-    };
-
-  private static readonly Dictionary<string, Func<string, Asn1Encodable>> FromStringMethods
-    = new Dictionary<string, Func<string, Asn1Encodable>>
-    {
-      { "BitString", str => new DerBitString(str.HexToBytes()) },
-      { "Enumerated", str => new DerEnumerated(new BigInteger(str)) },
-      { "Integer", str => new DerInteger(new BigInteger(str)) },
-      { "ObjectIdentifier", str => new DerObjectIdentifier(str) },
-      { "GeneralString", str => new DerGeneralString(str) },
-      { "NumericString", str => new DerNumericString(str) },
-      { "VisibleString", str => new DerVisibleString(str) },
-      { "T61String", str => new DerT61String(str) },
-      { "BmpString", str => new DerBmpString(str) },
-      { "IA5String", str => new DerIA5String(str) },
-      { "Utf8String", str => new DerUtf8String(str) },
-      { "PrintableString", str => new DerPrintableString(str) },
-      { "OctetString", str => new DerOctetString(str.HexToBytes()) },
-      { "VideotexString", str => new DerVideotexString(str.HexToBytes()) },
-      { "UniversalString", str => new DerUniversalString(str.HexToBytes()) },
-      { "GraphicString", str => new DerGraphicString(str.HexToBytes()) },
-      { "GeneralizedTime", str => new DerGeneralizedTime(DateTime.Parse(str)) },
-      { "UtcTime", str => new DerUtcTime(DateTime.Parse(str)) },
-      { "Null", _ => DerNull.Instance }
-    };
-
-
-  public static String GetType(Asn1Object value)
+  public static String GetTaggedValue(Asn1Object value)
   {
-    if (AsnToString.TryGetValue(value.GetType(), out var entry))
+    switch (value)
     {
-      return entry.Key;
+      case DerBitString x:
+        return $"[BitString] {x.GetOctets().ToHexString()}";
+      case DerEnumerated x:
+        return $"[Enumerated] {x.Value}";
+      case DerInteger x:
+        return $"[Integer] {x.Value}";
+      case DerObjectIdentifier x:
+        return $"[ObjectIdentifier] {x.Id}";
+      case DerGeneralString x:
+        return $"[GeneralString] {x.GetString()}";
+      case DerNumericString x:
+        return $"[NumericString] {x.GetString()}";
+      case DerVisibleString x:
+        return $"[VisibleString] {x.GetString()}";
+      case DerT61String x:
+        return $"[T61String] {x.GetString()}";
+      case DerBmpString x:
+        return $"[BmpString] {x.GetString()}";
+      case DerIA5String x:
+        return $"[IA5String] {x.GetString()}";
+      case DerUtf8String x:
+        return $"[Utf8String] {x.GetString()}";
+      case DerPrintableString x:
+        return $"[PrintableString] {x.GetString()}";
+      case DerOctetString x:
+        return $"[OctetString] {x.GetOctets().ToHexString()}";
+      case DerUniversalString x:
+        return $"[UniversalString] {x.GetOctets().ToHexString()}";
+      case DerGraphicString x:
+        return $"[GraphicString] {x.GetOctets().ToHexString()}";
+      case DerVideotexString x:
+        return $"[VideotexString] {x.GetOctets().ToHexString()}";
+      case DerGeneralizedTime x:
+        return $"[GeneralizedTime] {x.ToDateTime()}";
+      case DerUtcTime x:
+        return $"[UtcTime] {x.ToDateTime()}";
+      case DerNull:
+        return "[Null] NULL";
+      default:
+        throw new ArgumentException($"Unknown ASN type: {value.GetType()}");
     }
-
-    throw new ArgumentException("Unknown object type");
-  }
-
-  public static String GetStringValue(Asn1Object value)
-  {
-    if (AsnToString.TryGetValue(value.GetType(), out var entry))
-    {
-      return entry.Value(value);
-    }
-
-    throw new ArgumentException("Unknown object type");
   }
 
   public static Asn1Encodable GetEncodable(string type, string value)
   {
-    if (FromStringMethods.TryGetValue(type, out var func))
+    switch (type)
     {
-      return func(value);
+      case "BitString":
+        return new DerBitString(value.HexToBytes());
+      case "Enumerated":
+        return new DerEnumerated(new BigInteger(value));
+      case "Integer":
+        return new DerInteger(new BigInteger(value));
+      case "ObjectIdentifier":
+        return new DerObjectIdentifier(value);
+      case "GeneralString":
+        return new DerGeneralString(value);
+      case "NumericString":
+        return new DerNumericString(value);
+      case "VisibleString":
+        return new DerVisibleString(value);
+      case "T61String":
+        return new DerT61String(value);
+      case "BmpString":
+        return new DerBmpString(value);
+      case "IA5String":
+        return new DerIA5String(value);
+      case "Utf8String":
+        return new DerUtf8String(value);
+      case "PrintableString":
+        return new DerPrintableString(value);
+      case "OctetString":
+        return new DerOctetString(value.HexToBytes());
+      case "VideotexString":
+        return new DerVideotexString(value.HexToBytes());
+      case "UniversalString":
+        return new DerUniversalString(value.HexToBytes());
+      case "GraphicString":
+        return new DerGraphicString(value.HexToBytes());
+      case "GeneralizedTime":
+        return new DerGeneralizedTime(DateTime.Parse(value));
+      case "UtcTime":
+        return new DerUtcTime(DateTime.Parse(value));
+      case "Null":
+        return DerNull.Instance;
+      default:
+        throw new ArgumentException($"Unknown object type: {type}");
     }
-
-    throw new ArgumentException("Unknown object type");
   }
 }

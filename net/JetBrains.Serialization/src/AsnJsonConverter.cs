@@ -61,7 +61,7 @@ public class AsnJsonConverter : JsonConverter
           break;
 
         default:
-          writer.WriteValue("[" + TextualInfo.GetType(asnValue) + "] " + TextualInfo.GetStringValue(asnValue));
+          writer.WriteValue(TextualInfo.GetTaggedValue(asnValue));
           break;
       }
     }
