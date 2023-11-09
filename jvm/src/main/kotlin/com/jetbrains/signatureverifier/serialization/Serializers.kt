@@ -39,7 +39,7 @@ object Asn1PrimitiveSerializer : KSerializer<ASN1Primitive> {
         } else {
           var c = 0
           val elements = jsonElement.map { (i, json) ->
-            if (i.toIntOrNull() != c){
+            if (i.toIntOrNull() != c) {
               throw SerializationException("Illegal index for sequence: ${i.toIntOrNull()}, expected $c")
             }
             c++
@@ -65,7 +65,7 @@ object Asn1PrimitiveSerializer : KSerializer<ASN1Primitive> {
           val value = jsonElement.toString().substringAfter('"').substringBeforeLast('"')
           val tagEnd = value.indexOf(']')
 
-          if (value[0] != '[' || tagEnd < 0){
+          if (value[0] != '[' || tagEnd < 0) {
             throw SerializationException("Could not parse tag for enrty $jsonElement")
           }
 
@@ -127,11 +127,7 @@ object Asn1PrimitiveSerializer : KSerializer<ASN1Primitive> {
       else -> {
         jsonOutput.encodeJsonElement(
           JsonPrimitive(
-            "[${TextualInfo.getType(value)}] ${
-              TextualInfo.getStringValue(
-                value
-              )
-            }"
+            TextualInfo.getTaggedValue(value)
           )
         )
       }
