@@ -1,3 +1,4 @@
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Asn1;
@@ -100,28 +101,61 @@ public class AsnJsonConverter : JsonConverter
           case "explicit":
             if (properties.Count != 3)
             {
-              throw new Exception();
+              throw new SerializationException(
+                $"Incorrect number of fields for tagged object: {properties.Count}, expected 3");
             }
 
-            return new DerTaggedObject((bool)properties[0].Value, (int)properties[1].Value,
+            if (properties[0].Value.Type != JTokenType.Boolean)
+            {
+              throw new SerializationException(
+                $"Illegal value for Explicit in tagged object");
+            }
+
+            if (properties[1].Name != "tagNo" || properties[1].Value.Type != JTokenType.Integer)
+            {
+              throw new SerializationException(
+                "Illegal TagNo in tagged object");
+            }
+
+            if (properties[2].Name != "object")
+            {
+              throw new SerializationException(
+                "Illegal Object in tagged object");
+            }
+
+            return new DerTaggedObject((bool)properties[0], (int)properties[1],
               ConvertObject(properties[2].Value));
 
           default:
-            return properties.Select(it => ConvertObject(it.Value)).ToDerSequence();
+            int c = 0;
+            return properties.Select(it =>
+              {
+                if (!(int.TryParse(it.Name, out _) && int.Parse(it.Name) == c))
+                {
+                  throw new SerializationException($"Illegal index in sequence: {it.Name}, expected {c}");
+                }
+
+                c++;
+
+                return ConvertObject(it.Value);
+              }
+            ).ToDerSequence();
         }
       case JTokenType.String:
         var token = jsonToken.ToString();
-        if (token[0] != '[')
-        {
-          throw new FormatException();
-        }
 
         var tagEndIndex = token.IndexOf("]", StringComparison.Ordinal);
+
+        if (token[0] != '[' || tagEndIndex < 0)
+        {
+          throw new SerializationException($"Could not parse tag for entry {token}");
+        }
+
         var type = token.Substring(1, tagEndIndex - 1);
 
         if (tagEndIndex + 2 > token.Length)
         {
-          throw new FormatException();
+          throw new SerializationException($"Could not parse value for entry {token}");
         }
 
         var value = token.Substring(tagEndIndex + 2);
@@ -130,7 +164,7 @@ public class AsnJsonConverter : JsonConverter
           .ToAsn1Object();
     }
 
-    return DerNull.Instance;
+    throw new SerializationException("Could not parse give json");
   }
 
   public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)

@@ -122,7 +122,7 @@ public abstract class TextualInfo
       return entry.Key;
     }
 
-    throw new Exception();
+    throw new ArgumentException("Unknown object type");
   }
 
   public static String GetStringValue(Asn1Object value)
@@ -132,7 +132,7 @@ public abstract class TextualInfo
       return entry.Value(value);
     }
 
-    throw new Exception();
+    throw new ArgumentException("Unknown object type");
   }
 
   public static Asn1Encodable GetEncodable(string type, string value)
@@ -142,6 +142,6 @@ public abstract class TextualInfo
       return func(value);
     }
 
-    return DerNull.Instance;
+    throw new ArgumentException("Unknown object type");
   }
 }
