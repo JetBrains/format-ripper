@@ -66,7 +66,7 @@ object Asn1PrimitiveSerializer : KSerializer<ASN1Primitive> {
           val tagEnd = value.indexOf(']')
 
           if (value[0] != '[' || tagEnd < 0) {
-            throw SerializationException("Could not parse tag for enrty $jsonElement")
+            throw SerializationException("Could not parse tag for entry $jsonElement")
           }
 
           val tag = value.substring(1, tagEnd)
