@@ -13,6 +13,7 @@ using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Security.Certificates;
 using Org.BouncyCastle.Tsp;
 using Org.BouncyCastle.Utilities;
+using Org.BouncyCastle.Utilities.Collections;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
@@ -137,27 +138,19 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
       get { return tsaSignerInfo.UnsignedAttributes; }
     }
 
-    public IX509Store GetCertificates(
-      string type)
-    {
-      return tsToken.GetCertificates(type);
-    }
-
-    public IX509Store GetCrls(
-      string type)
-    {
-      return tsToken.GetCrls(type);
-    }
-
-    public IX509Store GetCertificates()
+    public IStore<X509Certificate> GetCertificates()
     {
       return tsToken.GetCertificates();
     }
 
-    public IX509Store GetAttributeCertificates(
-      string type)
+    public IStore<X509Crl> GetCrls()
     {
-      return tsToken.GetAttributeCertificates(type);
+      return tsToken.GetCrls();
+    }
+
+    public IStore<X509V2AttributeCertificate> GetAttributeCertificates()
+    {
+      return tsToken.GetAttributeCertificates();
     }
 
     /**
@@ -182,7 +175,7 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
         byte[] hash = DigestUtilities.CalculateDigest(
           certID.GetHashAlgorithmName(), cert.GetEncoded());
 
-        if (!Arrays.ConstantTimeAreEqual(certID.GetCertHash(), hash))
+        if (!Arrays.FixedTimeEquals(certID.GetCertHash(), hash))
         {
           throw new TspValidationException("certificate hash does not match certID hash.");
         }

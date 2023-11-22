@@ -4,6 +4,8 @@ using JetBrains.SignatureVerifier.Crypt.BC.Compat;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Cms;
+using Org.BouncyCastle.Utilities.Collections;
+using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 
 namespace JetBrains.SignatureVerifier.Crypt.BC
@@ -39,9 +41,9 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
     private SignedData signedData;
     private ContentInfo contentInfo;
     private SignerInformationStore signerInfoStore;
-    private IX509Store attrCertStore;
-    private IX509Store certificateStore;
-    private IX509Store crlStore;
+    private IStore<X509V2AttributeCertificate> attrCertStore;
+    private IStore<X509Certificate> certificateStore;
+    private IStore<X509Crl> crlStore;
     private IDictionary hashes;
 
     private CmsSignedData(
@@ -108,11 +110,6 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
       get { return signedData.Version.IntValueExact; }
     }
 
-    internal IX509Store GetCertificates()
-    {
-      return Helper.GetCertificates(signedData.Certificates);
-    }
-
     /**
 		* return the collection of signers that are associated with the
 		* signatures for the message.
@@ -156,12 +153,11 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
 		 * @exception NoSuchStoreException if the store type isn't available.
 		 * @exception CmsException if a general exception prevents creation of the X509Store
 		 */
-    public IX509Store GetAttributeCertificates(
-      string type)
+    public IStore<X509V2AttributeCertificate> GetAttributeCertificates()
     {
       if (attrCertStore == null)
       {
-        attrCertStore = Helper.CreateAttributeStore(type, signedData.Certificates);
+        attrCertStore = Helper.CreateAttributeStore(signedData.Certificates);
       }
 
       return attrCertStore;
@@ -176,12 +172,11 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
 		 * @exception NoSuchStoreException if the store type isn't available.
 		 * @exception CmsException if a general exception prevents creation of the X509Store
 		 */
-    public IX509Store GetCertificates(
-      string type)
+    public IStore<X509Certificate> GetCertificates()
     {
       if (certificateStore == null)
       {
-        certificateStore = Helper.CreateCertificateStore(type, signedData.Certificates);
+        certificateStore = Helper.CreateCertificateStore(signedData.Certificates);
       }
 
       return certificateStore;
@@ -196,12 +191,11 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
 		* @exception NoSuchStoreException if the store type isn't available.
 		* @exception CmsException if a general exception prevents creation of the X509Store
 		*/
-    public IX509Store GetCrls(
-      string type)
+    public IStore<X509Crl> GetCrls()
     {
       if (crlStore == null)
       {
-        crlStore = Helper.CreateCrlStore(type, signedData.CRLs);
+        crlStore = Helper.CreateCrlStore(signedData.CRLs);
       }
 
       return crlStore;

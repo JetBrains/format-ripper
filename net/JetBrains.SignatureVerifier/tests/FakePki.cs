@@ -123,7 +123,7 @@ namespace JetBrains.SignatureVerifier.Tests
       if (codeSign)
       {
         extOids.Add(X509Extensions.ExtendedKeyUsage);
-        extValues.Add(new(false, new DerOctetString(new DerSequence(KeyPurposeID.IdKPCodeSigning))));
+        extValues.Add(new(false, new DerOctetString(new DerSequence(KeyPurposeID.id_kp_codeSigning))));
       }
 
       Debug.Assert(extOids.Count == extValues.Count);

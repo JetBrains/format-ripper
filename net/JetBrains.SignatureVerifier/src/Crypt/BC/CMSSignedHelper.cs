@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using JetBrains.SignatureVerifier.Crypt.BC.Compat;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.CryptoPro;
@@ -34,7 +35,7 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
     private static readonly IDictionary digestAlgs = Platform.CreateHashtable();
     private static readonly IDictionary digestAliases = Platform.CreateHashtable();
 
-    private static readonly ISet noParams = new HashSet();
+    private static readonly ISet<string> noParams = new HashSet<string>();
     private static readonly IDictionary ecAlgorithms = Platform.CreateHashtable();
 
     private static void AddEntries(DerObjectIdentifier oid, string digest, string encryption)
@@ -224,11 +225,10 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
       return SignerUtilities.GetSigner(algorithm);
     }
 
-    internal IX509Store CreateAttributeStore(
-      string type,
+    internal IStore<X509V2AttributeCertificate> CreateAttributeStore(
       Asn1Set certSet)
     {
-      IList certs = Platform.CreateArrayList();
+      IList<X509V2AttributeCertificate> certs = new List<X509V2AttributeCertificate>();
 
       if (certSet != null)
       {
@@ -259,9 +259,7 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
 
       try
       {
-        return X509StoreFactory.Create(
-          "AttributeCertificate/" + type,
-          new X509CollectionStoreParameters(certs));
+        return CollectionUtilities.CreateStore(certs);
       }
       catch (ArgumentException e)
       {
@@ -269,11 +267,10 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
       }
     }
 
-    internal IX509Store CreateCertificateStore(
-      string type,
+    internal IStore<X509Certificate> CreateCertificateStore(
       Asn1Set certSet)
     {
-      IList certs = Platform.CreateArrayList();
+      IList<X509Certificate> certs = new List<X509Certificate>();
 
       if (certSet != null)
       {
@@ -282,9 +279,7 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
 
       try
       {
-        return X509StoreFactory.Create(
-          "Certificate/" + type,
-          new X509CollectionStoreParameters(certs));
+        return CollectionUtilities.CreateStore(certs);
       }
       catch (ArgumentException e)
       {
@@ -292,11 +287,10 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
       }
     }
 
-    internal IX509Store CreateCrlStore(
-      string type,
+    internal IStore<X509Crl> CreateCrlStore(
       Asn1Set crlSet)
     {
-      IList crls = Platform.CreateArrayList();
+      IList<X509Crl> crls = new List<X509Crl>();
 
       if (crlSet != null)
       {
@@ -305,9 +299,7 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
 
       try
       {
-        return X509StoreFactory.Create(
-          "CRL/" + type,
-          new X509CollectionStoreParameters(crls));
+        return CollectionUtilities.CreateStore(crls);
       }
       catch (ArgumentException e)
       {
@@ -316,7 +308,7 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
     }
 
     private void AddCertsFromSet(
-      IList certs,
+      IList<X509Certificate> certs,
       Asn1Set certSet)
     {
       X509CertificateParser cf = new X509CertificateParser();
@@ -341,7 +333,7 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
     }
 
     private void AddCrlsFromSet(
-      IList crls,
+      IList<X509Crl> crls,
       Asn1Set crlSet)
     {
       X509CrlParser cf = new X509CrlParser();
@@ -437,20 +429,6 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
       }
 
       return encOID;
-    }
-
-    public IX509Store GetCertificates(Asn1Set certificates)
-    {
-      ArrayList certList = new ArrayList();
-      if (certificates != null)
-      {
-        foreach (Asn1Encodable enc in certificates)
-        {
-          certList.Add(X509CertificateStructure.GetInstance(enc));
-        }
-      }
-
-      return new X509CollectionStore(certList);
     }
   }
 }
