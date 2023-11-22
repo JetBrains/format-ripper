@@ -19,7 +19,7 @@ namespace JetBrains.SignatureVerifier.Crypt
 
     public override ISet<string> GetSupportedExtensions()
     {
-      throw new NotImplementedException();
+      throw new NotSupportedException();
     }
 
     public override void Check(X509Certificate cert, ISet<string> unresolvedCritExts)
