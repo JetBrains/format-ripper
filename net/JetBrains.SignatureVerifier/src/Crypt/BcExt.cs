@@ -81,7 +81,7 @@ namespace JetBrains.SignatureVerifier.Crypt
           // look for URIs in fullName
           if (dpn != null)
           {
-            if (dpn.PointType == DistributionPointName.FullName)
+            if (dpn.Type == DistributionPointName.FullName)
             {
               GeneralName[] genNames = GeneralNames.GetInstance(
                 dpn.Name).GetNames();
@@ -123,7 +123,7 @@ namespace JetBrains.SignatureVerifier.Crypt
     public static bool CanSignOcspResponses([NotNull] this X509Certificate cert)
     {
       if (cert == null) throw new ArgumentNullException(nameof(cert));
-      return cert.GetExtendedKeyUsage().Contains(KeyPurposeID.IdKPOcspSigning.Id);
+      return cert.GetExtendedKeyUsage().Any(k => k.Id == KeyPurposeID.id_kp_codeSigning.Id);
     }
 
     /// <summary>

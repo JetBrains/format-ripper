@@ -10,6 +10,7 @@ using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Pkix;
 using Org.BouncyCastle.Security.Certificates;
 using Org.BouncyCastle.Tsp;
+using Org.BouncyCastle.Utilities.Collections;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
@@ -23,7 +24,7 @@ namespace JetBrains.SignatureVerifier.Crypt
   class SignerInfoVerifier
   {
     private readonly SignerInformation _signer;
-    private readonly IX509Store _certs;
+    private readonly IStore<X509Certificate> _certs;
     private readonly CrlProvider _crlProvider;
     private readonly ILogger _logger;
     private TimeStampToken _timeStampToken;
@@ -32,7 +33,7 @@ namespace JetBrains.SignatureVerifier.Crypt
     private List<SignerInformation> CounterSignatures => _counterSignatures ??= getCounterSignatures();
 
     public SignerInfoVerifier([NotNull] SignerInformation signer,
-      [NotNull] IX509Store certs,
+      [NotNull] IStore<X509Certificate> certs,
       CrlProvider crlProvider,
       ILogger logger)
     {
@@ -48,7 +49,7 @@ namespace JetBrains.SignatureVerifier.Crypt
       if (signatureVerificationParams == null)
         throw new ArgumentNullException(nameof(signatureVerificationParams));
 
-      var certList = new ArrayList(_certs.GetMatches(_signer.SignerID));
+      var certList = _certs.EnumerateMatches(_signer.SignerID).ToList();
 
       if (certList.Count < 1)
       {
@@ -58,7 +59,7 @@ namespace JetBrains.SignatureVerifier.Crypt
           { Message = Messages.signer_cert_not_found };
       }
 
-      var cert = (X509Certificate)certList[0];
+      var cert = certList[0];
 
       try
       {
@@ -184,14 +185,14 @@ namespace JetBrains.SignatureVerifier.Crypt
       if (tst == null)
         return VerifySignatureResult.Valid;
 
-      var tstCerts = tst.GetCertificates("Collection");
-      var tstCertsList = new ArrayList(tstCerts.GetMatches(tst.SignerID));
+      var tstCerts = tst.GetCertificates();
+      var tstCertsList = tstCerts.EnumerateMatches(tst.SignerID).ToList();
 
       if (tstCertsList.Count < 1)
         return new VerifySignatureResult(VerifySignatureStatus.InvalidTimestamp)
           { Message = Messages.signer_cert_not_found };
 
-      var tstCert = (X509Certificate)tstCertsList[0];
+      var tstCert = tstCertsList[0];
 
       try
       {
@@ -201,7 +202,7 @@ namespace JetBrains.SignatureVerifier.Crypt
           try
           {
             var tstCmsSignedData = tst.ToCmsSignedData();
-            var certs = tstCmsSignedData.GetCertificates("Collection");
+            var certs = tstCmsSignedData.GetCertificates();
             return await buildCertificateChainAsync(tstCert, certs, signatureVerificationParams);
           }
           catch (PkixCertPathBuilderException ex)
@@ -225,7 +226,7 @@ namespace JetBrains.SignatureVerifier.Crypt
 
     private async Task<VerifySignatureResult> buildCertificateChainAsync(
       X509Certificate primary,
-      IX509Store intermediateCertsStore,
+      IStore<X509Certificate> intermediateCertsStore,
       SignatureVerificationParams signatureVerificationParams)
     {
       _logger.Trace(
@@ -309,7 +310,7 @@ namespace JetBrains.SignatureVerifier.Crypt
         {
           var attrValue = signingTimeAttribute.AttrValues[0];
           var time = Time.GetInstance(attrValue);
-          return time.Date;
+          return time.ToDateTime();
         }
 
         return (DateTime?)null;
@@ -321,7 +322,7 @@ namespace JetBrains.SignatureVerifier.Crypt
     private DateTime? getSigningTime()
     {
       var signingTime = getSignedAttributeValue(CmsAttributes.SigningTime);
-      return signingTime == null ? null : Time.GetInstance(signingTime).Date;
+      return signingTime == null ? null : Time.GetInstance(signingTime).ToDateTime();
     }
 
     private Asn1Encodable getSignedAttributeValue(DerObjectIdentifier oid) =>

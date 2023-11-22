@@ -2,6 +2,8 @@ using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using JetBrains.SignatureVerifier.Crypt.BC;
+using Org.BouncyCastle.Utilities.Collections;
+using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 
 namespace JetBrains.SignatureVerifier.Crypt
@@ -34,14 +36,14 @@ namespace JetBrains.SignatureVerifier.Crypt
 
       _logger?.Trace($"Verify with params: {signatureVerificationParams}");
 
-      var certs = signedMessage.SignedData.GetCertificates("Collection");
+      var certs = signedMessage.SignedData.GetCertificates();
       var signersStore = signedMessage.SignedData.GetSignerInfos();
       return verifySignatureAsync(signersStore, certs, signatureVerificationParams);
     }
 
     private async Task<VerifySignatureResult> verifySignatureAsync(
       SignerInformationStore signersStore,
-      IX509Store certs,
+      IStore<X509Certificate> certs,
       SignatureVerificationParams signatureVerificationParams)
     {
       foreach (SignerInformation signer in signersStore.GetSigners())
