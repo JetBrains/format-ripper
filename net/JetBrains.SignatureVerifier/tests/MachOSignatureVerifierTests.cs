@@ -21,6 +21,13 @@ namespace JetBrains.SignatureVerifier.Tests
     [TestCase(VerifySignatureStatus.Valid, "env-wrapper.x64")]
     [TestCase(VerifySignatureStatus.Valid, "libMonoSupportW.x64.dylib")]
     [TestCase(VerifySignatureStatus.Valid, "libhostfxr.dylib")]
+    [TestCase(VerifySignatureStatus.Valid, "draw.io-7.6.6")]
+    [TestCase(VerifySignatureStatus.Valid, "draw.io-13.9.9")]
+    [TestCase(VerifySignatureStatus.Valid, "draw.io-14.1.8")]
+    [TestCase(VerifySignatureStatus.Valid, "draw.io-22.1.2")]
+    [TestCase(VerifySignatureStatus.Valid, "libquit.dylib")]
+    [TestCase(VerifySignatureStatus.Valid, "libapple_crypto.dylib")]
+    [TestCase(VerifySignatureStatus.Valid, "libspindump.dylib")]
     public async Task VerifySignTest(VerifySignatureStatus expectedResult, string machoResourceName)
     {
       var verificationParams = new SignatureVerificationParams(buildChain: false, withRevocationCheck: false);
@@ -50,6 +57,10 @@ namespace JetBrains.SignatureVerifier.Tests
     [TestCase(VerifySignatureStatus.Valid, apple_root, "env-wrapper.x64")]
     [TestCase(VerifySignatureStatus.Valid, apple_root, "libMonoSupportW.x64.dylib")]
     [TestCase(VerifySignatureStatus.Valid, apple_root, "libhostfxr.dylib")]
+    [TestCase(VerifySignatureStatus.Valid, apple_root, "draw.io-7.6.6")]
+    [TestCase(VerifySignatureStatus.Valid, apple_root, "draw.io-13.9.9")]
+    [TestCase(VerifySignatureStatus.Valid, apple_root, "draw.io-14.1.8")]
+    [TestCase(VerifySignatureStatus.Valid, apple_root, "draw.io-22.1.2")]
     public void VerifySignWithChainTest(
       VerifySignatureStatus expectedResult,
       string codesignRootCertStoreResourceName,
@@ -58,6 +69,38 @@ namespace JetBrains.SignatureVerifier.Tests
       var results = ResourceUtil.OpenRead(ResourceCategory.MachO, codesignRootCertStoreResourceName, codeSignRootsStream =>
         {
           var verificationParams = new SignatureVerificationParams(codeSignRootsStream, withRevocationCheck: false);
+          return GetMachOFile(machOResourceName).Sections
+            .Select(async section =>
+              {
+                var signedMessage = SignedMessage.CreateInstance(section.SignatureData);
+                var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
+                return await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
+              })
+            .Select(_ => _.Result)
+            .ToList();
+        });
+
+      foreach (VerifySignatureResult result in results)
+        Assert.AreEqual(expectedResult, result.Status);
+    }
+
+    [TestCase(VerifySignatureStatus.Valid, apple_root, "libquit.dylib", "2020-1-1")]
+    [TestCase(VerifySignatureStatus.Valid, apple_root, "libapple_crypto.dylib", "2020-1-1")]
+    [TestCase(VerifySignatureStatus.Valid, apple_root, "libspindump.dylib", "2020-1-1")]
+    public void VerifySignWithChainAndExactValidationTimeTest(
+      VerifySignatureStatus expectedResult,
+      string codesignRootCertStoreResourceName,
+      string machOResourceName,
+      DateTime validationTime)
+    {
+      var results = ResourceUtil.OpenRead(ResourceCategory.MachO, codesignRootCertStoreResourceName, codeSignRootsStream =>
+        {
+          var verificationParams = new SignatureVerificationParams(
+            codeSignRootsStream,
+            withRevocationCheck: false,
+            signatureValidationTimeMode: SignatureValidationTimeMode.SignValidationTime,
+            signatureValidationTime: validationTime);
+
           return GetMachOFile(machOResourceName).Sections
             .Select(async section =>
               {
