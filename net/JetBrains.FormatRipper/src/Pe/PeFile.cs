@@ -164,6 +164,8 @@ namespace JetBrains.FormatRipper.Pe
       // 15.	Finalize the hash algorithm context.
       // Note: This procedure uses offset values from the PE/COFF specification, version 8.1 . For authoritative offset values, refer to the most recent version of the PE/COFF specification.
 
+      // See "AuthHashCalc" utility: https://github.com/hfiref0x/AuthHashCalc
+
       var sortedHashIncludeRanges = StreamRangeUtil.Invert(sizeOfHeaders, new List<StreamRange>
           {
             checkSumRange,

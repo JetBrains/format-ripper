@@ -76,6 +76,8 @@ namespace JetBrains.FormatRipper.Compound
 
     public static unsafe CompoundFile Parse(Stream stream, Mode mode = Mode.Default, ExtractFilter? extractFilter = null)
     {
+      // See "Structured Storage Viewer" utility: https://www.mitec.cz/ssv.html
+
       stream.Position = 0;
       CompoundFileHeader cfh;
       StreamUtil.ReadBytes(stream, (byte*)&cfh, sizeof(CompoundFileHeader));
