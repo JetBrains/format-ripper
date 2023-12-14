@@ -5,6 +5,7 @@
     private readonly VerifySignatureStatus _status;
     public VerifySignatureStatus Status => _status;
     public bool NotValid => _status != VerifySignatureStatus.Valid;
+    public bool IsValid => _status == VerifySignatureStatus.Valid;
     public string Message { get; set; }
     public static readonly VerifySignatureResult Valid = new(VerifySignatureStatus.Valid);
 
@@ -23,6 +24,8 @@
     Valid,
     InvalidSignature,
     InvalidChain,
-    InvalidTimestamp
+    InvalidTimestamp,
+    InvalidFileHash,
+    FileIntegrityDataNotFound,
   }
 }
