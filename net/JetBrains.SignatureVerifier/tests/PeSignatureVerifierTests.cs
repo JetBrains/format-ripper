@@ -26,15 +26,16 @@ namespace JetBrains.SignatureVerifier.Tests
     [TestCase(VerifySignatureStatus.InvalidSignature, "ServiceModelRegUI_broken_nested_sign.dll")]
     [TestCase(VerifySignatureStatus.InvalidTimestamp, "ServiceModelRegUI_broken_nested_sign_timestamp.dll")]
     [TestCase(VerifySignatureStatus.Valid           , "shell32.dll")]
-    [TestCase(VerifySignatureStatus.Valid           , "IntelAudioService.exe")]
+    [TestCase(VerifySignatureStatus.InvalidFileHash , "IntelAudioService.exe")]
+    [TestCase(VerifySignatureStatus.Valid           , "IntelAudioService.exe", true)]
     [TestCase(VerifySignatureStatus.InvalidSignature, "libcrypto-1_1-x64.dll")]
     [TestCase(VerifySignatureStatus.InvalidSignature, "libssl-1_1-x64.dll")]
     [TestCase(VerifySignatureStatus.Valid           , "JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe")]
     [TestCase(VerifySignatureStatus.Valid           , "JetBrains.ReSharper.TestResources.dll")]
     [TestCase(VerifySignatureStatus.InvalidTimestamp, "dotnet_broken_timestamp.exe")]
-    [TestCase(VerifySignatureStatus.Valid, "aticfx64.dll")]
+    [TestCase(VerifySignatureStatus.Valid,            "aticfx64.dll")]
     // @formatter:on
-    public async Task VerifySignTest(VerifySignatureStatus expectedResult, string peResourceName)
+    public async Task VerifySignTest(VerifySignatureStatus expectedResult, string peResourceName, bool allowHashMismatches = false)
     {
       var file = ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData | PeFile.Mode.ComputeHashInfo));
       var verificationParams = new SignatureVerificationParams(null, null, false, false);
@@ -45,7 +46,7 @@ namespace JetBrains.SignatureVerifier.Tests
       if (result.IsValid)
       {
         result = ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName,
-          stream => signedMessageVerifier.VerifyFileIntegrityAsync(signedMessage, file.ComputeHashInfo, stream, new FileIntegrityVerificationParams(allowHashMismatches: true)));
+          stream => signedMessageVerifier.VerifyFileIntegrityAsync(signedMessage, file.ComputeHashInfo, stream, new FileIntegrityVerificationParams(allowHashMismatches)));
       }
 
       Assert.AreEqual(expectedResult, result.Status);
