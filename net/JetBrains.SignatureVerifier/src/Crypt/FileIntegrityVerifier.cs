@@ -14,15 +14,30 @@ using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 
 namespace JetBrains.SignatureVerifier.Crypt;
 
+/// <summary>
+/// Class for file hash validation
+/// </summary>
 public class FileIntegrityVerifier
 {
   [NotNull] private readonly SignedMessage _signedMessage;
 
+  /// <summary>
+  /// Constructs new verifier
+  /// </summary>
+  /// <param name="signedMessage">Files signature</param>
   public FileIntegrityVerifier([NotNull] SignedMessage signedMessage)
   {
     _signedMessage = signedMessage;
   }
 
+  /// <summary>
+  /// Calculate file's hash and compare it with value from signature
+  /// </summary>
+  /// <param name="stream">File stream</param>
+  /// <param name="computeHashInfo">Hash computation information</param>
+  /// <param name="verificationParams">Verification parameters</param>
+  /// <returns>Validation result.
+  /// Returns FileIntegrityDataNotFound if the signature token with the expected hash value was not found.</returns>
   public VerifySignatureResult VerifyFileIntegrityAsync(Stream stream, ComputeHashInfo computeHashInfo, FileIntegrityVerificationParams verificationParams)
   {
     var signedDataTokens = GetIndirectDataTokens();
@@ -66,6 +81,11 @@ public class FileIntegrityVerifier
     return result;
   }
 
+  /// <summary>
+  /// Extract SPC_INDIRECT_DATA tokens from SignedData's content and from nested signatures
+  /// stored in unsigned attributes collection.
+  /// </summary>
+  /// <returns>List of SPC_INDIRECT_DATA tokens</returns>
   private IEnumerable<SpcIndirectDataToken> GetIndirectDataTokens()
   {
     List<SpcIndirectDataToken> tokens = new List<SpcIndirectDataToken>();
