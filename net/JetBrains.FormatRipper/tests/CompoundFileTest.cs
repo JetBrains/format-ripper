@@ -40,7 +40,7 @@ namespace JetBrains.FormatRipper.Tests
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static readonly object?[] Sources =
       {
-        MakeSource("2dac4b.msi", CompoundFile.FileType.Msi, CodeOptions.HasCmsBlob, "4D628DAE27082C2FC80D0FD9AAEC6FD095DFCAE306F671A987E785BE13F6F684727F118B71143687D5A440352786218D", "0;0;[4000:278],[4AC0:12],[4B40:C],[4B00:20],[4B80:3C],[4C80:E],[4D00:60],[4E00:248],[6000:1CC5],[5080:3AC],[4BC0:78],[4C40:24],[4CC0:3C],[4DC0:1E],[4A80:24],[49C0:30],[4A00:18],[4A40:2A],[4D80:10],[4280:708],[2050:10]",
+        MakeSource("2dac4b.msi", CompoundFile.FileType.Msi, CodeOptions.HasCmsBlob, "4D628DAE27082C2FC80D0FD9AAEC6FD095DFCAE306F671A987E785BE13F6F684727F118B71143687D5A440352786218D", "0;0;[5440:14],[4000:278],[4AC0:12],[4B40:C],[4B00:20],[4B80:3C],[4C80:E],[4D00:60],[4E00:248],[6000:1CC5],[5080:3AC],[4BC0:78],[4C40:24],[4CC0:3C],[4DC0:1E],[4A80:24],[49C0:30],[4A00:18],[4A40:2A],[4D80:10],[4280:708],[2050:10]",
           new StreamInfo("AF7549BB3D6F120C3F94693939102319D3CC0F40BDDA6DB6C3C42B843614F847", "\x0005DigitalSignature"),
           new StreamInfo("D8C411FDEDE8A4835D4EB6120181633B39A390792E7C918C6119319B72E222A6", "\x0005MsiDigitalSignatureEx"),
           new StreamInfo("EC194B156003A8C8BAFF9F9E6131431D7DE0E58C1004452AAF9B7CA4E536401B", "\x0005SummaryInformation"),
@@ -155,7 +155,7 @@ namespace JetBrains.FormatRipper.Tests
       var hasCmsBlob = (expectedOptions & CodeOptions.HasCmsBlob) == CodeOptions.HasCmsBlob;
       var signedBlob = file.SignatureData.SignedBlob;
       var cmsBlob = file.SignatureData.CmsBlob;
-      
+
       Assert.AreEqual(hasCmsBlob, file.HasSignature);
       Assert.IsNull(signedBlob);
       Assert.AreEqual(hasCmsBlob, cmsBlob != null);

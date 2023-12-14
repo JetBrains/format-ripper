@@ -4,6 +4,9 @@ using Org.BouncyCastle.Asn1.X509;
 
 namespace JetBrains.SignatureVerifier.Crypt.BC.Authenticode;
 
+/// <summary>
+/// Class that represents Microsoft Authenticode structure SpcIndirectDataContent
+/// </summary>
 public class SpcIndirectDataContent
 {
   public DigestInfo DigestInfo { get; private set; }

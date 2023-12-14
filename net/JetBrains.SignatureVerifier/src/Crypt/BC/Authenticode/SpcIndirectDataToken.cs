@@ -6,49 +6,46 @@ using ContentInfo = Org.BouncyCastle.Asn1.Cms.ContentInfo;
 
 namespace JetBrains.SignatureVerifier.Crypt.BC.Authenticode;
 
+/// <summary>
+/// Class that represents Microsoft Authenticode structure SpcIndirectDataToken
+/// </summary>
 public class SpcIndirectDataToken
 {
-  private readonly CmsSignedData _signedData;
-
-  private readonly SignerInformation _signerInfo;
+  public SignerInformation SignerInfo { get; }
 
   public SpcIndirectDataContent IndirectDataContent { get; }
 
   public SpcIndirectDataToken(
-    ContentInfo contentInfo)
-    : this(new CmsSignedData(contentInfo))
-  {
-  }
-
-  public SpcIndirectDataToken(
     CmsSignedData signedData)
   {
-    _signedData = signedData;
+    if (signedData.SignedContent == null)
+      throw new ArgumentException("SignedContent is empty");
 
-    if (!_signedData.SignedContentType.Equals(OIDs.SPC_INDIRECT_DATA))
-    {
+    if (!signedData.SignedContentType.Equals(OIDs.SPC_INDIRECT_DATA))
       throw new CmsException($"Invalid content type. Expected SPC_INDIRECT_DATA, got {signedData.SignedContentType}");
-    }
 
-    ICollection signers = _signedData.GetSignerInfos().GetSigners();
+    ICollection signers = signedData.GetSignerInfos().GetSigners();
 
     if (signers.Count != 1)
-      throw new ArgumentException($"SPC_INDIRECT_DATA token is signed by ${signers.Count} signers, but it must contain only 1 signature.");
+      throw new AuthenticodeException($"SPC_INDIRECT_DATA token is signed by ${signers.Count} signers, but it must contain only 1 signature.");
 
     IEnumerator signerEnum = signers.GetEnumerator();
 
     signerEnum.MoveNext();
-    _signerInfo = (SignerInformation)signerEnum.Current;
+    SignerInfo = (SignerInformation)signerEnum.Current;
+
+    Pkcs7ProcessableObject pkcs7ProcessableObject = signedData.SignedContent as Pkcs7ProcessableObject;
+
+    if (pkcs7ProcessableObject == null)
+      throw new AuthenticodeException($"Invalid type of SignedContent: ${signedData.SignedContent.GetType()}");
 
     try
     {
-      Pkcs7ProcessableObject pkcs7ProcessableObject = _signedData.SignedContent as Pkcs7ProcessableObject;
-
       IndirectDataContent = SpcIndirectDataContent.GetInstance(pkcs7ProcessableObject.GetContent());
     }
-    catch (CmsException e)
+    catch (Exception e)
     {
-      throw new TspException(e.Message, e.InnerException);
+      throw new AuthenticodeException(e.Message, e.InnerException);
     }
   }
 }
