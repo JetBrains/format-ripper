@@ -48,7 +48,7 @@ public class FileIntegrityVerifier
     var algorithms = signedDataTokens
       .Select(t => t.IndirectDataContent.DigestInfo.AlgorithmID);
 
-    Dictionary<AlgorithmIdentifier, byte[]> hashes = BcHashUtil.ComputeHashes(stream, computeHashInfo, algorithms);
+    IDictionary<AlgorithmIdentifier, byte[]> hashes = HashUtil.ComputeHashes(stream, computeHashInfo, algorithms);
 
     foreach (var spcIndirectDataToken in signedDataTokens)
     {
