@@ -40,7 +40,6 @@ namespace JetBrains.SignatureVerifier.Tests
       var file = ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData | PeFile.Mode.ComputeHashInfo));
       var verificationParams = new SignatureVerificationParams(null, null, false, false);
       var signedMessage = SignedMessage.CreateInstance(file.SignatureData);
-
       var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
       var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 

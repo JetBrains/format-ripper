@@ -21,8 +21,7 @@ namespace JetBrains.SignatureVerifier.Tests
           Assert.IsNotNull(file.ComputeHashInfo);
           return HashUtil.ComputeHash(stream, file.ComputeHashInfo, new HashAlgorithmName(hashAlgorithmName));
         });
-      var fileHash = HexUtil.ConvertToHexString(hash);
-      Assert.AreEqual(expectedHash, fileHash);
+      Assert.AreEqual(expectedHash, HexUtil.ConvertToHexString(hash));
     }
   }
 }

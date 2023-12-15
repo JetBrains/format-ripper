@@ -314,11 +314,7 @@ namespace JetBrains.FormatRipper.Compound
 
         foreach (var entry in directoryEntries)
         {
-          if (entry is
-              {
-                ObjectType: STGTY.STGTY_STREAM, StreamSize: > 0,
-                Name: not (DirectoryNames.DigitalSignatureName or DirectoryNames.MsiDigitalSignatureExName)
-              })
+          if (entry is { ObjectType: STGTY.STGTY_STREAM, StreamSize: > 0, Name: not (DirectoryNames.DigitalSignatureName or DirectoryNames.MsiDigitalSignatureExName) })
             sortedDirectoryEntries.Add(entry);
 
           if (entry.Name == DirectoryNames.MsiDigitalSignatureExName)
