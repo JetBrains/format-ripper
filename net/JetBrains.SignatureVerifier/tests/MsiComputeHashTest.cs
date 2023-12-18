@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography;
-using JetBrains.FormatRipper.Compound;
+﻿using JetBrains.FormatRipper.Compound;
 using NUnit.Framework;
 
 namespace JetBrains.SignatureVerifier.Tests
@@ -19,7 +18,7 @@ namespace JetBrains.SignatureVerifier.Tests
         {
           var file = CompoundFile.Parse(stream, CompoundFile.Mode.ComputeHashInfo);
           Assert.IsNotNull(file.ComputeHashInfo);
-          return HashUtil.ComputeHash(stream, file.ComputeHashInfo, new HashAlgorithmName(hashAlgorithmName));
+          return HashUtil.ComputeHash(stream, file.ComputeHashInfo, hashAlgorithmName);
         });
       Assert.AreEqual(expectedHash, HexUtil.ConvertToHexString(hash));
     }

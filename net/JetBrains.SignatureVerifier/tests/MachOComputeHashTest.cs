@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Security.Cryptography;
 using JetBrains.FormatRipper.MachO;
 using NUnit.Framework;
 
@@ -23,7 +22,7 @@ namespace JetBrains.SignatureVerifier.Tests
         .Select(_ =>
           {
             Assert.IsNotNull(_.ComputeHashInfo);
-            return HashUtil.ComputeHash(stream, _.ComputeHashInfo, new HashAlgorithmName(hashAlgorithmName));
+            return HashUtil.ComputeHash(stream, _.ComputeHashInfo, hashAlgorithmName);
           }).ToArray());
       Assert.AreEqual(expectedHashes.Length, hashes.Length);
       for (var index = 0; index < expectedHashes.Length; ++index)
