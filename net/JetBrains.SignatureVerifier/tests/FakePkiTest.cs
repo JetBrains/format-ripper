@@ -112,7 +112,7 @@ namespace JetBrains.SignatureVerifier.Tests
         cmsGen.AddCertificates(getStore(cert));
 
       var peFile = PeFile.Parse(peStream, PeFile.Mode.ComputeHashInfo);
-      var hash = HashUtil.ComputeHash(peStream, peFile.ComputeHashInfo, HashAlgorithmName.SHA1);
+      var hash = HashUtil.ComputeHash(peStream, peFile.ComputeHashInfo, HashAlgorithmName.SHA1.Name);
       var content = createCmsSignedData(hash);
       var contentData = content.GetDerEncoded();
       CmsSignedData cmsSignedData =
