@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Org.BouncyCastle.Pkix;
@@ -21,8 +22,8 @@ namespace JetBrains.SignatureVerifier.Crypt
     private string SignatureValidationTimeFormatted =>
       SignatureValidationTime.HasValue ? SignatureValidationTime.ToString() : "<null>";
 
-    private HashSet _rootCertificates;
-    internal HashSet RootCertificates => _rootCertificates ??= readRootCertificates();
+    private HashSet<TrustAnchor> _rootCertificates;
+    internal HashSet<TrustAnchor> RootCertificates => _rootCertificates ??= readRootCertificates();
 
     /// <summary>
     /// Initialize SignatureVerificationParams
@@ -68,13 +69,13 @@ namespace JetBrains.SignatureVerifier.Crypt
       SignatureValidationTime = signValidationTime;
     }
 
-    private HashSet readRootCertificates()
+    private HashSet<TrustAnchor> readRootCertificates()
     {
       if (_signRootCertStore is null
           && _timestampRootCertStore is null)
         return null;
 
-      HashSet rootCerts = new HashSet();
+      HashSet<TrustAnchor> rootCerts = new HashSet<TrustAnchor>();
       X509CertificateParser parser = new X509CertificateParser();
       addCerts(_signRootCertStore);
       addCerts(_timestampRootCertStore);
@@ -85,9 +86,13 @@ namespace JetBrains.SignatureVerifier.Crypt
         if (storeStream is not null)
         {
           storeStream.Position = 0;
-          rootCerts.AddAll(parser.ReadCertificates(storeStream)
-            .Cast<X509Certificate>()
-            .Select(cert => new TrustAnchor(cert, new byte[0])));
+          var certsToAdd = parser.ReadCertificates(storeStream)
+            .Select(cert => new TrustAnchor(cert, new byte[0]));
+
+          foreach (var trustAnchor in certsToAdd)
+          {
+            rootCerts.Add(trustAnchor);
+          }
         }
       }
     }

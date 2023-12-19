@@ -1,7 +1,11 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using JetBrains.FormatRipper;
 using JetBrains.SignatureVerifier.Crypt.BC;
+using Org.BouncyCastle.Utilities.Collections;
+using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 
 namespace JetBrains.SignatureVerifier.Crypt
@@ -34,14 +38,14 @@ namespace JetBrains.SignatureVerifier.Crypt
 
       _logger?.Trace($"Verify with params: {signatureVerificationParams}");
 
-      var certs = signedMessage.SignedData.GetCertificates("Collection");
+      var certs = signedMessage.SignedData.GetCertificates();
       var signersStore = signedMessage.SignedData.GetSignerInfos();
       return verifySignatureAsync(signersStore, certs, signatureVerificationParams);
     }
 
     private async Task<VerifySignatureResult> verifySignatureAsync(
       SignerInformationStore signersStore,
-      IX509Store certs,
+      IStore<X509Certificate> certs,
       SignatureVerificationParams signatureVerificationParams)
     {
       foreach (SignerInformation signer in signersStore.GetSigners())
@@ -54,6 +58,22 @@ namespace JetBrains.SignatureVerifier.Crypt
       }
 
       return VerifySignatureResult.Valid;
+    }
+
+    public VerifySignatureResult VerifyFileIntegrityAsync(
+      [NotNull] SignedMessage signedMessage,
+      [NotNull] ComputeHashInfo computeHashInfo,
+      [NotNull] Stream file,
+      [NotNull] FileIntegrityVerificationParams verificationParams)
+    {
+      if (signedMessage == null) throw new ArgumentNullException(nameof(signedMessage));
+      if (computeHashInfo == null)  throw new ArgumentNullException(nameof(computeHashInfo));
+      if (file == null) throw new ArgumentNullException(nameof(file));
+      if (verificationParams == null) throw new ArgumentNullException(nameof(verificationParams));
+
+      var siv = new FileIntegrityVerifier(signedMessage);
+
+      return siv.VerifyFileIntegrityAsync(file, computeHashInfo, verificationParams);
     }
   }
 }

@@ -76,6 +76,8 @@ namespace JetBrains.FormatRipper.Compound
 
     public static unsafe CompoundFile Parse(Stream stream, Mode mode = Mode.Default, ExtractFilter? extractFilter = null)
     {
+      // See "Structured Storage Viewer" utility: https://www.mitec.cz/ssv.html
+
       stream.Position = 0;
       CompoundFileHeader cfh;
       StreamUtil.ReadBytes(stream, (byte*)&cfh, sizeof(CompoundFileHeader));
@@ -308,9 +310,17 @@ namespace JetBrains.FormatRipper.Compound
       if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
       {
         var sortedDirectoryEntries = new List<DirectoryEntry>();
+        DirectoryEntry? msiDigitalSignatureExEntry = null;
+
         foreach (var entry in directoryEntries)
+        {
           if (entry is { ObjectType: STGTY.STGTY_STREAM, StreamSize: > 0, Name: not (DirectoryNames.DigitalSignatureName or DirectoryNames.MsiDigitalSignatureExName) })
             sortedDirectoryEntries.Add(entry);
+
+          if (entry.Name == DirectoryNames.MsiDigitalSignatureExName)
+            msiDigitalSignatureExEntry = entry;
+        }
+
         sortedDirectoryEntries.Sort((x, y) =>
           {
             // Note(ww898): Compatibility with previous version!!!
@@ -325,6 +335,11 @@ namespace JetBrains.FormatRipper.Compound
           });
 
         var orderedIncludeRanges = new List<StreamRange>();
+
+        // This entry should be hashed first
+        if (msiDigitalSignatureExEntry != null)
+          Walk(msiDigitalSignatureExEntry.StreamSize < miniStreamCutoffSize, msiDigitalSignatureExEntry.StartingSectorLocation, 0, msiDigitalSignatureExEntry.StreamSize, _ => orderedIncludeRanges.Add(_));
+
         foreach (var entry in sortedDirectoryEntries)
           Walk(entry.StreamSize < miniStreamCutoffSize, entry.StartingSectorLocation, 0, entry.StreamSize, _ => orderedIncludeRanges.Add(_));
 

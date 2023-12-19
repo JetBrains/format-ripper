@@ -316,14 +316,15 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
     }
 
     /**
-		* return the DER encoding of the signed attributes.
+		* return the BER encoding of the signed attributes.
+    * BER encoding keeps original ordering of the signed attributes instead of DER encoding which sorts sets
 		* @throws IOException if an encoding error occurs.
 		*/
     public byte[] GetEncodedSignedAttributes()
     {
       return signedAttributeSet == null
         ? null
-        : signedAttributeSet.GetEncoded(Asn1Encodable.Der);
+        : signedAttributeSet.GetEncoded(Asn1Encodable.Ber);
     }
 
     private bool DoVerify(
@@ -607,7 +608,7 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
 
           byte[] sigHash = digInfo.GetDigest();
 
-          return Arrays.ConstantTimeAreEqual(digest, sigHash);
+          return Arrays.FixedTimeEquals(digest, sigHash);
         }
         else if (algorithm.Equals("DSA"))
         {
@@ -666,10 +667,11 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
       Time signingTime = GetSigningTime();
       if (signingTime != null)
       {
-        cert.CheckValidity(signingTime.Date);
+        cert.CheckValidity(signingTime.ToDateTime());
       }
 
-      return DoVerify(cert.GetPublicKey());
+      var pubKey = cert.GetPublicKey();
+      return DoVerify(pubKey);
     }
 
     /**

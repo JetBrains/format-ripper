@@ -14,11 +14,11 @@ namespace JetBrains.SignatureVerifier.Crypt
 {
   class CustomPkixBuilderParameters : PkixBuilderParameters
   {
-    [NotNull] private readonly IX509Store _intermediateCertsStore;
+    [NotNull] private readonly IStore<X509Certificate> _intermediateCertsStore;
     [NotNull] private readonly X509CertStoreSelector _primaryCertHolder;
 
-    public CustomPkixBuilderParameters([NotNull] HashSet rootCertificates,
-      [NotNull] IX509Store intermediateCertsStore,
+    public CustomPkixBuilderParameters([NotNull] HashSet<TrustAnchor> rootCertificates,
+      [NotNull] IStore<X509Certificate> intermediateCertsStore,
       [NotNull] X509CertStoreSelector primaryCertHolder,
       DateTime? signValidationTime)
       : base(rootCertificates, primaryCertHolder)
@@ -30,9 +30,9 @@ namespace JetBrains.SignatureVerifier.Crypt
       _intermediateCertsStore = intermediateCertsStore;
       _primaryCertHolder = primaryCertHolder;
       ValidityModel = ChainValidityModel;
-      Date = signValidationTime.HasValue ? new DateTimeObject(signValidationTime.Value) : null;
+      Date = signValidationTime;
       IsRevocationEnabled = false;
-      AddStore(intermediateCertsStore);
+      AddStoreCert(intermediateCertsStore);
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ namespace JetBrains.SignatureVerifier.Crypt
     {
       if (crlProvider == null) throw new ArgumentNullException(nameof(crlProvider));
 
-      var certs = _intermediateCertsStore.GetMatches(null).Cast<X509Certificate>().ToList();
+      var certs = _intermediateCertsStore.EnumerateMatches(null).ToList();
       certs.Add(_primaryCertHolder.Certificate);
       certs.RemoveAll(cert => cert.IsSelfSigned());
       var allCerts = certs.Distinct(new X509CertificateEquComparer()).ToList();
@@ -56,16 +56,16 @@ namespace JetBrains.SignatureVerifier.Crypt
         return true;
 
       var crlStore = getCrlStore(allCrls);
-      AddStore(crlStore);
+      AddStoreCrl(crlStore);
       IsRevocationEnabled = true;
 
       return false;
     }
 
-    public override IList GetCertPathCheckers()
+    public override IList<PkixCertPathChecker> GetCertPathCheckers()
     {
       var cpc = new CustomPkixCertPathChecker();
-      return new List<CustomPkixCertPathChecker> { cpc };
+      return new List<PkixCertPathChecker>() { cpc };
     }
 
     private async Task<List<X509Crl>> getCrlsForCertsAsync(CrlProvider crlProvider, List<X509Certificate> allCerts)
@@ -91,12 +91,9 @@ namespace JetBrains.SignatureVerifier.Crypt
     }
 
 
-    private IX509Store getCrlStore(List<X509Crl> crls)
+    private IStore<X509Crl> getCrlStore(List<X509Crl> crls)
     {
-      IX509Store crlStore = X509StoreFactory.Create(
-        "CRL/Collection",
-        new X509CollectionStoreParameters(crls));
-
+      IStore<X509Crl> crlStore = CollectionUtilities.CreateStore(crls);
       return crlStore;
     }
   }

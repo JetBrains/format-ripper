@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography;
-using JetBrains.FormatRipper.Pe;
+﻿using JetBrains.FormatRipper.Pe;
 using NUnit.Framework;
 
 namespace JetBrains.SignatureVerifier.Tests
@@ -37,7 +36,7 @@ namespace JetBrains.SignatureVerifier.Tests
         {
           var file = PeFile.Parse(stream, PeFile.Mode.ComputeHashInfo);
           Assert.IsNotNull(file.ComputeHashInfo);
-          return HashUtil.ComputeHash(stream, file.ComputeHashInfo, new HashAlgorithmName(hashAlgorithmName));
+          return HashUtil.ComputeHash(stream, file.ComputeHashInfo, hashAlgorithmName);
         });
       Assert.AreEqual(expectedResult, HexUtil.ConvertToHexString(result));
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using JetBrains.SignatureVerifier.Crypt.BC.Compat;
 using Org.BouncyCastle.Asn1;
@@ -22,9 +23,6 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
 {
   public class TspUtil
   {
-    private static ISet EmptySet = CollectionUtilities.ReadOnly(new HashSet());
-    private static IList EmptyList = CollectionUtilities.ReadOnly(Platform.CreateArrayList());
-
     private static readonly IDictionary digestLengths = Platform.CreateHashtable();
     private static readonly IDictionary digestNames = Platform.CreateHashtable();
 
@@ -102,7 +100,7 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
                 GetDigestAlgName(tstInfo.MessageImprintAlgOid),
                 signerInfo.GetSignature());
 
-              if (!Arrays.ConstantTimeAreEqual(expectedDigest, tstInfo.GetMessageImprintDigest()))
+              if (!Arrays.FixedTimeEquals(expectedDigest, tstInfo.GetMessageImprintDigest()))
                 throw new TspValidationException("Incorrect digest in message imprint");
 
               timestamps.Add(timeStampToken);
@@ -158,7 +156,7 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
         ExtendedKeyUsage extKey = ExtendedKeyUsage.GetInstance(
           Asn1Object.FromByteArray(ext.GetOctets()));
 
-        if (!extKey.HasKeyPurposeId(KeyPurposeID.IdKPTimeStamping) || extKey.Count != 1)
+        if (!extKey.HasKeyPurposeId(KeyPurposeID.id_kp_timeStamping) || extKey.Count != 1)
           throw new TspValidationException("ExtendedKeyUsage not solely time stamping.");
       }
       catch (IOException)
@@ -196,29 +194,29 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
       return DigestUtilities.GetDigest(digestName);
     }
 
-    internal static ISet GetCriticalExtensionOids(X509Extensions extensions)
+    internal static ISet<DerObjectIdentifier> GetCriticalExtensionOids(X509Extensions extensions)
     {
       if (extensions == null)
-        return EmptySet;
+        return CollectionUtilities.ReadOnly(new HashSet<DerObjectIdentifier>());
 
-      return CollectionUtilities.ReadOnly(new HashSet(extensions.GetCriticalExtensionOids()));
+      return CollectionUtilities.ReadOnly(new HashSet<DerObjectIdentifier>(extensions.GetCriticalExtensionOids()));
     }
 
-    internal static ISet GetNonCriticalExtensionOids(X509Extensions extensions)
+    internal static ISet<DerObjectIdentifier> GetNonCriticalExtensionOids(X509Extensions extensions)
     {
       if (extensions == null)
-        return EmptySet;
+        return CollectionUtilities.ReadOnly(new HashSet<DerObjectIdentifier>());
 
       // TODO: should probably produce a set that imposes correct ordering
-      return CollectionUtilities.ReadOnly(new HashSet(extensions.GetNonCriticalExtensionOids()));
+      return CollectionUtilities.ReadOnly(new HashSet<DerObjectIdentifier>(extensions.GetNonCriticalExtensionOids()));
     }
 
-    internal static IList GetExtensionOids(X509Extensions extensions)
+    internal static IList<DerObjectIdentifier> GetExtensionOids(X509Extensions extensions)
     {
       if (extensions == null)
-        return EmptyList;
+        return CollectionUtilities.ReadOnly(new List<DerObjectIdentifier>());
 
-      return CollectionUtilities.ReadOnly(Platform.CreateArrayList(extensions.GetExtensionOids()));
+      return CollectionUtilities.ReadOnly(extensions.GetExtensionOids());
     }
   }
 }

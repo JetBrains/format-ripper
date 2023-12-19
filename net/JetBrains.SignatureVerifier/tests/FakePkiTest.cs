@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using Org.BouncyCastle.Asn1.Oiw;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Utilities.Collections;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
 using X509Certificate = Org.BouncyCastle.X509.X509Certificate;
@@ -107,10 +109,10 @@ namespace JetBrains.SignatureVerifier.Tests
       cmsGen.AddSigner(keyPairPrivate, cert, OiwObjectIdentifiers.IdSha1.Id);
 
       if (addSignerCert)
-        cmsGen.AddCertificates(getStore(StoreType.CERTIFICATE, cert));
+        cmsGen.AddCertificates(getStore(cert));
 
       var peFile = PeFile.Parse(peStream, PeFile.Mode.ComputeHashInfo);
-      var hash = HashUtil.ComputeHash(peStream, peFile.ComputeHashInfo, HashAlgorithmName.SHA1);
+      var hash = HashUtil.ComputeHash(peStream, peFile.ComputeHashInfo, HashAlgorithmName.SHA1.Name);
       var content = createCmsSignedData(hash);
       var contentData = content.GetDerEncoded();
       CmsSignedData cmsSignedData =
@@ -149,7 +151,7 @@ namespace JetBrains.SignatureVerifier.Tests
     private static Stream getRootStoreStream(X509Certificate cert)
     {
       var cmsGen = new CmsSignedDataGenerator();
-      cmsGen.AddCertificates(getStore(StoreType.CERTIFICATE, cert));
+      cmsGen.AddCertificates(getStore(cert));
       CmsSignedData cmsSignedData = cmsGen.Generate(new CmsProcessableByteArray(new byte[] { }), false);
       var data = cmsSignedData.GetEncoded();
       return new MemoryStream(data);
@@ -165,15 +167,9 @@ namespace JetBrains.SignatureVerifier.Tests
         });
     }
 
-    private static IX509Store getStore(StoreType storeType, params X509ExtensionBase[] items)
+    private static IStore<X509Certificate> getStore(params X509Certificate[] items)
     {
-      return X509StoreFactory.Create($"{storeType}/COLLECTION", new X509CollectionStoreParameters(items));
-    }
-
-    enum StoreType
-    {
-      CERTIFICATE,
-      CRL
+      return CollectionUtilities.CreateStore(items);
     }
   }
 }
