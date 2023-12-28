@@ -1,6 +1,6 @@
 import jetbrains.sign.GpgSignSignatoryProvider
 
-val kotlinVersion = "1.6.10"
+val kotlinVersion = "1.6.21"
 val junitVersion = "5.8.2"
 val mockitoVersion = "4.2.0"
 val isUnderTeamCity = System.getenv("TEAMCITY_VERSION") != null
@@ -15,7 +15,7 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version "1.6.21"
     signing
     `maven-publish`
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
@@ -36,8 +36,8 @@ dependencies {
     implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
     implementation("org.bouncycastle:bcutil-jdk15on:1.70")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")
     implementation("org.apache.commons:commons-compress:1.21")
 
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
