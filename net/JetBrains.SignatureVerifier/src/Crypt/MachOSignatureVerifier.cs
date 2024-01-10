@@ -21,15 +21,26 @@ namespace JetBrains.SignatureVerifier.Crypt;
 /// </summary>
 public class MachOSignatureVerifier
 {
-  [CanBeNull] private readonly ILogger _logger;
+  private readonly ILogger _logger;
+  private readonly SignedMessageVerifier _signedMessageVerifier;
 
   /// <summary>
   /// Constructs new verifier
   /// </summary>
   /// <param name="logger">Logger</param>
-  public MachOSignatureVerifier([CanBeNull] ILogger logger)
+  public MachOSignatureVerifier([CanBeNull] ILogger logger) : this(new SignedMessageVerifier(logger), logger)
   {
-    _logger = logger;
+  }
+
+  /// <summary>
+  /// Constructs new verifier
+  /// </summary>
+  /// <param name="signedMessageVerifier">Signed message verifier</param>
+  /// <param name="logger">Logger</param>
+  public MachOSignatureVerifier([NotNull] SignedMessageVerifier signedMessageVerifier, [CanBeNull] ILogger logger)
+  {
+    _signedMessageVerifier = signedMessageVerifier ?? throw new ArgumentNullException(nameof(signedMessageVerifier));
+    _logger = logger ?? NullLogger.Instance;
   }
 
   /// <summary>
@@ -38,12 +49,20 @@ public class MachOSignatureVerifier
   /// <param name="machOFile">Parsed Mach-o file</param>
   /// <param name="stream">Mach-o file raw stream</param>
   /// <param name="signatureVerificationParams">Verification params</param>
+  /// <param name="fileIntegrityVerificationParams">File integrity verification params</param>
   /// <returns>Verification result</returns>
-  public async Task<VerifySignatureResult> VerifyAsync(MachOFile machOFile, Stream stream, SignatureVerificationParams signatureVerificationParams)
+  public async Task<VerifySignatureResult> VerifyAsync(
+    [NotNull] MachOFile machOFile,
+    [NotNull] Stream stream,
+    SignatureVerificationParams signatureVerificationParams,
+    FileIntegrityVerificationParams fileIntegrityVerificationParams)
   {
+    if (machOFile == null) throw new ArgumentNullException(nameof(machOFile));
+    if (stream == null) throw new ArgumentNullException(nameof(stream));
+
     foreach (var section in machOFile.Sections)
     {
-      var sectionVerificationResult = await VerifyAsync(section, stream, signatureVerificationParams);
+      var sectionVerificationResult = await VerifyAsync(section, stream, signatureVerificationParams, fileIntegrityVerificationParams);
 
       if (!sectionVerificationResult.IsValid)
         return sectionVerificationResult;
@@ -58,12 +77,19 @@ public class MachOSignatureVerifier
   /// <param name="section">Mach-o file section</param>
   /// <param name="stream">Mach-o file raw stream. A stream of the entire file is expected.</param>
   /// <param name="signatureVerificationParams">Verification params</param>
+  /// <param name="fileIntegrityVerificationParams">File integrity verification params</param>
   /// <returns>Verification result</returns>
-  public async Task<VerifySignatureResult> VerifyAsync(MachOFile.Section section, Stream stream, SignatureVerificationParams signatureVerificationParams)
+  public async Task<VerifySignatureResult> VerifyAsync(
+    MachOFile.Section section,
+    Stream stream,
+    SignatureVerificationParams signatureVerificationParams,
+    FileIntegrityVerificationParams fileIntegrityVerificationParams)
   {
+    if (!section.HashVerificationUnits.Any() || !section.CDHashes.Any())
+      throw new ArgumentException($"Mach-o file was parsed without {nameof(MachOFile.Mode.ComputeHashInfo)} flag", nameof(section));
+
     var signedMessage = SignedMessage.CreateInstance(section.SignatureData);
-    var signedMessageVerifier = new SignedMessageVerifier(_logger);
-    var signatureVerificationResult = await signedMessageVerifier.VerifySignatureAsync(signedMessage, signatureVerificationParams);
+    var signatureVerificationResult = await _signedMessageVerifier.VerifySignatureAsync(signedMessage, signatureVerificationParams);
 
     if (!signatureVerificationResult.IsValid)
       return signatureVerificationResult;
@@ -87,6 +113,12 @@ public class MachOSignatureVerifier
     return VerifySignatureResult.Valid;
   }
 
+  /// <summary>
+  /// Verify hash slots (regular and special) in all Code Directories
+  /// </summary>
+  /// <param name="stream">File stream</param>
+  /// <param name="section">Mach-o section to verify</param>
+  /// <returns>Code directories verification result</returns>
   private static VerifySignatureResult VerifyCodeDirectories(Stream stream, MachOFile.Section section)
   {
     if (!section.HashVerificationUnits.Any())
@@ -105,6 +137,13 @@ public class MachOSignatureVerifier
     return VerifySignatureResult.Valid;
   }
 
+  /// <summary>
+  /// Verify Code Directories integrity
+  /// </summary>
+  /// <param name="stream">Mach-o file stream</param>
+  /// <param name="cdHashesInfo">Code Directories hash calculation info</param>
+  /// <param name="sectionSignature">Signed message</param>
+  /// <returns>Code Directories integrity verification result</returns>
   private VerifySignatureResult VerifyCDHashes(Stream stream, IEnumerable<CDHash> cdHashesInfo, SignedMessage sectionSignature)
   {
     Dictionary<AlgorithmIdentifier, byte[]> hashesToVerify = new Dictionary<AlgorithmIdentifier, byte[]>();
@@ -168,6 +207,11 @@ public class MachOSignatureVerifier
     return hashesToVerify.Count == 0 ? VerifySignatureResult.Valid : new VerifySignatureResult(VerifySignatureStatus.InvalidFileHash);
   }
 
+  /// <summary>
+  /// Get expected CDHash values from APPLE_HASH_AGILITY_V2 (1.2.840.113635.100.9.2) attribute
+  /// </summary>
+  /// <param name="signedMessage">Signed message</param>
+  /// <returns>List of DigestInfos which contains hash function oid and expected value</returns>
   private IEnumerable<DigestInfo> GetHashAgilityV2Hashes(SignedMessage signedMessage)
   {
     List<DigestInfo> tokens = new List<DigestInfo>();
@@ -202,6 +246,11 @@ public class MachOSignatureVerifier
     return tokens;
   }
 
+  /// <summary>
+  /// Get expected CDHash values from APPLE_HASH_AGILITY (1.2.840.113635.100.9.1) attribute
+  /// </summary>
+  /// <param name="signedMessage">Signed message</param>
+  /// <returns>List of expected hash values (without hash algorithm id)</returns>
   private IEnumerable<byte[]> GetHashAgilityV1Hashes(SignedMessage signedMessage)
   {
     List<byte[]> hashesList = new List<byte[]>();
