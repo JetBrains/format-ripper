@@ -39,7 +39,7 @@ namespace JetBrains.SignatureVerifier.Tests
       {
         MachOSignatureVerifier signatureVerifier = new MachOSignatureVerifier(ConsoleLogger.Instance);
 
-        return signatureVerifier.VerifyAsync(machOFile, stream, verificationParams);
+        return signatureVerifier.VerifyAsync(machOFile, stream, verificationParams, FileIntegrityVerificationParams.Default);
       });
 
       Assert.AreEqual(expectedResult, result.Status);
@@ -82,7 +82,7 @@ namespace JetBrains.SignatureVerifier.Tests
             return GetMachOFile(machOResourceName).Sections
               .Select(async section =>
               {
-                return await signatureVerifier.VerifyAsync(section, stream, verificationParams);
+                return await signatureVerifier.VerifyAsync(section, stream, verificationParams, FileIntegrityVerificationParams.Default);
               })
               .Select(_ => _.Result)
               .ToList();
@@ -117,7 +117,7 @@ namespace JetBrains.SignatureVerifier.Tests
             return GetMachOFile(machOResourceName).Sections
               .Select(async section =>
               {
-                return await signatureVerifier.VerifyAsync(section, stream, verificationParams);
+                return await signatureVerifier.VerifyAsync(section, stream, verificationParams, FileIntegrityVerificationParams.Default);
               })
               .Select(_ => _.Result)
               .ToList();

@@ -39,15 +39,11 @@ namespace JetBrains.SignatureVerifier.Tests
     {
       var file = ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData | PeFile.Mode.ComputeHashInfo));
       var verificationParams = new SignatureVerificationParams(null, null, false, false);
-      var signedMessage = SignedMessage.CreateInstance(file.SignatureData);
-      var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
-      var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 
-      if (result.IsValid)
-      {
-        result = ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName,
-          stream => signedMessageVerifier.VerifyFileIntegrityAsync(signedMessage, file.ComputeHashInfo, stream, new FileIntegrityVerificationParams(allowHashMismatches)));
-      }
+      var authenticodeSignatureVerifier = new AuthenticodeSignatureVerifier(ConsoleLogger.Instance);
+
+      var result = await ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName,
+        async stream => await authenticodeSignatureVerifier.VerifyAsync(file, stream, verificationParams, new FileIntegrityVerificationParams(allowHashMismatches)));
 
       Assert.AreEqual(expectedResult, result.Status);
     }
