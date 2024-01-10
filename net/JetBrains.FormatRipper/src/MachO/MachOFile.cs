@@ -19,6 +19,8 @@ namespace JetBrains.FormatRipper.MachO
       public readonly bool HasSignature;
       public readonly SignatureData SignatureData;
       public readonly ComputeHashInfo? ComputeHashInfo;
+      public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
+      public readonly IEnumerable<CDHash> CDHashes;
 
       internal Section(
         bool isLittleEndian,
@@ -28,7 +30,9 @@ namespace JetBrains.FormatRipper.MachO
         MH_Flags mhFlags,
         bool hasSignature,
         SignatureData signatureData,
-        ComputeHashInfo? computeHashInfo)
+        ComputeHashInfo? computeHashInfo,
+        IEnumerable<HashVerificationUnit> hashVerificationUnits,
+        IEnumerable<CDHash> cdHashes)
       {
         IsLittleEndian = isLittleEndian;
         CpuType = cpuType;
@@ -38,6 +42,8 @@ namespace JetBrains.FormatRipper.MachO
         HasSignature = hasSignature;
         SignatureData = signatureData;
         ComputeHashInfo = computeHashInfo;
+        HashVerificationUnits = hashVerificationUnits;
+        CDHashes = cdHashes;
       }
     }
 
@@ -137,6 +143,9 @@ namespace JetBrains.FormatRipper.MachO
           var hasSignature = false;
           byte[]? codeDirectoryBlob = null;
           byte[]? cmsSignatureBlob = null;
+          List<HashVerificationUnit> hashVerificationUnits = new List<HashVerificationUnit>();
+          List<CDHash> cdHashes = new List<CDHash>();
+
           fixed (byte* buf = StreamUtil.ReadBytes(stream, checked((int)sizeOfCmds)))
           {
             for (var cmdPtr = buf; nCmds-- > 0;)
@@ -200,24 +209,98 @@ namespace JetBrains.FormatRipper.MachO
                     var csCount = MemoryUtil.GetBeU4(cssb.count);
                     fixed (byte* scBuf = StreamUtil.ReadBytes(stream, checked((int)csLength - sizeof(CS_SuperBlob))))
                     {
+                      ComputeHashInfo[] specialSlotPositions = new ComputeHashInfo[CSSLOT.CSSLOT_HASHABLE_ENTRIES_MAX - 1];
+
+                      for(int superBlobEntryIndex = 0; superBlobEntryIndex < csCount; superBlobEntryIndex++)
+                      {
+                        var scPtr = scBuf + superBlobEntryIndex * sizeof(CS_BlobIndex);
+                        CS_BlobIndex csbi;
+                        MemoryUtil.CopyBytes(scPtr, (byte*)&csbi, sizeof(CS_BlobIndex));
+                        uint slotType = MemoryUtil.GetBeU4(csbi.type);
+
+                        if (slotType >= CSSLOT.CSSLOT_INFOSLOT && slotType <= CSSLOT.CSSLOT_LIBRARY_CONSTRAINT)
+                        {
+                          uint offset = MemoryUtil.GetBeU4(csbi.offset);
+                          var csOffsetPtr = scBuf + offset - sizeof(CS_SuperBlob);
+
+                          CS_Blob csb;
+                          MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
+
+                          specialSlotPositions[slotType - 1] = new ComputeHashInfo(0, new[]
+                          {
+                            new StreamRange(checked(imageRange.Position + GetU4(ldc.dataoff) + offset), MemoryUtil.GetBeU4(csb.length))
+                          }, 0);
+                        }
+                      }
+
                       for (var scPtr = scBuf; csCount-- > 0; scPtr += sizeof(CS_BlobIndex))
                       {
                         CS_BlobIndex csbi;
                         MemoryUtil.CopyBytes(scPtr, (byte*)&csbi, sizeof(CS_BlobIndex));
-                        var csOffsetPtr = scBuf + MemoryUtil.GetBeU4(csbi.offset) - sizeof(CS_SuperBlob);
-                        switch (MemoryUtil.GetBeU4(csbi.type))
+                        uint offset = MemoryUtil.GetBeU4(csbi.offset);
+                        var csOffsetPtr = scBuf + offset - sizeof(CS_SuperBlob);
+                        uint slotType = MemoryUtil.GetBeU4(csbi.type);
+                        switch (slotType)
                         {
-                        case CSSLOT.CSSLOT_CODEDIRECTORY:
+                          case CSSLOT.CSSLOT_CODEDIRECTORY:
+                          case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES:
+                          case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES1:
+                          case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES2:
+                          case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES3:
+                          case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES4:
                           {
                             CS_CodeDirectory cscd;
                             MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&cscd, sizeof(CS_CodeDirectory));
                             if ((CSMAGIC)MemoryUtil.GetBeU4(cscd.magic) != CSMAGIC.CSMAGIC_CODEDIRECTORY)
                               throw new FormatException("Invalid Mach-O code directory signature magic");
                             var cscdLength = MemoryUtil.GetBeU4(cscd.length);
-                            codeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, checked((int)cscdLength));
+
+                            byte[] currentCodeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, checked((int)cscdLength));
+
+                            if (slotType == CSSLOT.CSSLOT_CODEDIRECTORY)
+                              codeDirectoryBlob = currentCodeDirectoryBlob;
+
+                            int codeSlots = checked((int)MemoryUtil.GetBeU4(cscd.nCodeSlots));
+                            int specialSlots = checked((int)MemoryUtil.GetBeU4(cscd.nSpecialSlots));
+                            uint zeroHashOffset = MemoryUtil.GetBeU4(cscd.hashOffset);
+                            long codeLimit = MemoryUtil.GetBeU4(cscd.codeLimit);
+                            int pageSize = 1 << cscd.pageSize;
+                            string hashName = CS_HASHTYPE.GetHashName(cscd.hashType);
+
+                            var cdHash = new CDHash(hashName, new ComputeHashInfo(0, new[]
+                            {
+                              new StreamRange(checked(imageRange.Position + GetU4(ldc.dataoff) + offset), cscdLength)
+                            }, 0));
+
+                            cdHashes.Add(cdHash);
+
+                            for (int i = 0; i < codeSlots; i++)
+                            {
+                              byte[] hash = new byte[cscd.hashSize];
+                              Array.Copy(currentCodeDirectoryBlob, checked((int)zeroHashOffset + i * cscd.hashSize), hash, 0, cscd.hashSize);
+
+                              long pageStart = i * pageSize;
+                              long currentPageSize = pageStart + pageSize > codeLimit ? codeLimit - pageStart : pageSize;
+
+                              var computeHashInfo = new ComputeHashInfo(0, new[]
+                              {
+                                new StreamRange(pageStart + imageRange.Position, currentPageSize)
+                              }, 0);
+
+                              hashVerificationUnits.Add(new HashVerificationUnit(hashName, hash, computeHashInfo));
+                            }
+
+                            for (uint i = 1; i < specialSlots; i++)
+                            {
+                              byte[] hash = new byte[cscd.hashSize];
+                              Array.Copy(currentCodeDirectoryBlob, checked((int)(zeroHashOffset - i * cscd.hashSize)), hash, 0, cscd.hashSize);
+
+                              if (specialSlotPositions[i - 1] != null)
+                                hashVerificationUnits.Add(new HashVerificationUnit(hashName, hash, specialSlotPositions[i - 1]));
+                            }
                           }
                           break;
-                        case CSSLOT.CSSLOT_CMS_SIGNATURE:
+                          case CSSLOT.CSSLOT_CMS_SIGNATURE:
                           {
                             CS_Blob csb;
                             MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
@@ -246,7 +329,7 @@ namespace JetBrains.FormatRipper.MachO
                 excludeRanges.Add(new StreamRange(checked(cmdOffset + sizeOfCmds), sizeof(load_command) + sizeof(linkedit_data_command)));
           }
 
-          return new(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob));
+          return new(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob), hashVerificationUnits, cdHashes);
         }
 
         int GetZeroPadding(bool hasCodeSignature)
@@ -286,7 +369,9 @@ namespace JetBrains.FormatRipper.MachO
             (MH_Flags)GetU4(mh.flags),
             loadCommands.HasSignature,
             loadCommands.SignatureData,
-            computeHashInfo);
+            computeHashInfo,
+            loadCommands.HashVerificationUnits,
+            loadCommands.CDHashes);
         }
         else
         {
@@ -317,7 +402,9 @@ namespace JetBrains.FormatRipper.MachO
             (MH_Flags)GetU4(mh.flags),
             loadCommands.HasSignature,
             loadCommands.SignatureData,
-            computeHashInfo);
+            computeHashInfo,
+            loadCommands.HashVerificationUnits,
+            loadCommands.CDHashes);
         }
       }
 
@@ -390,11 +477,15 @@ namespace JetBrains.FormatRipper.MachO
     {
       public readonly bool HasSignature;
       public readonly SignatureData SignatureData;
+      public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
+      public readonly IEnumerable<CDHash> CDHashes;
 
-      public LoadCommandsInfo(bool hasSignature, SignatureData signatureData)
+      public LoadCommandsInfo(bool hasSignature, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes)
       {
         HasSignature = hasSignature;
         SignatureData = signatureData;
+        HashVerificationUnits = hashVerificationUnits;
+        CDHashes = cdHashes;
       }
     }
   }

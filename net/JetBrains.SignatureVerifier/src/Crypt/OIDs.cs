@@ -17,6 +17,9 @@ namespace JetBrains.SignatureVerifier.Crypt
     public static readonly DerObjectIdentifier APPLE_CERTIFICATE_EXTENSION_KEXT_SIGNING =
       new("1.2.840.113635.100.6.1.18");
 
+    public static readonly DerObjectIdentifier APPLE_HASH_AGILITY = new("1.2.840.113635.100.9.1");
+    public static readonly DerObjectIdentifier APPLE_HASH_AGILITY_V2 = new("1.2.840.113635.100.9.2");
+
     public static readonly DerObjectIdentifier OCSP = new("1.3.6.1.5.5.7.48.1");
   }
 }
