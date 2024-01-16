@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using JetBrains.FormatRipper.Compound;
+using JetBrains.FormatRipper.Dmg;
 using JetBrains.FormatRipper.Elf;
 using JetBrains.FormatRipper.MachO;
 using JetBrains.FormatRipper.Pe;
@@ -16,7 +17,9 @@ namespace JetBrains.FormatRipper.FileExplorer
       TryParseElf(stream, out properties) ? FileType.Elf :
       TryParseMachO(stream, out properties) ? FileType.MachO :
       TryParseMsi(stream, out properties) ? FileType.Msi :
-      TryParseSh(stream, out properties) ? FileType.Sh : FileType.Unknown, properties);
+      TryParseSh(stream, out properties) ? FileType.Sh :
+      TryParseDmg(stream, out properties) ? FileType.Dmg :
+      FileType.Unknown, properties);
 
 #if !(NET20 || NET30)
     public static Result DetectFileType(this Stream stream) => Detect(stream);
@@ -176,6 +179,30 @@ namespace JetBrains.FormatRipper.FileExplorer
         if (ShFile.Is(stream))
         {
           properties = FileProperties.ExecutableType;
+          return true;
+        }
+      }
+      catch (IOException)
+      {
+      }
+
+      properties = default;
+      return false;
+    }
+
+    private static bool TryParseDmg(Stream stream, out FileProperties properties)
+    {
+      try
+      {
+        if (DmgFile.Is(stream))
+        {
+          var file = DmgFile.Parse(stream);
+
+          properties = FileProperties.BundleType;
+
+          if (file.HasSignature)
+            properties |= FileProperties.Signed;
+
           return true;
         }
       }
