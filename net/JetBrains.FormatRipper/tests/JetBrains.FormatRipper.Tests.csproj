@@ -22,5 +22,6 @@
     <EmbeddedResource Include="..\..\..\data\msi\*" LinkBase="Resources\Msi" />
     <EmbeddedResource Include="..\..\..\data\pe\*" LinkBase="Resources\Pe" />
     <EmbeddedResource Include="..\..\..\data\sh\*" LinkBase="Resources\Sh" />
+    <EmbeddedResource Include="..\..\..\data\dmg\*" LinkBase="Resources\Dmg" />
   </ItemGroup>
 </Project>
