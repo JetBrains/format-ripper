@@ -1,12 +1,9 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using JetBrains.FormatRipper;
 using JetBrains.SignatureVerifier.Crypt.BC;
 using Org.BouncyCastle.Utilities.Collections;
 using Org.BouncyCastle.X509;
-using Org.BouncyCastle.X509.Store;
 
 namespace JetBrains.SignatureVerifier.Crypt
 {
@@ -58,22 +55,6 @@ namespace JetBrains.SignatureVerifier.Crypt
       }
 
       return VerifySignatureResult.Valid;
-    }
-
-    public VerifySignatureResult VerifyFileIntegrityAsync(
-      [NotNull] SignedMessage signedMessage,
-      [NotNull] ComputeHashInfo computeHashInfo,
-      [NotNull] Stream file,
-      [NotNull] FileIntegrityVerificationParams verificationParams)
-    {
-      if (signedMessage == null) throw new ArgumentNullException(nameof(signedMessage));
-      if (computeHashInfo == null)  throw new ArgumentNullException(nameof(computeHashInfo));
-      if (file == null) throw new ArgumentNullException(nameof(file));
-      if (verificationParams == null) throw new ArgumentNullException(nameof(verificationParams));
-
-      var siv = new FileIntegrityVerifier(signedMessage);
-
-      return siv.VerifyFileIntegrityAsync(file, computeHashInfo, verificationParams);
     }
   }
 }

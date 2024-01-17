@@ -27,15 +27,11 @@ namespace JetBrains.SignatureVerifier.Tests
         });
 
       var verificationParams = new SignatureVerificationParams(null, null, false, false);
-      var signedMessage = SignedMessage.CreateInstance(file.SignatureData);
-      var signedMessageVerifier = new SignedMessageVerifier(ConsoleLogger.Instance);
-      var result = await signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams);
 
-      if (result.IsValid)
-      {
-        result = ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName,
-          stream => signedMessageVerifier.VerifyFileIntegrityAsync(signedMessage, file.ComputeHashInfo, stream, new FileIntegrityVerificationParams()));
-      }
+      var authenticodeSignatureVerifier = new AuthenticodeSignatureVerifier(ConsoleLogger.Instance);
+
+      var result = await ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName,
+          async stream => await authenticodeSignatureVerifier.VerifyAsync(file, stream, verificationParams, FileIntegrityVerificationParams.Default));
 
       Assert.AreEqual(expectedResult, result.Status);
     }

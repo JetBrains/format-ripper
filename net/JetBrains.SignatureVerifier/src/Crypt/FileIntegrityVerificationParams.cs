@@ -2,6 +2,8 @@ namespace JetBrains.SignatureVerifier.Crypt;
 
 public class FileIntegrityVerificationParams
 {
+  public static FileIntegrityVerificationParams Default = new FileIntegrityVerificationParams(allowHashMismatches: false);
+
   /// <summary>
   /// Allow hash mismatches if file has more than one signature
   /// </summary>
