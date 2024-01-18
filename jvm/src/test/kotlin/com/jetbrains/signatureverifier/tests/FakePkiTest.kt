@@ -63,7 +63,11 @@ class FakePkiTest {
         val signedMessage = SignedMessage.CreateInstance(signatureData)
 
         getRootStoreStream(pki.Certificate).use { signRootCertStore ->
-          val verificationParams = SignatureVerificationParams(signRootCertStore, withRevocationCheck = false)
+          val verificationParams = SignatureVerificationParams(
+            signRootCertStore,
+            withRevocationCheck = false,
+            expectedResult = VerifySignatureStatus.InvalidSignature
+          )
           val signedMessageVerifier = SignedMessageVerifier(ConsoleLogger.Instance)
           val res = runBlocking { signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams) }
 
@@ -96,7 +100,7 @@ class FakePkiTest {
         val signedMessage = SignedMessage.CreateInstance(signatureData)
 
         getRootStoreStream(pki.Certificate).use { signRootCertStore ->
-          val verificationParams = SignatureVerificationParams(signRootCertStore)
+          val verificationParams = SignatureVerificationParams(signRootCertStore, expectedResult = VerifySignatureStatus.InvalidChain)
           val signedMessageVerifier =
             SignedMessageVerifier(CrlProvider(crlSource, crlCache, ConsoleLogger.Instance), ConsoleLogger.Instance)
           val res = runBlocking { signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams) }
@@ -120,7 +124,7 @@ class FakePkiTest {
         val peFile = PeFile(signedPeStream)
         val signatureData = peFile.GetSignatureData()
         val signedMessage = SignedMessage.CreateInstance(signatureData)
-        val verificationParams = SignatureVerificationParams(buildChain = false)
+        val verificationParams = SignatureVerificationParams(buildChain = false, expectedResult = VerifySignatureStatus.InvalidSignature)
         val signedMessageVerifier = SignedMessageVerifier(ConsoleLogger.Instance)
 
         val res = runBlocking { signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams) }

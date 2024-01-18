@@ -10,6 +10,7 @@ import com.jetbrains.signatureverifier.crypt.BcExt.ToX509CertificateHolder
 import com.jetbrains.signatureverifier.crypt.Utils.ConvertToLocalDateTime
 import com.jetbrains.signatureverifier.crypt.Utils.FlatMessages
 import com.jetbrains.signatureverifier.crypt.Utils.ToString
+import com.jetbrains.signatureverifier.crypt.Utils.isExceptionIgnored
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1EncodableVector
 import org.bouncycastle.asn1.ASN1ObjectIdentifier
@@ -81,7 +82,10 @@ open class SignerInfoVerifier(
 
       return VerifySignatureResult.Valid
     } catch (ex: CMSException) {
-      return VerifySignatureResult(VerifySignatureStatus.InvalidSignature, ex.FlatMessages())
+      return if (isExceptionIgnored(ex)) VerifySignatureResult(signatureVerificationParams.expectedResult) else VerifySignatureResult(
+        VerifySignatureStatus.InvalidSignature,
+        ex.FlatMessages()
+      )
     } catch (ex: CertificateExpiredException) {
       return VerifySignatureResult(VerifySignatureStatus.InvalidSignature, ex.FlatMessages())
     }
@@ -152,7 +156,7 @@ open class SignerInfoVerifier(
     val tst = TimeStampToken ?: return VerifySignatureResult.Valid
     val tstCerts = tst.certificates
     val tstCertsList = ArrayList(tstCerts.getMatches(tst.sid as Selector<X509CertificateHolder>))
-    if (tstCertsList.count() < 1)
+    if (tstCertsList.isEmpty())
       return VerifySignatureResult(VerifySignatureStatus.InvalidTimestamp, Messages.signer_cert_not_found)
 
     val tstCert = tstCertsList[0] as X509CertificateHolder
@@ -168,7 +172,11 @@ open class SignerInfoVerifier(
           VerifySignatureResult.InvalidChain(ex.FlatMessages())
         }
     } catch (ex: TSPException) {
-      return VerifySignatureResult(VerifySignatureStatus.InvalidTimestamp, ex.FlatMessages())
+      return if (isExceptionIgnored(ex)) VerifySignatureResult.Valid else
+        VerifySignatureResult(
+          VerifySignatureStatus.InvalidTimestamp,
+          ex.FlatMessages()
+        )
     } catch (ex: CertificateExpiredException) {
       return VerifySignatureResult(VerifySignatureStatus.InvalidTimestamp, ex.FlatMessages())
     }

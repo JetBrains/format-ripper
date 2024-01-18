@@ -26,7 +26,7 @@ class MachoSignatureVerifierTests {
         MachoArch(it).Extract()
       }
 
-    val verificationParams = SignatureVerificationParams(null, null, false, false)
+    val verificationParams = SignatureVerificationParams(null, null, false, false, expectedResult = expectedResult)
     val signedMessageVerifier = SignedMessageVerifier(ConsoleLogger.Instance)
 
     for (machoFile in machoFiles) {

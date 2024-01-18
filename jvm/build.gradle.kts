@@ -32,9 +32,9 @@ repositories {
 }
 
 dependencies {
-    implementation("org.bouncycastle:bcprov-jdk18on:1.76")
-    implementation("org.bouncycastle:bcpkix-jdk18on:1.76")
-    implementation("org.bouncycastle:bcutil-jdk18on:1.76")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.77")
+    implementation("org.bouncycastle:bcpkix-jdk18on:1.77")
+    implementation("org.bouncycastle:bcutil-jdk18on:1.77")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.7.3")

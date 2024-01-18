@@ -20,7 +20,13 @@ class PeSignatureVerifierTests {
   @MethodSource("VerifySignTestProvider")
   fun VerifySignTest(peResourceName: String, expectedResult: VerifySignatureStatus) {
     val result = getTestByteChannel("pe", peResourceName).use {
-      val verificationParams = SignatureVerificationParams(null, null, false, false)
+      val verificationParams = SignatureVerificationParams(
+        null,
+        null,
+        false,
+        withRevocationCheck = false,
+        expectedResult = expectedResult
+      )
       val peFile = PeFile(it)
       val signatureData = peFile.GetSignatureData()
       val signedMessage = SignedMessage.CreateInstance(signatureData)
@@ -42,7 +48,7 @@ class PeSignatureVerifierTests {
       getTestDataInputStream("pe", codesignRootCertStoreResourceName).use { codesignroots ->
         getTestDataInputStream("pe", timestampRootCertStoreResourceName).use { timestamproots ->
           val verificationParams = SignatureVerificationParams(
-            codesignroots, timestamproots, buildChain = true, withRevocationCheck = false
+            codesignroots, timestamproots, buildChain = true, withRevocationCheck = false, expectedResult = expectedResult
           )
 
           val peFile = PeFile(peFileStream)
@@ -70,7 +76,7 @@ class PeSignatureVerifierTests {
         peResourceName,
         codesignRootCertStoreResourceName,
         timestampRootCertStoreResourceName,
-        Date(Long.MIN_VALUE).ConvertToLocalDateTime()
+        LocalDateTime.now().minusYears(10)
       )
     }
     assertEquals(expectedResult, actual.Status)
@@ -105,7 +111,7 @@ class PeSignatureVerifierTests {
         peResourceName,
         codesignRootCertStoreResourceName,
         timestampRootCertStoreResourceName,
-        Date(Long.MAX_VALUE).ConvertToLocalDateTime()
+        LocalDateTime.now().plusYears(10)
       )
     }
     assertEquals(expectedResult, actual.Status)
@@ -146,7 +152,8 @@ class PeSignatureVerifierTests {
             withRevocationCheck = false,
             ocspResponseTimeout = null,
             SignatureValidationTimeMode.SignValidationTime,
-            signatureValidationTime = time
+            signatureValidationTime = time,
+            expectedResult = VerifySignatureStatus.Valid
           )
 
           val peFile = PeFile(peFileStream)
