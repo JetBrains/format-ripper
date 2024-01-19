@@ -264,7 +264,7 @@ namespace JetBrains.FormatRipper.MachO
                             int specialSlots = checked((int)MemoryUtil.GetBeU4(cscd.nSpecialSlots));
                             uint zeroHashOffset = MemoryUtil.GetBeU4(cscd.hashOffset);
                             long codeLimit = MemoryUtil.GetBeU4(cscd.codeLimit);
-                            int pageSize = 1 << cscd.pageSize;
+                            int pageSize = cscd.pageSize > 0 ? 1 << cscd.pageSize : 0;
                             string hashName = CS_HASHTYPE.GetHashName(cscd.hashType);
 
                             var cdHash = new CDHash(hashName, new ComputeHashInfo(0, new[]
@@ -280,7 +280,11 @@ namespace JetBrains.FormatRipper.MachO
                               Array.Copy(currentCodeDirectoryBlob, checked((int)zeroHashOffset + i * cscd.hashSize), hash, 0, cscd.hashSize);
 
                               long pageStart = i * pageSize;
-                              long currentPageSize = pageStart + pageSize > codeLimit ? codeLimit - pageStart : pageSize;
+                              long currentPageSize;
+                              if (pageSize > 0)
+                                currentPageSize = pageStart + pageSize > codeLimit ? codeLimit - pageStart : pageSize;
+                              else
+                                currentPageSize = codeLimit - pageStart;
 
                               var computeHashInfo = new ComputeHashInfo(0, new[]
                               {
@@ -290,7 +294,7 @@ namespace JetBrains.FormatRipper.MachO
                               hashVerificationUnits.Add(new HashVerificationUnit(hashName, hash, computeHashInfo));
                             }
 
-                            for (uint i = 1; i < specialSlots; i++)
+                            for (uint i = 1; i <= specialSlots; i++)
                             {
                               byte[] hash = new byte[cscd.hashSize];
                               Array.Copy(currentCodeDirectoryBlob, checked((int)(zeroHashOffset - i * cscd.hashSize)), hash, 0, cscd.hashSize);
