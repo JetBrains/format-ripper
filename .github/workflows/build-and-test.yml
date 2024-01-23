@@ -25,7 +25,7 @@ jobs:
         with:
           dotnet-version: |
             3.1.x
-            7.0.x
+            8.0.x
       - name: Restore
         working-directory: ${{ github.workspace }}/net
         run: dotnet restore
@@ -58,10 +58,10 @@ jobs:
       - name: Setup .NET SDK, Restore, Build and Tests under QEMU ${{ matrix.arch }}
         run: >
           docker run --rm -v "${{ github.workspace }}:/work" --platform linux/${{ matrix.arch }} ${{ matrix.arch }}/fedora:39 /bin/bash -c " \
-            dnf install -y dotnet-sdk-7.0 && \
+            dnf install -y dotnet-sdk-8.0 && \
             cd /work/net && \
             dotnet restore && \
-            dotnet test -f net7.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results' && \
+            dotnet test -f net8.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results' && \
             true"
       - name: Upload test results
         uses: actions/upload-artifact@v3
@@ -96,7 +96,7 @@ jobs:
         run: dotnet restore
       - name: Build and Tests
         working-directory: ${{ github.workspace }}/net
-        run: dotnet test -f net7.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results'
+        run: dotnet test -f net8.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results'
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: always()
