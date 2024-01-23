@@ -18,7 +18,8 @@ Following types of software binaries files are supported:
 - MS Windows Installer (MSI)
 - MachO
 - Fat-MachO (Universal binaries)
-- ELF
+- Executable and linking format (ELF)
+- Apple disk image (DMG)
 
 See further descriptions:
 
