@@ -89,8 +89,6 @@ namespace JetBrains.FormatRipper.Dmg
       List<HashVerificationUnit> hashVerificationUnits = new List<HashVerificationUnit>();
       List<CDHash> cdHashes = new List<CDHash>();
 
-      var isLittleEndian = false;
-
       if ((mode & Mode.SignatureData) == Mode.SignatureData && hasSignature)
       {
         var imageRange = new StreamRange(0, stream.Length);
