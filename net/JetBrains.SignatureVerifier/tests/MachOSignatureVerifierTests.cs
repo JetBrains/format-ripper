@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentAssertions;
 using JetBrains.FormatRipper.MachO;
 using JetBrains.SignatureVerifier.Crypt;
 using NUnit.Framework;
@@ -49,12 +48,7 @@ namespace JetBrains.SignatureVerifier.Tests
     public void VerifySignInvalidSignatureFormat(string machoResourceName)
     {
       foreach (var section in GetMachOFile(machoResourceName).Sections)
-      {
-        Action action = () => SignedMessage.CreateInstance(section.SignatureData);
-        action.Should()
-          .Throw<Exception>()
-          .WithMessage("Invalid signature format");
-      }
+        Assert.That(() => SignedMessage.CreateInstance(section.SignatureData), Throws.Exception, "Invalid signature format");
     }
 
     [TestCase(VerifySignatureStatus.Valid, apple_root, "JetBrains.Profiler.PdbServer")]
