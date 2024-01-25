@@ -54,6 +54,8 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
         return sectionVerificationResult;
     }
 
+    _logger?.Info("Mach-O file signature verification successfully passed");
+
     return VerifySignatureResult.Valid;
   }
 
@@ -78,26 +80,41 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
     var signatureVerificationResult = await _signedMessageVerifier.VerifySignatureAsync(signedMessage, signatureVerificationParams);
 
     if (!signatureVerificationResult.IsValid)
+    {
+      _logger?.Warning("Mach-O file signature verification failed: certificates or attributes validation failed");
       return signatureVerificationResult;
+    }
 
     if (!section.HashVerificationUnits.Any())
+    {
+      _logger?.Warning("Mach-O file signature verification failed: no hash verification units was found in the file");
       return new VerifySignatureResult(VerifySignatureStatus.InvalidFileHash);
+    }
 
     // Verify hash slots (regular and special) in all Code Directories
     var codeDirectoryValidationResult = VerifyHashVerificationUnits(stream, section.HashVerificationUnits);
 
     if (!codeDirectoryValidationResult.IsValid)
+    {
+      _logger?.Warning("Mach-O file signature verification failed: at least one hash verification unit is invalid");
       return codeDirectoryValidationResult;
+    }
 
     if (!section.CDHashes.Any())
+    {
+      _logger?.Warning("Mach-O file signature verification failed: no code directory hashes (CDHash) was found in the file");
       return new VerifySignatureResult(VerifySignatureStatus.InvalidFileHash);
+    }
 
     if (section.CDHashes.Count() > 1)
     {
       var cdHashesVerificationResult = VerifyCDHashes(stream, section.CDHashes, signedMessage);
 
       if (!cdHashesVerificationResult.IsValid)
+      {
+        _logger?.Warning("Mach-O file signature verification failed: at leash one CDHash verification failed");
         return cdHashesVerificationResult;
+      }
     }
 
     return VerifySignatureResult.Valid;

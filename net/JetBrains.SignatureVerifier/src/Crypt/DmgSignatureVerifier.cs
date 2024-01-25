@@ -45,7 +45,10 @@ public class DmgSignatureVerifier: AppleSignatureVerifier
     FileIntegrityVerificationParams fileIntegrityVerificationParams)
   {
     if (!dmgFile.HasSignature)
+    {
+      _logger?.Warning("DMG file signature verification failed: file is not signed");
       return new VerifySignatureResult(VerifySignatureStatus.InvalidSignature);
+    }
 
     if (!dmgFile.HashVerificationUnits.Any() || !dmgFile.CDHashes.Any())
       throw new ArgumentException($"DMG file was parsed without {nameof(DmgFile.Mode.ComputeHashInfo)} flag", nameof(dmgFile));
@@ -54,27 +57,44 @@ public class DmgSignatureVerifier: AppleSignatureVerifier
     var signatureVerificationResult = await _signedMessageVerifier.VerifySignatureAsync(signedMessage, signatureVerificationParams);
 
     if (!signatureVerificationResult.IsValid)
+    {
+      _logger?.Warning("DMG file signature verification failed: certificates or attributes validation failed");
       return signatureVerificationResult;
+    }
 
     if (!dmgFile.HashVerificationUnits.Any())
+    {
+      _logger?.Warning("DMG file signature verification failed: no hash verification units was found in the file");
       return new VerifySignatureResult(VerifySignatureStatus.InvalidFileHash);
+    }
 
     // Verify hash slots (regular and special) in all Code Directories
     var codeDirectoryValidationResult = VerifyHashVerificationUnits(stream, dmgFile.HashVerificationUnits);
 
     if (!codeDirectoryValidationResult.IsValid)
+    {
+      _logger?.Warning("DMG file signature verification failed: at least one hash verification unit is invalid");
       return codeDirectoryValidationResult;
+    }
 
     if (!dmgFile.CDHashes.Any())
+    {
+      _logger?.Warning("DMG file signature verification failed: no code directory hashes (CDHash) was found in the file");
       return new VerifySignatureResult(VerifySignatureStatus.InvalidFileHash);
+    }
 
     if (dmgFile.CDHashes.Count() > 1)
     {
       var cdHashesVerificationResult = VerifyCDHashes(stream, dmgFile.CDHashes, signedMessage);
 
       if (!cdHashesVerificationResult.IsValid)
+      {
+        _logger?.Warning("DMG file signature verification failed: at leash one CDHash verification failed");
         return cdHashesVerificationResult;
+      }
     }
+
+    _logger?.Info("DMG file signature verification successfully passed");
 
     return VerifySignatureResult.Valid;
   }
