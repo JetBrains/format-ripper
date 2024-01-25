@@ -19,9 +19,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
             3.1.x
@@ -52,7 +52,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install QEMU static executables formats
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       - name: Setup .NET SDK, Restore, Build and Tests under QEMU ${{ matrix.arch }}
@@ -90,7 +90,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Restore
         working-directory: ${{ github.workspace }}/net
         run: dotnet restore
@@ -117,16 +117,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.0.6
+        uses: gradle/wrapper-validation-action@v1
       - name: Gradle Build
-        uses: gradle/gradle-build-action@v2.5.1
+        uses: gradle/gradle-build-action@v2
         with:
           arguments: test --stacktrace
           build-root-directory: ${{ github.workspace }}/jvm
@@ -150,7 +150,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install QEMU static executables formats
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       - name: Setup JDK and Tests under QEMU ${{ matrix.arch }}
@@ -185,11 +185,11 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.0.6
+        uses: gradle/wrapper-validation-action@v1
       - name: Gradle Build
-        uses: gradle/gradle-build-action@v2.5.1
+        uses: gradle/gradle-build-action@v2
         with:
           arguments: test --stacktrace
           build-root-directory: ${{ github.workspace }}/jvm
