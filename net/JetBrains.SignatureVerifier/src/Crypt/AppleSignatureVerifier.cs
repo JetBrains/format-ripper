@@ -99,7 +99,10 @@ public class AppleSignatureVerifier
         if (equals)
           hashesToVerify.Remove(algId);
         else
+        {
+          _logger?.Warning("Apple signature verification failed: CDHash value doesn't match the expected value");
           return new VerifySignatureResult(VerifySignatureStatus.InvalidFileHash);
+        }
       }
     }
 
@@ -127,6 +130,9 @@ public class AppleSignatureVerifier
       if (foundKey != null)
         hashesToVerify.Remove(foundKey);
     }
+
+    if (hashesToVerify.Count > 0)
+      _logger?.Warning("Apple signature verification failed: CDHash value doesn't match the expected value");
 
     return hashesToVerify.Count == 0 ? VerifySignatureResult.Valid : new VerifySignatureResult(VerifySignatureStatus.InvalidFileHash);
   }
