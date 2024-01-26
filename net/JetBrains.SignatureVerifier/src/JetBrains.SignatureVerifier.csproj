@@ -8,7 +8,7 @@
     <LangVersion>10</LangVersion>
     <Company>JetBrains s.r.o.</Company>
     <Copyright>Copyright © 2021-$([System.DateTime]::Now.ToString('yyyy')) JetBrains s.r.o.</Copyright>
-    <Authors>Mikhail Pilin, Anton Vladimirov</Authors>
+    <Authors>Mikhail Pilin, Anton Vladimirov, Konstantin Kretov</Authors>
     <Description>The cross-platform open-source library for performing cryptography signature checks.</Description>
     <RepositoryUrl>https://github.com/JetBrains/format-ripper</RepositoryUrl>
     <PackageIcon>icon.png</PackageIcon>
