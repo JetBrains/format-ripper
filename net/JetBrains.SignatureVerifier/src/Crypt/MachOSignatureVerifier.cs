@@ -117,6 +117,8 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
       }
     }
 
+    _logger?.Info("Mach-O file signature verification successfully passed");
+
     return VerifySignatureResult.Valid;
   }
 }
