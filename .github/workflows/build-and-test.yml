@@ -19,13 +19,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
             3.1.x
-            7.0.x
+            8.0.x
       - name: Restore
         working-directory: ${{ github.workspace }}/net
         run: dotnet restore
@@ -52,16 +52,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install QEMU static executables formats
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       - name: Setup .NET SDK, Restore, Build and Tests under QEMU ${{ matrix.arch }}
         run: >
           docker run --rm -v "${{ github.workspace }}:/work" --platform linux/${{ matrix.arch }} ${{ matrix.arch }}/fedora:39 /bin/bash -c " \
-            dnf install -y dotnet-sdk-7.0 && \
+            dnf install -y dotnet-sdk-8.0 && \
             cd /work/net && \
             dotnet restore && \
-            dotnet test -f net7.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results' && \
+            dotnet test -f net8.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results' && \
             true"
       - name: Upload test results
         uses: actions/upload-artifact@v3
@@ -90,13 +90,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Restore
         working-directory: ${{ github.workspace }}/net
         run: dotnet restore
       - name: Build and Tests
         working-directory: ${{ github.workspace }}/net
-        run: dotnet test -f net7.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results'
+        run: dotnet test -f net8.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results'
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: always()
@@ -117,16 +117,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.0.6
+        uses: gradle/wrapper-validation-action@v1
       - name: Gradle Build
-        uses: gradle/gradle-build-action@v2.5.1
+        uses: gradle/gradle-build-action@v2
         with:
           arguments: test --stacktrace
           build-root-directory: ${{ github.workspace }}/jvm
@@ -144,13 +144,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [ s390x ]
+        arch: [ s390x, ppc64le ]
 
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install QEMU static executables formats
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       - name: Setup JDK and Tests under QEMU ${{ matrix.arch }}
@@ -173,6 +173,8 @@ jobs:
         include:
           - os: linux
             arch: s390x
+          - os: linux
+            arch: ppc64le
           - os: freebsd
             arch: amd64
 
@@ -183,11 +185,11 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.0.6
+        uses: gradle/wrapper-validation-action@v1
       - name: Gradle Build
-        uses: gradle/gradle-build-action@v2.5.1
+        uses: gradle/gradle-build-action@v2
         with:
           arguments: test --stacktrace
           build-root-directory: ${{ github.workspace }}/jvm

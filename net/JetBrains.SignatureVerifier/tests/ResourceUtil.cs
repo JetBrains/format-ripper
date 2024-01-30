@@ -11,6 +11,7 @@ namespace JetBrains.SignatureVerifier.Tests
       var type = typeof(ResourceUtil);
       var fullResourceName = new StringBuilder(type.Namespace).Append(".Resources.").Append(category switch
           {
+            ResourceCategory.Dmg => "Dmg",
             ResourceCategory.MachO => "MachO",
             ResourceCategory.Msi => "Msi",
             ResourceCategory.Pe => "Pe",

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp3.1;net7.0</TargetFrameworks>
+    <TargetFrameworks>net461;netcoreapp3.1;net8.0</TargetFrameworks>
     <RootNamespace>JetBrains.SignatureVerifier.Tests</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../../key.snk</AssemblyOriginatorKeyFile>
@@ -9,15 +9,15 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.1" />
-    <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="All" />
-    <PackageReference Include="Moq" Version="4.18.4" />
-    <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
-    <PackageReference Include="FluentAssertions" Version="6.10.0" />
+    <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" PrivateAssets="All" />
+    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <ProjectReference Include="..\src\JetBrains.SignatureVerifier.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\..\..\data\dmg\*" LinkBase="Resources\Dmg" />
     <EmbeddedResource Include="..\..\..\data\mach-o\*" LinkBase="Resources\MachO" />
     <EmbeddedResource Include="..\..\..\data\msi\*" LinkBase="Resources\Msi" />
     <EmbeddedResource Include="..\..\..\data\pe\*" LinkBase="Resources\Pe" />

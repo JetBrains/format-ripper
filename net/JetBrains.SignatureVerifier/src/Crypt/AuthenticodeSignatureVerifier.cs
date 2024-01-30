@@ -11,6 +11,7 @@ using JetBrains.SignatureVerifier.Crypt.BC;
 using JetBrains.SignatureVerifier.Crypt.BC.Authenticode;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
 using Attribute = Org.BouncyCastle.Asn1.Cms.Attribute;
 
@@ -109,9 +110,17 @@ public class AuthenticodeSignatureVerifier
     var signatureVerificationResult = await _signedMessageVerifier.VerifySignatureAsync(signedMessage, signatureVerificationParams);
 
     if (!signatureVerificationResult.IsValid)
+    {
+      _logger?.Warning("Authenticode signature verification failed: certificates or attributes validation failed");
       return signatureVerificationResult;
+    }
 
     var fileIntegrityVerificationResult = VerifyFileIntegrity(signedMessage, computeHashInfo, stream, fileIntegrityVerificationParams);
+
+    if (!fileIntegrityVerificationResult.IsValid)
+      _logger?.Warning("Authenticode signature verification failed: file integrity verification failed");
+    else
+      _logger?.Info("Authenticode signature verification successfully passed");
 
     return fileIntegrityVerificationResult;
   }
@@ -161,8 +170,14 @@ public class AuthenticodeSignatureVerifier
       else
       {
         hasInvalidSignatures = true;
+        var algName = DigestUtilities.GetAlgorithmName(algId.Algorithm);
         if (!fileIntegrityVerificationParams.AllowHashMismatches)
+        {
+          _logger?.Warning($"Authenticode signature verification error: hash value mismatch for the algorithm {algName}");
           break;
+        }
+
+        _logger?.Warning($"Authenticode signature verification warning: hash value mismatch for the algorithm {algName}");
       }
     }
 

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net35;netcoreapp3.1;net7.0</TargetFrameworks>
+    <TargetFrameworks>net35;netcoreapp3.1;net8.0</TargetFrameworks>
     <RootNamespace>JetBrains.FormatRipper.Tests</RootNamespace>
     <Nullable>enable</Nullable>
     <SignAssembly>true</SignAssembly>
@@ -9,9 +9,9 @@
     <LangVersion>10</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
     <ProjectReference Include="..\src\JetBrains.FormatRipper.csproj" />
   </ItemGroup>
@@ -22,5 +22,6 @@
     <EmbeddedResource Include="..\..\..\data\msi\*" LinkBase="Resources\Msi" />
     <EmbeddedResource Include="..\..\..\data\pe\*" LinkBase="Resources\Pe" />
     <EmbeddedResource Include="..\..\..\data\sh\*" LinkBase="Resources\Sh" />
+    <EmbeddedResource Include="..\..\..\data\dmg\*" LinkBase="Resources\Dmg" />
   </ItemGroup>
 </Project>
