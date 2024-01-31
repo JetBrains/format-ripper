@@ -1,7 +1,7 @@
 package com.jetbrains.signatureverifier.crypt
 
+import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.cms.CMSException
-import org.bouncycastle.tsp.TSPException
 import org.bouncycastle.tsp.TSPValidationException
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -55,5 +55,18 @@ object Utils {
       this == null -> null
       else -> DateTimeFormatter.ofPattern(format).format(this)
     }
+  }
+
+  fun printCertificateError(cert: X509CertificateHolder, inFile: String?) {
+    println("Verifier failed in $inFile for the following certificate:")
+    println("Certificate: ${cert.serialNumber}")
+    println("Issued: ${cert.issuer}")
+
+    val asn = cert.toASN1Structure()
+
+    println("Subject: ${asn.subject}")
+    println("Signature: ${asn.signature}")
+    println("Validity from: ${asn.startDate.date} to: ${asn.endDate.date}")
+
   }
 }

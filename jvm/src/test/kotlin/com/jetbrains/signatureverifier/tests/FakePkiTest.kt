@@ -44,7 +44,7 @@ import java.util.*
 import java.util.stream.Stream
 
 class FakePkiTest {
-  private val localClock = Clock.systemDefaultZone()
+  private val localClock = Clock.systemUTC()
 
   private fun nowPlusDays(days: Long): Date = LocalDateTime.now(localClock).plusDays(days).ConvertToDate()
   private fun nowPlusSeconds(seconds: Long): Date = LocalDateTime.now(localClock).plusSeconds(seconds).ConvertToDate()
@@ -66,7 +66,8 @@ class FakePkiTest {
           val verificationParams = SignatureVerificationParams(
             signRootCertStore,
             withRevocationCheck = false,
-            expectedResult = VerifySignatureStatus.InvalidSignature
+            expectedResult = VerifySignatureStatus.InvalidSignature,
+            testedFileName = peResourceName
           )
           val signedMessageVerifier = SignedMessageVerifier(ConsoleLogger.Instance)
           val res = runBlocking { signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams) }
@@ -100,7 +101,9 @@ class FakePkiTest {
         val signedMessage = SignedMessage.CreateInstance(signatureData)
 
         getRootStoreStream(pki.Certificate).use { signRootCertStore ->
-          val verificationParams = SignatureVerificationParams(signRootCertStore, expectedResult = VerifySignatureStatus.InvalidChain)
+          val verificationParams = SignatureVerificationParams(signRootCertStore,
+            expectedResult = VerifySignatureStatus.InvalidChain,
+            testedFileName =peResourceName)
           val signedMessageVerifier =
             SignedMessageVerifier(CrlProvider(crlSource, crlCache, ConsoleLogger.Instance), ConsoleLogger.Instance)
           val res = runBlocking { signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams) }
@@ -124,7 +127,9 @@ class FakePkiTest {
         val peFile = PeFile(signedPeStream)
         val signatureData = peFile.GetSignatureData()
         val signedMessage = SignedMessage.CreateInstance(signatureData)
-        val verificationParams = SignatureVerificationParams(buildChain = false, expectedResult = VerifySignatureStatus.InvalidSignature)
+        val verificationParams = SignatureVerificationParams(buildChain = false,
+          expectedResult = VerifySignatureStatus.InvalidSignature,
+          testedFileName = peResourceName)
         val signedMessageVerifier = SignedMessageVerifier(ConsoleLogger.Instance)
 
         val res = runBlocking { signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams) }

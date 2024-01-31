@@ -25,7 +25,8 @@ class SignatureVerificationParams
   ocspResponseTimeout: Duration? = null,
   signatureValidationTimeMode: SignatureValidationTimeMode = SignatureValidationTimeMode.Timestamp,
   signatureValidationTime: LocalDateTime? = null,
-  val expectedResult: VerifySignatureStatus = VerifySignatureStatus.Valid
+  val expectedResult: VerifySignatureStatus = VerifySignatureStatus.Valid,
+  val testedFileName: String?
 ) {
   val _signRootCertStore: InputStream? = signRootCertStore
   val _timestampRootCertStore: InputStream? = timestampRootCertStore

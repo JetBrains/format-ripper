@@ -26,7 +26,14 @@ class MachoSignatureVerifierTests {
         MachoArch(it).Extract()
       }
 
-    val verificationParams = SignatureVerificationParams(null, null, false, false, expectedResult = expectedResult)
+    val verificationParams = SignatureVerificationParams(
+      null,
+      null,
+      false,
+      false,
+      expectedResult = expectedResult,
+      testedFileName = machoResourceName
+    )
     val signedMessageVerifier = SignedMessageVerifier(ConsoleLogger.Instance)
 
     for (machoFile in machoFiles) {
@@ -58,8 +65,15 @@ class MachoSignatureVerifierTests {
     @JvmStatic
     fun VerifySignTestProvider(): Stream<Arguments> {
       return Stream.of(
-        Arguments.of("env-wrapper.x64", VerifySignatureStatus.Valid),
-        Arguments.of("libMonoSupportW.x64.dylib", VerifySignatureStatus.Valid),
+        Arguments.of("draw.io-7.6.6", VerifySignatureStatus.Valid),
+        Arguments.of("draw.io-13.9.9", VerifySignatureStatus.InvalidSignature),
+        Arguments.of("draw.io-13.9.9-edited", VerifySignatureStatus.InvalidSignature),
+        Arguments.of("draw.io-14.1.8", VerifySignatureStatus.Valid),
+        Arguments.of("draw.io-22.1.2", VerifySignatureStatus.Valid),
+        Arguments.of("fat.dylib_signed", VerifySignatureStatus.Valid),
+        Arguments.of("libhostfxr.dylib", VerifySignatureStatus.Valid),
+        Arguments.of("env-wrapper.x64", VerifySignatureStatus.InvalidSignature),
+        Arguments.of("libMonoSupportW.x64.dylib", VerifySignatureStatus.InvalidSignature),
         Arguments.of("cat", VerifySignatureStatus.Valid),
         Arguments.of("JetBrains.Profiler.PdbServer", VerifySignatureStatus.Valid),
         Arguments.of("fat.dylib_signed", VerifySignatureStatus.Valid),

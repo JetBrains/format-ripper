@@ -25,7 +25,8 @@ class DefaultRootsTest {
     val cnRegex = Regex("CN=(?<CN>[^,]*)")
     val certificates = SignatureVerificationParams(
       Resources.GetDefaultRoots(),
-      withRevocationCheck = false
+      withRevocationCheck = false,
+      testedFileName = null
     ).RootCertificates!!.map {
       it.trustedCert
     }.map {

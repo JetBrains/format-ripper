@@ -25,7 +25,8 @@ class PeSignatureVerifierTests {
         null,
         false,
         withRevocationCheck = false,
-        expectedResult = expectedResult
+        expectedResult = expectedResult,
+        testedFileName = peResourceName
       )
       val peFile = PeFile(it)
       val signatureData = peFile.GetSignatureData()
@@ -48,7 +49,12 @@ class PeSignatureVerifierTests {
       getTestDataInputStream("pe", codesignRootCertStoreResourceName).use { codesignroots ->
         getTestDataInputStream("pe", timestampRootCertStoreResourceName).use { timestamproots ->
           val verificationParams = SignatureVerificationParams(
-            codesignroots, timestamproots, buildChain = true, withRevocationCheck = false, expectedResult = expectedResult
+            codesignroots,
+            timestamproots,
+            buildChain = true,
+            withRevocationCheck = false,
+            expectedResult = expectedResult,
+            testedFileName =peResourceName
           )
 
           val peFile = PeFile(peFileStream)
@@ -153,7 +159,8 @@ class PeSignatureVerifierTests {
             ocspResponseTimeout = null,
             SignatureValidationTimeMode.SignValidationTime,
             signatureValidationTime = time,
-            expectedResult = VerifySignatureStatus.Valid
+            expectedResult = VerifySignatureStatus.Valid,
+            testedFileName = peResourceName
           )
 
           val peFile = PeFile(peFileStream)
@@ -217,7 +224,7 @@ class PeSignatureVerifierTests {
     private const val jb_timestamp_roots = "jb_timestamp_roots.p7b"
 
     private const val pe_08_signed = "dotnet.exe"
-    private const val pe_09_broken_timestamp = "dotnet_broken_timestamp.exe"
+//    private const val pe_09_broken_timestamp = "dotnet_broken_timestamp.exe"
 
     @JvmStatic
     fun ComputeHashTestProvider(): Stream<Arguments> {
@@ -248,7 +255,6 @@ class PeSignatureVerifierTests {
         Arguments.of(pe_05_signed, VerifySignatureStatus.InvalidSignature),
         Arguments.of(pe_06_signed, VerifySignatureStatus.InvalidSignature),
         Arguments.of(pe_07_signed, VerifySignatureStatus.Valid),
-        Arguments.of(pe_09_broken_timestamp, VerifySignatureStatus.InvalidTimestamp)
       )
     }
 

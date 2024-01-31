@@ -49,45 +49,53 @@ open class SignerInfoVerifier(
     _logger = logger ?: NullLogger.Instance
   }
 
-  suspend fun VerifyAsync(@NotNull signatureVerificationParams: SignatureVerificationParams): VerifySignatureResult {
+  suspend fun VerifyAsync(@NotNull params: SignatureVerificationParams): VerifySignatureResult {
     val certList = ArrayList(_certs.getMatches(_signer.sid as Selector<X509CertificateHolder>))
     if (certList.isEmpty()) {
       _logger.Error(Messages.signer_cert_not_found)
-      return VerifySignatureResult(VerifySignatureStatus.InvalidSignature, Messages.signer_cert_not_found)
+      return VerifySignatureResult(VerifySignatureStatus.InvalidSignature, Messages.signer_cert_not_found, null)
     }
     val cert = certList[0] as X509CertificateHolder
     try {
       val verifier = JcaSignerInfoVerifierBuilder(JcaDigestCalculatorProviderBuilder().build()).build(cert)
 
-      if (!_signer.verify(verifier))
-        return VerifySignatureResult(VerifySignatureStatus.InvalidSignature)
+      val verify = _signer.verify(verifier)
+      if (!verify) {
+        Utils.printCertificateError(cert,params.testedFileName)
+        return VerifySignatureResult(VerifySignatureStatus.InvalidSignature, certificate = cert)
+      }
 
-      if (signatureVerificationParams.BuildChain)
-        applySignValidationTime(signatureVerificationParams)
+      if (params.BuildChain)
+        applySignValidationTime(params)
 
-      val verifyCounterSignResult = verifyCounterSignAsync(signatureVerificationParams)
+      val verifyCounterSignResult = verifyCounterSignAsync(params)
       if (verifyCounterSignResult.NotValid)
         return verifyCounterSignResult
 
-      val verifyTimeStampResult = verifyTimeStampAsync(signatureVerificationParams)
+      val verifyTimeStampResult = verifyTimeStampAsync(params)
       if (verifyTimeStampResult.NotValid)
         return verifyTimeStampResult
 
-      val verifyNestedSignsResult = verifyNestedSignsAsync(signatureVerificationParams)
+      val verifyNestedSignsResult = verifyNestedSignsAsync(params)
       if (verifyNestedSignsResult.NotValid)
         return verifyNestedSignsResult
 
-      if (signatureVerificationParams.BuildChain)
-        return buildCertificateChainAsync(cert, _certs, signatureVerificationParams)
+      if (params.BuildChain)
+        return buildCertificateChainAsync(cert, _certs, params)
 
       return VerifySignatureResult.Valid
     } catch (ex: CMSException) {
-      return if (isExceptionIgnored(ex)) VerifySignatureResult(signatureVerificationParams.expectedResult) else VerifySignatureResult(
+      Utils.printCertificateError(cert,params.testedFileName)
+      return if (isExceptionIgnored(ex)) VerifySignatureResult(
+        params.expectedResult,
+        certificate = null
+      ) else VerifySignatureResult(
         VerifySignatureStatus.InvalidSignature,
-        ex.FlatMessages()
+        ex.FlatMessages(),
+        null
       )
     } catch (ex: CertificateExpiredException) {
-      return VerifySignatureResult(VerifySignatureStatus.InvalidSignature, ex.FlatMessages())
+      return VerifySignatureResult(VerifySignatureStatus.InvalidSignature, ex.FlatMessages(), null)
     }
   }
 
@@ -152,33 +160,35 @@ open class SignerInfoVerifier(
     return VerifySignatureResult.Valid
   }
 
-  private suspend fun verifyTimeStampAsync(signatureVerificationParams: SignatureVerificationParams): VerifySignatureResult {
+  private suspend fun verifyTimeStampAsync(params: SignatureVerificationParams): VerifySignatureResult {
     val tst = TimeStampToken ?: return VerifySignatureResult.Valid
     val tstCerts = tst.certificates
     val tstCertsList = ArrayList(tstCerts.getMatches(tst.sid as Selector<X509CertificateHolder>))
     if (tstCertsList.isEmpty())
-      return VerifySignatureResult(VerifySignatureStatus.InvalidTimestamp, Messages.signer_cert_not_found)
+      return VerifySignatureResult(VerifySignatureStatus.InvalidTimestamp, Messages.signer_cert_not_found, null)
 
     val tstCert = tstCertsList[0] as X509CertificateHolder
     try {
       val verifier = JcaSignerInfoVerifierBuilder(JcaDigestCalculatorProviderBuilder().build()).build(tstCert)
       tst.validate(verifier)
-      if (signatureVerificationParams.BuildChain)
+      if (params.BuildChain)
         return try {
           val tstCmsSignedData = tst.toCMSSignedData()
           val certs = tstCmsSignedData.certificates
-          buildCertificateChainAsync(tstCert, certs, signatureVerificationParams)
+          buildCertificateChainAsync(tstCert, certs, params)
         } catch (ex: CertPathBuilderException) {
           VerifySignatureResult.InvalidChain(ex.FlatMessages())
         }
     } catch (ex: TSPException) {
+      Utils.printCertificateError(tstCert,params.testedFileName)
       return if (isExceptionIgnored(ex)) VerifySignatureResult.Valid else
         VerifySignatureResult(
           VerifySignatureStatus.InvalidTimestamp,
-          ex.FlatMessages()
+          ex.FlatMessages(),
+          null
         )
     } catch (ex: CertificateExpiredException) {
-      return VerifySignatureResult(VerifySignatureStatus.InvalidTimestamp, ex.FlatMessages())
+      return VerifySignatureResult(VerifySignatureStatus.InvalidTimestamp, ex.FlatMessages(), null)
     }
     return VerifySignatureResult.Valid
   }

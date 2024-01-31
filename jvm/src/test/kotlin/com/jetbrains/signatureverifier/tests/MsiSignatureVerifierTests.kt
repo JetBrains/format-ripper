@@ -19,7 +19,14 @@ class MsiSignatureVerifierTests {
   @MethodSource("VerifySignTestProvider")
   fun VerifySignTest(resourceName: String, expectedResult: VerifySignatureStatus) {
     val result = TestUtil.getTestByteChannel("msi", resourceName).use {
-      val verificationParams = SignatureVerificationParams(null, null, false, false, expectedResult = expectedResult)
+      val verificationParams = SignatureVerificationParams(
+        null,
+        null,
+        false,
+        false,
+        expectedResult = expectedResult,
+        testedFileName = resourceName
+      )
       val msiFile = MsiFile(it)
       val signatureData = msiFile.GetSignatureData()
       val signedMessage = SignedMessage.CreateInstance(signatureData)

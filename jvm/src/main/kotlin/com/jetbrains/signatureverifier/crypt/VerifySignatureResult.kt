@@ -1,6 +1,13 @@
 ﻿package com.jetbrains.signatureverifier.crypt
 
-class VerifySignatureResult(private val status: VerifySignatureStatus, private val message: String? = null) {
+import org.bouncycastle.cert.X509CertificateHolder
+import java.security.cert.X509Certificate
+
+class VerifySignatureResult(
+  private val status: VerifySignatureStatus,
+  private val message: String? = null,
+  certificate: X509CertificateHolder? =null
+) {
   val Status: VerifySignatureStatus
     get() = status
 
@@ -11,10 +18,10 @@ class VerifySignatureResult(private val status: VerifySignatureStatus, private v
     get() = status != VerifySignatureStatus.Valid
 
   companion object {
-    val Valid = VerifySignatureResult(VerifySignatureStatus.Valid)
+    val Valid = VerifySignatureResult(VerifySignatureStatus.Valid, certificate = null)
 
     fun InvalidChain(message: String): VerifySignatureResult =
-      VerifySignatureResult(VerifySignatureStatus.InvalidChain, message)
+      VerifySignatureResult(VerifySignatureStatus.InvalidChain, message, null)
   }
 }
 
