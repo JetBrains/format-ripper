@@ -59,6 +59,7 @@ public class AuthenticodeSignatureVerifier
     SignatureVerificationParams signatureVerificationParams,
     FileIntegrityVerificationParams fileIntegrityVerificationParams)
   {
+    if (!peFile.HasSignature) return new VerifySignatureResult(VerifySignatureStatus.InvalidSignature);
     if (peFile.ComputeHashInfo == null) throw new ArgumentException($"PE file was parsed without {nameof(PeFile.Mode.ComputeHashInfo)} flag", nameof(peFile));
 
     return await VerifyAsync(peFile.SignatureData, peFile.ComputeHashInfo, stream, signatureVerificationParams, fileIntegrityVerificationParams);
