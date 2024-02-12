@@ -15,8 +15,11 @@ namespace JetBrains.FormatRipper.Pe
     public readonly bool HasSignature;
     public readonly SignatureData SignatureData;
     public readonly ComputeHashInfo? ComputeHashInfo;
+    public readonly ComputeHashInfo? ComputeChecksumInfo;
     public readonly bool HasMetadata;
+    public readonly StreamRange ChecksumRange;
     public readonly StreamRange SecurityDataDirectoryRange;
+    public readonly PeFileSignature? Signature;
 
     private PeFile(
       IMAGE_FILE_MACHINE machine,
@@ -26,8 +29,11 @@ namespace JetBrains.FormatRipper.Pe
       bool hasSignature,
       SignatureData signatureData,
       bool hasMetadata,
+      StreamRange checksumRange,
       StreamRange securityDataDirectoryRange,
-      ComputeHashInfo? computeHashInfo)
+      ComputeHashInfo? computeHashInfo,
+      ComputeHashInfo? computeChecksumInfo,
+      PeFileSignature? signature)
     {
       Machine = machine;
       Characteristics = characteristics;
@@ -36,8 +42,11 @@ namespace JetBrains.FormatRipper.Pe
       HasSignature = hasSignature;
       SignatureData = signatureData;
       HasMetadata = hasMetadata;
+      ChecksumRange = checksumRange;
       SecurityDataDirectoryRange = securityDataDirectoryRange;
       ComputeHashInfo = computeHashInfo;
+      ComputeChecksumInfo = computeChecksumInfo;
+      Signature = signature;
     }
 
     public static unsafe bool Is(Stream stream)
@@ -87,6 +96,7 @@ namespace JetBrains.FormatRipper.Pe
       IMAGE_SUBSYSTEM subsystem;
       IMAGE_DLLCHARACTERISTICS dllCharacteristics;
       uint numberOfRvaAndSizes;
+      PeFileSignature peFileSignature = new PeFileSignature();
       StreamRange checkSumRange;
       switch (MemoryUtil.GetLeU2(iohMagic))
       {
@@ -102,6 +112,7 @@ namespace JetBrains.FormatRipper.Pe
           subsystem = (IMAGE_SUBSYSTEM)MemoryUtil.GetLeU2(ioh.Subsystem);
           dllCharacteristics = (IMAGE_DLLCHARACTERISTICS)MemoryUtil.GetLeU2(ioh.DllCharacteristics);
           numberOfRvaAndSizes = Math.Max(MemoryUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+          peFileSignature.ExpectedCrc = MemoryUtil.GetLeU4(ioh.CheckSum);
         }
         break;
       case Magic.IMAGE_NT_OPTIONAL_HDR64_MAGIC:
@@ -115,6 +126,7 @@ namespace JetBrains.FormatRipper.Pe
           subsystem = (IMAGE_SUBSYSTEM)MemoryUtil.GetLeU2(ioh.Subsystem);
           dllCharacteristics = (IMAGE_DLLCHARACTERISTICS)MemoryUtil.GetLeU2(ioh.DllCharacteristics);
           numberOfRvaAndSizes = Math.Max(MemoryUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+          peFileSignature.ExpectedCrc = MemoryUtil.GetLeU4(ioh.CheckSum);
         }
         break;
       default:
@@ -200,10 +212,10 @@ namespace JetBrains.FormatRipper.Pe
         else
           sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections, sizeOfFile - sizeOfSections));
 
-        if (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size) <= stream.Length)
         if (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size) == stream.Length)
         {
           hasSignature = true;
+
           if ((mode & Mode.SignatureData) == Mode.SignatureData)
           {
             stream.Position = MemoryUtil.GetLeU4(securityIdd.VirtualAddress);
@@ -211,7 +223,15 @@ namespace JetBrains.FormatRipper.Pe
             StreamUtil.ReadBytes(stream, (byte*)&wc, sizeof(WIN_CERTIFICATE));
             if (MemoryUtil.GetLeU2(wc.wCertificateType) != WinCertificate.WIN_CERT_TYPE_PKCS_SIGNED_DATA)
               throw new FormatException("Unsupported PE certificate type");
-            signatureData = new SignatureData(null, StreamUtil.ReadBytes(stream, checked((int)(MemoryUtil.GetLeU4(wc.dwLength) - sizeof(WIN_CERTIFICATE)))));
+
+            byte[] cmsBlob = StreamUtil.ReadBytes(stream, checked((int)(MemoryUtil.GetLeU4(wc.dwLength) - sizeof(WIN_CERTIFICATE))));
+            signatureData = new SignatureData(null, cmsBlob);
+
+            peFileSignature.SignatureBlobOffset = MemoryUtil.GetLeU4(securityIdd.VirtualAddress);
+            peFileSignature.SignatureBlobSize = MemoryUtil.GetLeU4(securityIdd.Size);
+            peFileSignature.CertificateType = MemoryUtil.GetLeU2(wc.wCertificateType);
+            peFileSignature.CertificateRevision = MemoryUtil.GetLeU2(wc.wRevision);
+            peFileSignature.SignatureBlob = cmsBlob;
           }
         }
       }
@@ -219,8 +239,14 @@ namespace JetBrains.FormatRipper.Pe
         sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections, sizeOfFile - sizeOfSections));
 
       ComputeHashInfo? computeHashInfo = null;
+      ComputeHashInfo? computeChecksumInfo = null;
       if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+      {
         computeHashInfo = new ComputeHashInfo(0, sortedHashIncludeRanges, 0);
+        var checksumRanges = StreamRangeUtil.Invert(stream.Length, new List<StreamRange>() { checkSumRange });
+
+        computeChecksumInfo = new ComputeHashInfo(0, checksumRanges, 0);
+      }
 
       var hasMetadata = TranslateVirtualAddress(ishs, ref corIdd) != 0;
 
@@ -228,8 +254,10 @@ namespace JetBrains.FormatRipper.Pe
       return new(
         (IMAGE_FILE_MACHINE)MemoryUtil.GetLeU2(ifh.Machine),
         (IMAGE_FILE)MemoryUtil.GetLeU2(ifh.Characteristics),
-        subsystem, dllCharacteristics, hasSignature, signatureData, hasMetadata, securityIddRange,
-        computeHashInfo);
+        subsystem, dllCharacteristics, hasSignature, signatureData, hasMetadata, checkSumRange, securityIddRange,
+        computeHashInfo,
+        computeChecksumInfo,
+        (mode & Mode.SignatureData) == Mode.SignatureData ? peFileSignature : null);
     }
 
     private static uint TranslateVirtualAddress(IMAGE_SECTION_HEADER[] ishs, ref IMAGE_DATA_DIRECTORY idd)
