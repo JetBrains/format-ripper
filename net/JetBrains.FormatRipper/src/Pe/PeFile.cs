@@ -201,6 +201,7 @@ namespace JetBrains.FormatRipper.Pe
           sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections, sizeOfFile - sizeOfSections));
 
         if (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size) <= stream.Length)
+        if (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size) == stream.Length)
         {
           hasSignature = true;
           if ((mode & Mode.SignatureData) == Mode.SignatureData)
