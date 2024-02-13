@@ -17,6 +17,7 @@ namespace JetBrains.FormatRipper.Pe
     public readonly ComputeHashInfo? ComputeHashInfo;
     public readonly ComputeHashInfo? ComputeChecksumInfo;
     public readonly bool HasMetadata;
+    public readonly StreamRange TimeDateStampRange;
     public readonly StreamRange ChecksumRange;
     public readonly StreamRange SecurityDataDirectoryRange;
     public readonly PeFileSignature? Signature;
@@ -29,6 +30,7 @@ namespace JetBrains.FormatRipper.Pe
       bool hasSignature,
       SignatureData signatureData,
       bool hasMetadata,
+      StreamRange timeDateStampRange,
       StreamRange checksumRange,
       StreamRange securityDataDirectoryRange,
       ComputeHashInfo? computeHashInfo,
@@ -42,6 +44,7 @@ namespace JetBrains.FormatRipper.Pe
       HasSignature = hasSignature;
       SignatureData = signatureData;
       HasMetadata = hasMetadata;
+      TimeDateStampRange = timeDateStampRange;
       ChecksumRange = checksumRange;
       SecurityDataDirectoryRange = securityDataDirectoryRange;
       ComputeHashInfo = computeHashInfo;
@@ -74,6 +77,7 @@ namespace JetBrains.FormatRipper.Pe
 
     public static unsafe PeFile Parse(Stream stream, Mode mode = Mode.Default)
     {
+      PeFileSignature peFileSignature = new PeFileSignature();
       stream.Position = 0;
       IMAGE_DOS_HEADER ids;
       StreamUtil.ReadBytes(stream, (byte*)&ids, sizeof(IMAGE_DOS_HEADER));
@@ -87,7 +91,9 @@ namespace JetBrains.FormatRipper.Pe
         throw new InvalidDataException("Invalid PE magic");
 
       IMAGE_FILE_HEADER ifh;
+      StreamRange timeDateStampRange = new StreamRange(checked(stream.Position + ((byte*)&ifh.TimeDateStamp - (byte*)&ifh)), sizeof(uint));
       StreamUtil.ReadBytes(stream, (byte*)&ifh, sizeof(IMAGE_FILE_HEADER));
+      peFileSignature.TimeDateStamp = MemoryUtil.GetLeU4(ifh.TimeDateStamp);
 
       ushort iohMagic;
       StreamUtil.ReadBytes(stream, (byte*)&iohMagic, sizeof(ushort));
@@ -96,7 +102,6 @@ namespace JetBrains.FormatRipper.Pe
       IMAGE_SUBSYSTEM subsystem;
       IMAGE_DLLCHARACTERISTICS dllCharacteristics;
       uint numberOfRvaAndSizes;
-      PeFileSignature peFileSignature = new PeFileSignature();
       StreamRange checkSumRange;
       switch (MemoryUtil.GetLeU2(iohMagic))
       {
@@ -254,7 +259,7 @@ namespace JetBrains.FormatRipper.Pe
       return new(
         (IMAGE_FILE_MACHINE)MemoryUtil.GetLeU2(ifh.Machine),
         (IMAGE_FILE)MemoryUtil.GetLeU2(ifh.Characteristics),
-        subsystem, dllCharacteristics, hasSignature, signatureData, hasMetadata, checkSumRange, securityIddRange,
+        subsystem, dllCharacteristics, hasSignature, signatureData, hasMetadata, timeDateStampRange, checkSumRange, securityIddRange,
         computeHashInfo,
         computeChecksumInfo,
         (mode & Mode.SignatureData) == Mode.SignatureData ? peFileSignature : null);
