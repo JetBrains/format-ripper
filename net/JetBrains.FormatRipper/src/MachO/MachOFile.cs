@@ -21,6 +21,7 @@ namespace JetBrains.FormatRipper.MachO
       public readonly ComputeHashInfo? ComputeHashInfo;
       public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
       public readonly IEnumerable<CDHash> CDHashes;
+      public readonly MachOSectionSignature? Signature;
 
       internal Section(
         bool isLittleEndian,
@@ -32,7 +33,8 @@ namespace JetBrains.FormatRipper.MachO
         SignatureData signatureData,
         ComputeHashInfo? computeHashInfo,
         IEnumerable<HashVerificationUnit> hashVerificationUnits,
-        IEnumerable<CDHash> cdHashes)
+        IEnumerable<CDHash> cdHashes,
+        MachOSectionSignature? signature)
       {
         IsLittleEndian = isLittleEndian;
         CpuType = cpuType;
@@ -44,11 +46,13 @@ namespace JetBrains.FormatRipper.MachO
         ComputeHashInfo = computeHashInfo;
         HashVerificationUnits = hashVerificationUnits;
         CDHashes = cdHashes;
+        Signature = signature;
       }
     }
 
     public readonly bool? IsFatLittleEndian;
     public readonly Section[] Sections;
+    public readonly MachOFileSignature? Signature;
 
     [Flags]
     public enum Mode : uint
@@ -62,6 +66,10 @@ namespace JetBrains.FormatRipper.MachO
     {
       IsFatLittleEndian = isFatLittleEndian;
       Sections = sections;
+      Signature = new MachOFileSignature(new MachOSectionSignature[sections.Length]);
+
+      for (int i = 0; i < sections.Length; i++)
+        Signature.SectionSignatures[i] = sections[i].Signature;
     }
 
     public static unsafe bool Is(Stream stream)
@@ -133,6 +141,7 @@ namespace JetBrains.FormatRipper.MachO
 
         var isLittleEndian = magic is MH.MH_MAGIC or MH.MH_MAGIC_64;
         var needSwap = BitConverter.IsLittleEndian != isLittleEndian;
+        var machOSignature = new MachOSectionSignature();
 
         uint GetU4(uint v) => needSwap ? MemoryUtil.SwapU4(v) : v;
 
@@ -140,15 +149,17 @@ namespace JetBrains.FormatRipper.MachO
 
         LoadCommandsInfo ReadLoadCommands(long cmdOffset, uint nCmds, uint sizeOfCmds)
         {
+          machOSignature.LoadCommandsOffset = cmdOffset;
           var hasSignature = false;
           byte[]? codeDirectoryBlob = null;
           byte[]? cmsSignatureBlob = null;
           List<HashVerificationUnit> hashVerificationUnits = new List<HashVerificationUnit>();
           List<CDHash> cdHashes = new List<CDHash>();
+          uint remainingCommands = nCmds;
 
           fixed (byte* buf = StreamUtil.ReadBytes(stream, checked((int)sizeOfCmds)))
           {
-            for (var cmdPtr = buf; nCmds-- > 0;)
+            for (var cmdPtr = buf; remainingCommands-- > 0;)
             {
               load_command lc;
               MemoryUtil.CopyBytes(cmdPtr, (byte*)&lc, sizeof(load_command));
@@ -185,7 +196,8 @@ namespace JetBrains.FormatRipper.MachO
                 }
                 break;
               case LC.LC_CODE_SIGNATURE:
-                {
+              {
+                  machOSignature.LcCodeSignatureSize = GetU4(lc.cmdsize);
                   linkedit_data_command ldc;
                   MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&ldc, sizeof(linkedit_data_command));
                   if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
@@ -194,8 +206,13 @@ namespace JetBrains.FormatRipper.MachO
                     excludeRanges.Add(new StreamRange(GetU4(ldc.dataoff), GetU4(ldc.datasize)));
                   }
 
+                  machOSignature.LinkEditDataOffset = GetU4(ldc.dataoff);
+                  machOSignature.LinkEditDataSize = GetU4(ldc.datasize);
+
                   if ((mode & Mode.SignatureData) == Mode.SignatureData)
                   {
+                    stream.Position = checked(imageRange.Position + GetU4(ldc.dataoff));
+                    machOSignature.SignatureBlob = StreamUtil.ReadBytes(stream, checked((int)GetU4(ldc.datasize)));
                     stream.Position = checked(imageRange.Position + GetU4(ldc.dataoff));
 
                     CS_SuperBlob cssb;
@@ -333,7 +350,7 @@ namespace JetBrains.FormatRipper.MachO
                 excludeRanges.Add(new StreamRange(checked(cmdOffset + sizeOfCmds), sizeof(load_command) + sizeof(linkedit_data_command)));
           }
 
-          return new(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob), hashVerificationUnits, cdHashes);
+          return new(cmdOffset, nCmds, sizeOfCmds, hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob), hashVerificationUnits, cdHashes);
         }
 
         int GetZeroPadding(bool hasCodeSignature)
@@ -353,6 +370,9 @@ namespace JetBrains.FormatRipper.MachO
             excludeRanges.Add(new StreamRange(checked(sizeof(MH) + ((byte*)&mh.ncmds - (byte*)&mh)), sizeof(uint)));
             excludeRanges.Add(new StreamRange(checked(sizeof(MH) + ((byte*)&mh.sizeofcmds - (byte*)&mh)), sizeof(uint)));
           }
+
+          machOSignature.NumberOfLoadCommands = GetU4(mh.ncmds);
+          machOSignature.SizeOfLoadCommands = GetU4(mh.sizeofcmds);
 
           var loadCommands = ReadLoadCommands(sizeof(MH) + sizeof(mach_header_64), GetU4(mh.ncmds), GetU4(mh.sizeofcmds));
 
@@ -375,7 +395,8 @@ namespace JetBrains.FormatRipper.MachO
             loadCommands.SignatureData,
             computeHashInfo,
             loadCommands.HashVerificationUnits,
-            loadCommands.CDHashes);
+            loadCommands.CDHashes,
+            machOSignature);
         }
         else
         {
@@ -408,7 +429,8 @@ namespace JetBrains.FormatRipper.MachO
             loadCommands.SignatureData,
             computeHashInfo,
             loadCommands.HashVerificationUnits,
-            loadCommands.CDHashes);
+            loadCommands.CDHashes,
+            machOSignature);
         }
       }
 
@@ -479,17 +501,23 @@ namespace JetBrains.FormatRipper.MachO
 
     private readonly struct LoadCommandsInfo
     {
+      public readonly long LoadCommandsOffset;
+      public readonly uint NumberOfCommands;
+      public readonly uint SizeOfCommands;
       public readonly bool HasSignature;
       public readonly SignatureData SignatureData;
       public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
       public readonly IEnumerable<CDHash> CDHashes;
 
-      public LoadCommandsInfo(bool hasSignature, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes)
+      public LoadCommandsInfo(long loadCommandsOffset, uint numberOfCommands, uint sizeOfCommands, bool hasSignature, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes)
       {
         HasSignature = hasSignature;
         SignatureData = signatureData;
         HashVerificationUnits = hashVerificationUnits;
         CDHashes = cdHashes;
+        LoadCommandsOffset = loadCommandsOffset;
+        NumberOfCommands = numberOfCommands;
+        SizeOfCommands = sizeOfCommands;
       }
     }
   }

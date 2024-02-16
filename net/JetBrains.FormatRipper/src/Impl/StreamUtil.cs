@@ -29,5 +29,11 @@ namespace JetBrains.FormatRipper.Impl
       fixed (byte* buf = ReadBytes(stream, size))
         MemoryUtil.CopyBytes(buf, dst, size);
     }
+
+    internal static unsafe void WriteBytes(Stream stream, byte* src, int size)
+    {
+      byte[] buffer = MemoryUtil.CopyBytes(src, size);
+      stream.Write(buffer, 0, buffer.Length);
+    }
   }
 }

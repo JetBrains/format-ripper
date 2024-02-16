@@ -59,7 +59,7 @@ public class PeSignatureTransferTest
 
   [TestCase("HelloWorld1_signed.exe", "HelloWorld2.exe")]
   [TestCase("HelloWorld2_signed.exe", "HelloWorld1.exe")]
-  public async Task SignatureTransferBetweenIncompatibleFilesShouldThrowException(string donor, string acceptor)
+  public void SignatureTransferBetweenIncompatibleFilesShouldThrowException(string donor, string acceptor)
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Pe, donor, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
