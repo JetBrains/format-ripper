@@ -144,6 +144,7 @@ namespace JetBrains.FormatRipper.MachO
         var machOSignature = new MachOSectionSignature();
 
         uint GetU4(uint v) => needSwap ? MemoryUtil.SwapU4(v) : v;
+        ulong GetU8(ulong v) => needSwap ? MemoryUtil.SwapU8(v) : v;
 
         var excludeRanges = new List<StreamRange>();
 
@@ -155,11 +156,11 @@ namespace JetBrains.FormatRipper.MachO
           byte[]? cmsSignatureBlob = null;
           List<HashVerificationUnit> hashVerificationUnits = new List<HashVerificationUnit>();
           List<CDHash> cdHashes = new List<CDHash>();
-          uint remainingCommands = nCmds;
+          uint commandNumber = 0;
 
           fixed (byte* buf = StreamUtil.ReadBytes(stream, checked((int)sizeOfCmds)))
           {
-            for (var cmdPtr = buf; remainingCommands-- > 0;)
+            for (var cmdPtr = buf; commandNumber++ < nCmds;)
             {
               load_command lc;
               MemoryUtil.CopyBytes(cmdPtr, (byte*)&lc, sizeof(load_command));
@@ -168,12 +169,15 @@ namespace JetBrains.FormatRipper.MachO
               switch ((LC)GetU4(lc.cmd))
               {
               case LC.LC_SEGMENT:
+                machOSignature.LastLinkeditCommandNumber = commandNumber;
                 if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
                 {
                   segment_command sc;
                   MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command));
                   var segNameBuf = MemoryUtil.CopyBytes(sc.segname, 16);
                   var segName = new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
+                  machOSignature.LastLinkeditVmSize32 = GetU4(sc.vmsize);
+                  machOSignature.LastLinkeditFileSize32 = GetU4(sc.filesize);
                   if (segName == SEG.SEG_LINKEDIT)
                   {
                     excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.vmsize - (byte*)&sc)), sizeof(uint)));
@@ -182,12 +186,15 @@ namespace JetBrains.FormatRipper.MachO
                 }
                 break;
               case LC.LC_SEGMENT_64:
+                machOSignature.LastLinkeditCommandNumber = commandNumber;
                 if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
                 {
                   segment_command_64 sc;
                   MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command_64));
                   var segNameBuf = MemoryUtil.CopyBytes(sc.segname, 16);
                   var segName = new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
+                  machOSignature.LastLinkeditVmSize64 = GetU8(sc.vmsize);
+                  machOSignature.LastLinkeditFileSize64 = GetU8(sc.filesize);
                   if (segName == SEG.SEG_LINKEDIT)
                   {
                     excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.vmsize - (byte*)&sc)), sizeof(ulong)));

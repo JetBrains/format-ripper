@@ -15,6 +15,9 @@ public class MachOSignatureTransferTests
   [TestCase("TestCppApp2_adhoc_signed", "TestCppApp2_adhoc")]
   [TestCase("TestApp_developer", "TestApp_adhoc")]
   [TestCase("TestApp_developer", "TestApp_not_signed")]
+  [TestCase("cat", "cat_removed_signature")]
+  [TestCase("FatTestCppApp_signed", "FatTestCppApp")]
+  [TestCase("FatTestCppApp_adhoc_signed", "FatTestCppApp_adhoc")]
   public async Task SignatureShouldBeTransfered(string donor, string acceptor)
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.MachO, donor, stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData | MachOFile.Mode.ComputeHashInfo));
