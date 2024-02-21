@@ -8,6 +8,8 @@ namespace JetBrains.FormatRipper.MachO;
 
 public class MachOSignatureInjector
 {
+  private const long MaxPaddingBytes = 8;
+
   struct MachOSectionInfo
   {
     public long SectionOffset;
@@ -322,7 +324,11 @@ public class MachOSignatureInjector
 
     if (PositionFromStart() < sectionSignature.LinkEditDataOffset)
     {
-      byte[] padding = new byte[sectionSignature.LinkEditDataOffset - PositionFromStart()];
+      long paddingBytes = sectionSignature.LinkEditDataOffset - PositionFromStart();
+      if (paddingBytes > MaxPaddingBytes)
+        throw new SignatureInjectionException($"Too many padding bytes required between payload and signature. Expected no more than {MaxPaddingBytes} bytes, but required {paddingBytes} bytes. Seems that the donor and the acceptor files are incompatible.");
+
+      byte[] padding = new byte[paddingBytes];
       outputStream.Write(padding, 0, padding.Length);
     }
 

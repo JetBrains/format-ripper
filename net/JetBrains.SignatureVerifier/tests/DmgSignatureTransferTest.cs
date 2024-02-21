@@ -14,6 +14,10 @@ public class DmgSignatureTransferTest
   [TestCase("license-signed.dmg", "license.dmg")]
   [TestCase("test-signed.dmg", "test.dmg")]
   [TestCase("test-readonly-signed.dmg", "test-readonly.dmg")]
+  [TestCase("test2-signed.dmg", "test2.dmg")]
+  [TestCase("test2-signed-timestamped.dmg", "test2.dmg")]
+  [TestCase("test2-signed-timestamped.dmg", "test2-signed.dmg")]
+  [TestCase("test2-signed.dmg", "test2-signed-timestamped.dmg")]
   public async Task SignatureShouldBeTransfered(string donor, string acceptor)
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, donor, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData | DmgFile.Mode.ComputeHashInfo));
@@ -27,10 +31,6 @@ public class DmgSignatureTransferTest
       DmgSignatureInjector.InjectSignature(stream, resultFileStream, file.Signature);
       return 0;
     });
-
-    resultFileStream.Seek(0, SeekOrigin.Begin);
-    using (var f = File.OpenWrite("output"))
-      resultFileStream.WriteTo(f);
 
     DmgFile acceptorFile = DmgFile.Parse(resultFileStream, DmgFile.Mode.SignatureData | DmgFile.Mode.ComputeHashInfo);
 
@@ -56,6 +56,8 @@ public class DmgSignatureTransferTest
   }
 
   [TestCase("test-signed.dmg", "test-readonly.dmg")]
+  [TestCase("test-signed.dmg", "test2.dmg")]
+  [TestCase("test2-signed.dmg", "test.dmg")]
   [TestCase("test-signed.dmg", "license.dmg")]
   [TestCase("license-signed.dmg", "test.dmg")]
   public void SignatureTransferBetweenIncompatibleFilesShouldThrowException(string donor, string acceptor)
