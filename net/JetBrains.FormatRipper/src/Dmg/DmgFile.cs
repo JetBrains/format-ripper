@@ -14,6 +14,7 @@ namespace JetBrains.FormatRipper.Dmg
     public readonly SignatureData SignatureData;
     public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
     public readonly IEnumerable<CDHash> CDHashes;
+    public readonly DmgFileSignature? Signature;
 
     [Flags]
     public enum Mode : uint
@@ -25,11 +26,13 @@ namespace JetBrains.FormatRipper.Dmg
 
     private DmgFile(bool hasSignature,
       SignatureData signatureData,
+      DmgFileSignature? signature,
       IEnumerable<HashVerificationUnit> hashVerificationUnits,
       IEnumerable<CDHash> cdHashes)
     {
       HasSignature = hasSignature;
       SignatureData = signatureData;
+      Signature = signature;
       HashVerificationUnits = hashVerificationUnits;
       CDHashes = cdHashes;
     }
@@ -86,12 +89,22 @@ namespace JetBrains.FormatRipper.Dmg
       var hasSignature = signatureLength != 0;
       byte[]? codeDirectoryBlob = null;
       byte[]? cmsSignatureBlob = null;
+      DmgFileSignature? signature = null;
       List<HashVerificationUnit> hashVerificationUnits = new List<HashVerificationUnit>();
       List<CDHash> cdHashes = new List<CDHash>();
 
       if ((mode & Mode.SignatureData) == Mode.SignatureData && hasSignature)
       {
         var imageRange = new StreamRange(0, stream.Length);
+
+        stream.Position = checked(imageRange.Position + (long)signatureOffset);
+
+        signature = new DmgFileSignature()
+        {
+          SignatureOffset = checked((long)signatureOffset),
+          SignatureLength = checked((long)signatureLength),
+          SignatureBlob = StreamUtil.ReadBytes(stream, checked((int)signatureLength)),
+        };
 
         stream.Position = checked(imageRange.Position + (long)signatureOffset);
 
@@ -218,7 +231,7 @@ namespace JetBrains.FormatRipper.Dmg
         }
       }
 
-      return new DmgFile(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob), hashVerificationUnits, cdHashes);
+      return new DmgFile(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob), signature, hashVerificationUnits, cdHashes);
     }
   }
 }
