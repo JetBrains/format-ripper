@@ -318,25 +318,7 @@ public class MachOSignatureInjector
 
     long end = oldSignatureOffset != 0 ? sourceStreamRange.Position + oldSignatureOffset : sourceStreamRange.Position + sourceStreamRange.Size;
 
-    long remainingBytes = end - sourceStream.Position;
-
-    const long maxChunk = 1024 * 1024;
-
-    byte[] buffer = new byte[maxChunk];
-
-    while (remainingBytes > 0)
-    {
-      long chunk = Math.Min(maxChunk, remainingBytes);
-
-      int actualRead = sourceStream.Read(buffer, 0, (int)chunk);
-
-      if (actualRead == 0)
-        throw new SignatureInjectionException($"Error reading from the source stream. Stream position: {sourceStream.Position}, stream length: {sourceStream.Length}");
-
-      outputStream.Write(buffer, 0, actualRead);
-
-      remainingBytes -= actualRead;
-    }
+    StreamUtil.CopyBytes(sourceStream, outputStream, end - sourceStream.Position);
 
     if (PositionFromStart() < sectionSignature.LinkEditDataOffset)
     {

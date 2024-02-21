@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace JetBrains.FormatRipper.Impl
 {
@@ -34,6 +35,25 @@ namespace JetBrains.FormatRipper.Impl
     {
       byte[] buffer = MemoryUtil.CopyBytes(src, size);
       stream.Write(buffer, 0, buffer.Length);
+    }
+
+    internal static void CopyBytes(Stream sourceStream, Stream destinationStream, long bytesToCopy, int maxChunk = 1024 * 1024)
+    {
+      byte[] buffer = new byte[maxChunk];
+
+      while (bytesToCopy > 0)
+      {
+        long chunk = Math.Min(maxChunk, bytesToCopy);
+
+        int actualRead = sourceStream.Read(buffer, 0, (int)chunk);
+
+        if (actualRead == 0)
+          throw new IOException($"Error reading from the source stream. Stream position: {sourceStream.Position}, stream length: {sourceStream.Length}, attempted to read {chunk} bytes");
+
+        destinationStream.Write(buffer, 0, actualRead);
+
+        bytesToCopy -= actualRead;
+      }
     }
   }
 }

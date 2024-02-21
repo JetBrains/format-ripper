@@ -32,10 +32,6 @@ public class MachOSignatureTransferTests
       return 0;
     });
 
-    resultFileStream.Seek(0, SeekOrigin.Begin);
-    using (var f = File.OpenWrite("output"))
-      resultFileStream.WriteTo(f);
-
     MachOFile acceptorFile = MachOFile.Parse(resultFileStream, MachOFile.Mode.SignatureData | MachOFile.Mode.ComputeHashInfo);
 
     var verificationParams = new SignatureVerificationParams(null, null, false, false);
