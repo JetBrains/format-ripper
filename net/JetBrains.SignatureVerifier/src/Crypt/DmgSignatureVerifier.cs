@@ -51,7 +51,7 @@ public class DmgSignatureVerifier: AppleSignatureVerifier
     }
 
     if (!dmgFile.HashVerificationUnits.Any() || !dmgFile.CDHashes.Any())
-      throw new ArgumentException($"DMG file was parsed without {nameof(DmgFile.Mode.ComputeHashInfo)} flag", nameof(dmgFile));
+      throw new ArgumentException($"DMG file was parsed without {nameof(DmgFile.Mode.SignatureData)} flag", nameof(dmgFile));
 
     var signedMessage = SignedMessage.CreateInstance(dmgFile.SignatureData);
     var signatureVerificationResult = await _signedMessageVerifier.VerifySignatureAsync(signedMessage, signatureVerificationParams);

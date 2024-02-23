@@ -16,7 +16,7 @@ public class DmgFileTest
     var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream =>
     {
       Assert.IsTrue(DmgFile.Is(stream));
-      return DmgFile.Parse(stream, DmgFile.Mode.SignatureData | DmgFile.Mode.ComputeHashInfo);
+      return DmgFile.Parse(stream, DmgFile.Mode.SignatureData);
     });
 
     Assert.AreEqual(hasSignature, file.HasSignature);

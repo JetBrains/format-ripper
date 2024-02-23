@@ -23,7 +23,7 @@ public class MachOSignatureTransferTests
   [TestCase("FatTestCppApp_signed", "FatTestCppApp_signed_timestamped")]
   public async Task SignatureShouldBeTransfered(string donor, string acceptor)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.MachO, donor, stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData | MachOFile.Mode.ComputeHashInfo));
+    var file = ResourceUtil.OpenRead(ResourceCategory.MachO, donor, stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData));
 
     Assert.NotNull(file.Signature);
 
@@ -35,7 +35,7 @@ public class MachOSignatureTransferTests
       return 0;
     });
 
-    MachOFile acceptorFile = MachOFile.Parse(resultFileStream, MachOFile.Mode.SignatureData | MachOFile.Mode.ComputeHashInfo);
+    MachOFile acceptorFile = MachOFile.Parse(resultFileStream, MachOFile.Mode.SignatureData);
 
     var verificationParams = new SignatureVerificationParams(null, null, false, false);
 
@@ -66,7 +66,7 @@ public class MachOSignatureTransferTests
   [TestCase("TestApp_developer", "TestCppApp1")]
   public void SignatureTransferBetweenIncompatibleFilesShouldThrowException(string donor, string acceptor)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.MachO, donor, stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData | MachOFile.Mode.ComputeHashInfo));
+    var file = ResourceUtil.OpenRead(ResourceCategory.MachO, donor, stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData));
 
     Assert.NotNull(file.Signature);
 

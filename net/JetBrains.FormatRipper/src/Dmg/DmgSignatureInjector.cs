@@ -7,7 +7,7 @@ namespace JetBrains.FormatRipper.Dmg;
 
 public class DmgSignatureInjector
 {
-  public static unsafe void InjectSignature(Stream sourceStream, Stream outputStream, DmgFileSignature signature)
+  public static unsafe void InjectSignature(Stream sourceStream, Stream outputStream, DmgSignatureTransferData signatureTransferData)
   {
     sourceStream.Seek(-sizeof(UDIF), SeekOrigin.End);
 
@@ -21,16 +21,16 @@ public class DmgSignatureInjector
 
     long usefullPayloadLength = existingSignatureLength == 0 ? sourceStream.Length - sizeof(UDIF) : existingSignatureOffset;
 
-    if (usefullPayloadLength != signature.SignatureOffset)
-      throw new SignatureInjectionException($"Cannot transfer the signature. Expected file size: {signature.SignatureOffset + sizeof(UDIF)} bytes, bug got {sourceStream.Length} bytes");
+    if (usefullPayloadLength != signatureTransferData.SignatureOffset)
+      throw new SignatureInjectionException($"Cannot transfer the signature. Expected file size: {signatureTransferData.SignatureOffset + sizeof(UDIF)} bytes, bug got {sourceStream.Length} bytes");
 
-    long bytesToCopy = Math.Min(usefullPayloadLength, signature.SignatureOffset);
+    long bytesToCopy = Math.Min(usefullPayloadLength, signatureTransferData.SignatureOffset);
 
     StreamUtil.CopyBytes(sourceStream, outputStream, bytesToCopy);
 
-    outputStream.Write(signature.SignatureBlob, 0, signature.SignatureBlob.Length);
-    udif.CodeSignatureLength = MemoryUtil.GetBeU8((ulong)signature.SignatureLength);
-    udif.CodeSignatureOffset = MemoryUtil.GetBeU8((ulong)signature.SignatureOffset);
+    outputStream.Write(signatureTransferData.SignatureBlob, 0, signatureTransferData.SignatureBlob.Length);
+    udif.CodeSignatureLength = MemoryUtil.GetBeU8((ulong)signatureTransferData.SignatureLength);
+    udif.CodeSignatureOffset = MemoryUtil.GetBeU8((ulong)signatureTransferData.SignatureOffset);
 
     StreamUtil.WriteBytes(outputStream, (byte*)&udif, sizeof(UDIF));
   }
