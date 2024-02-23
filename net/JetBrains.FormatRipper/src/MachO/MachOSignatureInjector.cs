@@ -17,7 +17,7 @@ public class MachOSignatureInjector
     public int Alignment;
   }
 
-  public static unsafe void InjectSignature(Stream sourceStream, Stream outputStream, MachOFileSignature signature)
+  public static unsafe void InjectSignature(Stream sourceStream, Stream outputStream, MachOSignatureTransferData signatureTransferData)
   {
     if (!outputStream.CanWrite) throw new ArgumentException("Provided stream is not writeable");
 
@@ -30,23 +30,23 @@ public class MachOSignatureInjector
 
     if (!isFat)
     {
-      if (signature.SectionSignatures.Length != 1)
-        throw new SignatureInjectionException($"Invalid number of signatures for the non-FAT Mach-O. Expected 1, but got {signature.SectionSignatures.Length}");
+      if (signatureTransferData.SectionSignatures.Length != 1)
+        throw new SignatureInjectionException($"Invalid number of signatures for the non-FAT Mach-O. Expected 1, but got {signatureTransferData.SectionSignatures.Length}");
 
       TransferSectionSignature(
         sourceStream,
         new StreamRange(0, sourceStream.Length),
         outputStream,
         magic,
-        signature.SectionSignatures[0]);
+        signatureTransferData.SectionSignatures[0]);
     }
     else
     {
-      ProcessFatMachO(sourceStream, outputStream, magic, signature);
+      ProcessFatMachO(sourceStream, outputStream, magic, signatureTransferData);
     }
   }
 
-  private static unsafe void ProcessFatMachO(Stream sourceStream, Stream outputStream, MH fatMagic, MachOFileSignature signature)
+  private static unsafe void ProcessFatMachO(Stream sourceStream, Stream outputStream, MH fatMagic, MachOSignatureTransferData signatureTransferData)
   {
     var isFatLittleEndian = fatMagic is MH.FAT_MAGIC or MH.FAT_MAGIC_64;
     var needSwap = BitConverter.IsLittleEndian != isFatLittleEndian;
@@ -58,8 +58,8 @@ public class MachOSignatureInjector
     StreamUtil.ReadBytes(sourceStream, (byte*)&fh, sizeof(fat_header));
     var nFatArch = GetU4(fh.nfat_arch);
 
-    if (signature.SectionSignatures.Length != nFatArch)
-      throw new SignatureInjectionException($"Cannot transfer signatures: source and destination files have different number of sections. The source file has {signature.SectionSignatures.Length} section(s) and the destination file has {nFatArch} section(s).");
+    if (signatureTransferData.SectionSignatures.Length != nFatArch)
+      throw new SignatureInjectionException($"Cannot transfer signatures: source and destination files have different number of sections. The source file has {signatureTransferData.SectionSignatures.Length} section(s) and the destination file has {nFatArch} section(s).");
 
     uint rawFatMagic = MemoryUtil.GetLeU4((uint)fatMagic);
     StreamUtil.WriteBytes(outputStream, (byte*)&rawFatMagic, sizeof(uint));
@@ -87,7 +87,7 @@ public class MachOSignatureInjector
               SectionSize = checked((long)GetU8(fatNodes[n].size)),
               Alignment = (int)GetU4(fatNodes[n].align)
             },
-            signature.SectionSignatures[n]);
+            signatureTransferData.SectionSignatures[n]);
 
           fatNodes[n].offset = GetU8((ulong)processedSection.SectionOffset);
           fatNodes[n].size = GetU8((ulong)processedSection.SectionSize);
@@ -117,7 +117,7 @@ public class MachOSignatureInjector
               SectionSize = GetU4(fatNodes[n].size),
               Alignment = (int)GetU4(fatNodes[n].align)
             },
-            signature.SectionSignatures[n]);
+            signatureTransferData.SectionSignatures[n]);
 
           fatNodes[n].offset = GetU4(checked((uint)processedSection.SectionOffset));
           fatNodes[n].size = GetU4(checked((uint)processedSection.SectionSize));
@@ -130,7 +130,7 @@ public class MachOSignatureInjector
     }
   }
 
-  private static unsafe MachOSectionInfo ProcessSection(Stream sourceStream, Stream outputStream, MachOSectionInfo sectionInfo, MachOSectionSignature? sectionSignature)
+  private static unsafe MachOSectionInfo ProcessSection(Stream sourceStream, Stream outputStream, MachOSectionInfo sectionInfo, MachOSectionSignatureTransferData? sectionSignature)
   {
     sourceStream.Position = sectionInfo.SectionOffset;
     uint rawSubMagic;
@@ -167,7 +167,7 @@ public class MachOSignatureInjector
     outputStream.Write(buffer, 0, buffer.Length);
   }
 
-  private static unsafe long TransferSectionSignature(Stream sourceStream, StreamRange sourceStreamRange, Stream outputStream, MH magic, MachOSectionSignature? sectionSignature)
+  private static unsafe long TransferSectionSignature(Stream sourceStream, StreamRange sourceStreamRange, Stream outputStream, MH magic, MachOSectionSignatureTransferData? sectionSignature)
   {
     if (sectionSignature == null)
       throw new SignatureInjectionException($"Cannot transfer the signature for section: it is not signed in the original file");

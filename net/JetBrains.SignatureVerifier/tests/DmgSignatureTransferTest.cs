@@ -20,19 +20,19 @@ public class DmgSignatureTransferTest
   [TestCase("test2-signed.dmg", "test2-signed-timestamped.dmg")]
   public async Task SignatureShouldBeTransfered(string donor, string acceptor)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, donor, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData | DmgFile.Mode.ComputeHashInfo));
+    var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, donor, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData));
 
-    Assert.NotNull(file.Signature);
+    Assert.NotNull(file.SignatureTransferData);
 
     using MemoryStream resultFileStream = new MemoryStream();
 
     ResourceUtil.OpenRead(ResourceCategory.Dmg, acceptor, stream =>
     {
-      DmgSignatureInjector.InjectSignature(stream, resultFileStream, file.Signature);
+      DmgSignatureInjector.InjectSignature(stream, resultFileStream, file.SignatureTransferData);
       return 0;
     });
 
-    DmgFile acceptorFile = DmgFile.Parse(resultFileStream, DmgFile.Mode.SignatureData | DmgFile.Mode.ComputeHashInfo);
+    DmgFile acceptorFile = DmgFile.Parse(resultFileStream, DmgFile.Mode.SignatureData);
 
     var verificationParams = new SignatureVerificationParams(null, null, false, false);
 
@@ -62,15 +62,15 @@ public class DmgSignatureTransferTest
   [TestCase("license-signed.dmg", "test.dmg")]
   public void SignatureTransferBetweenIncompatibleFilesShouldThrowException(string donor, string acceptor)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, donor, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData | DmgFile.Mode.ComputeHashInfo));
+    var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, donor, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData));
 
-    Assert.NotNull(file.Signature);
+    Assert.NotNull(file.SignatureTransferData);
 
     using MemoryStream resultFileStream = new MemoryStream();
 
     ResourceUtil.OpenRead(ResourceCategory.Dmg, acceptor, stream =>
     {
-      Assert.Throws<SignatureInjectionException>(() => DmgSignatureInjector.InjectSignature(stream, resultFileStream, file.Signature));
+      Assert.Throws<SignatureInjectionException>(() => DmgSignatureInjector.InjectSignature(stream, resultFileStream, file.SignatureTransferData));
       return 0;
     });
   }

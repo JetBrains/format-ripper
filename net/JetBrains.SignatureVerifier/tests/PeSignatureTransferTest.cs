@@ -24,17 +24,15 @@ public class PeSignatureTransferTest
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Pe, donor, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
-    Assert.NotNull(file.Signature);
+    Assert.NotNull(file.SignatureTransferData);
 
     using MemoryStream acceptorFileStream = new MemoryStream();
 
     ResourceUtil.OpenRead(ResourceCategory.Pe, acceptor, stream =>
     {
-      stream.CopyTo(acceptorFileStream);
+      PeSignatureInjector.InjectSignature(stream, acceptorFileStream, file.SignatureTransferData);
       return 0;
     });
-
-    PeSignatureInjector.InjectSignature(acceptorFileStream, file.Signature);
 
     PeFile acceptorFile = PeFile.Parse(acceptorFileStream, PeFile.Mode.SignatureData | PeFile.Mode.ComputeHashInfo);
 
@@ -63,16 +61,14 @@ public class PeSignatureTransferTest
   {
     var file = ResourceUtil.OpenRead(ResourceCategory.Pe, donor, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
-    Assert.NotNull(file.Signature);
+    Assert.NotNull(file.SignatureTransferData);
 
     using MemoryStream acceptorFileStream = new MemoryStream();
 
     ResourceUtil.OpenRead(ResourceCategory.Pe, acceptor, stream =>
     {
-      stream.CopyTo(acceptorFileStream);
+      Assert.Throws<SignatureInjectionException>(() => PeSignatureInjector.InjectSignature(stream, acceptorFileStream, file.SignatureTransferData));
       return 0;
     });
-
-    Assert.Throws<SignatureInjectionException>(() => PeSignatureInjector.InjectSignature(acceptorFileStream, file.Signature));
   }
 }

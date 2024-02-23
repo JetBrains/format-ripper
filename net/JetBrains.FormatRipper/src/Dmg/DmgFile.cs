@@ -14,25 +14,24 @@ namespace JetBrains.FormatRipper.Dmg
     public readonly SignatureData SignatureData;
     public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
     public readonly IEnumerable<CDHash> CDHashes;
-    public readonly DmgFileSignature? Signature;
+    public readonly DmgSignatureTransferData? SignatureTransferData;
 
     [Flags]
     public enum Mode : uint
     {
       Default = 0x0,
-      SignatureData = 0x1,
-      ComputeHashInfo = 0x2
+      SignatureData = 0x1
     }
 
     private DmgFile(bool hasSignature,
       SignatureData signatureData,
-      DmgFileSignature? signature,
       IEnumerable<HashVerificationUnit> hashVerificationUnits,
-      IEnumerable<CDHash> cdHashes)
+      IEnumerable<CDHash> cdHashes,
+      DmgSignatureTransferData? signatureTransferData)
     {
       HasSignature = hasSignature;
       SignatureData = signatureData;
-      Signature = signature;
+      SignatureTransferData = signatureTransferData;
       HashVerificationUnits = hashVerificationUnits;
       CDHashes = cdHashes;
     }
@@ -89,7 +88,7 @@ namespace JetBrains.FormatRipper.Dmg
       var hasSignature = signatureLength != 0;
       byte[]? codeDirectoryBlob = null;
       byte[]? cmsSignatureBlob = null;
-      DmgFileSignature? signature = null;
+      DmgSignatureTransferData? signatureTransferData = null;
       List<HashVerificationUnit> hashVerificationUnits = new List<HashVerificationUnit>();
       List<CDHash> cdHashes = new List<CDHash>();
 
@@ -99,7 +98,7 @@ namespace JetBrains.FormatRipper.Dmg
 
         stream.Position = checked(imageRange.Position + (long)signatureOffset);
 
-        signature = new DmgFileSignature()
+        signatureTransferData = new DmgSignatureTransferData()
         {
           SignatureOffset = checked((long)signatureOffset),
           SignatureLength = checked((long)signatureLength),
@@ -231,7 +230,7 @@ namespace JetBrains.FormatRipper.Dmg
         }
       }
 
-      return new DmgFile(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob), signature, hashVerificationUnits, cdHashes);
+      return new DmgFile(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob), hashVerificationUnits, cdHashes, signatureTransferData);
     }
   }
 }

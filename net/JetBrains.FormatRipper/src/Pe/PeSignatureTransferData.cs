@@ -1,8 +1,11 @@
 namespace JetBrains.FormatRipper.Pe;
 
-public class PeFileSignature
+/// <summary>
+/// Class that stores sufficient information to transfer the signature from one PE file to another
+/// </summary>
+public class PeSignatureTransferData
 {
-  public uint ExpectedCrc { get; internal set; }
+  public uint CheckSum { get; internal set; }
 
   public uint TimeDateStamp { get; internal set; }
 

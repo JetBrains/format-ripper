@@ -1,14 +1,13 @@
 namespace JetBrains.FormatRipper.MachO;
 
-public class MachOSectionSignature
+/// <summary>
+/// Class that stores sufficient information to transfer the signature from one MachO section to another
+/// </summary>
+public class MachOSectionSignatureTransferData
 {
   public uint NumberOfLoadCommands { get; internal set; }
 
   public uint SizeOfLoadCommands { get; internal set; }
-
-  public long LoadCommandsOffset { get; internal set; }
-
-  public uint LcCodeSignaturePtr { get; internal set; }
 
   public uint LcCodeSignatureSize { get; internal set; }
 
