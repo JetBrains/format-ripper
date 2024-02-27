@@ -7,12 +7,24 @@ namespace JetBrains.FormatRipper.Dmg;
 
 public class DmgSignatureInjector
 {
+  /// <summary>
+  /// Inject signature into a DMG file
+  /// </summary>
+  /// <param name="sourceStream">Read-only stream of a file into which you want to inject a signature</param>
+  /// <param name="outputStream">Stream for writing a result file with an injected signature</param>
+  /// <param name="signatureTransferData">Signature transfer data to inject</param>
+  /// <exception cref="ArgumentException">Thrown if output stream is not writeable</exception>
+  /// <exception cref="FormatException">Thrown if input file has invalid format</exception>
+  /// <exception cref="SignatureInjectionException">Thrown on signature transfer error. This usually happens when trying to transfer signatures between incompatible files.</exception>
   public static unsafe void InjectSignature(Stream sourceStream, Stream outputStream, DmgSignatureTransferData signatureTransferData)
   {
     sourceStream.Seek(-sizeof(UDIF), SeekOrigin.End);
 
     UDIF udif;
     StreamUtil.ReadBytes(sourceStream, (byte*)&udif, sizeof(UDIF));
+
+    if ((DmgMagic)MemoryUtil.GetBeU4(udif.Magic) != DmgMagic.KOLY)
+      throw new FormatException("Invalid DMG file UDIF structure magic");
 
     sourceStream.Seek(0, SeekOrigin.Begin);
 
@@ -22,7 +34,7 @@ public class DmgSignatureInjector
     long usefullPayloadLength = existingSignatureLength == 0 ? sourceStream.Length - sizeof(UDIF) : existingSignatureOffset;
 
     if (usefullPayloadLength != signatureTransferData.SignatureOffset)
-      throw new SignatureInjectionException($"Cannot transfer the signature. Expected file size: {signatureTransferData.SignatureOffset + sizeof(UDIF)} bytes, bug got {sourceStream.Length} bytes");
+      throw new SignatureInjectionException($"Cannot transfer the signature. Expected file size: {signatureTransferData.SignatureOffset + sizeof(UDIF)} bytes, but got {sourceStream.Length} bytes");
 
     long bytesToCopy = Math.Min(usefullPayloadLength, signatureTransferData.SignatureOffset);
 

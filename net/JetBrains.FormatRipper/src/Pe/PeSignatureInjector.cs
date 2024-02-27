@@ -10,6 +10,15 @@ public class PeSignatureInjector
 {
   internal const int SignatureAlignment = 8;
 
+  /// <summary>
+  /// Inject signature into a PE file
+  /// </summary>
+  /// <param name="sourceStream">Read-only stream of a file into which you want to inject a signature</param>
+  /// <param name="outputStream">Stream for writing a result file with an injected signature</param>
+  /// <param name="signatureTransferData">Signature transfer data to inject</param>
+  /// <exception cref="ArgumentException">Thrown if output stream is not writeable</exception>
+  /// <exception cref="FormatException">Thrown if input file has invalid format</exception>
+  /// <exception cref="SignatureInjectionException">Thrown on signature transfer error. This usually happens when trying to transfer signatures between incompatible files.</exception>
   public static unsafe void InjectSignature(Stream sourceStream, Stream outputStream, PeSignatureTransferData signatureTransferData)
   {
     if (!outputStream.CanWrite) throw new ArgumentException("Provided stream is not writeable");
@@ -24,7 +33,7 @@ public class PeSignatureInjector
     uint peMagic;
     StreamUtil.ReadBytes(sourceStream, (byte*)&peMagic, sizeof(uint));
     if (MemoryUtil.GetLeU4(peMagic) != Magic.IMAGE_NT_SIGNATURE)
-      throw new InvalidDataException("Invalid PE magic");
+      throw new FormatException("Invalid PE magic");
 
     long imageFileHeaderPosition = sourceStream.Position;
 
