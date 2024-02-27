@@ -77,8 +77,8 @@ public class PeSignatureInjector
     {
       StreamUtil.ReadBytes(sourceStream, (byte*)iddsBuf, rvaSize);
       existingSignatureOffset = MemoryUtil.GetLeU4(iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY].VirtualAddress);
-      iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY].VirtualAddress = signatureTransferData.SignatureBlobOffset;
-      iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY].Size = signatureTransferData.SignatureBlobSize;
+      iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY].VirtualAddress = MemoryUtil.GetLeU4(signatureTransferData.SignatureBlobOffset);
+      iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY].Size = MemoryUtil.GetLeU4(signatureTransferData.SignatureBlobSize);
 
       StreamUtil.WriteBytes(outputStream, (byte*)iddsBuf, rvaSize);
     }
