@@ -17,6 +17,15 @@ public class MachOSignatureInjector
     public int Alignment;
   }
 
+  /// <summary>
+  /// Inject signature into a Mach-O file
+  /// </summary>
+  /// <param name="sourceStream">Read-only stream of a file into which you want to inject a signature</param>
+  /// <param name="outputStream">Stream for writing a result file with an injected signature</param>
+  /// <param name="signatureTransferData">Signature transfer data to inject</param>
+  /// <exception cref="ArgumentException">Thrown if output stream is not writeable</exception>
+  /// <exception cref="FormatException">Thrown if input file has invalid format</exception>
+  /// <exception cref="SignatureInjectionException">Thrown on signature transfer error. This usually happens when trying to transfer signatures between incompatible files.</exception>
   public static unsafe void InjectSignature(Stream sourceStream, Stream outputStream, MachOSignatureTransferData signatureTransferData)
   {
     if (!outputStream.CanWrite) throw new ArgumentException("Provided stream is not writeable");
@@ -232,10 +241,9 @@ public class MachOSignatureInjector
     }
     else
     {
-      throw new SignatureInjectionException($"Unsupported Mach-O magic {magic.ToString("X")}");
+      throw new FormatException($"Invalid Mach-O magic: {magic.ToString("X")}");
     }
 
-    long position = sourceStream.Position;
     uint oldSignatureOffset = 0;
     uint commandNumber = 0;
     fixed (byte* buf = StreamUtil.ReadBytes(sourceStream, checked((int)sizeofcmds)))
@@ -245,9 +253,6 @@ public class MachOSignatureInjector
         load_command lc;
         MemoryUtil.CopyBytes(cmdPtr, (byte*)&lc, sizeof(load_command));
         uint cmdSize = GetU4(lc.cmdsize);
-
-        position += sizeof(load_command);
-
         var payloadLcPtr = cmdPtr + sizeof(load_command);
         var commandType = (LC)GetU4(lc.cmd);
 
@@ -257,8 +262,6 @@ public class MachOSignatureInjector
           {
             segment_command_64 sc;
             MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command_64));
-            var segNameBuf = MemoryUtil.CopyBytes(sc.segname, 16);
-            var segName = new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
             sc.vmsize = GetU8(sectionSignature.LastLinkeditVmSize64);
             sc.filesize = GetU8(sectionSignature.LastLinkeditFileSize64);
 
@@ -268,12 +271,14 @@ public class MachOSignatureInjector
           {
             segment_command sc;
             MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command));
-            var segNameBuf = MemoryUtil.CopyBytes(sc.segname, 16);
-            var segName = new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
             sc.vmsize = GetU4(sectionSignature.LastLinkeditVmSize32);
             sc.filesize = GetU4(sectionSignature.LastLinkeditFileSize32);
 
             MemoryUtil.CopyBytes((byte*)&sc, payloadLcPtr, sizeof(segment_command));
+          }
+          else
+          {
+            throw new SignatureInjectionException($"Error injecting signature. Load command number {sectionSignature.LastLinkeditCommandNumber} was supposed to be either LC_SEGMENT or LC_SEGMENT_64, but {commandType.ToString()} was found");
           }
         }
 
@@ -291,7 +296,6 @@ public class MachOSignatureInjector
         }
 
         cmdPtr += cmdSize;
-        position += cmdSize;
       }
 
       StreamUtil.WriteBytes(outputStream, buf, checked((int)sizeofcmds));
