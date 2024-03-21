@@ -76,13 +76,26 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
     if (!section.HashVerificationUnits.Any() || !section.CDHashes.Any())
       throw new ArgumentException($"Mach-o file was parsed without {nameof(MachOFile.Mode.ComputeHashInfo)} flag", nameof(section));
 
-    var signedMessage = SignedMessage.CreateInstance(section.SignatureData);
-    var signatureVerificationResult = await _signedMessageVerifier.VerifySignatureAsync(signedMessage, signatureVerificationParams);
-
-    if (!signatureVerificationResult.IsValid)
+    if (section.SignatureType == MachOFile.SignatureType.AdHoc && !signatureVerificationParams.AllowAdhocSignatures)
     {
-      _logger?.Warning("Mach-O file signature verification failed: certificates or attributes validation failed");
-      return signatureVerificationResult;
+      _logger?.Warning($"Mach-O file has adhoc signature which is not allowed. Set {nameof(SignatureVerificationParams.AllowAdhocSignatures)} to true is you want to check adhoc signatures.");
+      return new VerifySignatureResult(VerifySignatureStatus.InvalidSignature);
+    }
+
+    SignedMessage signedMessage = null;
+
+    bool skipSignedMessageVerification = section.SignatureType == MachOFile.SignatureType.AdHoc & signatureVerificationParams.AllowAdhocSignatures;
+
+    if (!skipSignedMessageVerification)
+    {
+      signedMessage = SignedMessage.CreateInstance(section.SignatureData);
+      var signatureVerificationResult = await _signedMessageVerifier.VerifySignatureAsync(signedMessage, signatureVerificationParams);
+
+      if (!signatureVerificationResult.IsValid)
+      {
+        _logger?.Warning("Mach-O file signature verification failed: certificates or attributes validation failed");
+        return signatureVerificationResult;
+      }
     }
 
     if (!section.HashVerificationUnits.Any())
@@ -106,7 +119,7 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
       return new VerifySignatureResult(VerifySignatureStatus.InvalidFileHash);
     }
 
-    if (section.CDHashes.Count() > 1)
+    if (section.CDHashes.Count() > 1 && !skipSignedMessageVerification)
     {
       var cdHashesVerificationResult = VerifyCDHashes(stream, section.CDHashes, signedMessage);
 

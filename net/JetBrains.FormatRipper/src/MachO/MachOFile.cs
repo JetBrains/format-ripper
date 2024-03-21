@@ -17,6 +17,7 @@ namespace JetBrains.FormatRipper.MachO
       public readonly MH_FileType MhFileType;
       public readonly MH_Flags MhFlags;
       public readonly bool HasSignature;
+      public readonly SignatureType SignatureType;
       public readonly SignatureData SignatureData;
       public readonly ComputeHashInfo? ComputeHashInfo;
       public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
@@ -30,6 +31,7 @@ namespace JetBrains.FormatRipper.MachO
         MH_FileType mhFileType,
         MH_Flags mhFlags,
         bool hasSignature,
+        SignatureType signatureType,
         SignatureData signatureData,
         ComputeHashInfo? computeHashInfo,
         IEnumerable<HashVerificationUnit> hashVerificationUnits,
@@ -42,6 +44,7 @@ namespace JetBrains.FormatRipper.MachO
         MhFileType = mhFileType;
         MhFlags = mhFlags;
         HasSignature = hasSignature;
+        SignatureType = signatureType;
         SignatureData = signatureData;
         ComputeHashInfo = computeHashInfo;
         HashVerificationUnits = hashVerificationUnits;
@@ -60,6 +63,13 @@ namespace JetBrains.FormatRipper.MachO
       Default = 0x0,
       SignatureData = 0x1,
       ComputeHashInfo = 0x2
+    }
+
+    public enum SignatureType
+    {
+      None,
+      AdHoc,
+      Regular,
     }
 
     private MachOFile(bool? isFatLittleEndian, Section[] sections)
@@ -150,6 +160,7 @@ namespace JetBrains.FormatRipper.MachO
         LoadCommandsInfo ReadLoadCommands(long cmdOffset, uint nCmds, uint sizeOfCmds)
         {
           var hasSignature = false;
+          SignatureType signatureType = SignatureType.None;
           byte[]? codeDirectoryBlob = null;
           byte[]? cmsSignatureBlob = null;
           List<HashVerificationUnit> hashVerificationUnits = new List<HashVerificationUnit>();
@@ -292,6 +303,8 @@ namespace JetBrains.FormatRipper.MachO
                             var cscdLength = MemoryUtil.GetBeU4(cscd.length);
 
                             byte[] currentCodeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, checked((int)cscdLength));
+                            if (signatureType == SignatureType.None)
+                              signatureType = SignatureType.AdHoc;
 
                             if (slotType == CSSLOT.CSSLOT_CODEDIRECTORY)
                               codeDirectoryBlob = currentCodeDirectoryBlob;
@@ -350,6 +363,7 @@ namespace JetBrains.FormatRipper.MachO
                             if (csbLength < sizeof(CS_Blob))
                               throw new FormatException("Too small Mach-O cms signature blob length");
                             cmsSignatureBlob = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob), checked((int)csbLength - sizeof(CS_Blob)));
+                            signatureType = SignatureType.Regular;
                           }
                           break;
                         }
@@ -371,10 +385,11 @@ namespace JetBrains.FormatRipper.MachO
 
           return new(
             hasSignature,
+            signatureType,
             new SignatureData(codeDirectoryBlob, cmsSignatureBlob),
             hashVerificationUnits,
             cdHashes,
-            (mode & Mode.SignatureData) == Mode.SignatureData ? sectionSignatureTransferData : null);
+            (mode & Mode.SignatureData) == Mode.SignatureData && signatureType != SignatureType.None ? sectionSignatureTransferData : null);
         }
 
         int GetZeroPadding(bool hasCodeSignature)
@@ -415,6 +430,7 @@ namespace JetBrains.FormatRipper.MachO
             (MH_FileType)GetU4(mh.filetype),
             (MH_Flags)GetU4(mh.flags),
             loadCommands.HasSignature,
+            loadCommands.SignatureType,
             loadCommands.SignatureData,
             computeHashInfo,
             loadCommands.HashVerificationUnits,
@@ -449,6 +465,7 @@ namespace JetBrains.FormatRipper.MachO
             (MH_FileType)GetU4(mh.filetype),
             (MH_Flags)GetU4(mh.flags),
             loadCommands.HasSignature,
+            loadCommands.SignatureType,
             loadCommands.SignatureData,
             computeHashInfo,
             loadCommands.HashVerificationUnits,
@@ -525,14 +542,16 @@ namespace JetBrains.FormatRipper.MachO
     private readonly struct LoadCommandsInfo
     {
       public readonly bool HasSignature;
+      public readonly SignatureType SignatureType;
       public readonly SignatureData SignatureData;
       public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
       public readonly IEnumerable<CDHash> CDHashes;
       public readonly MachOSectionSignatureTransferData? SectionSignatureTransferData;
 
-      public LoadCommandsInfo(bool hasSignature, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes, MachOSectionSignatureTransferData? sectionSignatureTransferData)
+      public LoadCommandsInfo(bool hasSignature, SignatureType signatureType, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes, MachOSectionSignatureTransferData? sectionSignatureTransferData)
       {
         HasSignature = hasSignature;
+        SignatureType = signatureType;
         SignatureData = signatureData;
         HashVerificationUnits = hashVerificationUnits;
         CDHashes = cdHashes;

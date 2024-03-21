@@ -18,6 +18,7 @@ namespace JetBrains.SignatureVerifier.Crypt
     public TimeSpan OcspResponseTimeout { get; private set; }
     public SignatureValidationTimeMode SignValidationTimeMode { get; private set; }
     public DateTime? SignatureValidationTime { get; private set; }
+    public bool AllowAdhocSignatures { get; private set; }
 
     private string SignatureValidationTimeFormatted =>
       SignatureValidationTime.HasValue ? SignatureValidationTime.ToString() : "<null>";
@@ -35,6 +36,7 @@ namespace JetBrains.SignatureVerifier.Crypt
     /// <param name="ocspResponseTimeout">Timeout for OCSP request (5 sec. by default) (apply if withRevocationCheck is true)</param>
     /// <param name="signatureValidationTimeMode">Mode of selection time which is used for certificates and CRLs validation (SignatureValidationTimeMode.Timestamp by default)</param>
     /// <param name="signatureValidationTime">Time which is used when signatureValidationTimeMode is SignValidationTime</param>
+    /// <param name="allowAdhocSignatures">Validation process only checks hashes if ad hoc signatures are allowed</param>
     public SignatureVerificationParams(
       Stream signRootCertStore = null,
       Stream timestampRootCertStore = null,
@@ -42,7 +44,8 @@ namespace JetBrains.SignatureVerifier.Crypt
       bool withRevocationCheck = true,
       TimeSpan? ocspResponseTimeout = null,
       SignatureValidationTimeMode signatureValidationTimeMode = SignatureValidationTimeMode.Timestamp,
-      DateTime? signatureValidationTime = null)
+      DateTime? signatureValidationTime = null,
+      bool allowAdhocSignatures = false)
     {
       _signRootCertStore = signRootCertStore;
       _timestampRootCertStore = timestampRootCertStore;
@@ -56,6 +59,7 @@ namespace JetBrains.SignatureVerifier.Crypt
         throw new ArgumentNullException(nameof(signatureValidationTime));
 
       SignatureValidationTime = signatureValidationTime;
+      AllowAdhocSignatures = allowAdhocSignatures;
     }
 
     public void SetSignValidationTime(DateTime signValidationTime)

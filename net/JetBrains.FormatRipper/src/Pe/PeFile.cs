@@ -45,17 +45,24 @@ namespace JetBrains.FormatRipper.Pe
 
     public static unsafe bool Is(Stream stream)
     {
-      stream.Position = 0;
-      IMAGE_DOS_HEADER ids;
-      StreamUtil.ReadBytes(stream, (byte*)&ids, sizeof(IMAGE_DOS_HEADER));
-      if (MemoryUtil.GetLeU2(ids.e_magic) != Magic.IMAGE_DOS_SIGNATURE)
+      try
+      {
+        stream.Position = 0;
+        IMAGE_DOS_HEADER ids;
+        StreamUtil.ReadBytes(stream, (byte*)&ids, sizeof(IMAGE_DOS_HEADER));
+        if (MemoryUtil.GetLeU2(ids.e_magic) != Magic.IMAGE_DOS_SIGNATURE)
+          return false;
+
+        stream.Position = MemoryUtil.GetLeU4(ids.e_lfanew);
+
+        uint peMagic;
+        StreamUtil.ReadBytes(stream, (byte*)&peMagic, sizeof(uint));
+        return MemoryUtil.GetLeU4(peMagic) == Magic.IMAGE_NT_SIGNATURE;
+      }
+      catch (Exception)
+      {
         return false;
-
-      stream.Position = MemoryUtil.GetLeU4(ids.e_lfanew);
-
-      uint peMagic;
-      StreamUtil.ReadBytes(stream, (byte*)&peMagic, sizeof(uint));
-      return MemoryUtil.GetLeU4(peMagic) == Magic.IMAGE_NT_SIGNATURE;
+      }
     }
 
     [Flags]
