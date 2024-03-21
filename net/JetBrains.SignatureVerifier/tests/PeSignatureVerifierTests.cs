@@ -33,6 +33,7 @@ namespace JetBrains.SignatureVerifier.Tests
     [TestCase(VerifySignatureStatus.Valid           , "JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe")]
     [TestCase(VerifySignatureStatus.Valid           , "JetBrains.ReSharper.TestResources.dll")]
     [TestCase(VerifySignatureStatus.InvalidTimestamp, "dotnet_broken_timestamp.exe")]
+    [TestCase(VerifySignatureStatus.InvalidSignature, "dotnet_extra_bytes.exe")]
     [TestCase(VerifySignatureStatus.Valid,            "aticfx64.dll")]
     // @formatter:on
     public async Task VerifySignTest(VerifySignatureStatus expectedResult, string peResourceName, bool allowHashMismatches = false)

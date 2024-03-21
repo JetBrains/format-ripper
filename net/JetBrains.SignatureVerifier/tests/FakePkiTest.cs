@@ -136,7 +136,7 @@ namespace JetBrains.SignatureVerifier.Tests
       //write new ImageDirectoryEntrySecurity
       signedPeStream.Seek(peFile.SecurityDataDirectoryRange.Position, SeekOrigin.Begin);
       writer.Write((int) attributeCertificateTableOffset);
-      writer.Write(encodedCmsSignedData.Length);
+      writer.Write(encodedCmsSignedData.Length + 8); //dwLength = size + sizeof(WIN_CERTIFICATE)
       return signedPeStream;
     }
 

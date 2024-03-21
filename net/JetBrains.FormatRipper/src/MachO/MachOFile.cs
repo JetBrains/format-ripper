@@ -17,10 +17,12 @@ namespace JetBrains.FormatRipper.MachO
       public readonly MH_FileType MhFileType;
       public readonly MH_Flags MhFlags;
       public readonly bool HasSignature;
+      public readonly SignatureType SignatureType;
       public readonly SignatureData SignatureData;
       public readonly ComputeHashInfo? ComputeHashInfo;
       public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
       public readonly IEnumerable<CDHash> CDHashes;
+      public readonly MachOSectionSignatureTransferData? SignatureTransferData;
 
       internal Section(
         bool isLittleEndian,
@@ -29,10 +31,12 @@ namespace JetBrains.FormatRipper.MachO
         MH_FileType mhFileType,
         MH_Flags mhFlags,
         bool hasSignature,
+        SignatureType signatureType,
         SignatureData signatureData,
         ComputeHashInfo? computeHashInfo,
         IEnumerable<HashVerificationUnit> hashVerificationUnits,
-        IEnumerable<CDHash> cdHashes)
+        IEnumerable<CDHash> cdHashes,
+        MachOSectionSignatureTransferData? signatureTransferData)
       {
         IsLittleEndian = isLittleEndian;
         CpuType = cpuType;
@@ -40,15 +44,18 @@ namespace JetBrains.FormatRipper.MachO
         MhFileType = mhFileType;
         MhFlags = mhFlags;
         HasSignature = hasSignature;
+        SignatureType = signatureType;
         SignatureData = signatureData;
         ComputeHashInfo = computeHashInfo;
         HashVerificationUnits = hashVerificationUnits;
         CDHashes = cdHashes;
+        SignatureTransferData = signatureTransferData;
       }
     }
 
     public readonly bool? IsFatLittleEndian;
     public readonly Section[] Sections;
+    public readonly MachOSignatureTransferData? Signature;
 
     [Flags]
     public enum Mode : uint
@@ -58,10 +65,21 @@ namespace JetBrains.FormatRipper.MachO
       ComputeHashInfo = 0x2
     }
 
+    public enum SignatureType
+    {
+      None,
+      AdHoc,
+      Regular,
+    }
+
     private MachOFile(bool? isFatLittleEndian, Section[] sections)
     {
       IsFatLittleEndian = isFatLittleEndian;
       Sections = sections;
+      Signature = new MachOSignatureTransferData(new MachOSectionSignatureTransferData[sections.Length]);
+
+      for (int i = 0; i < sections.Length; i++)
+        Signature.SectionSignatures[i] = sections[i].SignatureTransferData;
     }
 
     public static unsafe bool Is(Stream stream)
@@ -135,20 +153,28 @@ namespace JetBrains.FormatRipper.MachO
         var needSwap = BitConverter.IsLittleEndian != isLittleEndian;
 
         uint GetU4(uint v) => needSwap ? MemoryUtil.SwapU4(v) : v;
+        ulong GetU8(ulong v) => needSwap ? MemoryUtil.SwapU8(v) : v;
 
         var excludeRanges = new List<StreamRange>();
 
         LoadCommandsInfo ReadLoadCommands(long cmdOffset, uint nCmds, uint sizeOfCmds)
         {
           var hasSignature = false;
+          SignatureType signatureType = SignatureType.None;
           byte[]? codeDirectoryBlob = null;
           byte[]? cmsSignatureBlob = null;
           List<HashVerificationUnit> hashVerificationUnits = new List<HashVerificationUnit>();
           List<CDHash> cdHashes = new List<CDHash>();
+          uint commandNumber = 0;
+          var sectionSignatureTransferData = new MachOSectionSignatureTransferData()
+          {
+            NumberOfLoadCommands = nCmds,
+            SizeOfLoadCommands = sizeOfCmds,
+          };
 
           fixed (byte* buf = StreamUtil.ReadBytes(stream, checked((int)sizeOfCmds)))
           {
-            for (var cmdPtr = buf; nCmds-- > 0;)
+            for (var cmdPtr = buf; commandNumber++ < nCmds;)
             {
               load_command lc;
               MemoryUtil.CopyBytes(cmdPtr, (byte*)&lc, sizeof(load_command));
@@ -156,35 +182,50 @@ namespace JetBrains.FormatRipper.MachO
 
               switch ((LC)GetU4(lc.cmd))
               {
-              case LC.LC_SEGMENT:
-                if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+                case LC.LC_SEGMENT:
                 {
                   segment_command sc;
                   MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command));
-                  var segNameBuf = MemoryUtil.CopyBytes(sc.segname, 16);
-                  var segName = new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
-                  if (segName == SEG.SEG_LINKEDIT)
+
+                  sectionSignatureTransferData.LastLinkeditCommandNumber = commandNumber;
+                  sectionSignatureTransferData.LastLinkeditVmSize32 = GetU4(sc.vmsize);
+                  sectionSignatureTransferData.LastLinkeditFileSize32 = GetU4(sc.filesize);
+
+                  if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
                   {
-                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.vmsize - (byte*)&sc)), sizeof(uint)));
-                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.filesize - (byte*)&sc)), sizeof(uint)));
+                    var segNameBuf = MemoryUtil.CopyBytes(sc.segname, 16);
+                    var segName = new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
+                    if (segName == SEG.SEG_LINKEDIT)
+                    {
+                      excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.vmsize - (byte*)&sc)), sizeof(uint)));
+                      excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.filesize - (byte*)&sc)), sizeof(uint)));
+                    }
                   }
+
+                  break;
                 }
-                break;
-              case LC.LC_SEGMENT_64:
-                if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
+                case LC.LC_SEGMENT_64:
                 {
                   segment_command_64 sc;
                   MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command_64));
-                  var segNameBuf = MemoryUtil.CopyBytes(sc.segname, 16);
-                  var segName = new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
-                  if (segName == SEG.SEG_LINKEDIT)
+
+                  sectionSignatureTransferData.LastLinkeditCommandNumber = commandNumber;
+                  sectionSignatureTransferData.LastLinkeditVmSize64 = GetU8(sc.vmsize);
+                  sectionSignatureTransferData.LastLinkeditFileSize64 = GetU8(sc.filesize);
+
+                  if ((mode & Mode.ComputeHashInfo) == Mode.ComputeHashInfo)
                   {
-                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.vmsize - (byte*)&sc)), sizeof(ulong)));
-                    excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.filesize - (byte*)&sc)), sizeof(ulong)));
+                    var segNameBuf = MemoryUtil.CopyBytes(sc.segname, 16);
+                    var segName = new string(Encoding.UTF8.GetChars(segNameBuf, 0, MemoryUtil.GetAsciiStringZSize(segNameBuf)));
+                    if (segName == SEG.SEG_LINKEDIT)
+                    {
+                      excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.vmsize - (byte*)&sc)), sizeof(ulong)));
+                      excludeRanges.Add(new StreamRange(checked(cmdOffset + (payloadLcPtr - buf) + ((byte*)&sc.filesize - (byte*)&sc)), sizeof(ulong)));
+                    }
                   }
+                  break;
                 }
-                break;
-              case LC.LC_CODE_SIGNATURE:
+                case LC.LC_CODE_SIGNATURE:
                 {
                   linkedit_data_command ldc;
                   MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&ldc, sizeof(linkedit_data_command));
@@ -194,8 +235,14 @@ namespace JetBrains.FormatRipper.MachO
                     excludeRanges.Add(new StreamRange(GetU4(ldc.dataoff), GetU4(ldc.datasize)));
                   }
 
+                  sectionSignatureTransferData.LcCodeSignatureSize = GetU4(lc.cmdsize);
+                  sectionSignatureTransferData.LinkEditDataOffset = GetU4(ldc.dataoff);
+                  sectionSignatureTransferData.LinkEditDataSize = GetU4(ldc.datasize);
+
                   if ((mode & Mode.SignatureData) == Mode.SignatureData)
                   {
+                    stream.Position = checked(imageRange.Position + GetU4(ldc.dataoff));
+                    sectionSignatureTransferData.SignatureBlob = StreamUtil.ReadBytes(stream, checked((int)GetU4(ldc.datasize)));
                     stream.Position = checked(imageRange.Position + GetU4(ldc.dataoff));
 
                     CS_SuperBlob cssb;
@@ -256,6 +303,8 @@ namespace JetBrains.FormatRipper.MachO
                             var cscdLength = MemoryUtil.GetBeU4(cscd.length);
 
                             byte[] currentCodeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, checked((int)cscdLength));
+                            if (signatureType == SignatureType.None)
+                              signatureType = SignatureType.AdHoc;
 
                             if (slotType == CSSLOT.CSSLOT_CODEDIRECTORY)
                               codeDirectoryBlob = currentCodeDirectoryBlob;
@@ -314,6 +363,7 @@ namespace JetBrains.FormatRipper.MachO
                             if (csbLength < sizeof(CS_Blob))
                               throw new FormatException("Too small Mach-O cms signature blob length");
                             cmsSignatureBlob = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob), checked((int)csbLength - sizeof(CS_Blob)));
+                            signatureType = SignatureType.Regular;
                           }
                           break;
                         }
@@ -333,7 +383,13 @@ namespace JetBrains.FormatRipper.MachO
                 excludeRanges.Add(new StreamRange(checked(cmdOffset + sizeOfCmds), sizeof(load_command) + sizeof(linkedit_data_command)));
           }
 
-          return new(hasSignature, new SignatureData(codeDirectoryBlob, cmsSignatureBlob), hashVerificationUnits, cdHashes);
+          return new(
+            hasSignature,
+            signatureType,
+            new SignatureData(codeDirectoryBlob, cmsSignatureBlob),
+            hashVerificationUnits,
+            cdHashes,
+            (mode & Mode.SignatureData) == Mode.SignatureData && signatureType != SignatureType.None ? sectionSignatureTransferData : null);
         }
 
         int GetZeroPadding(bool hasCodeSignature)
@@ -354,6 +410,8 @@ namespace JetBrains.FormatRipper.MachO
             excludeRanges.Add(new StreamRange(checked(sizeof(MH) + ((byte*)&mh.sizeofcmds - (byte*)&mh)), sizeof(uint)));
           }
 
+
+
           var loadCommands = ReadLoadCommands(sizeof(MH) + sizeof(mach_header_64), GetU4(mh.ncmds), GetU4(mh.sizeofcmds));
 
           ComputeHashInfo? computeHashInfo = null;
@@ -372,10 +430,12 @@ namespace JetBrains.FormatRipper.MachO
             (MH_FileType)GetU4(mh.filetype),
             (MH_Flags)GetU4(mh.flags),
             loadCommands.HasSignature,
+            loadCommands.SignatureType,
             loadCommands.SignatureData,
             computeHashInfo,
             loadCommands.HashVerificationUnits,
-            loadCommands.CDHashes);
+            loadCommands.CDHashes,
+            loadCommands.SectionSignatureTransferData);
         }
         else
         {
@@ -405,10 +465,12 @@ namespace JetBrains.FormatRipper.MachO
             (MH_FileType)GetU4(mh.filetype),
             (MH_Flags)GetU4(mh.flags),
             loadCommands.HasSignature,
+            loadCommands.SignatureType,
             loadCommands.SignatureData,
             computeHashInfo,
             loadCommands.HashVerificationUnits,
-            loadCommands.CDHashes);
+            loadCommands.CDHashes,
+            loadCommands.SectionSignatureTransferData);
         }
       }
 
@@ -480,16 +542,20 @@ namespace JetBrains.FormatRipper.MachO
     private readonly struct LoadCommandsInfo
     {
       public readonly bool HasSignature;
+      public readonly SignatureType SignatureType;
       public readonly SignatureData SignatureData;
       public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
       public readonly IEnumerable<CDHash> CDHashes;
+      public readonly MachOSectionSignatureTransferData? SectionSignatureTransferData;
 
-      public LoadCommandsInfo(bool hasSignature, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes)
+      public LoadCommandsInfo(bool hasSignature, SignatureType signatureType, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes, MachOSectionSignatureTransferData? sectionSignatureTransferData)
       {
         HasSignature = hasSignature;
+        SignatureType = signatureType;
         SignatureData = signatureData;
         HashVerificationUnits = hashVerificationUnits;
         CDHashes = cdHashes;
+        SectionSignatureTransferData = sectionSignatureTransferData;
       }
     }
   }

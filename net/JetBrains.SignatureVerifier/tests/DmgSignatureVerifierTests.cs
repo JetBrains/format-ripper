@@ -7,7 +7,7 @@ namespace JetBrains.SignatureVerifier.Tests;
 
 public class DmgSignatureVerifierTests
 {
-  private static DmgFile GetDmgFile(string resourceName) => ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData | DmgFile.Mode.ComputeHashInfo));
+  private static DmgFile GetDmgFile(string resourceName) => ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData));
 
   // @formatter:off
   [TestCase(VerifySignatureStatus.Valid,            "license-signed.dmg")]
