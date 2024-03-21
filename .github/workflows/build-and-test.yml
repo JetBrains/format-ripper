@@ -124,7 +124,7 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/wrapper-validation-action@v2
       - name: Gradle Build
         uses: gradle/gradle-build-action@v2
         with:
@@ -187,7 +187,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/wrapper-validation-action@v2
       - name: Gradle Build
         uses: gradle/gradle-build-action@v2
         with:
