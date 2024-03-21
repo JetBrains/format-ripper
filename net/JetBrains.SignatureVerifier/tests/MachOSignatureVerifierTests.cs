@@ -28,9 +28,29 @@ namespace JetBrains.SignatureVerifier.Tests
     [TestCase(VerifySignatureStatus.Valid, "libapple_crypto.dylib")]
     [TestCase(VerifySignatureStatus.Valid, "libspindump.dylib")]
     [TestCase(VerifySignatureStatus.InvalidFileHash, "draw.io-13.9.9-edited")]
+    [TestCase(VerifySignatureStatus.InvalidSignature, "TestCppApp2_adhoc")]
     public async Task VerifySignTest(VerifySignatureStatus expectedResult, string machoResourceName)
     {
       var verificationParams = new SignatureVerificationParams(buildChain: false, withRevocationCheck: false);
+
+      MachOFile machOFile = GetMachOFile(machoResourceName);
+
+      var result = await ResourceUtil.OpenRead(ResourceCategory.MachO, machoResourceName, stream =>
+      {
+        MachOSignatureVerifier signatureVerifier = new MachOSignatureVerifier(ConsoleLogger.Instance);
+
+        return signatureVerifier.VerifyAsync(machOFile, stream, verificationParams, FileIntegrityVerificationParams.Default);
+      });
+
+      Assert.AreEqual(expectedResult, result.Status);
+    }
+
+    [TestCase(VerifySignatureStatus.Valid, "libspindump.dylib")]
+    [TestCase(VerifySignatureStatus.InvalidFileHash, "draw.io-13.9.9-edited")]
+    [TestCase(VerifySignatureStatus.Valid, "TestCppApp2_adhoc")]
+    public async Task VerifySignAdhocTest(VerifySignatureStatus expectedResult, string machoResourceName)
+    {
+      var verificationParams = new SignatureVerificationParams(buildChain: false, withRevocationCheck: false, allowAdhocSignatures: true);
 
       MachOFile machOFile = GetMachOFile(machoResourceName);
 
