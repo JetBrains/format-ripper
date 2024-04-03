@@ -23,6 +23,8 @@ namespace JetBrains.FormatRipper.MachO
       public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
       public readonly IEnumerable<CDHash> CDHashes;
       public readonly MachOSectionSignatureTransferData? SignatureTransferData;
+      public readonly byte[]? Entitlements;
+      public readonly byte[]? EntitlementsDer;
 
       internal Section(
         bool isLittleEndian,
@@ -36,7 +38,9 @@ namespace JetBrains.FormatRipper.MachO
         ComputeHashInfo? computeHashInfo,
         IEnumerable<HashVerificationUnit> hashVerificationUnits,
         IEnumerable<CDHash> cdHashes,
-        MachOSectionSignatureTransferData? signatureTransferData)
+        MachOSectionSignatureTransferData? signatureTransferData,
+        byte[]? entitlements,
+        byte[]? entitlementsDer)
       {
         IsLittleEndian = isLittleEndian;
         CpuType = cpuType;
@@ -50,6 +54,8 @@ namespace JetBrains.FormatRipper.MachO
         HashVerificationUnits = hashVerificationUnits;
         CDHashes = cdHashes;
         SignatureTransferData = signatureTransferData;
+        Entitlements = entitlements;
+        EntitlementsDer = entitlementsDer;
       }
     }
 
@@ -163,6 +169,8 @@ namespace JetBrains.FormatRipper.MachO
           SignatureType signatureType = SignatureType.None;
           byte[]? codeDirectoryBlob = null;
           byte[]? cmsSignatureBlob = null;
+          byte[]? entitlements = null;
+          byte[]? entitlementsDer = null;
           List<HashVerificationUnit> hashVerificationUnits = new List<HashVerificationUnit>();
           List<CDHash> cdHashes = new List<CDHash>();
           uint commandNumber = 0;
@@ -366,6 +374,32 @@ namespace JetBrains.FormatRipper.MachO
                             signatureType = SignatureType.Regular;
                           }
                           break;
+                          case CSSLOT.CSSLOT_ENTITLEMENTS:
+                          {
+                            CS_Entitlements csent;
+                            MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csent, sizeof(CS_Entitlements));
+
+                            CSMAGIC entitlementsMagic = (CSMAGIC)MemoryUtil.GetBeU4(csent.magic);
+                            if (entitlementsMagic != CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS)
+                              throw new FormatException($"Invalid Mach-O entitlements magic. Expected {CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS.ToString("X")} but got {entitlementsMagic.ToString("X")}");
+
+                            uint csentLength = MemoryUtil.GetBeU4(csent.length);
+                            entitlements = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Entitlements), checked((int)csentLength - sizeof(CS_Entitlements)));
+                          }
+                          break;
+                          case CSSLOT.CSSLOT_ENTITLEMENTS_DER:
+                          {
+                            CS_Entitlements csent;
+                            MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csent, sizeof(CS_Entitlements));
+
+                            CSMAGIC entitlementsMagic = (CSMAGIC)MemoryUtil.GetBeU4(csent.magic);
+                            if (entitlementsMagic != CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS_DER)
+                              throw new FormatException($"Invalid Mach-O der-encoded entitlements magic. Expected {CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS_DER.ToString("X")} but got {entitlementsMagic.ToString("X")}");
+
+                            uint csentLength = MemoryUtil.GetBeU4(csent.length);
+                            entitlementsDer = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Entitlements), checked((int)csentLength - sizeof(CS_Entitlements)));
+                          }
+                            break;
                         }
                       }
                     }
@@ -389,7 +423,9 @@ namespace JetBrains.FormatRipper.MachO
             new SignatureData(codeDirectoryBlob, cmsSignatureBlob),
             hashVerificationUnits,
             cdHashes,
-            (mode & Mode.SignatureData) == Mode.SignatureData && signatureType != SignatureType.None ? sectionSignatureTransferData : null);
+            (mode & Mode.SignatureData) == Mode.SignatureData && signatureType != SignatureType.None ? sectionSignatureTransferData : null,
+            entitlements,
+            entitlementsDer);
         }
 
         int GetZeroPadding(bool hasCodeSignature)
@@ -435,7 +471,9 @@ namespace JetBrains.FormatRipper.MachO
             computeHashInfo,
             loadCommands.HashVerificationUnits,
             loadCommands.CDHashes,
-            loadCommands.SectionSignatureTransferData);
+            loadCommands.SectionSignatureTransferData,
+            loadCommands.Entitlements,
+            loadCommands.EntitlementsDer);
         }
         else
         {
@@ -470,7 +508,9 @@ namespace JetBrains.FormatRipper.MachO
             computeHashInfo,
             loadCommands.HashVerificationUnits,
             loadCommands.CDHashes,
-            loadCommands.SectionSignatureTransferData);
+            loadCommands.SectionSignatureTransferData,
+            loadCommands.Entitlements,
+            loadCommands.EntitlementsDer);
         }
       }
 
@@ -547,8 +587,10 @@ namespace JetBrains.FormatRipper.MachO
       public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
       public readonly IEnumerable<CDHash> CDHashes;
       public readonly MachOSectionSignatureTransferData? SectionSignatureTransferData;
+      public readonly byte[]? Entitlements;
+      public readonly byte[]? EntitlementsDer;
 
-      public LoadCommandsInfo(bool hasSignature, SignatureType signatureType, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes, MachOSectionSignatureTransferData? sectionSignatureTransferData)
+      public LoadCommandsInfo(bool hasSignature, SignatureType signatureType, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes, MachOSectionSignatureTransferData? sectionSignatureTransferData, byte[]? entitlements, byte[]? entitlementsDer)
       {
         HasSignature = hasSignature;
         SignatureType = signatureType;
@@ -556,6 +598,8 @@ namespace JetBrains.FormatRipper.MachO
         HashVerificationUnits = hashVerificationUnits;
         CDHashes = cdHashes;
         SectionSignatureTransferData = sectionSignatureTransferData;
+        Entitlements = entitlements;
+        EntitlementsDer = entitlementsDer;
       }
     }
   }
