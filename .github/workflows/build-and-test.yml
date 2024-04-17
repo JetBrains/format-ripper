@@ -82,6 +82,8 @@ jobs:
             arch: s390x
           - os: freebsd
             arch: amd64
+          - os: freebsd
+            arch: arm64
 
     runs-on:
       - self-hosted
@@ -177,6 +179,8 @@ jobs:
             arch: ppc64le
           - os: freebsd
             arch: amd64
+          - os: freebsd
+            arch: arm64
 
     runs-on:
       - self-hosted
