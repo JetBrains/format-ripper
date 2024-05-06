@@ -30,13 +30,13 @@ import org.bouncycastle.util.Store
 internal class CMSSignedHelper {
   /**
    * Return the digest encryption algorithm using one of the standard
-   * JCA string representations rather the the algorithm identifier (if
+   * JCA string representations rather the algorithm identifier (if
    * possible).
    */
   fun getEncryptionAlgName(
     encryptionAlgOID: String
   ): String {
-    val algName = encryptionAlgs[encryptionAlgOID] as String?
+    val algName = encryptionAlgs[encryptionAlgOID]
     return algName ?: encryptionAlgOID
   }
 
@@ -75,7 +75,7 @@ internal class CMSSignedHelper {
       while (en.hasMoreElements()) {
         val obj = (en.nextElement() as ASN1Encodable).toASN1Primitive()
         if (obj is ASN1TaggedObject) {
-          certList.add(X509AttributeCertificateHolder(AttributeCertificate.getInstance(obj.getObject())))
+          certList.add(X509AttributeCertificateHolder(AttributeCertificate.getInstance(obj.baseObject)))
         }
       }
       return CollectionStore(certList)
