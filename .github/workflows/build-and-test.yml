@@ -41,7 +41,7 @@ jobs:
           if-no-files-found: error
 
   net-macos-arm64:
-    name: .NET MACOS ARM64
+    name: .NET macOS ARM64
 
     strategy:
       fail-fast: false
@@ -51,8 +51,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     env:
-      Dotnet_X64:   "~/my-dotnet/x64"
-      Dotnet_arm64: "~/my-dotnet/arm64"
+      DotNetSdkX64:   "~/.dotnet-sdk/x64"
+      DotNetSdkArm64: "~/.dotnet-sdk/arm64"
 
     steps:
       - name: Checkout
@@ -60,19 +60,19 @@ jobs:
       - name: Manually setup .NET 8.0 and 3.1 SDKs
         working-directory: ${{ github.workspace }}/net
         run: >
-          curl https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh -o dotnet-install.sh -s && chmod +x dotnet-install.sh && \
-            ./dotnet-install.sh --architecture arm64 --skip-non-versioned-files --channel 8.0 --install-dir $Dotnet_arm64 && \
-            ./dotnet-install.sh --architecture x64   --skip-non-versioned-files --channel 3.1 --install-dir $Dotnet_X64 && \
-            ./dotnet-install.sh --architecture x64   --skip-non-versioned-files --channel 8.0 --install-dir $Dotnet_X64 
+          curl -fsSLO https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh && chmod +x dotnet-install.sh && \
+            ./dotnet-install.sh --architecture arm64 --skip-non-versioned-files --channel 8.0 --install-dir $DotNetSdkArm64 && \
+            ./dotnet-install.sh --architecture x64   --skip-non-versioned-files --channel 3.1 --install-dir $DotNetSdkX64 && \
+            ./dotnet-install.sh --architecture x64   --skip-non-versioned-files --channel 8.0 --install-dir $DotNetSdkX64 
       - name: Restore
         working-directory: ${{ github.workspace }}/net
-        run: $Dotnet_arm64/dotnet restore
+        run: $DotNetSdkArm64/dotnet restore
       - name: Build and run arm64 tests
         working-directory: ${{ github.workspace }}/net
-        run: $Dotnet_arm64/dotnet test -f net8.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results_arm64'
+        run: $DotNetSdkArm64/dotnet test -f net8.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results_arm64'
       - name: Build and run x64 tests
         working-directory: ${{ github.workspace }}/net
-        run: $Dotnet_X64/dotnet test --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results_x64'
+        run: $DotNetSdkX64/dotnet test --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results_x64'
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: always()
