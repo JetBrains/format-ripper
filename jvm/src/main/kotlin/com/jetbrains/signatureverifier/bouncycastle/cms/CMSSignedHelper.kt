@@ -75,7 +75,7 @@ internal class CMSSignedHelper {
       while (en.hasMoreElements()) {
         val obj = (en.nextElement() as ASN1Encodable).toASN1Primitive()
         if (obj is ASN1TaggedObject) {
-          certList.add(X509AttributeCertificateHolder(AttributeCertificate.getInstance(obj.getObject())))
+          certList.add(X509AttributeCertificateHolder(AttributeCertificate.getInstance(obj.baseObject)))
         }
       }
       return CollectionStore(certList)
