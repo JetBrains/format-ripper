@@ -16,6 +16,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Version>2.2.0</Version>
+    <PackageProjectUrl>https://github.com/JetBrains/format-ripper</PackageProjectUrl>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.1" />
