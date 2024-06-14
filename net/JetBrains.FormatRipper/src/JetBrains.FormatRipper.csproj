@@ -16,7 +16,7 @@
     <PackageTags>jetbrains compound elf mach-o msi pe dmg parse windows linux macos netstandard netframework</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <Version>2.2.0</Version>
+    <Version>2.2.1</Version>
     <PackageProjectUrl>https://github.com/JetBrains/format-ripper</PackageProjectUrl>
   </PropertyGroup>
   <ItemGroup>
