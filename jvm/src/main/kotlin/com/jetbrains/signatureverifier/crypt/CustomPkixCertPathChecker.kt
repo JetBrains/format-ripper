@@ -12,7 +12,10 @@ class CustomPkixCertPathChecker : PKIXCertPathChecker() {
   }
 
   override fun getSupportedExtensions(): MutableSet<String> {
-    return mutableSetOf()
+    return mutableSetOf(
+      OIDs.APPLE_CERTIFICATE_EXTENSION_CODE_SIGNING.id,
+      OIDs.APPLE_CERTIFICATE_EXTENSION_KEXT_SIGNING.id
+    )
   }
 
   override fun check(cert: Certificate?, unresolvedCritExts: MutableCollection<String>) {
