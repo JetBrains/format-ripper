@@ -33,7 +33,7 @@ jobs:
         working-directory: ${{ github.workspace }}/net
         run: dotnet test --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results'
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: net-test-results-${{ matrix.os }}
@@ -74,7 +74,7 @@ jobs:
         working-directory: ${{ github.workspace }}/net
         run: $DotNetSdkX64/dotnet test --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results_x64'
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: net-test-results-${{ matrix.os }}
@@ -105,7 +105,7 @@ jobs:
             dotnet test -f net8.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results' && \
             true"
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: net-test-results-qemu-${{ matrix.arch }}
@@ -146,7 +146,7 @@ jobs:
         working-directory: ${{ github.workspace }}/net
         run: dotnet test -f ${{ env.tf }} -p:JB_TargetFramework=${{ env.tf }} --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results'
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: net-test-results-self-hosted-${{ matrix.os }}-${{ matrix.arch }}
@@ -179,7 +179,7 @@ jobs:
           arguments: test --stacktrace
           build-root-directory: ${{ github.workspace }}/jvm
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: jvm-test-results-${{ matrix.os }}
@@ -205,7 +205,7 @@ jobs:
         run: >
           docker run --rm -e JAVA_OPTS="-Djdk.lang.Process.launchMechanism=vfork" -v ${PWD}:/home/gradle/project -w /home/gradle/project/jvm --platform linux/${{ matrix.arch }} gradle:jdk17 gradle test --stacktrace
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: jvm-test-results-qemu-${{ matrix.arch }}
@@ -246,7 +246,7 @@ jobs:
           arguments: test --stacktrace
           build-root-directory: ${{ github.workspace }}/jvm
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: jvm-test-results-self-hosted-${{ matrix.os }}-${{ matrix.arch }}
