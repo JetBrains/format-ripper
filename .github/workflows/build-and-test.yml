@@ -121,6 +121,8 @@ jobs:
         include:
           - os: linux
             arch: s390x
+          - os: linux
+            arch: riscv64
           - os: freebsd
             arch: amd64
           - os: freebsd
@@ -131,15 +133,18 @@ jobs:
       - ${{ matrix.os }}
       - ${{ matrix.arch }}
 
+    env:
+      tf: ${{ matrix.os == 'linux' && matrix.arch == 'riscv64' && 'net9.0' || 'net8.0' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Restore
         working-directory: ${{ github.workspace }}/net
-        run: dotnet restore
+        run: dotnet restore -p:JB_TargetFramework=${{ env.tf }}
       - name: Build and Tests
         working-directory: ${{ github.workspace }}/net
-        run: dotnet test -f net8.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results'
+        run: dotnet test -f ${{ env.tf }} -p:JB_TargetFramework=${{ env.tf }} --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results'
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: always()
@@ -218,6 +223,8 @@ jobs:
             arch: s390x
           - os: linux
             arch: ppc64le
+          - os: linux
+            arch: riscv64
           - os: freebsd
             arch: amd64
           - os: freebsd

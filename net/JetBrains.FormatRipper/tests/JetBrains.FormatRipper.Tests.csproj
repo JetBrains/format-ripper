@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net35;netcoreapp3.1;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(JB_TargetFramework)'!=''">$(JB_TargetFramework)</TargetFrameworks>
     <RootNamespace>JetBrains.FormatRipper.Tests</RootNamespace>
     <Nullable>enable</Nullable>
     <SignAssembly>true</SignAssembly>
