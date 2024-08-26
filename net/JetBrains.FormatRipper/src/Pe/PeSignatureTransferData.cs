@@ -17,5 +17,5 @@ public class PeSignatureTransferData
 
   public ushort CertificateType { get; internal set; }
 
-  public byte[] SignatureBlob { get; internal set; }
+  public byte[] SignatureBlob { get; internal set; } = null!;
 }

@@ -25,5 +25,5 @@ public class MachOSectionSignatureTransferData
 
   public uint LastLinkeditFileSize32 { get; internal set; }
 
-  public byte[] SignatureBlob { get; internal set; }
+  public byte[] SignatureBlob { get; internal set; } = null!;
 }

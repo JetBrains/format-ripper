@@ -9,5 +9,5 @@ public class DmgSignatureTransferData
 
   public long SignatureLength { get; internal set; }
 
-  public byte[] SignatureBlob { get; internal set; }
+  public byte[] SignatureBlob { get; internal set; } = null!;
 }
