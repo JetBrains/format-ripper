@@ -119,22 +119,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: linux
-            arch: s390x
-          - os: linux
-            arch: riscv64
-          - os: freebsd
-            arch: amd64
-          - os: freebsd
-            arch: arm64
+          - os-labels: [linux, amd64, musl]
+          - os-labels: [linux, arm64, musl]
+          - os-labels: [linux, s390x, glibc]
+          - os-labels: [linux, riscv64, glibc]
+          - os-labels: [freebsd, amd64]
+          - os-labels: [freebsd, arm64]
 
     runs-on:
       - self-hosted
-      - ${{ matrix.os }}
-      - ${{ matrix.arch }}
+      - ${{ matrix.os-labels }}
 
     env:
-      tf: ${{ matrix.os == 'linux' && matrix.arch == 'riscv64' && 'net9.0' || 'net8.0' }}
+      tf: ${{ contains(matrix.os-labels, 'riscv64') && 'net9.0' || 'net8.0' }}
 
     steps:
       - name: Checkout
@@ -149,7 +146,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: net-test-results-self-hosted-${{ matrix.os }}-${{ matrix.arch }}
+          name: net-test-results-self-hosted-${{ join(matrix.os-labels, '-') }}
           path: ${{ github.workspace }}/net/**/tests/TestResults/*
           if-no-files-found: error
 
@@ -219,21 +216,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: linux
-            arch: s390x
-          - os: linux
-            arch: ppc64le
-          - os: linux
-            arch: riscv64
-          - os: freebsd
-            arch: amd64
-          - os: freebsd
-            arch: arm64
+          - os-labels: [linux, amd64, musl]
+          - os-labels: [linux, arm64, musl]
+          - os-labels: [linux, s390x, glibc]
+          - os-labels: [linux, ppc64le, glibc]
+          - os-labels: [linux, riscv64, glibc]
+          - os-labels: [freebsd, amd64]
+          - os-labels: [freebsd, arm64]
 
     runs-on:
       - self-hosted
-      - ${{ matrix.os }}
-      - ${{ matrix.arch }}
+      - ${{ matrix.os-labels }}
 
     steps:
       - name: Checkout
@@ -249,6 +242,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: jvm-test-results-self-hosted-${{ matrix.os }}-${{ matrix.arch }}
+          name: jvm-test-results-self-hosted-${{ join(matrix.os-labels, '-') }}
           path: ${{ github.workspace }}/jvm/build/test-results/test/*
           if-no-files-found: error
