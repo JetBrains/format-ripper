@@ -2,9 +2,9 @@
 
 [![Build and run tests](https://github.com/JetBrains/format-ripper/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/JetBrains/format-ripper/actions/workflows/build-and-test.yml)
 
-[![NuGet Badge](https://buildstats.info/nuget/JetBrains.FormatRipper)](https://www.nuget.org/packages/JetBrains.FormatRipper)
-[![NuGet Badge](https://buildstats.info/nuget/JetBrains.SignatureVerifier)](https://www.nuget.org/packages/JetBrains.SignatureVerifier)
-[![Maven Central](https://img.shields.io/maven-central/v/com.jetbrains.format-ripper/format-ripper)](https://mvnrepository.com/artifact/com.jetbrains.format-ripper)
+[![NuGet Version](https://img.shields.io/nuget/v/JetBrains.FormatRipper?label=JetBrains.FormatRipper)](https://www.nuget.org/packages/JetBrains.FormatRipper)
+[![NuGet Version](https://img.shields.io/nuget/v/JetBrains.SignatureVerifier?label=JetBrains.SignatureVerifier)](https://www.nuget.org/packages/JetBrains.SignatureVerifier)
+[![Maven Central Version](https://img.shields.io/maven-central/v/com.jetbrains.format-ripper/format-ripper?label=format-ripper)](https://mvnrepository.com/artifact/com.jetbrains.format-ripper)
 
 JetBrains format-ripper library is applicable for:
 
