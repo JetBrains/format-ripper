@@ -1,6 +1,8 @@
 name: Build and run tests
 
 on:
+  schedule:
+    - cron: "0 2 * * 1,4"
   push:
     branches: [ master ]
   pull_request:
