@@ -20,7 +20,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
-    <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" PrivateAssets="All" />
+    <PackageReference Include="JetBrains.Annotations" Version="2024.2.0" PrivateAssets="All" />
     <ProjectReference Include="..\..\JetBrains.FormatRipper\src\JetBrains.FormatRipper.csproj" />
   </ItemGroup>
   <ItemGroup>
