@@ -1,4 +1,9 @@
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
 import jetbrains.sign.GpgSignSignatoryProvider
+import java.util.*
 
 val kotlinVersion = "1.9.22"
 val junitVersion = "5.8.2"
@@ -13,6 +18,7 @@ buildscript {
     }
     dependencies {
         classpath("com.jetbrains:jet-sign:45.55")
+        classpath("com.squareup.okhttp3:okhttp:4.12.0")
     }
 }
 
@@ -20,7 +26,6 @@ plugins {
     kotlin("jvm") version "1.9.22"
     signing
     `maven-publish`
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
 sourceSets.main {
@@ -54,70 +59,118 @@ tasks.test {
 }
 
 java {
-    if (isUnderTeamCity) {
-        withJavadocJar()
-        withSourcesJar()
-    }
+    withJavadocJar()
+    withSourcesJar()
 }
 
-if (isUnderTeamCity) {
-    nexusPublishing {
-        repositories {
-            sonatype {
-                username.set(rootProject.extra["sonatypeUser"].toString())
-                password.set(rootProject.extra["sonatypePassword"].toString())
-            }
+publishing {
+    repositories {
+        maven {
+            name = "artifacts"
+            url = uri(layout.buildDirectory.dir("artifacts/maven"))
         }
     }
 
-    publishing {
-        publications {
-            create<MavenPublication>("mavenJava") {
-                artifactId = "format-ripper"
-                group = "com.jetbrains.format-ripper"
-                from(components["java"])
-                pom {
-                    packaging = "jar"
-                    name.set("JetBrains Format Ripper")
-                    url.set("https://github.com/JetBrains/format-ripper")
-                    description.set("A file format ripper library: provide info about binaries, perform cryptographic check")
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifactId = "format-ripper"
+            group = "com.jetbrains.format-ripper"
+            from(components["java"])
+            pom {
+                packaging = "jar"
+                name.set("JetBrains Format Ripper")
+                url.set("https://github.com/JetBrains/format-ripper")
+                description.set("A file format ripper library: provide info about binaries, perform cryptographic check")
 
-                    licenses {
-                        license {
-                            name.set("The Apache License, Version 2.0")
-                            url.set("https://www.apache.org/licenses/LICENSE-2.0")
-                        }
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
                     }
+                }
 
-                    organization {
-                        name.set("JetBrains s.r.o.")
-                        url.set("https://www.jetbrains.com/")
-                    }
+                organization {
+                    name.set("JetBrains s.r.o.")
+                    url.set("https://www.jetbrains.com/")
+                }
 
-                    developers {
-                        developer {
-                            id.set("mikhail.pilin")
-                            name.set("Mikhail Pilin")
-                            email.set("mikhail.pilin@jetbrains.com")
-                        }
-                        developer {
-                            id.set("konstantin.kretov")
-                            name.set("Konstantin Kretov")
-                            email.set("konstantin.kretov@jetbrains.com")
-                        }
+                developers {
+                    developer {
+                        id.set("mikhail.pilin")
+                        name.set("Mikhail Pilin")
+                        email.set("mikhail.pilin@jetbrains.com")
                     }
+                    developer {
+                        id.set("konstantin.kretov")
+                        name.set("Konstantin Kretov")
+                        email.set("konstantin.kretov@jetbrains.com")
+                    }
+                }
 
-                    scm {
-                        connection.set("scm:git@github.com:JetBrains/format-ripper.git")
-                        url.set("https://github.com/JetBrains/format-ripper.git")
-                    }
+                scm {
+                    connection.set("scm:git@github.com:JetBrains/format-ripper.git")
+                    url.set("https://github.com/JetBrains/format-ripper.git")
                 }
             }
         }
     }
+}
 
+if (isUnderTeamCity) {
     signing {
         sign(publishing.publications)
         signatories = GpgSignSignatoryProvider()
+    }
+}
+
+tasks {
+    val packSonatypeCentralBundle by registering(Zip::class) {
+        group = "publishing"
+
+        dependsOn(":publishMavenJavaPublicationToArtifactsRepository")
+
+        from(layout.buildDirectory.dir("artifacts/maven"))
+        archiveFileName.set("bundle.zip")
+        destinationDirectory.set(layout.buildDirectory)
+    }
+
+    val publishMavenToCentralPortal by registering {
+        group = "publishing"
+
+        dependsOn(packSonatypeCentralBundle)
+
+        doLast {
+            val uriBase = "https://central.sonatype.com/api/v1/publisher/upload"
+            val publicationType = "USER_MANAGED"
+            val deploymentName = "${project.name}-$version"
+            val uri = "$uriBase?name=$deploymentName&publicationType=$publicationType"
+
+            val userName = rootProject.extra["centralPortalUserName"] as String
+            val token = rootProject.extra["centralPortalToken"] as String
+            val base64Auth = Base64.getEncoder().encode("$userName:$token".toByteArray()).toString(Charsets.UTF_8)
+            val bundleFile = packSonatypeCentralBundle.get().archiveFile.get().asFile
+
+            println("Sending request to $uri...")
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .url(uri)
+                .header("Authorization", "Bearer $base64Auth")
+                .post(
+                    MultipartBody.Builder()
+                        .setType(MultipartBody.FORM)
+                        .addFormDataPart("bundle", bundleFile.name, bundleFile.asRequestBody())
+                        .build()
+                )
+                .build()
+            val response = client.newCall(request).execute()
+
+            val statusCode = response.code
+            println("Upload status code: $statusCode")
+            println("Upload result: ${response.body!!.string()}")
+            if (statusCode != 201) {
+                error("Upload error to Central repository. Status code $statusCode.")
+            }
+        }
     }
 }
