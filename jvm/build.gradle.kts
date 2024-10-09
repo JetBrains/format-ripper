@@ -5,6 +5,8 @@ val junitVersion = "5.8.2"
 val mockitoVersion = "4.2.0"
 val isUnderTeamCity = System.getenv("TEAMCITY_VERSION") != null
 
+version = rootProject.ext.get("projectVersion") as String
+
 buildscript {
     repositories {
         maven { url = uri("https://packages.jetbrains.team/maven/p/jcs/maven") }
@@ -73,7 +75,6 @@ if (isUnderTeamCity) {
             create<MavenPublication>("mavenJava") {
                 artifactId = "format-ripper"
                 group = "com.jetbrains.format-ripper"
-                version = rootProject.ext.get("projectVersion") as String
                 from(components["java"])
                 pom {
                     packaging = "jar"
@@ -88,11 +89,21 @@ if (isUnderTeamCity) {
                         }
                     }
 
+                    organization {
+                        name.set("JetBrains s.r.o.")
+                        url.set("https://www.jetbrains.com/")
+                    }
+
                     developers {
                         developer {
-                            id.set("anton.vladimirov")
-                            name.set("Anton Vladimirov")
-                            email.set("anton.vladimirov@jetbrains.com")
+                            id.set("mikhail.pilin")
+                            name.set("Mikhail Pilin")
+                            email.set("mikhail.pilin@jetbrains.com")
+                        }
+                        developer {
+                            id.set("konstantin.kretov")
+                            name.set("Konstantin Kretov")
+                            email.set("konstantin.kretov@jetbrains.com")
                         }
                     }
 
