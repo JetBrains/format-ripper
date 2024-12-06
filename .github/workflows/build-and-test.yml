@@ -89,9 +89,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [ s390x ]
+        arch: [ s390x, ppc64le ]
 
     runs-on: ubuntu-latest
+
+    env:
+      tfm: ${{ matrix.arch == 'ppc64le' && 'net9.0' || 'net8.0' }}
+      sdk: ${{ matrix.arch == 'ppc64le' && '9.0'    || '8.0'    }}
 
     steps:
       - name: Checkout
@@ -100,11 +104,12 @@ jobs:
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       - name: Setup .NET SDK, Restore, Build and Tests under QEMU ${{ matrix.arch }}
         run: >
-          docker run --rm -v "${{ github.workspace }}:/work" --platform linux/${{ matrix.arch }} ${{ matrix.arch }}/fedora:39 /bin/bash -c " \
-            dnf install -y dotnet-sdk-8.0 && \
+          docker run --rm -v "${{ github.workspace }}:/work" --platform linux/${{ matrix.arch }} ${{ matrix.arch }}/fedora:41 /bin/bash -c " \
+            dnf install -y crypto-policies-scripts dotnet-sdk-${{ env.sdk }} && \
+            update-crypto-policies --set DEFAULT:SHA1 && \
             cd /work/net && \
-            dotnet restore && \
-            dotnet test -f net8.0 --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results' && \
+            dotnet restore -p:JB_TargetFramework=${{ env.tfm }} && \
+            dotnet test -f ${{ env.tfm }} -p:JB_TargetFramework=${{ env.tfm }} --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results' && \
             true"
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -124,6 +129,7 @@ jobs:
           - os-labels: [linux, amd64, musl]
           - os-labels: [linux, arm64, musl]
           - os-labels: [linux, s390x, glibc]
+          - os-labels: [linux, ppc64le, glibc]
           - os-labels: [linux, riscv64, glibc]
           - os-labels: [freebsd, amd64]
           - os-labels: [freebsd, arm64]
@@ -133,17 +139,17 @@ jobs:
       - ${{ matrix.os-labels }}
 
     env:
-      tf: ${{ contains(matrix.os-labels, 'riscv64') && 'net9.0' || 'net8.0' }}
+      tfm: ${{ (contains(matrix.os-labels, 'riscv64') || contains(matrix.os-labels, 'ppc64le')) && 'net9.0' || 'net8.0' }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Restore
         working-directory: ${{ github.workspace }}/net
-        run: dotnet restore -p:JB_TargetFramework=${{ env.tf }}
+        run: dotnet restore -p:JB_TargetFramework=${{ env.tfm }}
       - name: Build and Tests
         working-directory: ${{ github.workspace }}/net
-        run: dotnet test -f ${{ env.tf }} -p:JB_TargetFramework=${{ env.tf }} --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results'
+        run: dotnet test -f ${{ env.tfm }} -p:JB_TargetFramework=${{ env.tfm }} --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results'
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
