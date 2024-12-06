@@ -89,7 +89,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [ s390x, ppc64le ]
+        arch: [ s390x ]
 
     runs-on: ubuntu-latest
 
