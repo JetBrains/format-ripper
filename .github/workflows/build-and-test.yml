@@ -19,6 +19,9 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    env:
+      MSBUILDTERMINALLOGGER: off
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,6 +56,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     env:
+      MSBUILDTERMINALLOGGER: off
       DotNetSdkX64:   "~/.dotnet-sdk/x64"
       DotNetSdkArm64: "~/.dotnet-sdk/arm64"
 
@@ -108,6 +112,7 @@ jobs:
             dnf install -y crypto-policies-scripts dotnet-sdk-${{ env.sdk }} && \
             update-crypto-policies --set DEFAULT:SHA1 && \
             cd /work/net && \
+            export MSBUILDTERMINALLOGGER=off && \
             dotnet restore -p:JB_TargetFramework=${{ env.tfm }} && \
             dotnet test -f ${{ env.tfm }} -p:JB_TargetFramework=${{ env.tfm }} --configuration Release --no-restore --verbosity normal --logger 'trx;LogFilePrefix=test-results' && \
             true"
@@ -139,6 +144,7 @@ jobs:
       - ${{ matrix.os-labels }}
 
     env:
+      MSBUILDTERMINALLOGGER: off
       tfm: ${{ (contains(matrix.os-labels, 'riscv64') || contains(matrix.os-labels, 'ppc64le')) && 'net9.0' || 'net8.0' }}
 
     steps:
