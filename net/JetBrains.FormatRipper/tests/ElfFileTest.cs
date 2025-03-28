@@ -59,6 +59,9 @@ namespace JetBrains.FormatRipper.Tests
     [TestCase("tempfile.ubuntu-i386"          , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_386        , 0u                                                                                                    , "/lib/ld-linux.so.2")]
     [TestCase("tempfile.ubuntu-x86_64"        , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_X86_64     , 0u                                                                                                    , "/lib64/ld-linux-x86-64.so.2")]
     [TestCase("vl805"                         , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_LINUX  , ET.ET_EXEC, EM.EM_ARM        , EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD                                                        , null)]
+    [TestCase("32bit.o"                       , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_REL , EM.EM_386        , EF.EF_NONE                                                                                            , null)]
+    [TestCase("64bit.o"                       , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_REL , EM.EM_X86_64     , EF.EF_NONE                                                                                            , null)]
+    [TestCase("core.2042"                     , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_CORE, EM.EM_X86_64     , EF.EF_NONE                                                                                            , null)]
     // @formatter:on
     [Test]
     public void Test(

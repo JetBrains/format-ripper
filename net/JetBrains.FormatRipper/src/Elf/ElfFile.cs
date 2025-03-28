@@ -88,23 +88,27 @@ namespace JetBrains.FormatRipper.Elf
 
         var ePhNum = GetU2(ehdr.e_phnum);
         var ePhEntSize = GetU2(ehdr.e_phentsize);
-        if (ePhEntSize < sizeof(Elf32_Phdr))
+        if (ePhNum > 0 && ePhEntSize < sizeof(Elf32_Phdr))
           throw new FormatException("Too small ELF program header entry size");
 
         string? interpreter = null;
-        fixed (byte* buf = StreamUtil.ReadBytes(stream, checked(ePhNum * ePhEntSize)))
+        if (ePhNum > 0)
         {
-          for (var ptr = buf; ePhNum-- > 0; ptr += ePhEntSize)
+          fixed (byte* buf = StreamUtil.ReadBytes(stream, checked(ePhNum * ePhEntSize)))
           {
-            Elf32_Phdr phdr;
-            MemoryUtil.CopyBytes(ptr, (byte*)&phdr, sizeof(Elf32_Phdr));
-            switch ((PT)GetU4(phdr.p_type))
+            for (var ptr = buf; ePhNum-- > 0; ptr += ePhEntSize)
             {
-            case PT.PT_INTERP:
-              stream.Position = GetU4(phdr.p_offset);
-              var interpreterBuf = StreamUtil.ReadBytes(stream, checked((int)GetU4(phdr.p_filesz)));
-              interpreter = new string(Encoding.UTF8.GetChars(interpreterBuf, 0, MemoryUtil.GetAsciiStringZSize(interpreterBuf)));
-              break;
+              Elf32_Phdr phdr;
+              MemoryUtil.CopyBytes(ptr, (byte*)&phdr, sizeof(Elf32_Phdr));
+              switch ((PT)GetU4(phdr.p_type))
+              {
+                case PT.PT_INTERP:
+                  stream.Position = GetU4(phdr.p_offset);
+                  var interpreterBuf = StreamUtil.ReadBytes(stream, checked((int)GetU4(phdr.p_filesz)));
+                  interpreter = new string(Encoding.UTF8.GetChars(interpreterBuf, 0,
+                    MemoryUtil.GetAsciiStringZSize(interpreterBuf)));
+                  break;
+              }
             }
           }
         }
@@ -130,23 +134,27 @@ namespace JetBrains.FormatRipper.Elf
 
         var ePhNum = GetU2(ehdr.e_phnum);
         var ePhEntSize = GetU2(ehdr.e_phentsize);
-        if (ePhEntSize < sizeof(Elf64_Phdr))
+        if (ePhNum > 0 && ePhEntSize < sizeof(Elf64_Phdr))
           throw new FormatException("Too small ELF program header entry size");
 
         string? interpreter = null;
-        fixed (byte* buf = StreamUtil.ReadBytes(stream, checked(ePhNum * ePhEntSize)))
+        if (ePhNum > 0)
         {
-          for (var ptr = buf; ePhNum-- > 0; ptr += ePhEntSize)
+          fixed (byte* buf = StreamUtil.ReadBytes(stream, checked(ePhNum * ePhEntSize)))
           {
-            Elf64_Phdr phdr;
-            MemoryUtil.CopyBytes(ptr, (byte*)&phdr, sizeof(Elf64_Phdr));
-            switch ((PT)GetU4(phdr.p_type))
+            for (var ptr = buf; ePhNum-- > 0; ptr += ePhEntSize)
             {
-            case PT.PT_INTERP:
-              stream.Position = checked((long)GetU8(phdr.p_offset));
-              var interpreterBuf = StreamUtil.ReadBytes(stream, checked((int)GetU8(phdr.p_filesz)));
-              interpreter = new string(Encoding.UTF8.GetChars(interpreterBuf, 0, MemoryUtil.GetAsciiStringZSize(interpreterBuf)));
-              break;
+              Elf64_Phdr phdr;
+              MemoryUtil.CopyBytes(ptr, (byte*)&phdr, sizeof(Elf64_Phdr));
+              switch ((PT)GetU4(phdr.p_type))
+              {
+                case PT.PT_INTERP:
+                  stream.Position = checked((long)GetU8(phdr.p_offset));
+                  var interpreterBuf = StreamUtil.ReadBytes(stream, checked((int)GetU8(phdr.p_filesz)));
+                  interpreter = new string(Encoding.UTF8.GetChars(interpreterBuf, 0,
+                    MemoryUtil.GetAsciiStringZSize(interpreterBuf)));
+                  break;
+              }
             }
           }
         }
