@@ -12,6 +12,8 @@ namespace JetBrains.FormatRipper.FileExplorer
     ExecutableType = 0x1,
     SharedLibraryType = 0x2,
     BundleType = 0x3,
+    RelocatableType = 0x4,
+    CoreDumpType = 0x5,
 
     TypeMask = 0xFF,
 

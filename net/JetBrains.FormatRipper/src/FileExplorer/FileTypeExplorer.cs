@@ -84,6 +84,8 @@ namespace JetBrains.FormatRipper.FileExplorer
             {
               ET.ET_EXEC => FileProperties.ExecutableType,
               ET.ET_DYN => file.Interpreter != null ? FileProperties.ExecutableType : FileProperties.SharedLibraryType,
+              ET.ET_REL => FileProperties.RelocatableType,
+              ET.ET_CORE => FileProperties.CoreDumpType,
               _ => FileProperties.UnknownType
             };
           return true;

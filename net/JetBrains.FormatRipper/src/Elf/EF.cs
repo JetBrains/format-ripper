@@ -9,6 +9,7 @@ namespace JetBrains.FormatRipper.Elf
   public enum EF : uint
   {
     // @formatter:off
+    EF_NONE                 = 0x00000000,
 
     EF_ARM_RELEXEC          = 0x00000001,
     EF_ARM_HASENTRY         = 0x00000002,
