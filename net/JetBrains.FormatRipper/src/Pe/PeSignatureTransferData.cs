@@ -5,17 +5,17 @@ namespace JetBrains.FormatRipper.Pe;
 /// </summary>
 public class PeSignatureTransferData
 {
-  public uint CheckSum { get; internal set; }
+  public uint CheckSum { get; set; }
 
-  public uint TimeDateStamp { get; internal set; }
+  public uint TimeDateStamp { get; set; }
 
-  public uint SignatureBlobOffset { get; internal set; }
+  public uint SignatureBlobOffset { get; set; }
 
-  public uint SignatureBlobSize { get; internal set; }
+  public uint SignatureBlobSize { get; set; }
 
-  public ushort CertificateRevision { get; internal set; }
+  public ushort CertificateRevision { get; set; }
 
-  public ushort CertificateType { get; internal set; }
+  public ushort CertificateType { get; set; }
 
-  public byte[] SignatureBlob { get; internal set; } = null!;
+  public byte[] SignatureBlob { get; set; } = null!;
 }
