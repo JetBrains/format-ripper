@@ -82,10 +82,17 @@ namespace JetBrains.FormatRipper.MachO
     {
       IsFatLittleEndian = isFatLittleEndian;
       Sections = sections;
-      Signature = new MachOSignatureTransferData(new MachOSectionSignatureTransferData[sections.Length]);
 
+      var signatureTransferData = new MachOSignatureTransferData(new MachOSectionSignatureTransferData[sections.Length]);
+
+      bool hasSignature = false;
       for (int i = 0; i < sections.Length; i++)
-        Signature.SectionSignatures[i] = sections[i].SignatureTransferData;
+      {
+        hasSignature |= sections[i].HasSignature;
+        signatureTransferData.SectionSignatures[i] = sections[i].SignatureTransferData;
+      }
+
+      Signature = hasSignature ? signatureTransferData : null;
     }
 
     public static unsafe bool Is(Stream stream)

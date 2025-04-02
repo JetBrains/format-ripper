@@ -24,7 +24,7 @@ class Program
       extractSourceOption, extractOutputOption
     };
 
-    extractCommand.SetHandler((string inputFile, string output) => { SignatureOperations.ExtractSignature(inputFile, output); }, extractSourceOption, extractOutputOption);
+    extractCommand.SetHandler(async (string inputFile, string output) => { await ExtractSignature(inputFile, output); }, extractSourceOption, extractOutputOption);
 
     var applySourceOption = new Option<string>(new string[] { "--source" }, "Path to the application to which the signature should be applied") { IsRequired = true };
     var applySignatureOption = new Option<string>(new string[] { "--signature" }, "Signature") { IsRequired = true };
@@ -37,7 +37,7 @@ class Program
       applySourceOption, applySignatureOption, applyOutputOption, applyDontVerifyResultsOption
     };
 
-    applyCommand.SetHandler(async (string inputFile, string signature, string output, bool skipVerification) => { await SignatureOperations.ApplySignature(inputFile, signature, output, skipVerification); }, applySourceOption, applySignatureOption, applyOutputOption, applyDontVerifyResultsOption);
+    applyCommand.SetHandler(async (string inputFile, string signature, string output, bool skipVerification) => { await ApplySignature(inputFile, signature, output, skipVerification); }, applySourceOption, applySignatureOption, applyOutputOption, applyDontVerifyResultsOption);
 
     var rootCommand = new RootCommand("Utility to extract and apply signature from/to various file formats")
     {
@@ -65,5 +65,22 @@ class Program
     };
 
     invocationContext.ExitCode = errorCode;
+  }
+
+  public static async Task ExtractSignature(string inputFile, string output)
+  {
+    using Stream inputFileStream = File.OpenRead(inputFile);
+    using Stream outputStream = File.OpenWrite(output);
+
+    await SignatureOperations.ExtractSignature(inputFileStream, outputStream);
+  }
+
+  public static async Task ApplySignature(string inputFile, string signatureFile, string output, bool verifyResults)
+  {
+    using Stream inputFileStream = File.OpenRead(inputFile);
+    using Stream signatureFileStream = File.OpenRead(signatureFile);
+    using Stream outputStream = File.Open(output, FileMode.Create, FileAccess.ReadWrite);
+
+    await SignatureOperations.ApplySignature(inputFileStream, signatureFileStream, outputStream, verifyResults);
   }
 }

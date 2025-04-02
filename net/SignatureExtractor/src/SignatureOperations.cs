@@ -9,21 +9,21 @@ namespace SignatureExtractor;
 
 public static class SignatureOperations
 {
-  public static void ExtractSignature(string inputFile, string output)
+  public static async Task ExtractSignature(Stream inputFile, Stream output)
   {
-    using var fileStream = File.OpenRead(inputFile);
-    var fileType = FileTypeExplorer.Detect(fileStream);
-    fileStream.Seek(0, SeekOrigin.Begin);
+    if (!inputFile.CanSeek)
+      throw new SignatureExtractionException("Input file must be seekable");
+
+    var fileType = FileTypeExplorer.Detect(inputFile);
+    inputFile.Seek(0, SeekOrigin.Begin);
 
     var signatureContainer = fileType.FileType switch
     {
-      FileType.MachO => ExtractMachOSignatures(fileStream),
-      FileType.Pe => ExtractPeSignatures(fileStream),
-      FileType.Dmg => ExtractDmgSignatures(fileStream),
+      FileType.MachO => ExtractMachOSignatures(inputFile),
+      FileType.Pe => ExtractPeSignatures(inputFile),
+      FileType.Dmg => ExtractDmgSignatures(inputFile),
       _ => throw new SignatureExtractionException($"Unsupported file type: {fileType.FileType}.")
     };
-
-    fileStream.Close();
 
     var settings = new JsonSerializerSettings()
     {
@@ -32,16 +32,20 @@ public static class SignatureOperations
       NullValueHandling = NullValueHandling.Ignore,
     };
 
-    var serialized = JsonConvert.SerializeObject(signatureContainer, settings);
-
-    File.WriteAllText(output, serialized);
+    using (StreamWriter writer = new StreamWriter(output, leaveOpen: true))
+    using (JsonTextWriter jsonWriter = new JsonTextWriter(writer))
+    {
+      JsonSerializer ser = JsonSerializer.Create(settings);
+      ser.Serialize(jsonWriter, signatureContainer);
+      await jsonWriter.FlushAsync();
+    }
   }
 
   static SignatureContainer ExtractMachOSignatures(Stream stream)
   {
     MachOFile parsedFile = MachOFile.Parse(stream, MachOFile.Mode.SignatureData);
 
-    if (parsedFile.Signature == null)
+    if (parsedFile.Signature == null || parsedFile.Signature.SectionSignatures.Length == 0)
       throw new SignatureExtractionException("No signature found");
 
     return new SignatureContainer(FileType.MachO, parsedFile.Signature, null, null);
@@ -67,37 +71,41 @@ public static class SignatureOperations
     return new SignatureContainer(FileType.Dmg, null, null, parsedFile.SignatureTransferData);
   }
 
-  public static async Task ApplySignature(string inputFile, string signatureFile, string output, bool verifyResults)
+  public static async Task ApplySignature(Stream inputFile, Stream signatureFile, Stream outputStream, bool verifyResults)
   {
-    var signature = File.ReadAllText(signatureFile);
+    if (!inputFile.CanSeek)
+      throw new SignatureApplicationException("Input file must be seekable");
 
-    var signatureContainer = JsonConvert.DeserializeObject<SignatureContainer>(signature);
+    if (verifyResults && !outputStream.CanSeek)
+      throw new SignatureApplicationException("Output file must be seekable if results verification is enabled");
+
+    SignatureContainer? signatureContainer = null;
+    using (StreamReader reader = new StreamReader(signatureFile, leaveOpen: true))
+    using (JsonTextReader jsonReader = new JsonTextReader(reader))
+    {
+      JsonSerializer ser = new JsonSerializer();
+      signatureContainer = ser.Deserialize<SignatureContainer>(jsonReader);
+    }
 
     if (signatureContainer == null)
       throw new SignatureApplicationException("Failed to deserialize signature");
 
-    using var fileStream = File.OpenRead(inputFile);
-    var fileType = FileTypeExplorer.Detect(fileStream);
-    fileStream.Seek(0, SeekOrigin.Begin);
+    var fileType = FileTypeExplorer.Detect(inputFile);
+    inputFile.Seek(0, SeekOrigin.Begin);
 
     if (fileType.FileType != signatureContainer.FileType)
       throw new SignatureApplicationException($"File type mismatch. Signature was extracted from {signatureContainer.FileType} file, but applied to {fileType.FileType} file.");
 
-    using Stream outputStream = File.Open(output, FileMode.Create, FileAccess.ReadWrite);
-
     var verifyResult = fileType.FileType switch
     {
-      FileType.MachO => await ApplyMachOSignature(fileStream, signatureContainer.MachOSignatureTransferData, outputStream, verifyResults),
-      FileType.Pe => await ApplyPeSignature(fileStream, signatureContainer.PeSignatureTransferData, outputStream, verifyResults),
-      FileType.Dmg => await ApplyDmgSignature(fileStream, signatureContainer.DmgSignatureTransferData, outputStream, verifyResults),
+      FileType.MachO => await ApplyMachOSignature(inputFile, signatureContainer.MachOSignatureTransferData, outputStream, verifyResults),
+      FileType.Pe => await ApplyPeSignature(inputFile, signatureContainer.PeSignatureTransferData, outputStream, verifyResults),
+      FileType.Dmg => await ApplyDmgSignature(inputFile, signatureContainer.DmgSignatureTransferData, outputStream, verifyResults),
       _ => throw new SignatureApplicationException($"Unsupported file type: {fileType.FileType}.")
     };
 
-    outputStream.Close();
-    fileStream.Close();
-
     if (verifyResult != null && !verifyResult.IsValid)
-      throw new Exception(verifyResult.Message);
+      throw new SignatureApplicationException(verifyResult.Message);
   }
 
   static async Task<VerifySignatureResult?> ApplyMachOSignature(Stream inputStream, MachOSignatureTransferData? signature, Stream outputStream, bool verifyResults)
@@ -130,7 +138,7 @@ public static class SignatureOperations
     {
       outputStream.Seek(0, SeekOrigin.Begin);
 
-      PeFile acceptorFile = PeFile.Parse(outputStream, PeFile.Mode.SignatureData);
+      PeFile acceptorFile = PeFile.Parse(outputStream, PeFile.Mode.SignatureData | PeFile.Mode.ComputeHashInfo);
       var verificationParams = new SignatureVerificationParams(null, null, false, false, allowAdhocSignatures: true);
       AuthenticodeSignatureVerifier signatureVerifier = new AuthenticodeSignatureVerifier(logger: null);
       result = await signatureVerifier.VerifyAsync(acceptorFile, outputStream, verificationParams, FileIntegrityVerificationParams.Default);

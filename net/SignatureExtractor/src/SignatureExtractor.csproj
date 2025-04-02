@@ -8,8 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\JetBrains.FormatRipper\src\JetBrains.FormatRipper.csproj" />
-      <ProjectReference Include="..\JetBrains.SignatureVerifier\src\JetBrains.SignatureVerifier.csproj" />
+      <ProjectReference Include="..\..\JetBrains.FormatRipper\src\JetBrains.FormatRipper.csproj" />
+      <ProjectReference Include="..\..\JetBrains.SignatureVerifier\src\JetBrains.SignatureVerifier.csproj" />
     </ItemGroup>
 
     <ItemGroup>
