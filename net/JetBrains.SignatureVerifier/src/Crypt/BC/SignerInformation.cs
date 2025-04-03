@@ -596,12 +596,12 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
 
           DigestInfo digInfo = DerDecode(decrypt);
 
-          if (!digInfo.AlgorithmID.Algorithm.Equals(digestAlgorithm.Algorithm))
+          if (!digInfo.DigestAlgorithm.Algorithm.Equals(digestAlgorithm.Algorithm))
           {
             return false;
           }
 
-          if (!IsNull(digInfo.AlgorithmID.Parameters))
+          if (!IsNull(digInfo.DigestAlgorithm.Parameters))
           {
             return false;
           }
