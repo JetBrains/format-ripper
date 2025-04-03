@@ -16,36 +16,37 @@ class Program
 {
   static async Task<int> Main(string[] args)
   {
-    var extractSourceOption = new Option<string>(new[] { "--source", "-s" }, "Path to the application whose signature is to be exported") { IsRequired = true };
-    var extractOutputOption = new Option<string>(new[] { "--output", "-o" }, "Path to save the signature") { IsRequired = true };
+    var extractInputOption = new Option<string>(new[] { "--input", "-i" }, "Path to the signed application whose signature is to be exported.") { IsRequired = true };
+    var extractOutputOption = new Option<string>(new[] { "--output", "-o" }, "Path to save the signature.") { IsRequired = true };
 
-    var extractCommand = new Command("extract", "Extract signature from the input file")
+    var extractCommand = new Command("extract", "Extract signature from the input file and save it to the output json file.")
     {
-      extractSourceOption, extractOutputOption
+      extractInputOption, extractOutputOption
     };
 
-    extractCommand.SetHandler(async (string inputFile, string output) => { await ExtractSignature(inputFile, output); }, extractSourceOption, extractOutputOption);
+    extractCommand.SetHandler(async (string inputFile, string output) => { await ExtractSignature(inputFile, output); }, extractInputOption, extractOutputOption);
 
-    var applySourceOption = new Option<string>(new string[] { "--source" }, "Path to the application to which the signature should be applied") { IsRequired = true };
-    var applySignatureOption = new Option<string>(new string[] { "--signature" }, "Signature") { IsRequired = true };
-    var applyOutputOption = new Option<string>(new string[] { "--output", "-o" }, "Path to save the resulting application") { IsRequired = true };
-    var applyDontVerifyResultsOption = new Option<bool>(new string[] { "--skip-verification" }, "Do not veryfy the resulting file") { IsRequired = false, Arity = ArgumentArity.ZeroOrOne };
+    var applyInputOption = new Option<string>(new string[] { "--input", "-i" }, "Path to the application to which the signature should be applied.") { IsRequired = true };
+    var applySignatureOption = new Option<string>(new string[] { "--signature", "-s" }, "Signature") { IsRequired = true };
+    var applyOutputOption = new Option<string>(new string[] { "--output", "-o" }, "Path to save the resulting application.") { IsRequired = true };
+    var applyDontVerifyResultsOption = new Option<bool>(new string[] { "--skip-verification" }, "Do not check the validity of the signature of the resulting file. If this flag is set, only the technical feasibility of signature transposition will be checked.") { IsRequired = false, Arity = ArgumentArity.ZeroOrOne };
     applyDontVerifyResultsOption.SetDefaultValue(false);
 
-    var applyCommand = new Command("apply", "Apply signature to the input file")
+    var applyCommand = new Command("apply", "Apply previously extracted signature to the input file and save the result to the output file. If the input file is already signed, the signature will be replaced with the new one.")
     {
-      applySourceOption, applySignatureOption, applyOutputOption, applyDontVerifyResultsOption
+      applyInputOption, applySignatureOption, applyOutputOption, applyDontVerifyResultsOption
     };
 
-    applyCommand.SetHandler(async (string inputFile, string signature, string output, bool skipVerification) => { await ApplySignature(inputFile, signature, output, skipVerification); }, applySourceOption, applySignatureOption, applyOutputOption, applyDontVerifyResultsOption);
+    applyCommand.SetHandler(async (string inputFile, string signature, string output, bool skipVerification) => { await ApplySignature(inputFile, signature, output, skipVerification); }, applyInputOption, applySignatureOption, applyOutputOption, applyDontVerifyResultsOption);
 
-    var rootCommand = new RootCommand("Utility to extract and apply signature from/to various file formats")
+    var rootCommand = new RootCommand("Utility to extract and apply signature from/to Mach-O, Dmg and PE file formats.")
     {
       extractCommand,
       applyCommand
     };
 
     var builder = new CommandLineBuilder(rootCommand)
+      .UseDefaults()
       .UseExceptionHandler(OnException)
       .Build();
 
@@ -61,6 +62,7 @@ class Program
     {
       SignatureExtractionException => 1,
       SignatureInjectionException => 2,
+      SignatureApplicationException => 3,
       _ => 255
     };
 
