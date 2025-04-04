@@ -5,9 +5,9 @@ namespace JetBrains.FormatRipper.Dmg;
 /// </summary>
 public class DmgSignatureTransferData
 {
-  public long SignatureOffset { get; internal set; }
+  public long SignatureOffset { get; set; }
 
-  public long SignatureLength { get; internal set; }
+  public long SignatureLength { get; set; }
 
-  public byte[] SignatureBlob { get; internal set; } = null!;
+  public byte[] SignatureBlob { get; set; } = null!;
 }

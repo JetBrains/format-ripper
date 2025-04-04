@@ -5,25 +5,25 @@ namespace JetBrains.FormatRipper.MachO;
 /// </summary>
 public class MachOSectionSignatureTransferData
 {
-  public uint NumberOfLoadCommands { get; internal set; }
+  public uint NumberOfLoadCommands { get; set; }
 
-  public uint SizeOfLoadCommands { get; internal set; }
+  public uint SizeOfLoadCommands { get; set; }
 
-  public uint LcCodeSignatureSize { get; internal set; }
+  public uint LcCodeSignatureSize { get; set; }
 
-  public uint LinkEditDataOffset { get; internal set; }
+  public uint LinkEditDataOffset { get; set; }
 
-  public uint LinkEditDataSize { get; internal set; }
+  public uint LinkEditDataSize { get; set; }
 
-  public uint LastLinkeditCommandNumber { get; internal set; }
+  public uint LastLinkeditCommandNumber { get; set; }
 
-  public ulong LastLinkeditVmSize64 { get; internal set; }
+  public ulong LastLinkeditVmSize64 { get; set; }
 
-  public ulong LastLinkeditFileSize64 { get; internal set; }
+  public ulong LastLinkeditFileSize64 { get; set; }
 
-  public uint LastLinkeditVmSize32 { get; internal set; }
+  public uint LastLinkeditVmSize32 { get; set; }
 
-  public uint LastLinkeditFileSize32 { get; internal set; }
+  public uint LastLinkeditFileSize32 { get; set; }
 
-  public byte[] SignatureBlob { get; internal set; } = null!;
+  public byte[] SignatureBlob { get; set; } = null!;
 }

@@ -152,13 +152,13 @@ public class AuthenticodeSignatureVerifier
     bool hasInvalidSignatures = false;
 
     var algorithms = signedDataTokens
-      .Select(t => t.IndirectDataContent.DigestInfo.AlgorithmID);
+      .Select(t => t.IndirectDataContent.DigestInfo.DigestAlgorithm);
 
     IDictionary<AlgorithmIdentifier, byte[]> hashes = HashUtil.ComputeHashes(stream, computeHashInfo, algorithms);
 
     foreach (var spcIndirectDataToken in signedDataTokens)
     {
-      AlgorithmIdentifier algId = spcIndirectDataToken.IndirectDataContent.DigestInfo.AlgorithmID;
+      AlgorithmIdentifier algId = spcIndirectDataToken.IndirectDataContent.DigestInfo.DigestAlgorithm;
 
       var imageHash = hashes[algId];
 

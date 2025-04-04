@@ -8,7 +8,7 @@ public class MachOSignatureTransferData
   /// <summary>
   /// Signatures of sections
   /// </summary>
-  public MachOSectionSignatureTransferData?[] SectionSignatures { get; internal set; }
+  public MachOSectionSignatureTransferData?[] SectionSignatures { get; set; }
 
   public MachOSignatureTransferData(MachOSectionSignatureTransferData?[] sectionSignatures)
   {

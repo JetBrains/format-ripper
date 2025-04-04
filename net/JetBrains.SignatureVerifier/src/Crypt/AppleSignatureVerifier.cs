@@ -85,7 +85,7 @@ public class AppleSignatureVerifier
 
     foreach (var cdHashValue in expectedCdHashValues)
     {
-      AlgorithmIdentifier algId = cdHashValue.AlgorithmID;
+      AlgorithmIdentifier algId = cdHashValue.DigestAlgorithm;
 
       if (hashesToVerify.ContainsKey(algId))
       {

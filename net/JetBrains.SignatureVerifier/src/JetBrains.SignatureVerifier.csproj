@@ -15,12 +15,12 @@
     <PackageTags>jetbrains signature verify netstandard</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <Version>2.3.0</Version>
+    <Version>2.4.0</Version>
     <PackageProjectUrl>https://github.com/JetBrains/format-ripper</PackageProjectUrl>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
-    <PackageReference Include="JetBrains.Annotations" Version="2024.2.0" PrivateAssets="All" />
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.1" />
+    <PackageReference Include="JetBrains.Annotations" Version="2024.3.0" PrivateAssets="All" />
     <ProjectReference Include="..\..\JetBrains.FormatRipper\src\JetBrains.FormatRipper.csproj" />
   </ItemGroup>
   <ItemGroup>

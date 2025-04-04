@@ -188,13 +188,12 @@ namespace JetBrains.SignatureVerifier.Crypt.BC
           }
 
           GeneralName[] names = certID.IssuerSerial.Issuer.GetNames();
-          X509Name principal = PrincipalUtilities.GetIssuerX509Principal(cert);
           bool found = false;
 
           for (int i = 0; i != names.Length; i++)
           {
-            if (names[i].TagNo == 4
-                && X509Name.GetInstance(names[i].Name).Equivalent(principal))
+            if (names[i].TagNo == GeneralName.DirectoryName
+                && X509Name.GetInstance(names[i].Name).Equivalent(cert.CertificateStructure.Issuer))
             {
               found = true;
               break;
