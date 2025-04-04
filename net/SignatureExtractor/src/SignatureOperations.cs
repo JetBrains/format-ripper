@@ -1,3 +1,4 @@
+using System.Text;
 using JetBrains.FormatRipper.Dmg;
 using JetBrains.FormatRipper.FileExplorer;
 using JetBrains.FormatRipper.MachO;
@@ -32,7 +33,7 @@ public static class SignatureOperations
       NullValueHandling = NullValueHandling.Ignore,
     };
 
-    using (StreamWriter writer = new StreamWriter(output, leaveOpen: true))
+    using (StreamWriter writer = new StreamWriter(output, Encoding.UTF8, 1024, true))
     using (JsonTextWriter jsonWriter = new JsonTextWriter(writer))
     {
       JsonSerializer ser = JsonSerializer.Create(settings);
@@ -80,7 +81,7 @@ public static class SignatureOperations
       throw new SignatureApplicationException("Output file must be seekable if results verification is enabled");
 
     SignatureContainer? signatureContainer = null;
-    using (StreamReader reader = new StreamReader(signatureFile, leaveOpen: true))
+    using (StreamReader reader = new StreamReader(signatureFile))
     using (JsonTextReader jsonReader = new JsonTextReader(reader))
     {
       JsonSerializer ser = new JsonSerializer();
