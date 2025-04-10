@@ -19,7 +19,7 @@ public class PeSignatureInjector
   /// <exception cref="ArgumentException">Thrown if output stream is not writeable</exception>
   /// <exception cref="FormatException">Thrown if input file has invalid format</exception>
   /// <exception cref="SignatureInjectionException">Thrown on signature transfer error. This usually happens when trying to transfer signatures between incompatible files.</exception>
-  public static unsafe void InjectSignature(Stream sourceStream, Stream outputStream, PeSignatureTransferData signatureTransferData)
+  public static unsafe void InjectSignature(Stream sourceStream, Stream outputStream, IPeSignatureTransferData signatureTransferData)
   {
     if (!outputStream.CanWrite) throw new ArgumentException("Provided stream is not writeable");
 

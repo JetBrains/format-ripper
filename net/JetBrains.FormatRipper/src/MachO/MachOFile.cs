@@ -22,7 +22,7 @@ namespace JetBrains.FormatRipper.MachO
       public readonly ComputeHashInfo? ComputeHashInfo;
       public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
       public readonly IEnumerable<CDHash> CDHashes;
-      public readonly MachOSectionSignatureTransferData? SignatureTransferData;
+      public readonly IMachOSectionSignatureTransferData? SignatureTransferData;
       public readonly byte[]? Entitlements;
       public readonly byte[]? EntitlementsDer;
 
@@ -38,7 +38,7 @@ namespace JetBrains.FormatRipper.MachO
         ComputeHashInfo? computeHashInfo,
         IEnumerable<HashVerificationUnit> hashVerificationUnits,
         IEnumerable<CDHash> cdHashes,
-        MachOSectionSignatureTransferData? signatureTransferData,
+        IMachOSectionSignatureTransferData? signatureTransferData,
         byte[]? entitlements,
         byte[]? entitlementsDer)
       {
@@ -61,7 +61,7 @@ namespace JetBrains.FormatRipper.MachO
 
     public readonly bool? IsFatLittleEndian;
     public readonly Section[] Sections;
-    public readonly MachOSignatureTransferData? Signature;
+    public readonly IMachOSignatureTransferData? Signature;
 
     [Flags]
     public enum Mode : uint
@@ -82,10 +82,17 @@ namespace JetBrains.FormatRipper.MachO
     {
       IsFatLittleEndian = isFatLittleEndian;
       Sections = sections;
-      Signature = new MachOSignatureTransferData(new MachOSectionSignatureTransferData[sections.Length]);
 
+      var signatureTransferData = new MachOSignatureTransferData(new IMachOSectionSignatureTransferData[sections.Length]);
+
+      bool hasSignature = false;
       for (int i = 0; i < sections.Length; i++)
-        Signature.SectionSignatures[i] = sections[i].SignatureTransferData;
+      {
+        hasSignature |= sections[i].HasSignature;
+        signatureTransferData.SectionSignatures[i] = sections[i].SignatureTransferData;
+      }
+
+      Signature = hasSignature ? signatureTransferData : null;
     }
 
     public static unsafe bool Is(Stream stream)

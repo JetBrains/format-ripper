@@ -17,7 +17,7 @@ namespace JetBrains.FormatRipper.Pe
     public readonly ComputeHashInfo? ComputeHashInfo;
     public readonly bool HasMetadata;
     public readonly StreamRange SecurityDataDirectoryRange;
-    public readonly PeSignatureTransferData? SignatureTransferData;
+    public readonly IPeSignatureTransferData? SignatureTransferData;
 
     private PeFile(
       IMAGE_FILE_MACHINE machine,
@@ -29,7 +29,7 @@ namespace JetBrains.FormatRipper.Pe
       bool hasMetadata,
       StreamRange securityDataDirectoryRange,
       ComputeHashInfo? computeHashInfo,
-      PeSignatureTransferData? signatureTransferData)
+      IPeSignatureTransferData? signatureTransferData)
     {
       Machine = machine;
       Characteristics = characteristics;
@@ -90,7 +90,7 @@ namespace JetBrains.FormatRipper.Pe
       IMAGE_FILE_HEADER ifh;
       StreamUtil.ReadBytes(stream, (byte*)&ifh, sizeof(IMAGE_FILE_HEADER));
 
-      PeSignatureTransferData? peSignatureTransferData = null;
+      IPeSignatureTransferData? peSignatureTransferData = null;
       ushort iohMagic;
       StreamUtil.ReadBytes(stream, (byte*)&iohMagic, sizeof(ushort));
 

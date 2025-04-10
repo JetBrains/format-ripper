@@ -14,7 +14,7 @@ namespace JetBrains.FormatRipper.Dmg
     public readonly SignatureData SignatureData;
     public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
     public readonly IEnumerable<CDHash> CDHashes;
-    public readonly DmgSignatureTransferData? SignatureTransferData;
+    public readonly IDmgSignatureTransferData? SignatureTransferData;
 
     [Flags]
     public enum Mode : uint
@@ -27,7 +27,7 @@ namespace JetBrains.FormatRipper.Dmg
       SignatureData signatureData,
       IEnumerable<HashVerificationUnit> hashVerificationUnits,
       IEnumerable<CDHash> cdHashes,
-      DmgSignatureTransferData? signatureTransferData)
+      IDmgSignatureTransferData? signatureTransferData)
     {
       HasSignature = hasSignature;
       SignatureData = signatureData;
@@ -88,7 +88,7 @@ namespace JetBrains.FormatRipper.Dmg
       var hasSignature = signatureLength != 0;
       byte[]? codeDirectoryBlob = null;
       byte[]? cmsSignatureBlob = null;
-      DmgSignatureTransferData? signatureTransferData = null;
+      IDmgSignatureTransferData? signatureTransferData = null;
       List<HashVerificationUnit> hashVerificationUnits = new List<HashVerificationUnit>();
       List<CDHash> cdHashes = new List<CDHash>();
 

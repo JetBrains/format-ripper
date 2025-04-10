@@ -1,29 +1,54 @@
 namespace JetBrains.FormatRipper.MachO;
 
 /// <summary>
-/// Class that stores sufficient information to transfer the signature from one MachO section to another
+/// Interface that has sufficient information to transfer the signature from one MachO section to another
 /// </summary>
-public class MachOSectionSignatureTransferData
+public interface IMachOSectionSignatureTransferData
 {
-  public uint NumberOfLoadCommands { get; internal set; }
+  uint NumberOfLoadCommands { get; }
 
-  public uint SizeOfLoadCommands { get; internal set; }
+  uint SizeOfLoadCommands { get; }
 
-  public uint LcCodeSignatureSize { get; internal set; }
+  uint LcCodeSignatureSize { get; }
 
-  public uint LinkEditDataOffset { get; internal set; }
+  uint LinkEditDataOffset { get; }
 
-  public uint LinkEditDataSize { get; internal set; }
+  uint LinkEditDataSize { get; }
 
-  public uint LastLinkeditCommandNumber { get; internal set; }
+  uint LastLinkeditCommandNumber { get; }
 
-  public ulong LastLinkeditVmSize64 { get; internal set; }
+  ulong LastLinkeditVmSize64 { get; }
 
-  public ulong LastLinkeditFileSize64 { get; internal set; }
+  ulong LastLinkeditFileSize64 { get; }
 
-  public uint LastLinkeditVmSize32 { get; internal set; }
+  uint LastLinkeditVmSize32 { get; }
 
-  public uint LastLinkeditFileSize32 { get; internal set; }
+  uint LastLinkeditFileSize32 { get; }
 
-  public byte[] SignatureBlob { get; internal set; } = null!;
+  byte[] SignatureBlob { get; }
+}
+
+internal class MachOSectionSignatureTransferData: IMachOSectionSignatureTransferData
+{
+  public uint NumberOfLoadCommands { get; set; }
+
+  public uint SizeOfLoadCommands { get; set; }
+
+  public uint LcCodeSignatureSize { get; set; }
+
+  public uint LinkEditDataOffset { get; set; }
+
+  public uint LinkEditDataSize { get; set; }
+
+  public uint LastLinkeditCommandNumber { get; set; }
+
+  public ulong LastLinkeditVmSize64 { get; set; }
+
+  public ulong LastLinkeditFileSize64 { get; set; }
+
+  public uint LastLinkeditVmSize32 { get; set; }
+
+  public uint LastLinkeditFileSize32 { get; set; }
+
+  public byte[] SignatureBlob { get; set; } = null!;
 }
