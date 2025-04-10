@@ -1,9 +1,18 @@
 namespace JetBrains.FormatRipper.Dmg;
 
 /// <summary>
-/// Class that stores sufficient information to transfer the signature from one DMG file to another
+/// Interface that has sufficient information to transfer the signature from one DMG file to another
 /// </summary>
-public class DmgSignatureTransferData
+public interface IDmgSignatureTransferData
+{
+  long SignatureOffset { get; }
+
+  long SignatureLength { get; }
+
+  byte[] SignatureBlob { get; }
+}
+
+internal class DmgSignatureTransferData: IDmgSignatureTransferData
 {
   public long SignatureOffset { get; set; }
 

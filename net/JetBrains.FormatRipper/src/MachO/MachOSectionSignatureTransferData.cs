@@ -1,9 +1,34 @@
 namespace JetBrains.FormatRipper.MachO;
 
 /// <summary>
-/// Class that stores sufficient information to transfer the signature from one MachO section to another
+/// Interface that has sufficient information to transfer the signature from one MachO section to another
 /// </summary>
-public class MachOSectionSignatureTransferData
+public interface IMachOSectionSignatureTransferData
+{
+  uint NumberOfLoadCommands { get; }
+
+  uint SizeOfLoadCommands { get; }
+
+  uint LcCodeSignatureSize { get; }
+
+  uint LinkEditDataOffset { get; }
+
+  uint LinkEditDataSize { get; }
+
+  uint LastLinkeditCommandNumber { get; }
+
+  ulong LastLinkeditVmSize64 { get; }
+
+  ulong LastLinkeditFileSize64 { get; }
+
+  uint LastLinkeditVmSize32 { get; }
+
+  uint LastLinkeditFileSize32 { get; }
+
+  byte[] SignatureBlob { get; }
+}
+
+internal class MachOSectionSignatureTransferData: IMachOSectionSignatureTransferData
 {
   public uint NumberOfLoadCommands { get; set; }
 

@@ -3,14 +3,8 @@ using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using JetBrains.FormatRipper;
-using JetBrains.FormatRipper.Dmg;
-using JetBrains.FormatRipper.FileExplorer;
-using JetBrains.FormatRipper.MachO;
-using JetBrains.FormatRipper.Pe;
 
 namespace SignatureExtractor;
-
-record SignatureContainer(FileType FileType, MachOSignatureTransferData? MachOSignatureTransferData, PeSignatureTransferData? PeSignatureTransferData, DmgSignatureTransferData? DmgSignatureTransferData);
 
 class Program
 {

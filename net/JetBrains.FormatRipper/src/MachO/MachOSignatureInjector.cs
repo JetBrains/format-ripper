@@ -26,7 +26,7 @@ public class MachOSignatureInjector
   /// <exception cref="ArgumentException">Thrown if output stream is not writeable</exception>
   /// <exception cref="FormatException">Thrown if input file has invalid format</exception>
   /// <exception cref="SignatureInjectionException">Thrown on signature transfer error. This usually happens when trying to transfer signatures between incompatible files.</exception>
-  public static unsafe void InjectSignature(Stream sourceStream, Stream outputStream, MachOSignatureTransferData signatureTransferData)
+  public static unsafe void InjectSignature(Stream sourceStream, Stream outputStream, IMachOSignatureTransferData signatureTransferData)
   {
     if (!outputStream.CanWrite) throw new ArgumentException("Provided stream is not writeable");
 
@@ -55,7 +55,7 @@ public class MachOSignatureInjector
     }
   }
 
-  private static unsafe void ProcessFatMachO(Stream sourceStream, Stream outputStream, MH fatMagic, MachOSignatureTransferData signatureTransferData)
+  private static unsafe void ProcessFatMachO(Stream sourceStream, Stream outputStream, MH fatMagic, IMachOSignatureTransferData signatureTransferData)
   {
     var isFatLittleEndian = fatMagic is MH.FAT_MAGIC or MH.FAT_MAGIC_64;
     var needSwap = BitConverter.IsLittleEndian != isFatLittleEndian;
@@ -139,7 +139,7 @@ public class MachOSignatureInjector
     }
   }
 
-  private static unsafe MachOSectionInfo ProcessSection(Stream sourceStream, Stream outputStream, MachOSectionInfo sectionInfo, MachOSectionSignatureTransferData? sectionSignature)
+  private static unsafe MachOSectionInfo ProcessSection(Stream sourceStream, Stream outputStream, MachOSectionInfo sectionInfo, IMachOSectionSignatureTransferData? sectionSignature)
   {
     sourceStream.Position = sectionInfo.SectionOffset;
     uint rawSubMagic;
@@ -176,7 +176,7 @@ public class MachOSignatureInjector
     outputStream.Write(buffer, 0, buffer.Length);
   }
 
-  private static unsafe long TransferSectionSignature(Stream sourceStream, StreamRange sourceStreamRange, Stream outputStream, MH magic, MachOSectionSignatureTransferData? sectionSignature)
+  private static unsafe long TransferSectionSignature(Stream sourceStream, StreamRange sourceStreamRange, Stream outputStream, MH magic, IMachOSectionSignatureTransferData? sectionSignature)
   {
     if (sectionSignature == null)
       throw new SignatureInjectionException($"Cannot transfer the signature for section: it is not signed in the original file");

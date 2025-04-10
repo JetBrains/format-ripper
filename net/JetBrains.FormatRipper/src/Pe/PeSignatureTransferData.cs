@@ -1,9 +1,26 @@
 namespace JetBrains.FormatRipper.Pe;
 
 /// <summary>
-/// Class that stores sufficient information to transfer the signature from one PE file to another
+/// Interface that has sufficient information to transfer the signature from one PE file to another
 /// </summary>
-public class PeSignatureTransferData
+public interface IPeSignatureTransferData
+{
+  uint CheckSum { get; }
+
+  uint TimeDateStamp { get; }
+
+  uint SignatureBlobOffset { get; }
+
+  uint SignatureBlobSize { get; }
+
+  ushort CertificateRevision { get; }
+
+  ushort CertificateType { get; }
+
+  byte[] SignatureBlob { get; }
+}
+
+internal class PeSignatureTransferData: IPeSignatureTransferData
 {
   public uint CheckSum { get; set; }
 

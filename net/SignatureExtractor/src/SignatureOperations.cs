@@ -80,11 +80,16 @@ public static class SignatureOperations
     if (verifyResults && !outputStream.CanSeek)
       throw new SignatureApplicationException("Output file must be seekable if results verification is enabled");
 
+    var settings = new JsonSerializerSettings
+    {
+      ContractResolver = new SignatureContainerContractResolver()
+    };
+
     SignatureContainer? signatureContainer = null;
     using (StreamReader reader = new StreamReader(signatureFile))
     using (JsonTextReader jsonReader = new JsonTextReader(reader))
     {
-      JsonSerializer ser = new JsonSerializer();
+      JsonSerializer ser = JsonSerializer.Create(settings);
       signatureContainer = ser.Deserialize<SignatureContainer>(jsonReader);
     }
 
@@ -109,7 +114,7 @@ public static class SignatureOperations
       throw new SignatureApplicationException(verifyResult.Message);
   }
 
-  static async Task<VerifySignatureResult?> ApplyMachOSignature(Stream inputStream, MachOSignatureTransferData? signature, Stream outputStream, bool verifyResults)
+  static async Task<VerifySignatureResult?> ApplyMachOSignature(Stream inputStream, IMachOSignatureTransferData? signature, Stream outputStream, bool verifyResults)
   {
     if (signature == null) throw new Exception("No signature found");
     MachOSignatureInjector.InjectSignature(inputStream, outputStream, signature);
@@ -129,7 +134,7 @@ public static class SignatureOperations
     return result;
   }
 
-  static async Task<VerifySignatureResult?> ApplyPeSignature(Stream inputStream, PeSignatureTransferData? signature, Stream outputStream, bool verifyResults)
+  static async Task<VerifySignatureResult?> ApplyPeSignature(Stream inputStream, IPeSignatureTransferData? signature, Stream outputStream, bool verifyResults)
   {
     if (signature == null) throw new Exception("No signature found");
     PeSignatureInjector.InjectSignature(inputStream, outputStream, signature);
@@ -148,7 +153,7 @@ public static class SignatureOperations
     return result;
   }
 
-  static async Task<VerifySignatureResult?> ApplyDmgSignature(Stream inputStream, DmgSignatureTransferData? signature, Stream outputStream, bool verifyResults)
+  static async Task<VerifySignatureResult?> ApplyDmgSignature(Stream inputStream, IDmgSignatureTransferData? signature, Stream outputStream, bool verifyResults)
   {
     if (signature == null) throw new Exception("No signature found");
     DmgSignatureInjector.InjectSignature(inputStream, outputStream, signature);

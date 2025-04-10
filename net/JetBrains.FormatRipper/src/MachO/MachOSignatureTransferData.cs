@@ -1,16 +1,21 @@
 namespace JetBrains.FormatRipper.MachO;
 
 /// <summary>
-/// Class that stores sufficient information to transfer the signature from one MachO file to another
+/// Interface that has sufficient information to transfer the signature from one MachO file to another
 /// </summary>
-public class MachOSignatureTransferData
+public interface IMachOSignatureTransferData
 {
   /// <summary>
   /// Signatures of sections
   /// </summary>
-  public MachOSectionSignatureTransferData?[] SectionSignatures { get; set; }
+  public IMachOSectionSignatureTransferData?[] SectionSignatures { get; }
+}
 
-  public MachOSignatureTransferData(MachOSectionSignatureTransferData?[] sectionSignatures)
+internal class MachOSignatureTransferData: IMachOSignatureTransferData
+{
+  public IMachOSectionSignatureTransferData?[] SectionSignatures { get; set; }
+
+  public MachOSignatureTransferData(IMachOSectionSignatureTransferData?[] sectionSignatures)
   {
     SectionSignatures = sectionSignatures;
   }
