@@ -3,6 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFrameworks>net8.0;netcoreapp3.1</TargetFrameworks>
+        <TargetFrameworks Condition="'$(JB_TargetFramework)'!=''">$(JB_TargetFramework)</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>12</LangVersion>
