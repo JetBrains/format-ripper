@@ -1,4 +1,4 @@
-namespace SignatureExtractor;
+namespace JetBrains.SignatureExtractor;
 
 public class SignatureApplicationException: Exception
 {

@@ -35,6 +35,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\src\SignatureExtractor.csproj" />
+      <ProjectReference Include="..\src\JetBrains.SignatureExtractor.csproj" />
     </ItemGroup>
 </Project>

@@ -4,7 +4,7 @@ using JetBrains.FormatRipper.MachO;
 using JetBrains.FormatRipper.Pe;
 using Newtonsoft.Json.Serialization;
 
-namespace SignatureExtractor;
+namespace JetBrains.SignatureExtractor;
 
 record SignatureContainer(FileType FileType, IMachOSignatureTransferData? MachOSignatureTransferData, IPeSignatureTransferData? PeSignatureTransferData, IDmgSignatureTransferData? DmgSignatureTransferData);
 

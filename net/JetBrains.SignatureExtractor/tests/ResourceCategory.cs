@@ -1,4 +1,4 @@
-namespace SignatureExtractor.Tests
+namespace JetBrains.SignatureExtractor.Tests
 {
   public enum ResourceCategory
   {

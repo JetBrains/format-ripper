@@ -1,4 +1,6 @@
-namespace SignatureExtractor.Tests;
+using JetBrains.SignatureExtractor;
+
+namespace JetBrains.SignatureExtractor.Tests;
 
 public class SignatureTransferTests
 {
