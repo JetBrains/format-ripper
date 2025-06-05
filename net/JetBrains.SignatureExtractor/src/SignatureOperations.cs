@@ -6,7 +6,7 @@ using JetBrains.FormatRipper.Pe;
 using JetBrains.SignatureVerifier.Crypt;
 using Newtonsoft.Json;
 
-namespace SignatureExtractor;
+namespace JetBrains.SignatureExtractor;
 
 public static class SignatureOperations
 {

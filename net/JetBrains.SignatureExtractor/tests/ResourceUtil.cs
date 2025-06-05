@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace SignatureExtractor.Tests;
+namespace JetBrains.SignatureExtractor.Tests;
 
 internal static class ResourceUtil
 {

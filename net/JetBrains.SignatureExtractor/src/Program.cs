@@ -4,7 +4,7 @@ using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using JetBrains.FormatRipper;
 
-namespace SignatureExtractor;
+namespace JetBrains.SignatureExtractor;
 
 class Program
 {

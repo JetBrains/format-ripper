@@ -29,7 +29,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
-            3.1.x
+            3.1.426
             8.0.x
       - name: Restore
         working-directory: ${{ github.workspace }}/net
@@ -145,7 +145,7 @@ jobs:
 
     env:
       MSBUILDTERMINALLOGGER: off
-      tfm: ${{ (contains(matrix.os-labels, 'riscv64') || contains(matrix.os-labels, 'ppc64le')) && 'net9.0' || 'net8.0' }}
+      tfm: ${{ (contains(matrix.os-labels, 's390x') || contains(matrix.os-labels, 'ppc64le') || contains(matrix.os-labels, 'riscv64')) && 'net9.0' || 'net8.0' }}
 
     steps:
       - name: Checkout

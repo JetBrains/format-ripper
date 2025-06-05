@@ -11,9 +11,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.FormatRipper", "J
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.FormatRipper.Tests", "JetBrains.FormatRipper\tests\JetBrains.FormatRipper.Tests.csproj", "{59C57C60-2CF9-4B5E-B291-12D76E093657}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignatureExtractor", "SignatureExtractor\src\SignatureExtractor.csproj", "{DFFCEEEE-DCA8-4DBC-9FA9-298EDFE42611}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.SignatureExtractor", "JetBrains.SignatureExtractor\src\JetBrains.SignatureExtractor.csproj", "{DFFCEEEE-DCA8-4DBC-9FA9-298EDFE42611}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignatureExtractor.Tests", "SignatureExtractor\tests\SignatureExtractor.Tests.csproj", "{F4BFA191-818E-427A-83A2-E95DF2F58BF3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetBrains.SignatureExtractor.Tests", "JetBrains.SignatureExtractor\tests\JetBrains.SignatureExtractor.Tests.csproj", "{F4BFA191-818E-427A-83A2-E95DF2F58BF3}"
 EndProject
 	ProjectSection(SolutionItems) = preProject
 		doc\FAQ.md = doc\FAQ.md
