@@ -1,0 +1,78 @@
+[
+  {
+    "testType": "validDmg",
+    "resourceName": "test.dmg",
+    "resourceCategory": "Dmg",
+    "hasSignature": false,
+    "description": "Test unsigned DMG file"
+  },
+  {
+    "testType": "validDmg",
+    "resourceName": "test-signed.dmg",
+    "resourceCategory": "Dmg",
+    "hasSignature": true,
+    "description": "Test signed DMG file"
+  },
+  {
+    "testType": "validDmg",
+    "resourceName": "license.dmg",
+    "resourceCategory": "Dmg",
+    "hasSignature": false,
+    "description": "Test license DMG file"
+  },
+  {
+    "testType": "validDmg",
+    "resourceName": "license-signed.dmg",
+    "resourceCategory": "Dmg",
+    "hasSignature": true,
+    "description": "Test signed license DMG file"
+  },
+  {
+    "testType": "nonDmg",
+    "resourceName": "addhoc",
+    "resourceCategory": "MachO",
+    "description": "Test MachO file (should not be recognized as DMG)"
+  },
+  {
+    "testType": "nonDmg",
+    "resourceName": "libhostfxr.dylib",
+    "resourceCategory": "MachO",
+    "description": "Test MachO dylib file (should not be recognized as DMG)"
+  },
+  {
+    "testType": "nonDmg",
+    "resourceName": "System.Security.Principal.Windows.dll",
+    "resourceCategory": "Pe",
+    "description": "Test PE DLL file (should not be recognized as DMG)"
+  },
+  {
+    "testType": "nonDmg",
+    "resourceName": "busybox.alpine-s390x",
+    "resourceCategory": "Elf",
+    "description": "Test ELF file (should not be recognized as DMG)"
+  },
+  {
+    "testType": "nonDmg",
+    "resourceName": "test-encrypted-aes128.dmg",
+    "resourceCategory": "Dmg",
+    "description": "Test encrypted AES128 DMG file (not yet supported)"
+  },
+  {
+    "testType": "nonDmg",
+    "resourceName": "test-encrypted-aes256.dmg",
+    "resourceCategory": "Dmg",
+    "description": "Test encrypted AES256 DMG file (not yet supported)"
+  },
+  {
+    "testType": "nonDmg",
+    "resourceName": "test-encrypted-aes128-signed.dmg",
+    "resourceCategory": "Dmg",
+    "description": "Test signed encrypted AES128 DMG file (not yet supported)"
+  },
+  {
+    "testType": "nonDmg",
+    "resourceName": "test-encrypted-aes256-signed.dmg",
+    "resourceCategory": "Dmg",
+    "description": "Test signed encrypted AES256 DMG file (not yet supported)"
+  }
+] 
