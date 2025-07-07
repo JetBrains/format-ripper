@@ -24,5 +24,7 @@
     <EmbeddedResource Include="..\..\..\data\pe\*" LinkBase="Resources\Pe" />
     <EmbeddedResource Include="..\..\..\data\sh\*" LinkBase="Resources\Sh" />
     <EmbeddedResource Include="..\..\..\data\dmg\*" LinkBase="Resources\Dmg" />
+    <EmbeddedResource Include="CompoundFileTestCases.json" LinkBase="Resources\Msi" />
+    <EmbeddedResource Include="DmgFileTestCases.json" />
   </ItemGroup>
 </Project>
