@@ -1,65 +1,94 @@
-﻿using JetBrains.FormatRipper.FileExplorer;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using JetBrains.FormatRipper.FileExplorer;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace JetBrains.FormatRipper.Tests
 {
+  // Logger interface for test output
+  public interface ILogger
+  {
+    void Info(string str);
+    void Warning(string str);
+    void Error(string str);
+    void Trace(string str);
+  }
+  [TestFixture]
   public class FileTypeExplorerTest
   {
-    // @formatter:off
-    [TestCase("error0"                               , ResourceCategory.Misc   , FileType.Unknown, FileProperties.UnknownType)]
-    [TestCase("error4"                               , ResourceCategory.Misc   , FileType.Unknown, FileProperties.UnknownType)]
-    [TestCase("error_mach-o"                         , ResourceCategory.Misc   , FileType.Unknown, FileProperties.UnknownType)]
-    [TestCase("error_msi"                            , ResourceCategory.Misc   , FileType.Unknown, FileProperties.UnknownType)]
-    [TestCase("error_pe"                             , ResourceCategory.Misc   , FileType.Unknown, FileProperties.UnknownType)]
-    [TestCase("error_pe"                             , ResourceCategory.Misc   , FileType.Unknown, FileProperties.UnknownType)]
-    [TestCase("catsay.ppc64"                         , ResourceCategory.Elf    , FileType.Elf    , FileProperties.ExecutableType)]
-    [TestCase("catsay.x86"                           , ResourceCategory.Elf    , FileType.Elf    , FileProperties.ExecutableType)]
-    [TestCase("libpcprofile.so"                      , ResourceCategory.Elf    , FileType.Elf    , FileProperties.SharedLibraryType)]
-    [TestCase("libulockmgr.so.1.0.1.x64"             , ResourceCategory.Elf    , FileType.Elf    , FileProperties.SharedLibraryType)]
-    [TestCase("tempfile.x64"                         , ResourceCategory.Elf    , FileType.Elf    , FileProperties.ExecutableType)]
-    [TestCase("vl805"                                , ResourceCategory.Elf    , FileType.Elf    , FileProperties.ExecutableType)]
-    [TestCase("64bit.o"                              , ResourceCategory.Elf    , FileType.Elf    , FileProperties.RelocatableType)]
-    [TestCase("32bit.o"                              , ResourceCategory.Elf    , FileType.Elf    , FileProperties.RelocatableType)]
-    [TestCase("core.2042"                            , ResourceCategory.Elf    , FileType.Elf    , FileProperties.CoreDumpType)]
-    [TestCase("cat"                                  , ResourceCategory.MachO  , FileType.MachO  , FileProperties.ExecutableType | FileProperties.MultiArch | FileProperties.Signed)]
-    [TestCase("env-wrapper.x64"                      , ResourceCategory.MachO  , FileType.MachO  , FileProperties.ExecutableType | FileProperties.Signed)]
-    [TestCase("fat.bundle"                           , ResourceCategory.MachO  , FileType.MachO  , FileProperties.BundleType | FileProperties.MultiArch)]
-    [TestCase("fat.dylib"                            , ResourceCategory.MachO  , FileType.MachO  , FileProperties.SharedLibraryType | FileProperties.MultiArch)]
-    [TestCase("fsnotifier"                           , ResourceCategory.MachO  , FileType.MachO  , FileProperties.ExecutableType | FileProperties.MultiArch)]
-    [TestCase("libMonoSupportW.x64.dylib"            , ResourceCategory.MachO  , FileType.MachO  , FileProperties.SharedLibraryType | FileProperties.Signed)]
-    [TestCase("libclang_rt.asan_iossim_dynamic.dylib", ResourceCategory.MachO  , FileType.MachO  , FileProperties.SharedLibraryType| FileProperties.MultiArch | FileProperties.Signed)]
-    [TestCase("libclang_rt.cc_kext.a"                , ResourceCategory.MachO  , FileType.Unknown, FileProperties.UnknownType)]
-    [TestCase("libclang_rt.soft_static.a"            , ResourceCategory.MachO  , FileType.Unknown, FileProperties.UnknownType)]
-    [TestCase("x64.bundle"                           , ResourceCategory.MachO  , FileType.MachO  , FileProperties.BundleType)]
-    [TestCase("x64.dylib"                            , ResourceCategory.MachO  , FileType.MachO  , FileProperties.SharedLibraryType)]
-    [TestCase("x86.bundle"                           , ResourceCategory.MachO  , FileType.MachO  , FileProperties.BundleType)]
-    [TestCase("x86.dylib"                            , ResourceCategory.MachO  , FileType.MachO  , FileProperties.SharedLibraryType)]
-    [TestCase("2dac4b.msi"                           , ResourceCategory.Msi    , FileType.Msi    , FileProperties.Signed)]
-    [TestCase("dbg_amd64_6.11.1.404.msi"             , ResourceCategory.Msi    , FileType.Msi    , FileProperties.Signed)]
-    [TestCase("Armature.Interface.dll"               , ResourceCategory.Pe     , FileType.Pe     , FileProperties.SharedLibraryType | FileProperties.Managed)]
-    [TestCase("System.Security.Principal.Windows.dll", ResourceCategory.Pe     , FileType.Pe     , FileProperties.SharedLibraryType | FileProperties.Managed | FileProperties.Signed)]
-    [TestCase("api-ms-win-core-rtlsupport-l1-1-0.dll", ResourceCategory.Pe     , FileType.Pe     , FileProperties.SharedLibraryType | FileProperties.Signed)]
-    [TestCase("winrsmgr.arm.dll"                     , ResourceCategory.Pe     , FileType.Pe     , FileProperties.SharedLibraryType)]
-    [TestCase("winrsmgr.arm64.dll"                   , ResourceCategory.Pe     , FileType.Pe     , FileProperties.SharedLibraryType)]
-    [TestCase("winrsmgr.x64.dll"                     , ResourceCategory.Pe     , FileType.Pe     , FileProperties.SharedLibraryType)]
-    [TestCase("winrsmgr.x86.dll"                     , ResourceCategory.Pe     , FileType.Pe     , FileProperties.SharedLibraryType)]
-    [TestCase("wscadminui.arm.exe"                   , ResourceCategory.Pe     , FileType.Pe     , FileProperties.ExecutableType)]
-    [TestCase("wscadminui.arm64.exe"                 , ResourceCategory.Pe     , FileType.Pe     , FileProperties.ExecutableType)]
-    [TestCase("wscadminui.x64.exe"                   , ResourceCategory.Pe     , FileType.Pe     , FileProperties.ExecutableType)]
-    [TestCase("wscadminui.x86.exe"                   , ResourceCategory.Pe     , FileType.Pe     , FileProperties.ExecutableType)]
-    [TestCase("1.sh"                                 , ResourceCategory.Sh     , FileType.Sh     , FileProperties.ExecutableType)]
-    [TestCase("2.sh"                                 , ResourceCategory.Sh     , FileType.Sh     , FileProperties.ExecutableType)]
-    // @formatter:on
-    [Test]
-    public void Test(
-      string resourceName,
-      ResourceCategory category,
-      FileType expectedFileType,
-      FileProperties expectedFileProperties)
+    // Local logger implementation for test output
+    private sealed class ConsoleLogger : ILogger
     {
-      var (fileType, fileProperties) = ResourceUtil.OpenRead(category, resourceName, FileTypeExplorer.Detect);
-      Assert.AreEqual(expectedFileType, fileType);
-      Assert.AreEqual(expectedFileProperties, fileProperties);
+      public static readonly ILogger Instance = new ConsoleLogger();
+      private ConsoleLogger() { }
+      public void Info(string str) => Console.WriteLine($"INFO: {str}");
+      public void Warning(string str) => Console.Error.WriteLine($"WARNING: {str}");
+      public void Error(string str) => Console.Error.WriteLine($"ERROR: {str}");
+      public void Trace(string str) => Console.Error.WriteLine($"TRACE: {str}");
+    }
+
+    public class TestCase
+    {
+      public string resourceName { get; set; }
+      public string resourceCategory { get; set; }
+      public string expectedFileType { get; set; }
+      public string[] expectedFileProperties { get; set; }
+      public string description { get; set; }
+    }
+
+    private static readonly ILogger Logger = ConsoleLogger.Instance;
+
+    private static IEnumerable<TestCaseData> LoadFileTypeExplorerTestCases()
+    {
+      var testCases = LoadTestCases();
+
+      return testCases.Select(testCase =>
+        new TestCaseData(testCase)
+          .SetName($"FileType_{testCase.resourceName.Replace(".", "_").Replace("-", "_")}")
+          .SetDescription($"Test file type detection for {testCase.resourceName} - {testCase.description}")
+      );
+    }
+
+    private static List<TestCase> LoadTestCases()
+    {
+      var type = typeof(ResourceUtil);
+      var resourceName = $"{type.Namespace}.FileTypeExplorerTestCases.json";
+
+      using var stream = type.Assembly.GetManifestResourceStream(resourceName);
+      if (stream == null)
+        throw new InvalidOperationException($"Failed to open resource stream for {resourceName}");
+
+      using var reader = new StreamReader(stream);
+      var json = reader.ReadToEnd();
+      return JsonConvert.DeserializeObject<List<TestCase>>(json);
+    }
+
+    [TestCaseSource(nameof(LoadFileTypeExplorerTestCases))]
+    [Test]
+    public void TestFileTypeDetection(TestCase testCase)
+    {
+      Logger.Info($"Testing file type detection for: {testCase.resourceName}");
+
+      var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
+      var expectedFileType = Enum.Parse<FileType>(testCase.expectedFileType);
+
+      // Parse file properties from the array
+      FileProperties expectedFileProperties = 0;
+      foreach (var propName in testCase.expectedFileProperties)
+      {
+        var prop = Enum.Parse<FileProperties>(propName.Trim());
+        expectedFileProperties |= prop;
+      }
+
+      var (fileType, fileProperties) = ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, FileTypeExplorer.Detect);
+
+      Assert.AreEqual(expectedFileType, fileType, $"File type mismatch for {testCase.resourceName}");
+      Assert.AreEqual(expectedFileProperties, fileProperties, $"File properties mismatch for {testCase.resourceName}");
+
+      Logger.Info($"Successfully tested {testCase.resourceName}: {fileType}, {fileProperties}");
     }
   }
 }
