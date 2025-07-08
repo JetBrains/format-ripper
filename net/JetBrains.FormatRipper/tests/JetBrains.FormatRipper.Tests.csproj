@@ -28,5 +28,6 @@
     <EmbeddedResource Include="DmgFileTestCases.json" />
     <EmbeddedResource Include="ElfFileTestCases.json" />
     <EmbeddedResource Include="FileTypeExplorerTestCases.json" />
+    <EmbeddedResource Include="MachOFileTestCases.json" />
   </ItemGroup>
 </Project>
