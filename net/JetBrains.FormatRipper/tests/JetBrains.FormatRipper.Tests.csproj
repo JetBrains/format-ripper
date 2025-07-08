@@ -27,5 +27,6 @@
     <EmbeddedResource Include="CompoundFileTestCases.json" LinkBase="Resources\Msi" />
     <EmbeddedResource Include="DmgFileTestCases.json" />
     <EmbeddedResource Include="ElfFileTestCases.json" />
+    <EmbeddedResource Include="FileTypeExplorerTestCases.json" />
   </ItemGroup>
 </Project>

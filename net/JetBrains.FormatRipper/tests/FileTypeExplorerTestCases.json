@@ -1,0 +1,296 @@
+[
+  {
+    "resourceName": "error0",
+    "resourceCategory": "Misc",
+    "expectedFileType": "Unknown",
+    "expectedFileProperties": ["UnknownType"],
+    "description": "Error file 0"
+  },
+  {
+    "resourceName": "error4",
+    "resourceCategory": "Misc",
+    "expectedFileType": "Unknown",
+    "expectedFileProperties": ["UnknownType"],
+    "description": "Error file 4"
+  },
+  {
+    "resourceName": "error_mach-o",
+    "resourceCategory": "Misc",
+    "expectedFileType": "Unknown",
+    "expectedFileProperties": ["UnknownType"],
+    "description": "Error MachO file"
+  },
+  {
+    "resourceName": "error_msi",
+    "resourceCategory": "Misc",
+    "expectedFileType": "Unknown",
+    "expectedFileProperties": ["UnknownType"],
+    "description": "Error MSI file"
+  },
+  {
+    "resourceName": "error_pe",
+    "resourceCategory": "Misc",
+    "expectedFileType": "Unknown",
+    "expectedFileProperties": ["UnknownType"],
+    "description": "Error PE file"
+  },
+  {
+    "resourceName": "catsay.ppc64",
+    "resourceCategory": "Elf",
+    "expectedFileType": "Elf",
+    "expectedFileProperties": ["ExecutableType"],
+    "description": "Catsay for PPC64"
+  },
+  {
+    "resourceName": "catsay.x86",
+    "resourceCategory": "Elf",
+    "expectedFileType": "Elf",
+    "expectedFileProperties": ["ExecutableType"],
+    "description": "Catsay for x86"
+  },
+  {
+    "resourceName": "libpcprofile.so",
+    "resourceCategory": "Elf",
+    "expectedFileType": "Elf",
+    "expectedFileProperties": ["SharedLibraryType"],
+    "description": "libpcprofile.so library"
+  },
+  {
+    "resourceName": "libulockmgr.so.1.0.1.x64",
+    "resourceCategory": "Elf",
+    "expectedFileType": "Elf",
+    "expectedFileProperties": ["SharedLibraryType"],
+    "description": "libulockmgr.so library for x64"
+  },
+  {
+    "resourceName": "tempfile.x64",
+    "resourceCategory": "Elf",
+    "expectedFileType": "Elf",
+    "expectedFileProperties": ["ExecutableType"],
+    "description": "Tempfile for x64"
+  },
+  {
+    "resourceName": "vl805",
+    "resourceCategory": "Elf",
+    "expectedFileType": "Elf",
+    "expectedFileProperties": ["ExecutableType"],
+    "description": "vl805 firmware"
+  },
+  {
+    "resourceName": "64bit.o",
+    "resourceCategory": "Elf",
+    "expectedFileType": "Elf",
+    "expectedFileProperties": ["RelocatableType"],
+    "description": "64-bit object file"
+  },
+  {
+    "resourceName": "32bit.o",
+    "resourceCategory": "Elf",
+    "expectedFileType": "Elf",
+    "expectedFileProperties": ["RelocatableType"],
+    "description": "32-bit object file"
+  },
+  {
+    "resourceName": "core.2042",
+    "resourceCategory": "Elf",
+    "expectedFileType": "Elf",
+    "expectedFileProperties": ["CoreDumpType"],
+    "description": "Core dump file"
+  },
+  {
+    "resourceName": "cat",
+    "resourceCategory": "MachO",
+    "expectedFileType": "MachO",
+    "expectedFileProperties": ["ExecutableType", "MultiArch", "Signed"],
+    "description": "Cat executable for macOS"
+  },
+  {
+    "resourceName": "env-wrapper.x64",
+    "resourceCategory": "MachO",
+    "expectedFileType": "MachO",
+    "expectedFileProperties": ["ExecutableType", "Signed"],
+    "description": "Environment wrapper for x64"
+  },
+  {
+    "resourceName": "fat.bundle",
+    "resourceCategory": "MachO",
+    "expectedFileType": "MachO",
+    "expectedFileProperties": ["BundleType", "MultiArch"],
+    "description": "Fat bundle for macOS"
+  },
+  {
+    "resourceName": "fat.dylib",
+    "resourceCategory": "MachO",
+    "expectedFileType": "MachO",
+    "expectedFileProperties": ["SharedLibraryType", "MultiArch"],
+    "description": "Fat dynamic library for macOS"
+  },
+  {
+    "resourceName": "fsnotifier",
+    "resourceCategory": "MachO",
+    "expectedFileType": "MachO",
+    "expectedFileProperties": ["ExecutableType", "MultiArch"],
+    "description": "FS notifier executable"
+  },
+  {
+    "resourceName": "libMonoSupportW.x64.dylib",
+    "resourceCategory": "MachO",
+    "expectedFileType": "MachO",
+    "expectedFileProperties": ["SharedLibraryType", "Signed"],
+    "description": "Mono support library for x64"
+  },
+  {
+    "resourceName": "libclang_rt.asan_iossim_dynamic.dylib",
+    "resourceCategory": "MachO",
+    "expectedFileType": "MachO",
+    "expectedFileProperties": ["SharedLibraryType", "MultiArch", "Signed"],
+    "description": "Clang runtime library for iOS simulator"
+  },
+  {
+    "resourceName": "libclang_rt.cc_kext.a",
+    "resourceCategory": "MachO",
+    "expectedFileType": "Unknown",
+    "expectedFileProperties": ["UnknownType"],
+    "description": "Clang runtime kernel extension"
+  },
+  {
+    "resourceName": "libclang_rt.soft_static.a",
+    "resourceCategory": "MachO",
+    "expectedFileType": "Unknown",
+    "expectedFileProperties": ["UnknownType"],
+    "description": "Clang runtime static library"
+  },
+  {
+    "resourceName": "x64.bundle",
+    "resourceCategory": "MachO",
+    "expectedFileType": "MachO",
+    "expectedFileProperties": ["BundleType"],
+    "description": "x64 bundle for macOS"
+  },
+  {
+    "resourceName": "x64.dylib",
+    "resourceCategory": "MachO",
+    "expectedFileType": "MachO",
+    "expectedFileProperties": ["SharedLibraryType"],
+    "description": "x64 dynamic library for macOS"
+  },
+  {
+    "resourceName": "x86.bundle",
+    "resourceCategory": "MachO",
+    "expectedFileType": "MachO",
+    "expectedFileProperties": ["BundleType"],
+    "description": "x86 bundle for macOS"
+  },
+  {
+    "resourceName": "x86.dylib",
+    "resourceCategory": "MachO",
+    "expectedFileType": "MachO",
+    "expectedFileProperties": ["SharedLibraryType"],
+    "description": "x86 dynamic library for macOS"
+  },
+  {
+    "resourceName": "2dac4b.msi",
+    "resourceCategory": "Msi",
+    "expectedFileType": "Msi",
+    "expectedFileProperties": ["Signed"],
+    "description": "Signed MSI package"
+  },
+  {
+    "resourceName": "dbg_amd64_6.11.1.404.msi",
+    "resourceCategory": "Msi",
+    "expectedFileType": "Msi",
+    "expectedFileProperties": ["Signed"],
+    "description": "Signed debug MSI package for AMD64"
+  },
+  {
+    "resourceName": "Armature.Interface.dll",
+    "resourceCategory": "Pe",
+    "expectedFileType": "Pe",
+    "expectedFileProperties": ["SharedLibraryType", "Managed"],
+    "description": "Managed PE DLL"
+  },
+  {
+    "resourceName": "System.Security.Principal.Windows.dll",
+    "resourceCategory": "Pe",
+    "expectedFileType": "Pe",
+    "expectedFileProperties": ["SharedLibraryType", "Managed", "Signed"],
+    "description": "Signed managed Windows security DLL"
+  },
+  {
+    "resourceName": "api-ms-win-core-rtlsupport-l1-1-0.dll",
+    "resourceCategory": "Pe",
+    "expectedFileType": "Pe",
+    "expectedFileProperties": ["SharedLibraryType", "Signed"],
+    "description": "Signed Windows API DLL"
+  },
+  {
+    "resourceName": "winrsmgr.arm.dll",
+    "resourceCategory": "Pe",
+    "expectedFileType": "Pe",
+    "expectedFileProperties": ["SharedLibraryType"],
+    "description": "Windows Remote Shell Manager for ARM"
+  },
+  {
+    "resourceName": "winrsmgr.arm64.dll",
+    "resourceCategory": "Pe",
+    "expectedFileType": "Pe",
+    "expectedFileProperties": ["SharedLibraryType"],
+    "description": "Windows Remote Shell Manager for ARM64"
+  },
+  {
+    "resourceName": "winrsmgr.x64.dll",
+    "resourceCategory": "Pe",
+    "expectedFileType": "Pe",
+    "expectedFileProperties": ["SharedLibraryType"],
+    "description": "Windows Remote Shell Manager for x64"
+  },
+  {
+    "resourceName": "winrsmgr.x86.dll",
+    "resourceCategory": "Pe",
+    "expectedFileType": "Pe",
+    "expectedFileProperties": ["SharedLibraryType"],
+    "description": "Windows Remote Shell Manager for x86"
+  },
+  {
+    "resourceName": "wscadminui.arm.exe",
+    "resourceCategory": "Pe",
+    "expectedFileType": "Pe",
+    "expectedFileProperties": ["ExecutableType"],
+    "description": "Windows Security Center Admin UI for ARM"
+  },
+  {
+    "resourceName": "wscadminui.arm64.exe",
+    "resourceCategory": "Pe",
+    "expectedFileType": "Pe",
+    "expectedFileProperties": ["ExecutableType"],
+    "description": "Windows Security Center Admin UI for ARM64"
+  },
+  {
+    "resourceName": "wscadminui.x64.exe",
+    "resourceCategory": "Pe",
+    "expectedFileType": "Pe",
+    "expectedFileProperties": ["ExecutableType"],
+    "description": "Windows Security Center Admin UI for x64"
+  },
+  {
+    "resourceName": "wscadminui.x86.exe",
+    "resourceCategory": "Pe",
+    "expectedFileType": "Pe",
+    "expectedFileProperties": ["ExecutableType"],
+    "description": "Windows Security Center Admin UI for x86"
+  },
+  {
+    "resourceName": "1.sh",
+    "resourceCategory": "Sh",
+    "expectedFileType": "Sh",
+    "expectedFileProperties": ["ExecutableType"],
+    "description": "Shell script 1"
+  },
+  {
+    "resourceName": "2.sh",
+    "resourceCategory": "Sh",
+    "expectedFileType": "Sh",
+    "expectedFileProperties": ["ExecutableType"],
+    "description": "Shell script 2"
+  }
+]
