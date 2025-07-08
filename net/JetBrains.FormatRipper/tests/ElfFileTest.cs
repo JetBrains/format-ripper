@@ -11,17 +11,6 @@ namespace JetBrains.FormatRipper.Tests
   [TestFixture]
   public sealed class ElfFileTest
   {
-    // Local logger implementation for test output
-    private sealed class ConsoleLogger : ILogger
-    {
-      public static readonly ILogger Instance = new ConsoleLogger();
-      private ConsoleLogger() { }
-      public void Info(string str) => Console.WriteLine($"INFO: {str}");
-      public void Warning(string str) => Console.Error.WriteLine($"WARNING: {str}");
-      public void Error(string str) => Console.Error.WriteLine($"ERROR: {str}");
-      public void Trace(string str) => Console.Error.WriteLine($"TRACE: {str}");
-    }
-
     public class TestCase
     {
       public string resourceName { get; set; }
@@ -35,8 +24,6 @@ namespace JetBrains.FormatRipper.Tests
       public string interpreter { get; set; }
       public string description { get; set; }
     }
-
-    private static readonly ILogger Logger = ConsoleLogger.Instance;
 
     private static IEnumerable<TestCaseData> LoadElfTestCases()
     {
@@ -69,12 +56,12 @@ namespace JetBrains.FormatRipper.Tests
     [Test]
     public void TestElfFile(TestCase testCase)
     {
-      Logger.Info($"Testing ELF file: {testCase.resourceName}");
+      Console.WriteLine($"INFO: Testing ELF file: {testCase.resourceName}");
 
       var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
       var file = ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
       {
-        Logger.Trace($"Parsing ELF file: {testCase.resourceName}");
+        Console.Error.WriteLine($"TRACE: Parsing ELF file: {testCase.resourceName}");
         Assert.IsTrue(ElfFile.Is(stream), $"File {testCase.resourceName} should be recognized as an ELF file");
         return ElfFile.Parse(stream);
       });
@@ -122,7 +109,7 @@ namespace JetBrains.FormatRipper.Tests
       Assert.AreEqual(expectedEFlags, file.EFlags, $"EFlags mismatch for {testCase.resourceName}. Expected 0x{expectedEFlags:X}, but was 0x{file.EFlags:X}");
       Assert.AreEqual(testCase.interpreter, file.Interpreter, $"Interpreter mismatch for {testCase.resourceName}");
 
-      Logger.Info($"Successfully tested {testCase.resourceName}");
+      Console.WriteLine($"INFO: Successfully tested {testCase.resourceName}");
     }
   }
 }

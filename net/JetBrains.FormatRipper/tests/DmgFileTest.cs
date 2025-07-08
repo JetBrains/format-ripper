@@ -10,17 +10,6 @@ namespace JetBrains.FormatRipper.Tests;
 
 public class DmgFileTest
 {
-  // Local logger implementation for test output
-  private sealed class ConsoleLogger : ILogger
-  {
-    public static readonly ILogger Instance = new ConsoleLogger();
-    private ConsoleLogger() { }
-    public void Info(string str) => Console.WriteLine($"INFO: {str}");
-    public void Warning(string str) => Console.Error.WriteLine($"WARNING: {str}");
-    public void Error(string str) => Console.Error.WriteLine($"ERROR: {str}");
-    public void Trace(string str) => Console.Error.WriteLine($"TRACE: {str}");
-  }
-
   public class TestCase
   {
     public string testType { get; set; }
@@ -29,8 +18,6 @@ public class DmgFileTest
     public bool? hasSignature { get; set; }
     public string description { get; set; }
   }
-
-  private static readonly ILogger Logger = ConsoleLogger.Instance;
 
   private static IEnumerable<TestCaseData> LoadValidDmgTestCases()
   {
@@ -74,12 +61,12 @@ public class DmgFileTest
   [Test]
   public void TestValidDmgFile_ShouldParseCorrectly(TestCase testCase)
   {
-    Logger.Info($"Testing valid DMG file: {testCase.resourceName}");
+    Console.WriteLine($"INFO: Testing valid DMG file: {testCase.resourceName}");
 
     var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
     var file = ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
     {
-      Logger.Trace($"Parsing DMG file: {testCase.resourceName}");
+      Console.Error.WriteLine($"TRACE: Parsing DMG file: {testCase.resourceName}");
       Assert.IsTrue(DmgFile.Is(stream), $"File {testCase.resourceName} should be recognized as a DMG file");
       return DmgFile.Parse(stream, DmgFile.Mode.SignatureData);
     });
@@ -88,23 +75,23 @@ public class DmgFileTest
     Assert.AreEqual(expectedHasSignature, file.HasSignature,
       $"File {testCase.resourceName} signature status mismatch. Expected: {expectedHasSignature}, Actual: {file.HasSignature}");
 
-    Logger.Info($"Successfully tested {testCase.resourceName} - HasSignature: {file.HasSignature}");
+    Console.WriteLine($"INFO: Successfully tested {testCase.resourceName} - HasSignature: {file.HasSignature}");
   }
 
   [TestCaseSource(nameof(LoadNonDmgTestCases))]
   [Test]
   public void TestNonDmgFile_ShouldNotBeRecognizedAsDmg(TestCase testCase)
   {
-    Logger.Info($"Testing non-DMG file: {testCase.resourceName}");
+    Console.WriteLine($"INFO: Testing non-DMG file: {testCase.resourceName}");
 
     var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
     ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
     {
-      Logger.Trace($"Checking if file is DMG: {testCase.resourceName}");
+      Console.Error.WriteLine($"TRACE: Checking if file is DMG: {testCase.resourceName}");
       Assert.IsFalse(DmgFile.Is(stream), $"File {testCase.resourceName} should NOT be recognized as a DMG file");
       return 0;
     });
 
-    Logger.Info($"Successfully verified {testCase.resourceName} is not a DMG file");
+    Console.WriteLine($"INFO: Successfully verified {testCase.resourceName} is not a DMG file");
   }
 }
