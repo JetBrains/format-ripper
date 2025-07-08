@@ -24,13 +24,6 @@
     <EmbeddedResource Include="..\..\..\data\pe\*" LinkBase="Resources\Pe" />
     <EmbeddedResource Include="..\..\..\data\sh\*" LinkBase="Resources\Sh" />
     <EmbeddedResource Include="..\..\..\data\dmg\*" LinkBase="Resources\Dmg" />
-    <EmbeddedResource Include="CompoundFileTestCases.json" LinkBase="Resources\Msi" />
-    <EmbeddedResource Include="DmgFileTestCases.json" />
-    <EmbeddedResource Include="ElfFileTestCases.json" />
-    <EmbeddedResource Include="FileTypeExplorerTestCases.json" />
-    <EmbeddedResource Include="MachOFileTestCases.json" />
-    <EmbeddedResource Include="MsiUtilTestCases.json" />
-    <EmbeddedResource Include="PeFileTestCases.json" />
-    <EmbeddedResource Include="ShFileTestCases.json" />
+    <EmbeddedResource Include="..\..\..\data\test_cases_descriptors\format-ripper\*" LinkBase="Resources\TestCases" />
   </ItemGroup>
 </Project>

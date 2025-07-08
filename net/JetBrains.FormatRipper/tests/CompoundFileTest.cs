@@ -35,13 +35,15 @@ namespace JetBrains.FormatRipper.Tests
       var type = typeof(ResourceUtil);
       var resourceName = $"{type.Namespace}.CompoundFileTestCases.json";
 
-      using var stream = type.Assembly.GetManifestResourceStream(resourceName);
-      if (stream == null)
-        throw new InvalidOperationException($"Failed to open resource stream for {resourceName}");
-
-      using var reader = new StreamReader(stream);
-      var json = reader.ReadToEnd();
-      var testCases = JsonConvert.DeserializeObject<List<TestCase>>(json);
+      var testCases = ResourceUtil.OpenRead(ResourceCategory.TestCases, "CompoundFileTestCases.json", stream =>
+      {
+        using var reader = new StreamReader(stream);
+        var json = reader.ReadToEnd();
+        var obj = JsonConvert.DeserializeObject<List<TestCase>>(json);
+        if (obj == null)
+          throw new InvalidOperationException($"Failed to deserialize test cases from {resourceName}");
+        return obj;
+      });
 
       return testCases.Select(testCase =>
         new TestCaseData(testCase)

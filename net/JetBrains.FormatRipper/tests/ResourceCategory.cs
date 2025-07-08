@@ -9,5 +9,6 @@ namespace JetBrains.FormatRipper.Tests
     Pe,
     Sh,
     Dmg,
+    TestCases,
   }
 }
