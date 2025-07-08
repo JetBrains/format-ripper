@@ -8,28 +8,9 @@ using NUnit.Framework;
 
 namespace JetBrains.FormatRipper.Tests
 {
-  // Logger interface for test output
-  public interface ILogger
-  {
-    void Info(string str);
-    void Warning(string str);
-    void Error(string str);
-    void Trace(string str);
-  }
   [TestFixture]
   public class FileTypeExplorerTest
   {
-    // Local logger implementation for test output
-    private sealed class ConsoleLogger : ILogger
-    {
-      public static readonly ILogger Instance = new ConsoleLogger();
-      private ConsoleLogger() { }
-      public void Info(string str) => Console.WriteLine($"INFO: {str}");
-      public void Warning(string str) => Console.Error.WriteLine($"WARNING: {str}");
-      public void Error(string str) => Console.Error.WriteLine($"ERROR: {str}");
-      public void Trace(string str) => Console.Error.WriteLine($"TRACE: {str}");
-    }
-
     public class TestCase
     {
       public string resourceName { get; set; }
@@ -38,8 +19,6 @@ namespace JetBrains.FormatRipper.Tests
       public string[] expectedFileProperties { get; set; }
       public string description { get; set; }
     }
-
-    private static readonly ILogger Logger = ConsoleLogger.Instance;
 
     private static IEnumerable<TestCaseData> LoadFileTypeExplorerTestCases()
     {
@@ -72,7 +51,7 @@ namespace JetBrains.FormatRipper.Tests
     [Test]
     public void TestFileTypeDetection(TestCase testCase)
     {
-      Logger.Info($"Testing file type detection for: {testCase.resourceName}");
+      Console.WriteLine($"INFO: Testing file type detection for: {testCase.resourceName}");
 
       var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
       var expectedFileType = Enum.Parse<FileType>(testCase.expectedFileType);
@@ -90,7 +69,7 @@ namespace JetBrains.FormatRipper.Tests
       Assert.AreEqual(expectedFileType, fileType, $"File type mismatch for {testCase.resourceName}");
       Assert.AreEqual(expectedFileProperties, fileProperties, $"File properties mismatch for {testCase.resourceName}");
 
-      Logger.Info($"Successfully tested {testCase.resourceName}: {fileType}, {fileProperties}");
+      Console.WriteLine($"INFO: Successfully tested {testCase.resourceName}: {fileType}, {fileProperties}");
     }
   }
 }
