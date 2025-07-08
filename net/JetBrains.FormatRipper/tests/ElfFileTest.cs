@@ -1,4 +1,10 @@
-﻿using JetBrains.FormatRipper.Elf;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using JetBrains.FormatRipper.Elf;
+using JetBrains.SignatureVerifier;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace JetBrains.FormatRipper.Tests
@@ -6,87 +12,116 @@ namespace JetBrains.FormatRipper.Tests
   [TestFixture]
   public sealed class ElfFileTest
   {
-    // Note(ww898): Some architectures don't have the difference in interpreters!!! See https://wiki.debian.org/ArchitectureSpecificsMemo for details.
-    // @formatter:off
-    [TestCase("busybox-static.nixos-aarch64"  , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_EXEC, EM.EM_AARCH64    , 0u                                                                                                    , null)]
-    [TestCase("busybox-static.nixos-x86_64"   , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_EXEC, EM.EM_X86_64     , 0u                                                                                                    , null)]
-    [TestCase("busybox.alpine-aarch64"        , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_AARCH64    , 0u                                                                                                    , "/lib/ld-musl-aarch64.so.1")]
-    [TestCase("busybox.alpine-armhf"          , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_ARM        , EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD                                                        , "/lib/ld-musl-armhf.so.1")]
-    [TestCase("busybox.alpine-i386"           , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_386        , 0u                                                                                                    , "/lib/ld-musl-i386.so.1")]
-    [TestCase("busybox.alpine-ppc64le"        , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_PPC64      , EF.EF_PPC64_ABI_VER2                                                                                  , "/lib/ld-musl-powerpc64le.so.1")]
-    [TestCase("busybox.alpine-s390x"          , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_S390       , 0u                                                                                                    , "/lib/ld-musl-s390x.so.1")]
-    [TestCase("busybox.alpine-x86_64"         , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_X86_64     , 0u                                                                                                    , "/lib/ld-musl-x86_64.so.1")]
-    [TestCase("catsay.ppc64"                  , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_EXEC, EM.EM_PPC64      , EF.EF_PPC64_ABI_VER1                                                                                  , null)]
-    [TestCase("catsay.x86"                    , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_EXEC, EM.EM_386        , 0u                                                                                                    , null)]
-    [TestCase("coreutils.nixos-aarch64"       , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_EXEC, EM.EM_AARCH64    , 0u                                                                                                    , "/nix/store/c1nqsqwl9allxbxhqx3iqfxk363qrnzv-glibc-2.32-54/lib/ld-linux-aarch64.so.1")]
-    [TestCase("coreutils.nixos-x86_64"        , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_EXEC, EM.EM_X86_64     , 0u                                                                                                    , "/nix/store/jsp3h3wpzc842j0rz61m5ly71ak6qgdn-glibc-2.32-54/lib/ld-linux-x86-64.so.2")]
-    [TestCase("grep.android-i386"             , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_386        , 0u                                                                                                    , "/system/bin/linker")]
-    [TestCase("grep.android-x86_64"           , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_X86_64     , 0u                                                                                                    , "/system/bin/linker64")]
-    [TestCase("libpcprofile.so"               , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN,  EM.EM_ARM        , EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD                                                        , null)]
-    [TestCase("libulockmgr.so.1.0.1.x64"      , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN,  EM.EM_X86_64     , 0U                                                                                                    , null)]
-    [TestCase("mktemp.freebsd-aarch64"        , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_AARCH64    , 0u                                                                                                    , "/libexec/ld-elf.so.1")]
-    [TestCase("mktemp.freebsd-i386"           , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_386        , 0u                                                                                                    , "/libexec/ld-elf.so.1")]
-    [TestCase("mktemp.freebsd-powerpc"        , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_PPC        , 0u                                                                                                    , "/libexec/ld-elf.so.1")]
-    [TestCase("mktemp.freebsd-powerpc64"      , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_PPC64      , EF.EF_PPC64_ABI_VER2                                                                                  , "/libexec/ld-elf.so.1")]
-    [TestCase("mktemp.freebsd-powerpc64le"    , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_PPC64      , EF.EF_PPC64_ABI_VER2                                                                                  , "/libexec/ld-elf.so.1")]
-    [TestCase("mktemp.freebsd-riscv64"        , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_EXEC, EM.EM_RISCV      , EF.EF_RISCV_FLOAT_ABI_DOUBLE | EF.EF_RISCV_RVC                                                        , "/libexec/ld-elf.so.1")]
-    [TestCase("mktemp.freebsd-sparc64"        , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_SPARCV9    , EF.EF_SPARCV9_RMO                                                                                     , "/libexec/ld-elf.so.1")]
-    [TestCase("mktemp.freebsd-x86_64"         , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_X86_64     , 0u                                                                                                    , "/libexec/ld-elf.so.1")]
-    [TestCase("mktemp.gentoo-armv4tl"         , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_ARM        , EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_SOFT                                                        , "/lib/ld-linux.so.3")]
-    [TestCase("mktemp.gentoo-armv7a_hf-uclibc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_ARM        , EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD                                                        , "/lib/ld-uClibc.so.0")]
-    [TestCase("mktemp.gentoo-hppa2.0"         , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_LINUX  , ET.ET_DYN , EM.EM_PARISC     , EF.EFA_PARISC_1_1                                                                                     , "/lib/ld.so.1")]
-    [TestCase("mktemp.gentoo-ia64"            , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_IA_64      , EF.EF_IA_64_ABI64                                                                                     , "/lib/ld-linux-ia64.so.2")]
-    [TestCase("mktemp.gentoo-m68k"            , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_68K        , 0u                                                                                                    , "/lib/ld.so.1")]
-    [TestCase("mktemp.gentoo-mipsel3-uclibc"  , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_EXEC, EM.EM_MIPS       , EF.EF_MIPS_ARCH_3 | EF.EF_MIPS_ABI_O32 | EF.EF_MIPS_32BITMODE | EF.EF_MIPS_CPIC | EF.EF_MIPS_NOREORDER, "/lib/ld-uClibc.so.0")]
-    [TestCase("mktemp.gentoo-sparc"           , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_SPARC32PLUS, EF.EF_SPARC_SUN_US3 | EF.EF_SPARC_SUN_US1 | EF.EF_SPARC_32PLUS                                        , "/lib/ld-linux.so.2")]
-    [TestCase("mktemp.openbsd-alpha"          , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_ALPHA      , 0u                                                                                                    , "/usr/libexec/ld.so")]
-    [TestCase("mktemp.openbsd-armv7"          , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_ARM        , EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_SOFT                                                        , "/usr/libexec/ld.so")]
-    [TestCase("mktemp.openbsd-hppa"           , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_HPUX   , ET.ET_DYN , EM.EM_PARISC     , EF.EFA_PARISC_1_1                                                                                     , "/usr/libexec/ld.so")]
-    [TestCase("mktemp.openbsd-i386"           , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_386        , 0u                                                                                                    , "/usr/libexec/ld.so")]
-    [TestCase("mktemp.openbsd-landisk"        , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_SH         , EF.EF_SH2E                                                                                            , "/usr/libexec/ld.so")]
-    [TestCase("mktemp.openbsd-luna88k"        , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_EXEC, EM.EM_88K        , 0u                                                                                                    , "/usr/libexec/ld.so")]
-    [TestCase("mktemp.openbsd-macppc"         , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_PPC        , 0u                                                                                                    , "/usr/libexec/ld.so")]
-    [TestCase("mktemp.openbsd-octeon"         , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_MIPS       , EF.EF_MIPS_ARCH_3 | EF.EF_MIPS_CPIC | EF.EF_MIPS_PIC | EF.EF_MIPS_NOREORDER                           , "/usr/libexec/ld.so")]
-    [TestCase("mktemp.openbsd-powerpc64"      , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_PPC64      , EF.EF_PPC64_ABI_VER2                                                                                  , "/usr/libexec/ld.so")]
-    [TestCase("mktemp.openbsd-sparc64"        , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_SPARCV9    , EF.EF_SPARCV9_RMO                                                                                     , "/usr/libexec/ld.so")]
-    [TestCase("mktemp.openbsd-x86_64"         , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_X86_64     , 0u                                                                                                    , "/usr/libexec/ld.so")]
-    [TestCase("mktemp.ubuntu-riscv64"         , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_RISCV      , EF.EF_RISCV_RVC | EF.EF_RISCV_FLOAT_ABI_DOUBLE                                                        , "/lib/ld-linux-riscv64-lp64d.so.1")]
-    [TestCase("nologin.opensuse-i586"         , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_386        , 0u                                                                                                    , "/lib/ld-linux.so.2")]
-    [TestCase("nologin.opensuse-ppc64le"      , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_PPC64      , EF.EF_PPC64_ABI_VER2                                                                                  , "/lib64/ld64.so.2")]
-    [TestCase("nologin.opensuse-s390x"        , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_S390       , 0u                                                                                                    , "/lib/ld64.so.1")]
-    [TestCase("tempfile.ubuntu-aarch64"       , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_AARCH64    , 0u                                                                                                    , "/lib/ld-linux-aarch64.so.1")]
-    [TestCase("tempfile.ubuntu-armhf"         , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_ARM        , EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD                                                        , "/lib/ld-linux-armhf.so.3")]
-    [TestCase("tempfile.ubuntu-i386"          , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_386        , 0u                                                                                                    , "/lib/ld-linux.so.2")]
-    [TestCase("tempfile.ubuntu-x86_64"        , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_DYN , EM.EM_X86_64     , 0u                                                                                                    , "/lib64/ld-linux-x86-64.so.2")]
-    [TestCase("vl805"                         , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_LINUX  , ET.ET_EXEC, EM.EM_ARM        , EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD                                                        , null)]
-    [TestCase("32bit.o"                       , ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_REL , EM.EM_386        , EF.EF_NONE                                                                                            , null)]
-    [TestCase("64bit.o"                       , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_REL , EM.EM_X86_64     , EF.EF_NONE                                                                                            , null)]
-    [TestCase("core.2042"                     , ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE   , ET.ET_CORE, EM.EM_X86_64     , EF.EF_NONE                                                                                            , null)]
-    // @formatter:on
-    [Test]
-    public void Test(
-      string resourceName,
-      ELFCLASS expectedEiClass,
-      ELFDATA expectedEiData,
-      ELFOSABI expectedEiOsAbi,
-      ET expectedEType,
-      EM expectedEMachine,
-      EF expectedEFlags,
-      string? expectedInterpreter)
+    // Local logger implementation for test output
+    private sealed class ConsoleLogger : ILogger
     {
-      var file = ResourceUtil.OpenRead(ResourceCategory.Elf, resourceName, stream =>
-        {
-          Assert.IsTrue(ElfFile.Is(stream));
-          return ElfFile.Parse(stream);
-        });
+      public static readonly ILogger Instance = new ConsoleLogger();
+      private ConsoleLogger() { }
+      public void Info(string str) => Console.WriteLine($"INFO: {str}");
+      public void Warning(string str) => Console.Error.WriteLine($"WARNING: {str}");
+      public void Error(string str) => Console.Error.WriteLine($"ERROR: {str}");
+      public void Trace(string str) => Console.Error.WriteLine($"TRACE: {str}");
+    }
 
-      Assert.AreEqual(expectedEiClass, file.EiClass);
-      Assert.AreEqual(expectedEiData, file.EiData);
-      Assert.AreEqual(expectedEiOsAbi, file.EiOsAbi);
-      Assert.AreEqual(expectedEType, file.EType);
-      Assert.AreEqual(expectedEMachine, file.EMachine);
-      Assert.AreEqual(expectedEFlags, file.EFlags, $"Expected 0x{expectedEFlags:X}, but was 0x{file.EFlags:X}");
-      Assert.AreEqual(expectedInterpreter, file.Interpreter);
+    public class TestCase
+    {
+      public string resourceName { get; set; }
+      public string resourceCategory { get; set; }
+      public string eiClass { get; set; }
+      public string eiData { get; set; }
+      public string eiOsAbi { get; set; }
+      public string eType { get; set; }
+      public string eMachine { get; set; }
+      public object eFlags { get; set; }
+      public string interpreter { get; set; }
+      public string description { get; set; }
+    }
+
+    private static readonly ILogger Logger = ConsoleLogger.Instance;
+
+    private static IEnumerable<TestCaseData> LoadElfTestCases()
+    {
+      var testCases = LoadTestCases();
+
+      return testCases.Select(testCase =>
+        new TestCaseData(testCase)
+          .SetName($"Elf_{testCase.resourceName.Replace(".", "_").Replace("-", "_")}")
+          .SetDescription($"Test ELF file parsing for {testCase.resourceName} - {testCase.description}")
+      );
+    }
+
+    private static List<TestCase> LoadTestCases()
+    {
+      var type = typeof(ResourceUtil);
+      var resourceName = $"{type.Namespace}.ElfFileTestCases.json";
+
+      using var stream = type.Assembly.GetManifestResourceStream(resourceName);
+      if (stream == null)
+        throw new InvalidOperationException($"Failed to open resource stream for {resourceName}");
+
+      using var reader = new StreamReader(stream);
+      var json = reader.ReadToEnd();
+      return JsonConvert.DeserializeObject<List<TestCase>>(json);
+    }
+
+    [TestCaseSource(nameof(LoadElfTestCases))]
+    [Test]
+    public void TestElfFile(TestCase testCase)
+    {
+      Logger.Info($"Testing ELF file: {testCase.resourceName}");
+
+      var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
+      var file = ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
+      {
+        Logger.Trace($"Parsing ELF file: {testCase.resourceName}");
+        Assert.IsTrue(ElfFile.Is(stream), $"File {testCase.resourceName} should be recognized as an ELF file");
+        return ElfFile.Parse(stream);
+      });
+
+      var expectedEiClass = Enum.Parse<ELFCLASS>(testCase.eiClass);
+      var expectedEiData = Enum.Parse<ELFDATA>(testCase.eiData);
+      var expectedEiOsAbi = Enum.Parse<ELFOSABI>(testCase.eiOsAbi);
+      var expectedEType = Enum.Parse<ET>(testCase.eType);
+      var expectedEMachine = Enum.Parse<EM>(testCase.eMachine);
+
+      // Handle eFlags which can be either a number or a string expression
+      EF expectedEFlags;
+      if (testCase.eFlags is long || testCase.eFlags is int)
+      {
+        expectedEFlags = (EF)Convert.ToUInt32(testCase.eFlags);
+      }
+      else
+      {
+        var flagsStr = testCase.eFlags.ToString();
+        if (string.IsNullOrEmpty(flagsStr) || flagsStr == "0")
+        {
+          expectedEFlags = 0;
+        }
+        else if (flagsStr == "EF_NONE")
+        {
+          expectedEFlags = EF.EF_NONE;
+        }
+        else
+        {
+          // Parse flag expressions like "EF_ARM_EABI_VER5 | EF_ARM_ABI_FLOAT_HARD"
+          expectedEFlags = 0;
+          foreach (var flagName in flagsStr.Split('|').Select(f => f.Trim()))
+          {
+            var flag = (EF)Enum.Parse(typeof(EF), flagName);
+            expectedEFlags |= flag;
+          }
+        }
+      }
+
+      Assert.AreEqual(expectedEiClass, file.EiClass, $"EiClass mismatch for {testCase.resourceName}");
+      Assert.AreEqual(expectedEiData, file.EiData, $"EiData mismatch for {testCase.resourceName}");
+      Assert.AreEqual(expectedEiOsAbi, file.EiOsAbi, $"EiOsAbi mismatch for {testCase.resourceName}");
+      Assert.AreEqual(expectedEType, file.EType, $"EType mismatch for {testCase.resourceName}");
+      Assert.AreEqual(expectedEMachine, file.EMachine, $"EMachine mismatch for {testCase.resourceName}");
+      Assert.AreEqual(expectedEFlags, file.EFlags, $"EFlags mismatch for {testCase.resourceName}. Expected 0x{expectedEFlags:X}, but was 0x{file.EFlags:X}");
+      Assert.AreEqual(testCase.interpreter, file.Interpreter, $"Interpreter mismatch for {testCase.resourceName}");
+
+      Logger.Info($"Successfully tested {testCase.resourceName}");
     }
   }
 }
