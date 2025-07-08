@@ -1,0 +1,497 @@
+[
+  {
+    "resourceName": "addhoc",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": null,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_ARM64",
+        "cpuSubType": "CPU_SUBTYPE_ARM64_ALL",
+        "mhFileType": "MH_EXECUTE",
+        "options": "HasSignedBlob",
+        "codeDirectoryBlobHash": "025EB09F62E679E957E46A4AD373229F7C27C47B26B08FA40EA31A1A7B542420B914A510CE134AF352882164266E74F4",
+        "cmsDataHash": null,
+        "orderedIncludeRanges": "0;0;[0:10],[18:3C8],[3E8:8],[3F8:180],[588:BB88]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Ad-hoc signed ARM64 executable"
+      }
+    ],
+    "description": "Ad-hoc signed ARM64 executable"
+  },
+  {
+    "resourceName": "cat",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": false,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_X86_64",
+        "cpuSubType": "CPU_SUBTYPE_X86_64_ALL",
+        "mhFileType": "MH_EXECUTE",
+        "options": "HasSignedBlob | HasCmsBlob",
+        "codeDirectoryBlobHash": "B5E1E4A45BF997C6BDB6D1716BCAE279B62B36B1FCB07E64183BC209F5E2FD4DBE8A759ECB1FB5D44B6678E222E4E4A4",
+        "cmsDataHash": "6BC01E731786AA9C85EAB2A559C4BFEE527EE8F425A4E822BECC9BB9EF8F51F1641C5FB8AB7DB1F524139441AA43191A",
+        "orderedIncludeRanges": "4000;0;[0:10],[18:4B8],[4D8:8],[4E8:180],[678:C118]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Signed x86_64 executable"
+      },
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_ARM64",
+        "cpuSubType": "CPU_SUBTYPE_ARM64_E | CPU_SUBTYPE_LIB64",
+        "mhFileType": "MH_EXECUTE",
+        "options": "HasSignedBlob | HasCmsBlob",
+        "codeDirectoryBlobHash": "2E4DCB03B2CEB5FB1349DBD8432750C33E6718CED1F60D9833BCF06B76105379CCE849CCE52DD45EE32D10EEF90EB9D1",
+        "cmsDataHash": "E614F32D5B5D1DAA208BFB3D9C1931ACEE72CC3EBE0AB29F0058CA45781539C60DAFFB6AA2EE3455A235FE158721F64E",
+        "orderedIncludeRanges": "14000;0;[0:10],[18:418],[438:8],[448:180],[5D8:80D8]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Signed ARM64 executable"
+      }
+    ],
+    "description": "Multi-architecture signed executable"
+  },
+  {
+    "resourceName": "chmod.ppc64",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": null,
+    "sections": [
+      {
+        "isLittleEndian": false,
+        "cpuType": "CPU_TYPE_POWERPC",
+        "cpuSubType": "CPU_SUBTYPE_POWERPC_ALL",
+        "mhFileType": "MH_EXECUTE",
+        "options": "0",
+        "codeDirectoryBlobHash": null,
+        "cmsDataHash": null,
+        "orderedIncludeRanges": "0;C;[0:10],[18:370],[38C:4],[394:2B8],[65C:3208]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "PowerPC executable"
+      }
+    ],
+    "description": "PowerPC executable"
+  },
+  {
+    "resourceName": "env-wrapper.x64",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": null,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_X86_64",
+        "cpuSubType": "CPU_SUBTYPE_X86_64_ALL | CPU_SUBTYPE_LIB64",
+        "mhFileType": "MH_EXECUTE",
+        "options": "HasSignedBlob | HasCmsBlob | HasEntitlements",
+        "codeDirectoryBlobHash": "99A55C919491A9B604DF28EABBAFE597A8C596C84E9CCC8FD2526107A9537983F19E08E4A3AC6A629DB1893159001159",
+        "cmsDataHash": "C2B4E1CD34B73AE1352473ADF9F88C8F37F38A0371A8100FF3D4D8358C8A8A8CB22CF16BC1B405BD3A20256E61E4E92E",
+        "orderedIncludeRanges": "0;0;[0:10],[18:380],[3A0:8],[3B0:170],[530:1D10]",
+        "entitlementsHash": "3EB06BCE5ABE8C6D8DA54C91A62E03DA5F31172CBF9E097CBA5E156B233754401F12B3DA15A51EF0455B5D29C0D6EAAC",
+        "entitlementsDerHash": null,
+        "description": "Signed x86_64 executable with entitlements"
+      }
+    ],
+    "description": "Signed x86_64 executable with entitlements"
+  },
+  {
+    "resourceName": "fat.bundle",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": false,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_I386",
+        "cpuSubType": "CPU_SUBTYPE_I386_ALL",
+        "mhFileType": "MH_BUNDLE",
+        "options": "0",
+        "codeDirectoryBlobHash": null,
+        "cmsDataHash": null,
+        "orderedIncludeRanges": "1000;8;[0:10],[18:E0],[FC:4],[104:114],[228:E20]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "i386 bundle"
+      },
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_X86_64",
+        "cpuSubType": "CPU_SUBTYPE_X86_64_ALL",
+        "mhFileType": "MH_BUNDLE",
+        "options": "0",
+        "codeDirectoryBlobHash": null,
+        "cmsDataHash": null,
+        "orderedIncludeRanges": "3000;8;[0:10],[18:160],[180:8],[190:118],[2B8:DA0]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "x86_64 bundle"
+      }
+    ],
+    "description": "Multi-architecture bundle"
+  },
+  {
+    "resourceName": "fat.dylib",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": false,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_X86_64",
+        "cpuSubType": "CPU_SUBTYPE_X86_64_ALL",
+        "mhFileType": "MH_DYLIB",
+        "options": "0",
+        "codeDirectoryBlobHash": null,
+        "cmsDataHash": null,
+        "orderedIncludeRanges": "1000;0;[0:10],[18:160],[180:8],[190:140],[2E0:D70]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "x86_64 dynamic library"
+      },
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_I386",
+        "cpuSubType": "CPU_SUBTYPE_I386_ALL",
+        "mhFileType": "MH_DYLIB",
+        "options": "0",
+        "codeDirectoryBlobHash": null,
+        "cmsDataHash": null,
+        "orderedIncludeRanges": "3000;C;[0:10],[18:E0],[FC:4],[104:13C],[250:DF4]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "i386 dynamic library"
+      }
+    ],
+    "description": "Multi-architecture dynamic library"
+  },
+  {
+    "resourceName": "fsnotifier",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": false,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_X86_64",
+        "cpuSubType": "CPU_SUBTYPE_X86_64_ALL",
+        "mhFileType": "MH_EXECUTE",
+        "options": "0",
+        "codeDirectoryBlobHash": null,
+        "cmsDataHash": null,
+        "orderedIncludeRanges": "4000;8;[0:10],[18:4C0],[4E0:8],[4F0:240],[740:8258]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "x86_64 executable"
+      },
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_ARM64",
+        "cpuSubType": "CPU_SUBTYPE_ARM64_ALL",
+        "mhFileType": "MH_EXECUTE",
+        "options": "HasSignedBlob",
+        "codeDirectoryBlobHash": "5CDCC9053E5F2E0581DA1B5EA926EB2A4B9C389324ADDAE416A0C938DB2436DE1C87422DF8A4A71C6109B7BB4BB19745",
+        "cmsDataHash": null,
+        "orderedIncludeRanges": "10000;0;[0:10],[18:468],[488:8],[498:250],[6F8:C2E8]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Signed ARM64 executable"
+      }
+    ],
+    "description": "Multi-architecture executable with mixed signing"
+  },
+  {
+    "resourceName": "JetBrains.Profiler.PdbServer",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": null,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_X86_64",
+        "cpuSubType": "CPU_SUBTYPE_X86_64_ALL | CPU_SUBTYPE_LIB64",
+        "mhFileType": "MH_EXECUTE",
+        "options": "HasSignedBlob | HasCmsBlob | HasEntitlements",
+        "codeDirectoryBlobHash": "D893A78E3ED66133914AB5BF1C70FBBC26DA0D008E59F84064250C417781CD8D3DA904FCB62D97002C1BED15580851EE",
+        "cmsDataHash": "86D3E5693F0528858A18CBCE2773BB0A348071D40F59459EB8ACB02086C2F2805B7D58B4D65CB65A187EA584AF6A0C2A",
+        "orderedIncludeRanges": "0;0;[0:10],[18:600],[620:8],[630:280],[8C0:19DAE0]",
+        "entitlementsHash": "BC11CE9A219A7C5A0EB56F343CA6699829D63CC3C743CA2C64EBA351D02434411B41BBF90045DCCC06A289A964BFCBF2",
+        "entitlementsDerHash": null,
+        "description": "Signed x86_64 executable with entitlements"
+      }
+    ],
+    "description": "JetBrains Profiler PDB Server"
+  },
+  {
+    "resourceName": "libhostfxr.dylib",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": null,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_X86_64",
+        "cpuSubType": "CPU_SUBTYPE_X86_64_ALL",
+        "mhFileType": "MH_DYLIB",
+        "options": "HasSignedBlob | HasCmsBlob",
+        "codeDirectoryBlobHash": "23BA89AC8310F343E691757AE45A4AA60BFDD60214E86D02F41BC2186E47F5C9FFADAE08B04724C736460AF870F4A836",
+        "cmsDataHash": "E2D2A5D0815B8EB03175AB74DB0984C17BC7BBB51416DA9BD055099AB1BFA4411F868133A56A4614518315CA5C46E40D",
+        "orderedIncludeRanges": "0;0;[0:10],[18:608],[628:8],[638:198],[7E0:661F0]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Signed x86_64 dynamic library"
+      }
+    ],
+    "description": ".NET Core host FX resolver library"
+  },
+  {
+    "resourceName": "libMonoSupportW.x64.dylib",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": null,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_X86_64",
+        "cpuSubType": "CPU_SUBTYPE_X86_64_ALL",
+        "mhFileType": "MH_DYLIB",
+        "options": "HasSignedBlob | HasCmsBlob | HasEntitlements",
+        "codeDirectoryBlobHash": "259BBB50C214B7CD7C8CD38B2E41916ECAB5A1A21875D719CC7CF2DFB9957D9507DCE16EAD39F17AC231CEA3A1D42F59",
+        "cmsDataHash": "A6342A89E763C7223ED91ED95FECBA8B42BD97759C87ABC5E79B2E44F5184EAE36E83F3F112ADD83A2483D4D76408D20",
+        "orderedIncludeRanges": "0;0;[0:10],[18:4C8],[4E8:8],[4F8:1F8],[700:2BBE0]",
+        "entitlementsHash": "3EB06BCE5ABE8C6D8DA54C91A62E03DA5F31172CBF9E097CBA5E156B233754401F12B3DA15A51EF0455B5D29C0D6EAAC",
+        "entitlementsDerHash": null,
+        "description": "Signed x86_64 dynamic library with entitlements"
+      }
+    ],
+    "description": "Mono support library for x64"
+  },
+  {
+    "resourceName": "libSystem.Net.Security.Native.dylib",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": null,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_ARM64",
+        "cpuSubType": "CPU_SUBTYPE_ARM64_ALL",
+        "mhFileType": "MH_DYLIB",
+        "options": "HasSignedBlob | HasCmsBlob",
+        "codeDirectoryBlobHash": "11879D3D604B604D2D7132EA9AA6E51E92E44BFE6C6675402888B5A459D7E473AD410EDA26F3E09FEDAA597CAC7BBD05",
+        "cmsDataHash": "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B",
+        "orderedIncludeRanges": "0;0;[0:10],[18:380],[3A0:8],[3B0:1E0],[5A0:C7C0]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Signed ARM64 dynamic library"
+      }
+    ],
+    "description": ".NET Core System.Net.Security native library"
+  },
+  {
+    "resourceName": "x64.bundle",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": null,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_X86_64",
+        "cpuSubType": "CPU_SUBTYPE_X86_64_ALL",
+        "mhFileType": "MH_BUNDLE",
+        "options": "0",
+        "codeDirectoryBlobHash": null,
+        "cmsDataHash": null,
+        "orderedIncludeRanges": "0;8;[0:10],[18:160],[180:8],[190:118],[2B8:DA0]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "x86_64 bundle"
+      }
+    ],
+    "description": "x86_64 bundle"
+  },
+  {
+    "resourceName": "x64.dylib",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": null,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_X86_64",
+        "cpuSubType": "CPU_SUBTYPE_X86_64_ALL",
+        "mhFileType": "MH_DYLIB",
+        "options": "0",
+        "codeDirectoryBlobHash": null,
+        "cmsDataHash": null,
+        "orderedIncludeRanges": "0;0;[0:10],[18:160],[180:8],[190:140],[2E0:D70]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "x86_64 dynamic library"
+      }
+    ],
+    "description": "x86_64 dynamic library"
+  },
+  {
+    "resourceName": "x86.bundle",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": null,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_I386",
+        "cpuSubType": "CPU_SUBTYPE_I386_ALL",
+        "mhFileType": "MH_BUNDLE",
+        "options": "0",
+        "codeDirectoryBlobHash": null,
+        "cmsDataHash": null,
+        "orderedIncludeRanges": "0;8;[0:10],[18:E0],[FC:4],[104:114],[228:E20]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "i386 bundle"
+      }
+    ],
+    "description": "i386 bundle"
+  },
+  {
+    "resourceName": "x86.dylib",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": null,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_I386",
+        "cpuSubType": "CPU_SUBTYPE_I386_ALL",
+        "mhFileType": "MH_DYLIB",
+        "options": "0",
+        "codeDirectoryBlobHash": null,
+        "cmsDataHash": null,
+        "orderedIncludeRanges": "0;C;[0:10],[18:E0],[FC:4],[104:13C],[250:DF4]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "i386 dynamic library"
+      }
+    ],
+    "description": "i386 dynamic library"
+  },
+  {
+    "resourceName": "libclang_rt.asan_iossim_dynamic.dylib",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": false,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_I386",
+        "cpuSubType": "CPU_SUBTYPE_I386_ALL",
+        "mhFileType": "MH_DYLIB",
+        "options": "HasSignedBlob | HasCmsBlob",
+        "codeDirectoryBlobHash": "1771EDC81D62DB2B2CE6EF1BAE1816D482C103BA23D34DC347E3EFE5953A113A6665B893370E7CFCE487A5E3C841010B",
+        "cmsDataHash": "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B",
+        "orderedIncludeRanges": "4000;0;[0:10],[18:48C],[4A8:4],[4B0:200],[6C0:E0780]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Signed i386 dynamic library"
+      },
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_X86_64",
+        "cpuSubType": "CPU_SUBTYPE_X86_64_ALL",
+        "mhFileType": "MH_DYLIB",
+        "options": "HasSignedBlob | HasCmsBlob",
+        "codeDirectoryBlobHash": "9DB34454E4A80EF9849C850249759DE7BA46ADFF9FCEC765A985BF74363104EA59166CC58208FE32F5EB7BC074A7D430",
+        "cmsDataHash": "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B",
+        "orderedIncludeRanges": "F0000;0;[0:10],[18:5B8],[5D8:8],[5E8:208],[800:EEFF0]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Signed x86_64 dynamic library"
+      },
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_ARM64",
+        "cpuSubType": "CPU_SUBTYPE_ARM64_ALL",
+        "mhFileType": "MH_DYLIB",
+        "options": "HasSignedBlob | HasCmsBlob",
+        "codeDirectoryBlobHash": "DEE34BB522EE25E88D8CE98D0174BC985F9CEBB83A4DA8C09C8164D2E311FB0AE02BC65A9B58E287468E027971F916EB",
+        "cmsDataHash": "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B",
+        "orderedIncludeRanges": "1E8000;0;[0:10],[18:5B8],[5D8:8],[5E8:220],[818:E9088]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Signed ARM64 dynamic library"
+      }
+    ],
+    "description": "Clang runtime library for iOS simulator"
+  },
+  {
+    "resourceName": "libclang_rt.asan_ios_dynamic.dylib",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": false,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_ARM",
+        "cpuSubType": "CPU_SUBTYPE_ARM_V7",
+        "mhFileType": "MH_DYLIB",
+        "options": "HasSignedBlob | HasCmsBlob",
+        "codeDirectoryBlobHash": "E82E90917F5C554C12E2EB3D7E39C5522FB233BC3D4EA37508E5F200C4000F0FAE10828CE0E81F202F6E85C1910A63CF",
+        "cmsDataHash": "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B",
+        "orderedIncludeRanges": "4000;0;[0:10],[18:4D0],[4EC:4],[4F4:210],[714:BDB3C]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Signed ARMv7 dynamic library"
+      },
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_ARM",
+        "cpuSubType": "CPU_SUBTYPE_ARM_V7S",
+        "mhFileType": "MH_DYLIB",
+        "options": "HasSignedBlob | HasCmsBlob",
+        "codeDirectoryBlobHash": "6AAB394CA282E8838774C0BE0D73BEB6A16FB21561599C5CD6A9C7EAE29CE73E317ABCE032C997B825DE89D754D87B17",
+        "cmsDataHash": "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B",
+        "orderedIncludeRanges": "CC000;0;[0:10],[18:4D0],[4EC:4],[4F4:210],[714:C1AEC]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Signed ARMv7s dynamic library"
+      },
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_ARM",
+        "cpuSubType": "CPU_SUBTYPE_ARM_V7K",
+        "mhFileType": "MH_DYLIB",
+        "options": "HasSignedBlob | HasCmsBlob",
+        "codeDirectoryBlobHash": "844CF546207CBB6F191838F50E6B98225348224BD031D008F00FFD4D371402C545E59A84E41E6946509D7CB373CA31A2",
+        "cmsDataHash": "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B",
+        "orderedIncludeRanges": "198000;0;[0:10],[18:558],[574:4],[57C:210],[79C:C1974]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Signed ARMv7k dynamic library"
+      },
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_ARM64",
+        "cpuSubType": "CPU_SUBTYPE_ARM64_ALL",
+        "mhFileType": "MH_DYLIB",
+        "options": "HasSignedBlob | HasCmsBlob",
+        "codeDirectoryBlobHash": "EB4B9910F8BD4988D7C23B06CFD1E695889B66C9E517636C83E3E7530DE774D2F9250383581A4E84017191D43E4B910B",
+        "cmsDataHash": "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B",
+        "orderedIncludeRanges": "264000;0;[0:10],[18:658],[678:8],[688:220],[8B8:E91D8]",
+        "entitlementsHash": null,
+        "entitlementsDerHash": null,
+        "description": "Signed ARM64 dynamic library"
+      }
+    ],
+    "description": "Clang runtime library for iOS"
+  },
+  {
+    "resourceName": "TestApp_signed_with_entitlements_der",
+    "resourceCategory": "MachO",
+    "isFatLittleEndian": null,
+    "sections": [
+      {
+        "isLittleEndian": true,
+        "cpuType": "CPU_TYPE_ARM64",
+        "cpuSubType": "CPU_SUBTYPE_ARM64_ALL",
+        "mhFileType": "MH_EXECUTE",
+        "options": "HasSignedBlob | HasCmsBlob | HasEntitlements | HasEntitlementsDer",
+        "codeDirectoryBlobHash": "227D0BAE1D7478664C77DF40B40BC3B2DC202A92BBE45C37E250EC8E1C60A7E625DDBEE10C3C052ECFBCF8709EC6C019",
+        "cmsDataHash": "3B3C5240C29ED3A89DB8CC44B2A1F4163E974059DA032C5AB088EE677669D91BB8C4F2ABEBD41922264772007B855D63",
+        "orderedIncludeRanges": "0;0;[0:10],[18:5F8],[618:8],[628:1B0],[7E8:18EF8]",
+        "entitlementsHash": "4F2269BC47B964BE340F1D84D33F74F3273A94DAE3D9D81109EA732DC6C9A841F866FE0BDDA5BFADC8FFF816EB991054",
+        "entitlementsDerHash": "7E9C32B43A70476E9A96E1878CB2FFEFD5608DA7F39E2711369FA5EA253E0F57DF173A3A37D09CBEE9756B6CFDE1FC2B",
+        "description": "Signed ARM64 executable with entitlements in DER format"
+      }
+    ],
+    "description": "Test application signed with entitlements in DER format"
+  }
+]
