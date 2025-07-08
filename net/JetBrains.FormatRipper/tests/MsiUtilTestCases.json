@@ -1,0 +1,72 @@
+[
+  {
+    "name": "DirectoryNames.DigitalSignatureName",
+    "expectedName": "DirectoryNames.DigitalSignatureName",
+    "description": "Digital Signature directory name"
+  },
+  {
+    "name": "DirectoryNames.DocumentSummaryInformation",
+    "expectedName": "DirectoryNames.DocumentSummaryInformation",
+    "description": "Document Summary Information directory name"
+  },
+  {
+    "name": "DirectoryNames.MsiDigitalSignatureExName",
+    "expectedName": "DirectoryNames.MsiDigitalSignatureExName",
+    "description": "MSI Digital Signature Ex directory name"
+  },
+  {
+    "name": "DirectoryNames.SummaryInformationName",
+    "expectedName": "DirectoryNames.SummaryInformationName",
+    "description": "Summary Information directory name"
+  },
+  {
+    "name": "DirectoryNames.䡀_ColumnsName",
+    "expectedName": "䡀_Columns",
+    "description": "MSI Columns directory name"
+  },
+  {
+    "name": "DirectoryNames.䡀_StringDataName",
+    "expectedName": "䡀_StringData",
+    "description": "MSI String Data directory name"
+  },
+  {
+    "name": "DirectoryNames.䡀_StringPoolName",
+    "expectedName": "䡀_StringPool",
+    "description": "MSI String Pool directory name"
+  },
+  {
+    "name": "DirectoryNames.䡀_TablesName",
+    "expectedName": "䡀_Tables",
+    "description": "MSI Tables directory name"
+  },
+  {
+    "name": "DirectoryNames.䡀_ValidationName",
+    "expectedName": "䡀_Validation",
+    "description": "MSI Validation directory name"
+  },
+  {
+    "name": "䡀䑒䗶䏤㾯㼒䔨䈸䆱䠨",
+    "expectedName": "䡀InstallUISequence",
+    "description": "MSI Install UI Sequence directory name"
+  },
+  {
+    "name": "䡀䈏䗤䕸㬨䐲䒳䈱䗱䠶",
+    "expectedName": "䡀FeatureComponents",
+    "description": "MSI Feature Components directory name"
+  },
+  {
+    "name": "䌋䄱䜵䆾䖸䌷䒦䠱",
+    "expectedName": "Binary.custicon",
+    "description": "MSI Binary custicon directory name"
+  },
+  {
+    "name": "䌋䄱䜵䅾䑤䕱䐥䠳",
+    "expectedName": "Binary.bannrbmp",
+    "description": "MSI Binary bannrbmp directory name"
+  },
+  {
+    "name": "䅧䞪䄦䠥",
+    "expectedName": "dbg.cab",
+    "description": "MSI Debug CAB directory name"
+  }
+]

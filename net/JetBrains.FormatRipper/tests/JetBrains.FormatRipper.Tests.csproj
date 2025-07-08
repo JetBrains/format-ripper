@@ -29,5 +29,6 @@
     <EmbeddedResource Include="ElfFileTestCases.json" />
     <EmbeddedResource Include="FileTypeExplorerTestCases.json" />
     <EmbeddedResource Include="MachOFileTestCases.json" />
+    <EmbeddedResource Include="MsiUtilTestCases.json" />
   </ItemGroup>
 </Project>
