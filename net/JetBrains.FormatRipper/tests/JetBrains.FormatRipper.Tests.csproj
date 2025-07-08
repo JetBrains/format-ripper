@@ -31,5 +31,6 @@
     <EmbeddedResource Include="MachOFileTestCases.json" />
     <EmbeddedResource Include="MsiUtilTestCases.json" />
     <EmbeddedResource Include="PeFileTestCases.json" />
+    <EmbeddedResource Include="ShFileTestCases.json" />
   </ItemGroup>
 </Project>

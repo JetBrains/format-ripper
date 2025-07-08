@@ -1,0 +1,12 @@
+[
+  {
+    "resourceName": "1.sh",
+    "resourceCategory": "Sh",
+    "description": "Test for shell script 1.sh"
+  },
+  {
+    "resourceName": "2.sh",
+    "resourceCategory": "Sh",
+    "description": "Test for shell script 2.sh"
+  }
+]
