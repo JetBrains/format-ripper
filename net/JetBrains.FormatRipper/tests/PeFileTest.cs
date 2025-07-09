@@ -54,7 +54,7 @@ namespace JetBrains.FormatRipper.Tests
         CodeOptions options = 0;
         if (testCase.expectedOptions != "0")
         {
-          foreach (var flag in testCase.expectedOptions.Split('|', StringSplitOptions.RemoveEmptyEntries))
+          foreach (var flag in testCase.expectedOptions.Split(new[] {'|'}, StringSplitOptions.RemoveEmptyEntries))
           {
             var trimmedFlag = flag.Trim();
             var enumValue = (CodeOptions)Enum.Parse(typeof(CodeOptions), trimmedFlag);

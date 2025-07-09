@@ -58,7 +58,7 @@ namespace JetBrains.FormatRipper.Tests
     {
       Console.WriteLine($"INFO: Testing ELF file: {testCase.resourceName}");
 
-      var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
+      var resourceCategory = (ResourceCategory)Enum.Parse(typeof(ResourceCategory), testCase.resourceCategory);
       var file = ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
       {
         Console.Error.WriteLine($"TRACE: Parsing ELF file: {testCase.resourceName}");
@@ -66,11 +66,11 @@ namespace JetBrains.FormatRipper.Tests
         return ElfFile.Parse(stream);
       });
 
-      var expectedEiClass = Enum.Parse<ELFCLASS>(testCase.eiClass);
-      var expectedEiData = Enum.Parse<ELFDATA>(testCase.eiData);
-      var expectedEiOsAbi = Enum.Parse<ELFOSABI>(testCase.eiOsAbi);
-      var expectedEType = Enum.Parse<ET>(testCase.eType);
-      var expectedEMachine = Enum.Parse<EM>(testCase.eMachine);
+      var expectedEiClass = (ELFCLASS)Enum.Parse(typeof(ELFCLASS), testCase.eiClass);
+      var expectedEiData = (ELFDATA)Enum.Parse(typeof(ELFDATA), testCase.eiData);
+      var expectedEiOsAbi = (ELFOSABI)Enum.Parse(typeof(ELFOSABI), testCase.eiOsAbi);
+      var expectedEType = (ET)Enum.Parse(typeof(ET), testCase.eType);
+      var expectedEMachine = (EM)Enum.Parse(typeof(EM), testCase.eMachine);
 
       // Handle eFlags which can be either a number or a string expression
       EF expectedEFlags;

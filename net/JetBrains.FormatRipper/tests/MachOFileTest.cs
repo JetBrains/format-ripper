@@ -78,7 +78,7 @@ namespace JetBrains.FormatRipper.Tests
     {
       Console.WriteLine($"INFO: Testing MachO file: {testCase.resourceName}");
 
-      var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
+      var resourceCategory = (ResourceCategory)Enum.Parse(typeof(ResourceCategory), testCase.resourceCategory);
       var file = ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
         {
           Console.Error.WriteLine($"TRACE: Parsing MachO file: {testCase.resourceName}");
@@ -100,7 +100,7 @@ namespace JetBrains.FormatRipper.Tests
 
         Assert.AreEqual(sectionData.isLittleEndian, fileSection.IsLittleEndian, indexMsg);
 
-        var expectedCpuType = Enum.Parse<CPU_TYPE>(sectionData.cpuType);
+        var expectedCpuType = (CPU_TYPE)Enum.Parse(typeof(CPU_TYPE), sectionData.cpuType);
         Assert.AreEqual(expectedCpuType, fileSection.CpuType, indexMsg);
 
         // Handle complex CPU subtypes with bitwise OR
@@ -109,13 +109,13 @@ namespace JetBrains.FormatRipper.Tests
         {
           foreach (var subTypeName in sectionData.cpuSubType.Split('|').Select(s => s.Trim()))
           {
-            var subType = Enum.Parse<CPU_SUBTYPE>(subTypeName);
+            var subType = (CPU_SUBTYPE)Enum.Parse(typeof(CPU_SUBTYPE), subTypeName);
             expectedCpuSubType |= subType;
           }
         }
         Assert.AreEqual(expectedCpuSubType, fileSection.CpuSubType, $"{indexMsg}, expected 0x{expectedCpuSubType:X}, but was 0x{fileSection.CpuSubType:X}");
 
-        var expectedMhFileType = Enum.Parse<MH_FileType>(sectionData.mhFileType);
+        var expectedMhFileType = (MH_FileType)Enum.Parse(typeof(MH_FileType), sectionData.mhFileType);
         Assert.AreEqual(expectedMhFileType, fileSection.MhFileType, indexMsg);
 
         // Parse options
@@ -124,7 +124,7 @@ namespace JetBrains.FormatRipper.Tests
         {
           foreach (var optionName in sectionData.options.Split('|').Select(s => s.Trim()))
           {
-            var option = Enum.Parse<Options>(optionName);
+            var option = (Options)Enum.Parse(typeof(Options), optionName);
             expectedOptions |= option;
           }
         }

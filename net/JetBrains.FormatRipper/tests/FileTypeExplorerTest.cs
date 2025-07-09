@@ -53,14 +53,14 @@ namespace JetBrains.FormatRipper.Tests
     {
       Console.WriteLine($"INFO: Testing file type detection for: {testCase.resourceName}");
 
-      var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
-      var expectedFileType = Enum.Parse<FileType>(testCase.expectedFileType);
+      var resourceCategory = (ResourceCategory)Enum.Parse(typeof(ResourceCategory), testCase.resourceCategory);
+      var expectedFileType = (FileType)Enum.Parse(typeof(FileType), testCase.expectedFileType);
 
       // Parse file properties from the array
       FileProperties expectedFileProperties = 0;
       foreach (var propName in testCase.expectedFileProperties)
       {
-        var prop = Enum.Parse<FileProperties>(propName.Trim());
+        var prop = (FileProperties)Enum.Parse(typeof(FileProperties), propName.Trim());
         expectedFileProperties |= prop;
       }
 

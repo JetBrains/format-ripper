@@ -63,7 +63,7 @@ public class DmgFileTest
   {
     Console.WriteLine($"INFO: Testing valid DMG file: {testCase.resourceName}");
 
-    var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
+    var resourceCategory = (ResourceCategory)Enum.Parse(typeof(ResourceCategory), testCase.resourceCategory);
     var file = ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
     {
       Console.Error.WriteLine($"TRACE: Parsing DMG file: {testCase.resourceName}");
@@ -84,7 +84,7 @@ public class DmgFileTest
   {
     Console.WriteLine($"INFO: Testing non-DMG file: {testCase.resourceName}");
 
-    var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
+    var resourceCategory = (ResourceCategory)Enum.Parse(typeof(ResourceCategory), testCase.resourceCategory);
     ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
     {
       Console.Error.WriteLine($"TRACE: Checking if file is DMG: {testCase.resourceName}");
