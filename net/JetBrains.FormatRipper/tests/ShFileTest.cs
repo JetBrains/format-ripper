@@ -51,7 +51,7 @@ namespace JetBrains.FormatRipper.Tests
     {
       Console.WriteLine($"INFO: Testing shell script file: {testCase.resourceName}");
 
-      var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
+      var resourceCategory = (ResourceCategory)Enum.Parse(typeof(ResourceCategory), testCase.resourceCategory);
       ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
       {
         Console.Error.WriteLine($"TRACE: Checking if {testCase.resourceName} is a shell script file");

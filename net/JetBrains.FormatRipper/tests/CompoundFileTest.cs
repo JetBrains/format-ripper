@@ -101,7 +101,7 @@ namespace JetBrains.FormatRipper.Tests
       Assert.AreEqual(testCase.expectedStreams.Length, fileExtractStreams.Count);
       for (var n = 0; n < testCase.expectedStreams.Length; ++n)
       {
-        Assert.AreEqual(Guid.Parse(testCase.expectedStreams[n].clsid), fileExtractStreams[n].Clsid);
+        Assert.AreEqual(new Guid(testCase.expectedStreams[n].clsid), fileExtractStreams[n].Clsid);
         Assert.AreEqual(testCase.expectedStreams[n].names.Length, fileExtractStreams[n].Names.Length);
         for (var k = 0; k < testCase.expectedStreams[n].names.Length; ++k)
           Assert.AreEqual(testCase.expectedStreams[n].names[k], fileExtractStreams[n].Names[k]);
