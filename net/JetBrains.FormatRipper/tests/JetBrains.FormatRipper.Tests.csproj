@@ -25,6 +25,6 @@
     <EmbeddedResource Include="..\..\..\data\pe\*" LinkBase="Resources\Pe" />
     <EmbeddedResource Include="..\..\..\data\sh\*" LinkBase="Resources\Sh" />
     <EmbeddedResource Include="..\..\..\data\dmg\*" LinkBase="Resources\Dmg" />
-    <EmbeddedResource Include="..\..\..\data\test_cases_descriptors\format-ripper\*" LinkBase="Resources\TestCases" />
+    <EmbeddedResource Include="..\..\..\data\test-cases-descriptors\format-ripper\*" LinkBase="Resources\TestCases" />
   </ItemGroup>
 </Project>
