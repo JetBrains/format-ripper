@@ -14,7 +14,7 @@ public class DmgFileTest
   {
     public string testType { get; set; }
     public string resourceName { get; set; }
-    public string resourceCategory { get; set; }
+    public ResourceCategory resourceCategory { get; set; }
     public bool? hasSignature { get; set; }
     public string description { get; set; }
   }
@@ -48,9 +48,10 @@ public class DmgFileTest
 
     return ResourceUtil.OpenRead(ResourceCategory.TestCases, "DmgFileTestCases.json", stream =>
     {
-      using var reader = new StreamReader(stream);
-      var json = reader.ReadToEnd();
-      var obj = JsonConvert.DeserializeObject<List<TestCase>>(json);
+      using var reader = new JsonTextReader(new StreamReader(stream));
+      var serializer = new JsonSerializer();
+      serializer.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+      var obj = serializer.Deserialize<List<TestCase>>(reader);
       if (obj == null)
         throw new InvalidOperationException($"Failed to deserialize test cases from {resourceName}");
       return obj;
@@ -63,8 +64,7 @@ public class DmgFileTest
   {
     Console.WriteLine($"INFO: Testing valid DMG file: {testCase.resourceName}");
 
-    var resourceCategory = (ResourceCategory)Enum.Parse(typeof(ResourceCategory), testCase.resourceCategory);
-    var file = ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
+    var file = ResourceUtil.OpenRead(testCase.resourceCategory, testCase.resourceName, stream =>
     {
       Console.Error.WriteLine($"TRACE: Parsing DMG file: {testCase.resourceName}");
       Assert.IsTrue(DmgFile.Is(stream), $"File {testCase.resourceName} should be recognized as a DMG file");
@@ -84,8 +84,7 @@ public class DmgFileTest
   {
     Console.WriteLine($"INFO: Testing non-DMG file: {testCase.resourceName}");
 
-    var resourceCategory = (ResourceCategory)Enum.Parse(typeof(ResourceCategory), testCase.resourceCategory);
-    ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
+    ResourceUtil.OpenRead(testCase.resourceCategory, testCase.resourceName, stream =>
     {
       Console.Error.WriteLine($"TRACE: Checking if file is DMG: {testCase.resourceName}");
       Assert.IsFalse(DmgFile.Is(stream), $"File {testCase.resourceName} should NOT be recognized as a DMG file");

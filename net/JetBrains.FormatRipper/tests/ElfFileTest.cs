@@ -14,12 +14,12 @@ namespace JetBrains.FormatRipper.Tests
     public class TestCase
     {
       public string resourceName { get; set; }
-      public string resourceCategory { get; set; }
-      public string eiClass { get; set; }
-      public string eiData { get; set; }
-      public string eiOsAbi { get; set; }
-      public string eType { get; set; }
-      public string eMachine { get; set; }
+      public ResourceCategory resourceCategory { get; set; }
+      public ELFCLASS eiClass { get; set; }
+      public ELFDATA eiData { get; set; }
+      public ELFOSABI eiOsAbi { get; set; }
+      public ET eType { get; set; }
+      public EM eMachine { get; set; }
       public object eFlags { get; set; }
       public string interpreter { get; set; }
       public string description { get; set; }
@@ -43,9 +43,10 @@ namespace JetBrains.FormatRipper.Tests
 
       return ResourceUtil.OpenRead(ResourceCategory.TestCases, "ElfFileTestCases.json", stream =>
       {
-        using var reader = new StreamReader(stream);
-        var json = reader.ReadToEnd();
-        var obj = JsonConvert.DeserializeObject<List<TestCase>>(json);
+        using var reader = new JsonTextReader(new StreamReader(stream));
+        var serializer = new JsonSerializer();
+        serializer.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+        var obj = serializer.Deserialize<List<TestCase>>(reader);
         if (obj == null)
           throw new InvalidOperationException($"Failed to deserialize test cases from {resourceName}");
         return obj;
@@ -58,19 +59,13 @@ namespace JetBrains.FormatRipper.Tests
     {
       Console.WriteLine($"INFO: Testing ELF file: {testCase.resourceName}");
 
-      var resourceCategory = (ResourceCategory)Enum.Parse(typeof(ResourceCategory), testCase.resourceCategory);
-      var file = ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
+      var file = ResourceUtil.OpenRead(testCase.resourceCategory, testCase.resourceName, stream =>
       {
         Console.Error.WriteLine($"TRACE: Parsing ELF file: {testCase.resourceName}");
         Assert.IsTrue(ElfFile.Is(stream), $"File {testCase.resourceName} should be recognized as an ELF file");
         return ElfFile.Parse(stream);
       });
 
-      var expectedEiClass = (ELFCLASS)Enum.Parse(typeof(ELFCLASS), testCase.eiClass);
-      var expectedEiData = (ELFDATA)Enum.Parse(typeof(ELFDATA), testCase.eiData);
-      var expectedEiOsAbi = (ELFOSABI)Enum.Parse(typeof(ELFOSABI), testCase.eiOsAbi);
-      var expectedEType = (ET)Enum.Parse(typeof(ET), testCase.eType);
-      var expectedEMachine = (EM)Enum.Parse(typeof(EM), testCase.eMachine);
 
       // Handle eFlags which can be either a number or a string expression
       EF expectedEFlags;
@@ -101,11 +96,11 @@ namespace JetBrains.FormatRipper.Tests
         }
       }
 
-      Assert.AreEqual(expectedEiClass, file.EiClass, $"EiClass mismatch for {testCase.resourceName}");
-      Assert.AreEqual(expectedEiData, file.EiData, $"EiData mismatch for {testCase.resourceName}");
-      Assert.AreEqual(expectedEiOsAbi, file.EiOsAbi, $"EiOsAbi mismatch for {testCase.resourceName}");
-      Assert.AreEqual(expectedEType, file.EType, $"EType mismatch for {testCase.resourceName}");
-      Assert.AreEqual(expectedEMachine, file.EMachine, $"EMachine mismatch for {testCase.resourceName}");
+      Assert.AreEqual(testCase.eiClass, file.EiClass, $"EiClass mismatch for {testCase.resourceName}");
+      Assert.AreEqual(testCase.eiData, file.EiData, $"EiData mismatch for {testCase.resourceName}");
+      Assert.AreEqual(testCase.eiOsAbi, file.EiOsAbi, $"EiOsAbi mismatch for {testCase.resourceName}");
+      Assert.AreEqual(testCase.eType, file.EType, $"EType mismatch for {testCase.resourceName}");
+      Assert.AreEqual(testCase.eMachine, file.EMachine, $"EMachine mismatch for {testCase.resourceName}");
       Assert.AreEqual(expectedEFlags, file.EFlags, $"EFlags mismatch for {testCase.resourceName}. Expected 0x{expectedEFlags:X}, but was 0x{file.EFlags:X}");
       Assert.AreEqual(testCase.interpreter, file.Interpreter, $"Interpreter mismatch for {testCase.resourceName}");
 

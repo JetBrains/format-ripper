@@ -36,9 +36,9 @@ namespace JetBrains.FormatRipper.Tests
 
       return ResourceUtil.OpenRead(ResourceCategory.TestCases, "MsiUtilTestCases.json", stream =>
       {
-        using var reader = new StreamReader(stream);
-        var json = reader.ReadToEnd();
-        var obj = JsonConvert.DeserializeObject<List<TestCase>>(json);
+        using var reader = new JsonTextReader(new StreamReader(stream));
+        var serializer = new JsonSerializer();
+        var obj = serializer.Deserialize<List<TestCase>>(reader);
         if (obj == null)
           throw new InvalidOperationException($"Failed to deserialize test cases from {resourceName}");
         return obj;

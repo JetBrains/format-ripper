@@ -15,7 +15,7 @@ namespace JetBrains.FormatRipper.Tests
     public class TestCase
     {
       public string resourceName { get; set; }
-      public string resourceCategory { get; set; }
+      public ResourceCategory resourceCategory { get; set; }
       public bool? isFatLittleEndian { get; set; }
       public SectionData[] sections { get; set; }
       public string description { get; set; }
@@ -24,9 +24,9 @@ namespace JetBrains.FormatRipper.Tests
     public class SectionData
     {
       public bool isLittleEndian { get; set; }
-      public string cpuType { get; set; }
+      public CPU_TYPE cpuType { get; set; }
       public string cpuSubType { get; set; }
-      public string mhFileType { get; set; }
+      public MH_FileType mhFileType { get; set; }
       public string options { get; set; }
       public string codeDirectoryBlobHash { get; set; }
       public string cmsDataHash { get; set; }
@@ -54,9 +54,10 @@ namespace JetBrains.FormatRipper.Tests
 
       return ResourceUtil.OpenRead(ResourceCategory.TestCases, "MachOFileTestCases.json", stream =>
       {
-        using var reader = new StreamReader(stream);
-        var json = reader.ReadToEnd();
-        var obj = JsonConvert.DeserializeObject<List<TestCase>>(json);
+        using var reader = new JsonTextReader(new StreamReader(stream));
+        var serializer = new JsonSerializer();
+        serializer.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+        var obj = serializer.Deserialize<List<TestCase>>(reader);
         if (obj == null)
           throw new InvalidOperationException($"Failed to deserialize test cases from {resourceName}");
         return obj;
@@ -78,8 +79,7 @@ namespace JetBrains.FormatRipper.Tests
     {
       Console.WriteLine($"INFO: Testing MachO file: {testCase.resourceName}");
 
-      var resourceCategory = (ResourceCategory)Enum.Parse(typeof(ResourceCategory), testCase.resourceCategory);
-      var file = ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
+      var file = ResourceUtil.OpenRead(testCase.resourceCategory, testCase.resourceName, stream =>
         {
           Console.Error.WriteLine($"TRACE: Parsing MachO file: {testCase.resourceName}");
           Assert.IsTrue(MachOFile.Is(stream), $"File {testCase.resourceName} should be recognized as a MachO file");
@@ -100,8 +100,7 @@ namespace JetBrains.FormatRipper.Tests
 
         Assert.AreEqual(sectionData.isLittleEndian, fileSection.IsLittleEndian, indexMsg);
 
-        var expectedCpuType = (CPU_TYPE)Enum.Parse(typeof(CPU_TYPE), sectionData.cpuType);
-        Assert.AreEqual(expectedCpuType, fileSection.CpuType, indexMsg);
+        Assert.AreEqual(sectionData.cpuType, fileSection.CpuType, indexMsg);
 
         // Handle complex CPU subtypes with bitwise OR
         CPU_SUBTYPE expectedCpuSubType = 0;
@@ -115,8 +114,7 @@ namespace JetBrains.FormatRipper.Tests
         }
         Assert.AreEqual(expectedCpuSubType, fileSection.CpuSubType, $"{indexMsg}, expected 0x{expectedCpuSubType:X}, but was 0x{fileSection.CpuSubType:X}");
 
-        var expectedMhFileType = (MH_FileType)Enum.Parse(typeof(MH_FileType), sectionData.mhFileType);
-        Assert.AreEqual(expectedMhFileType, fileSection.MhFileType, indexMsg);
+        Assert.AreEqual(sectionData.mhFileType, fileSection.MhFileType, indexMsg);
 
         // Parse options
         Options expectedOptions = 0;
