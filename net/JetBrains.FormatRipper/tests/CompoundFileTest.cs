@@ -16,7 +16,7 @@ namespace JetBrains.FormatRipper.Tests
     public class TestCase
     {
       public string resourceName { get; set; }
-      public string expectedType { get; set; }
+      public CompoundFile.FileType expectedType { get; set; }
       public string[] expectedOptions { get; set; }
       public string expectedCmsBlobHash { get; set; }
       public string expectedOrderedIncludeRanges { get; set; }
@@ -37,9 +37,10 @@ namespace JetBrains.FormatRipper.Tests
 
       var testCases = ResourceUtil.OpenRead(ResourceCategory.TestCases, "CompoundFileTestCases.json", stream =>
       {
-        using var reader = new StreamReader(stream);
-        var json = reader.ReadToEnd();
-        var obj = JsonConvert.DeserializeObject<List<TestCase>>(json);
+        using var reader = new JsonTextReader(new StreamReader(stream));
+        var serializer = new JsonSerializer();
+        serializer.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+        var obj = serializer.Deserialize<List<TestCase>>(reader);
         if (obj == null)
           throw new InvalidOperationException($"Failed to deserialize test cases from {resourceName}");
         return obj;
@@ -64,8 +65,7 @@ namespace JetBrains.FormatRipper.Tests
         return CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData | CompoundFile.Mode.ComputeHashInfo, (_, _, _) => true);
       });
 
-      var expectedType = (CompoundFile.FileType)Enum.Parse(typeof(CompoundFile.FileType), testCase.expectedType);
-      Assert.AreEqual(expectedType, file.Type);
+      Assert.AreEqual(testCase.expectedType, file.Type);
 
       var hasCmsBlob = testCase.expectedOptions.Contains("HasCmsBlob");
       var signedBlob = file.SignatureData.SignedBlob;

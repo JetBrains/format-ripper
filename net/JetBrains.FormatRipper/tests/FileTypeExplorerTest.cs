@@ -14,8 +14,8 @@ namespace JetBrains.FormatRipper.Tests
     public class TestCase
     {
       public string resourceName { get; set; }
-      public string resourceCategory { get; set; }
-      public string expectedFileType { get; set; }
+      public ResourceCategory resourceCategory { get; set; }
+      public FileType expectedFileType { get; set; }
       public string[] expectedFileProperties { get; set; }
       public string description { get; set; }
     }
@@ -38,9 +38,10 @@ namespace JetBrains.FormatRipper.Tests
 
       return ResourceUtil.OpenRead(ResourceCategory.TestCases, "FileTypeExplorerTestCases.json", stream =>
       {
-        using var reader = new StreamReader(stream);
-        var json = reader.ReadToEnd();
-        var obj = JsonConvert.DeserializeObject<List<TestCase>>(json);
+        using var reader = new JsonTextReader(new StreamReader(stream));
+        var serializer = new JsonSerializer();
+        serializer.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+        var obj = serializer.Deserialize<List<TestCase>>(reader);
         if (obj == null)
           throw new InvalidOperationException($"Failed to deserialize test cases from {resourceName}");
         return obj;
@@ -53,8 +54,8 @@ namespace JetBrains.FormatRipper.Tests
     {
       Console.WriteLine($"INFO: Testing file type detection for: {testCase.resourceName}");
 
-      var resourceCategory = (ResourceCategory)Enum.Parse(typeof(ResourceCategory), testCase.resourceCategory);
-      var expectedFileType = (FileType)Enum.Parse(typeof(FileType), testCase.expectedFileType);
+      var resourceCategory = testCase.resourceCategory;
+      var expectedFileType = testCase.expectedFileType;
 
       // Parse file properties from the array
       FileProperties expectedFileProperties = 0;
