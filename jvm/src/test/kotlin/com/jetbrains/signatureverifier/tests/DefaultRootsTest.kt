@@ -13,6 +13,7 @@ class DefaultRootsTest {
       // @formatter:off
       Pair("Apple Root CA"                            , BigInteger("02"                              , 16)),
       Pair("Certum Trusted Network CA"                , BigInteger("0444c0"                          , 16)),
+      Pair("DigiCert Trusted Root G4"                 , BigInteger("059b1b579e8e2132e23907bda777755c", 16)),
       Pair("Entrust Root Certification Authority - G2", BigInteger("4a538c28"                        , 16)),
       Pair("Go Daddy Root Certificate Authority - G2" , BigInteger("00"                              , 16)),
       Pair("Microsoft Root Certificate Authority"     , BigInteger("79ad16a14aa0a5ad4c7358f407132e65", 16)),
