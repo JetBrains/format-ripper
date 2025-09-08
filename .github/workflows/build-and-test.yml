@@ -212,7 +212,7 @@ jobs:
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       - name: Setup JDK and Tests under QEMU ${{ matrix.arch }}
         run: >
-          docker run --rm -e JAVA_OPTS="-Djdk.lang.Process.launchMechanism=vfork" -v ${PWD}:/home/gradle/project -w /home/gradle/project/jvm --platform linux/${{ matrix.arch }} gradle:7.2.0-jdk17 gradle test --stacktrace
+          docker run --rm -e JAVA_OPTS="-Djdk.lang.Process.launchMechanism=vfork" -v ${PWD}:/home/gradle/project -w /home/gradle/project/jvm --platform linux/${{ matrix.arch }} gradle:7.5.1-jdk17 gradle test --stacktrace
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
