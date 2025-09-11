@@ -2,7 +2,6 @@ package com.jetbrains.signatureverifier.macho
 
 import com.jetbrains.signatureverifier.*
 import com.jetbrains.util.*
-import org.apache.commons.compress.utils.SeekableInMemoryByteChannel
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
 import java.nio.channels.SeekableByteChannel
@@ -42,19 +41,6 @@ open class MachoFile {
     setMagic()
   }
 
-  /**
-   * Initializes a new instance of the MachoFile
-   *
-   * @param data  A raw data
-   * @exception ParseException  Indicates the byte order ("endianness")
-   *      in which data is stored in this computer architecture is not Little Endian.
-   * @exception InvalidDataException  If the input data not contain MachO
-   */
-  constructor(@NotNull data: ByteArray) {
-    _stream = SeekableInMemoryByteChannel(data)
-    setMagic()
-  }
-
   private fun setMagic() {
     val reader = BinaryReader(_stream.Rewind())
     Magic = reader.ReadUInt32().toLong() // mach_header::magic / mach_header64::magic
@@ -71,17 +57,46 @@ open class MachoFile {
   fun ComputeHash(algName: String): ByteArray {
     val (excludeRanges, hasLcCodeSignature) = getHashExcludeRanges()
     val hash = MessageDigest.getInstance(algName)
+
+    // Use a fixed-size buffer to avoid loading large chunks into memory
+    val buffer = ByteArray(1024 * 1024)
+
+    fun readAndHash(count: Long) {
+      var remaining = count
+      while (remaining > 0) {
+        val toRead = kotlin.math.min(remaining, buffer.size.toLong()).toInt()
+        val byteBuffer = java.nio.ByteBuffer.wrap(buffer, 0, toRead)
+        val bytesRead = _stream.read(byteBuffer)
+        if (bytesRead <= 0) break
+        hash.update(buffer, 0, bytesRead)
+        remaining -= bytesRead
+      }
+    }
+
+    fun readToEndAndHash() {
+      while (true) {
+        val byteBuffer = java.nio.ByteBuffer.wrap(buffer)
+        val bytesRead = _stream.read(byteBuffer)
+        if (bytesRead <= 0) break
+        hash.update(buffer, 0, bytesRead)
+      }
+    }
+
     if (excludeRanges.any()) {
-      val reader = BinaryReader(_stream.Rewind())
+      _stream.Rewind()
       for (dataInfo in excludeRanges) {
         val size = dataInfo.Offset - _stream.position()
         if (size > 0) {
-          hash.update(reader.ReadBytes(size.toInt()))
-          _stream.Seek(dataInfo.Size.toLong(), SeekOrigin.Current)
+          readAndHash(size)
         }
+        // Skip excluded range
+        _stream.Seek(dataInfo.Size.toLong(), SeekOrigin.Current)
       }
-      hash.update(_stream.ReadToEnd())
-      //append the zero-inset to the end of data. codesign does it as well
+
+      // Hash the rest to the end
+      readToEndAndHash()
+
+      // append the zero-inset to the end of data. codesign does it as well
       if (!hasLcCodeSignature) {
         val filesize = _stream.position()
         var zeroInsetSize = filesize % 16
@@ -91,7 +106,8 @@ open class MachoFile {
         }
       }
     } else {
-      hash.update(_stream.ReadAll())
+      _stream.Rewind()
+      readToEndAndHash()
     }
     return hash.digest()
   }
