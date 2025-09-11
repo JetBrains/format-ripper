@@ -75,15 +75,15 @@ open class MachoArch {
           _stream.Seek(4, SeekOrigin.Current)
         }
       return fatArchItems.map { s ->
-        _stream.Seek(s.Offset.toLong(), SeekOrigin.Begin)
-        MachoFile(reader.ReadBytes(s.Size))
+        // Create a subrange channel over the original stream without copying data
+        MachoFile(SubrangeSeekableByteChannel(_stream, s.Offset.toLong(), s.Size.toLong()))
       }.toList()
     }
     throw InvalidDataException("Unknown format")
   }
 
   private fun getMachoData(stream: SeekableByteChannel): MachoFile {
-    return MachoFile(stream.ReadAll())
+    return MachoFile(stream)
   }
 }
 
