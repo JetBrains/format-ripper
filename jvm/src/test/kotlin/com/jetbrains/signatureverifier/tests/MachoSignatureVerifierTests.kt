@@ -22,35 +22,31 @@ class MachoSignatureVerifierTests {
   @ParameterizedTest
   @MethodSource("VerifySignTestProvider")
   fun VerifySignTest(machoResourceName: String, expectedResult: VerifySignatureStatus) {
-    val machoFiles =
-      Files.newByteChannel(getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
-        MachoArch(it).Extract()
+    Files.newByteChannel(getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
+      val machoFiles = MachoArch(it).Extract()
+      val verificationParams = SignatureVerificationParams(null, null, false, false)
+      val signedMessageVerifier = SignedMessageVerifier(ConsoleLogger.Instance)
+
+      for (machoFile in machoFiles) {
+        val signatureData = machoFile.GetSignatureData()
+        val signedMessage = SignedMessage.CreateInstance(signatureData)
+        val result = runBlocking { signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams) }
+
+        Assertions.assertEquals(expectedResult, result.Status)
       }
-
-    val verificationParams = SignatureVerificationParams(null, null, false, false)
-    val signedMessageVerifier = SignedMessageVerifier(ConsoleLogger.Instance)
-
-    for (machoFile in machoFiles) {
-      val signatureData = machoFile.GetSignatureData()
-      val signedMessage = SignedMessage.CreateInstance(signatureData)
-      val result = runBlocking { signedMessageVerifier.VerifySignatureAsync(signedMessage, verificationParams) }
-
-      Assertions.assertEquals(expectedResult, result.Status)
     }
   }
 
   @ParameterizedTest
   @MethodSource("VerifySignInvalidSignatureFormatTestProvider")
   fun VerifySignInvalidSignatureFormat(machoResourceName: String) {
-    val machoFiles =
-      Files.newByteChannel(getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
-        MachoArch(it).Extract()
+    Files.newByteChannel(getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
+      val machoFiles = MachoArch(it).Extract()
+      for (machoFile in machoFiles) {
+        val signatureData = machoFile.GetSignatureData()
+        val thrown = assertThrows(Exception::class.java) { SignedMessage.CreateInstance(signatureData) }
+        assertTrue(thrown.message!!.contains("Invalid signature format"))
       }
-
-    for (machoFile in machoFiles) {
-      val signatureData = machoFile.GetSignatureData()
-      val thrown = assertThrows(Exception::class.java) { SignedMessage.CreateInstance(signatureData) }
-      assertTrue(thrown.message!!.contains("Invalid signature format"))
     }
   }
 

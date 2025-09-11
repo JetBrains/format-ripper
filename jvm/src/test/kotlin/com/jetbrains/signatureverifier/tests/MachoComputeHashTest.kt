@@ -16,15 +16,14 @@ class MachoComputeHashTest {
   @ParameterizedTest
   @MethodSource("MachoComputeHashTestProvider")
   fun ComputeHashTest(machoResourceName: String, alg: String, expectedResult: Collection<String>) {
-    val machoFiles =
-      Files.newByteChannel(getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
-        MachoArch(it).Extract()
-      }
+    Files.newByteChannel(getTestDataFile("mach-o", machoResourceName), StandardOpenOption.READ).use {
+      val machoFiles = MachoArch(it).Extract()
 
-    for (index in 0 until machoFiles.count()) {
-      val machoFile: MachoFile = machoFiles.elementAt(index)
-      val result = machoFile.ComputeHash(alg)
-      Assertions.assertEquals(expectedResult.elementAt(index), result.ConvertToHexString().uppercase())
+      for (index in 0 until machoFiles.count()) {
+        val machoFile: MachoFile = machoFiles.elementAt(index)
+        val result = machoFile.ComputeHash(alg)
+        Assertions.assertEquals(expectedResult.elementAt(index), result.ConvertToHexString().uppercase())
+      }
     }
   }
 
