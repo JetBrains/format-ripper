@@ -14,8 +14,6 @@ class PeFile {
   private val _signData: DataInfo
   private val _dotnetMetadata: DataInfo
 
-  private val RawPeData: ByteArray by lazy { rawPeData() }
-
   val ImageDirectoryEntrySecurityOffset: Int
     get() = _imageDirectoryEntrySecurity.Offset
 
@@ -108,48 +106,63 @@ class PeFile {
    * @param algName Name of the hashing algorithm
    * */
   fun ComputeHash(@NotNull algName: String): ByteArray {
-    val data = RawPeData
     val hash = MessageDigest.getInstance(algName)
 
-    //hash from start to checksum field
+    fun hashRange(startOffset: Long, length: Long) {
+      if (length <= 0L) return
+      val fileSize = _stream.size()
+      val safeStart = startOffset.coerceAtLeast(0L).coerceAtMost(fileSize)
+      val maxLen = (fileSize - safeStart).coerceAtLeast(0L)
+      val safeLen = length.coerceAtMost(maxLen)
+      if (safeLen <= 0L) return
+
+      val buffer = ByteArray(1024 * 1024) // 1MB chunks
+      var remaining = safeLen
+      _stream.Seek(safeStart, SeekOrigin.Begin)
+      while (remaining > 0) {
+        val toRead = if (remaining < buffer.size) remaining.toInt() else buffer.size
+        val bytesRead = _stream.read(java.nio.ByteBuffer.wrap(buffer, 0, toRead))
+        if (bytesRead <= 0) break
+        hash.update(buffer, 0, bytesRead)
+        remaining -= bytesRead
+      }
+    }
+
+    val fileSize = _stream.size().toInt()
+
+    // 1) Hash from start to checksum field (exclusive)
     var offset = 0
     var count = _checkSum.Offset
-    hash.update(data, offset, count)
+    hashRange(offset.toLong(), count.toLong())
 
-    //jump over checksum and hash to IMAGE_DIRECTORY_ENTRY_SECURITY
+    // 2) Skip checksum field, hash up to IMAGE_DIRECTORY_ENTRY_SECURITY (exclusive)
     offset = count + _checkSum.Size
     count = _imageDirectoryEntrySecurity.Offset - offset
-    hash.update(data, offset, count)
+    hashRange(offset.toLong(), count.toLong())
 
-    //jump over IMAGE_DIRECTORY_ENTRY_SECURITY
+    // 3) Skip IMAGE_DIRECTORY_ENTRY_SECURITY itself (8 bytes)
     offset = _imageDirectoryEntrySecurity.Offset + _imageDirectoryEntrySecurity.Size
 
-    if (_signData.IsEmpty) // PE is not signed
-    {
-      //hash to EOF
-      count = data.count() - offset
-      hash.update(data, offset, count)
+    if (_signData.IsEmpty) {
+      // 4a) Not signed: hash to EOF
+      count = fileSize - offset
+      hashRange(offset.toLong(), count.toLong())
     } else {
-      //PE is signed
+      // 4b) Signed: hash up to the start of signature data
       count = _signData.Offset - offset
+      if (offset + count <= fileSize) {
+        hashRange(offset.toLong(), count.toLong())
+      }
 
-      //hash to start the signature data
-      if ((offset + count) <= data.count())
-        hash.update(data, offset, count)
-
-      //jump over the signature data and hash all the rest
+      // 5) Jump over signature data and hash the rest to EOF
       offset = _signData.Offset + _signData.Size
-      count = data.count() - offset
-
-      if (count > 0)
-        hash.update(data, offset, count)
+      count = fileSize - offset
+      if (count > 0) {
+        hashRange(offset.toLong(), count.toLong())
+      }
     }
 
     return hash.digest()
-  }
-
-  private fun rawPeData(): ByteArray {
-    return _stream.Rewind().ReadToEnd()
   }
 }
 
