@@ -3,7 +3,7 @@ package com.jetbrains.signatureverifier.bouncycastle.cms
 import org.bouncycastle.cms.SignerId
 import org.bouncycastle.util.Iterable
 
-class SignerInformationStore : Iterable<SignerInformation?> {
+class SignerInformationStore : Iterable<SignerInformation> {
   private var all: MutableList<SignerInformation>
   private val table: MutableMap<SignerId, MutableList<SignerInformation>> = mutableMapOf()
 
