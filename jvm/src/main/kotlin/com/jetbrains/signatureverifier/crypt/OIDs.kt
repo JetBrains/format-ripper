@@ -12,5 +12,6 @@ object OIDs {
   val APPLE_CERTIFICATE_EXTENSION_CODE_SIGNING: ASN1ObjectIdentifier = ASN1ObjectIdentifier("1.2.840.113635.100.6.1.13")
   val APPLE_CERTIFICATE_EXTENSION_KEXT_SIGNING: ASN1ObjectIdentifier = ASN1ObjectIdentifier("1.2.840.113635.100.6.1.18")
   val OCSP: ASN1ObjectIdentifier = ASN1ObjectIdentifier("1.3.6.1.5.5.7.48.1")
+  val SPC_SIPINFO_OBJID: ASN1ObjectIdentifier = ASN1ObjectIdentifier("1.3.6.1.4.1.311.2.1.30")
 }
 
