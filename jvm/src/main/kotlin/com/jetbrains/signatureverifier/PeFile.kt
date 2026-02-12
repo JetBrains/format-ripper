@@ -1,13 +1,16 @@
 ﻿package com.jetbrains.signatureverifier
 
-import com.jetbrains.util.*
+import com.jetbrains.util.BinaryReader
+import com.jetbrains.util.Rewind
+import com.jetbrains.util.Seek
+import com.jetbrains.util.SeekOrigin
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
 import java.nio.channels.SeekableByteChannel
 import java.security.MessageDigest
 
 /** Portable Executable file from the specified channel */
-class PeFile {
+class PeFile : SignableFile {
   private val _stream: SeekableByteChannel
   private val _checkSum: DataInfo
   private val _imageDirectoryEntrySecurity: DataInfo
@@ -76,7 +79,7 @@ class PeFile {
   }
 
   /** Retrieve the signature data from PE */
-  fun GetSignatureData(): SignatureData {
+  override fun GetSignatureData(): SignatureData {
     if (_signData.IsEmpty)
       return SignatureData.Empty
 
@@ -105,7 +108,7 @@ class PeFile {
   /** Compute hash of PE structure
    * @param algName Name of the hashing algorithm
    * */
-  fun ComputeHash(@NotNull algName: String): ByteArray {
+  override fun ComputeHash(@NotNull algName: String): ByteArray {
     val hash = MessageDigest.getInstance(algName)
 
     fun hashRange(startOffset: Long, length: Long) {

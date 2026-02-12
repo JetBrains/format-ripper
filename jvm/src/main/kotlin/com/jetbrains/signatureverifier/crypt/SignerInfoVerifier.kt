@@ -52,6 +52,7 @@ open class SignerInfoVerifier {
   }
 
   suspend fun VerifyAsync(@NotNull signatureVerificationParams: SignatureVerificationParams): VerifySignatureResult {
+    @Suppress("UNCHECKED_CAST")
     val certList = ArrayList(_certs.getMatches(_signer.sID as Selector<X509CertificateHolder>))
     if (certList.isEmpty()) {
       _logger.Error(Messages.signer_cert_not_found)
@@ -154,6 +155,7 @@ open class SignerInfoVerifier {
   private suspend fun verifyTimeStampAsync(signatureVerificationParams: SignatureVerificationParams): VerifySignatureResult {
     val tst = TimeStampToken ?: return VerifySignatureResult.Valid
     val tstCerts = tst.certificates
+    @Suppress("UNCHECKED_CAST")
     val tstCertsList = ArrayList(tstCerts.getMatches(tst.sID as Selector<X509CertificateHolder>))
     if (tstCertsList.count() < 1)
       return VerifySignatureResult(VerifySignatureStatus.InvalidTimestamp, Messages.signer_cert_not_found)

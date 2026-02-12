@@ -1,5 +1,6 @@
 package com.jetbrains.signatureverifier.cf
 
+import com.jetbrains.signatureverifier.SignableFile
 import com.jetbrains.signatureverifier.SignatureData
 import org.jetbrains.annotations.NotNull
 import java.nio.channels.SeekableByteChannel
@@ -8,7 +9,7 @@ import java.security.MessageDigest
 /**
  * MS Windows Installer compound file
  */
-open class MsiFile {
+open class MsiFile : SignableFile {
   private val _cf: CompoundFile
 
   //\u0005DigitalSignature
@@ -39,7 +40,7 @@ open class MsiFile {
   /**
    * Retrieve the signature data from MSI
    */
-  fun GetSignatureData(): SignatureData {
+  override fun GetSignatureData(): SignatureData {
     val data = _cf.GetStreamData(_digitalSignatureEntryName)
 
     if (data == null)
@@ -48,13 +49,17 @@ open class MsiFile {
     return SignatureData(null, data)
   }
 
+  override fun ComputeHash(algName: String): ByteArray {
+    return ComputeHash(algName, true)
+  }
+
   /**
    * Compute hash of MSI structure
    *
    * @param algName  Name of the hashing algorithm
    * @param skipMsiDigitalSignatureExEntry  Skip \u0005MsiDigitalSignatureEx entry data when hashing
    */
-  fun ComputeHash(@NotNull algName: String, skipMsiDigitalSignatureExEntry: Boolean): ByteArray {
+  fun ComputeHash(@NotNull algName: String, skipMsiDigitalSignatureExEntry: Boolean = true): ByteArray {
     val entries = _cf.GetStreamDirectoryEntries()
       .sortedWith { e1: DirectoryEntry, e2: DirectoryEntry -> compareDirectoryEntries(e1, e2) }
 

@@ -1,6 +1,9 @@
 package com.jetbrains.signatureverifier.macho
 
-import com.jetbrains.signatureverifier.*
+import com.jetbrains.signatureverifier.DataInfo
+import com.jetbrains.signatureverifier.InvalidDataException
+import com.jetbrains.signatureverifier.SignableFile
+import com.jetbrains.signatureverifier.SignatureData
 import com.jetbrains.util.*
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
@@ -8,7 +11,7 @@ import java.nio.channels.SeekableByteChannel
 import java.security.MessageDigest
 import java.text.ParseException
 
-open class MachoFile {
+open class MachoFile : SignableFile {
   private val _stream: SeekableByteChannel
   var Magic: Long = 0
   val isLe32: Boolean
@@ -54,7 +57,7 @@ open class MachoFile {
     firstLoadCommandPosition = _stream.position() + (if (is32) 4 else 8)// load_command[0]
   }
 
-  fun ComputeHash(algName: String): ByteArray {
+  override fun ComputeHash(algName: String): ByteArray {
     val (excludeRanges, hasLcCodeSignature) = getHashExcludeRanges()
     val hash = MessageDigest.getInstance(algName)
 
@@ -165,7 +168,7 @@ open class MachoFile {
    *
    * @exception InvalidDataException  Indicates the data in the input stream does not correspond to MachO format or the signature data is malformed
    */
-  fun GetSignatureData(): SignatureData {
+  override fun GetSignatureData(): SignatureData {
     try {
       return getMachoSignatureData()
     } catch (ex: IOException) {

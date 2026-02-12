@@ -7,3 +7,4 @@ bin/
 packages/
 *.user
 *.nuget
+.DS_Store
