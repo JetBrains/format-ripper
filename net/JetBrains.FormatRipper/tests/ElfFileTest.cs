@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using JetBrains.FormatRipper.Elf;
+using JetBrains.SignatureVerifier;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -54,15 +55,13 @@ namespace JetBrains.FormatRipper.Tests
       var type = typeof(ResourceUtil);
       var resourceName = $"{type.Namespace}.ElfFileTestCases.json";
 
-      return ResourceUtil.OpenRead(ResourceCategory.TestCases, "ElfFileTestCases.json", stream =>
-      {
-        using var reader = new StreamReader(stream);
-        var json = reader.ReadToEnd();
-        var obj = JsonConvert.DeserializeObject<List<TestCase>>(json);
-        if (obj == null)
-          throw new InvalidOperationException($"Failed to deserialize test cases from {resourceName}");
-        return obj;
-      });
+      using var stream = type.Assembly.GetManifestResourceStream(resourceName);
+      if (stream == null)
+        throw new InvalidOperationException($"Failed to open resource stream for {resourceName}");
+
+      using var reader = new StreamReader(stream);
+      var json = reader.ReadToEnd();
+      return JsonConvert.DeserializeObject<List<TestCase>>(json);
     }
 
     [TestCaseSource(nameof(LoadElfTestCases))]

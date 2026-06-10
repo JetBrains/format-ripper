@@ -18,7 +18,6 @@ namespace JetBrains.FormatRipper.Tests
             ResourceCategory.Pe => "Pe",
             ResourceCategory.Sh => "Sh",
             ResourceCategory.Dmg => "Dmg",
-            ResourceCategory.TestCases => "TestCases",
             _ => new ArgumentOutOfRangeException(nameof(category), category, null)
           })
         .Append('.').Append(resourceName).ToString();
