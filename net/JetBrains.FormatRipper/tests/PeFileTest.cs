@@ -22,8 +22,8 @@ namespace JetBrains.FormatRipper.Tests
     public class TestCase
     {
       public string resourceName { get; set; }
-      public IMAGE_FILE_MACHINE expectedMachine { get; set; }
-      public IMAGE_SUBSYSTEM expectedSubsystem { get; set; }
+      public string expectedMachine { get; set; }
+      public string expectedSubsystem { get; set; }
       public string[] expectedCharacteristics { get; set; }
       public string expectedOptions { get; set; }
       public string expectedCmsBlobHash { get; set; }
@@ -38,8 +38,9 @@ namespace JetBrains.FormatRipper.Tests
 
       return testCases.Select(testCase =>
       {
-        var machine = testCase.expectedMachine;
-        var subsystem = testCase.expectedSubsystem;
+        // Parse the enum values from strings
+        var machine = (IMAGE_FILE_MACHINE)Enum.Parse(typeof(IMAGE_FILE_MACHINE), testCase.expectedMachine);
+        var subsystem = (IMAGE_SUBSYSTEM)Enum.Parse(typeof(IMAGE_SUBSYSTEM), testCase.expectedSubsystem);
 
         // Parse the characteristics flags
         IMAGE_FILE characteristics = 0;
@@ -83,10 +84,9 @@ namespace JetBrains.FormatRipper.Tests
 
       return ResourceUtil.OpenRead(ResourceCategory.TestCases, "PeFileTestCases.json", stream =>
       {
-        using var reader = new JsonTextReader(new StreamReader(stream));
-        var serializer = new JsonSerializer();
-        serializer.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
-        var obj = serializer.Deserialize<List<TestCase>>(reader);
+        using var reader = new StreamReader(stream);
+        var json = reader.ReadToEnd();
+        var obj = JsonConvert.DeserializeObject<List<TestCase>>(json);
         if (obj == null)
           throw new InvalidOperationException($"Failed to deserialize test cases from {resourceName}");
         return obj;
