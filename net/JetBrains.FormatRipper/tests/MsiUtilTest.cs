@@ -11,12 +11,25 @@ namespace JetBrains.FormatRipper.Tests
   [TestFixture]
   public sealed class MsiUtilTest
   {
+    // Local logger implementation for test output
+    private sealed class ConsoleLogger : ILogger
+    {
+      public static readonly ILogger Instance = new ConsoleLogger();
+      private ConsoleLogger() { }
+      public void Info(string str) => Console.WriteLine($"INFO: {str}");
+      public void Warning(string str) => Console.Error.WriteLine($"WARNING: {str}");
+      public void Error(string str) => Console.Error.WriteLine($"ERROR: {str}");
+      public void Trace(string str) => Console.Error.WriteLine($"TRACE: {str}");
+    }
+
     public class TestCase
     {
       public string name { get; set; }
       public string expectedName { get; set; }
       public string description { get; set; }
     }
+
+    private static readonly ILogger Logger = ConsoleLogger.Instance;
 
     private static IEnumerable<TestCaseData> LoadMsiTestCases()
     {
@@ -49,7 +62,7 @@ namespace JetBrains.FormatRipper.Tests
     [Test]
     public void TestMsiDecodeStreamName(TestCase testCase)
     {
-      Console.WriteLine($"Testing MSI stream name decoding: {testCase.description}");
+      Logger.Info($"Testing MSI stream name decoding: {testCase.description}");
 
       if (testCase.name.StartsWith("DirectoryNames."))
       {
@@ -85,7 +98,7 @@ namespace JetBrains.FormatRipper.Tests
       Assert.AreEqual(testCase.expectedName, decodedName,
         $"Failed to decode MSI stream name '{testCase.name}' correctly");
 
-      Console.WriteLine($"Successfully decoded '{testCase.name}' to '{decodedName}'");
+      Logger.Info($"Successfully decoded '{testCase.name}' to '{decodedName}'");
     }
   }
 }

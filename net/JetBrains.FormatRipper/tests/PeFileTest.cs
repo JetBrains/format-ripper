@@ -12,6 +12,17 @@ namespace JetBrains.FormatRipper.Tests
   [TestFixture]
   public sealed class PeFileTest
   {
+    // Local logger implementation for test output
+    private sealed class ConsoleLogger : ILogger
+    {
+      public static readonly ILogger Instance = new ConsoleLogger();
+      private ConsoleLogger() { }
+      public void Info(string str) => Console.WriteLine($"INFO: {str}");
+      public void Warning(string str) => Console.Error.WriteLine($"WARNING: {str}");
+      public void Error(string str) => Console.Error.WriteLine($"ERROR: {str}");
+      public void Trace(string str) => Console.Error.WriteLine($"TRACE: {str}");
+    }
+
     [Flags]
     public enum CodeOptions
     {
@@ -31,6 +42,8 @@ namespace JetBrains.FormatRipper.Tests
       public string expectedOrderedIncludeRanges { get; set; }
       public string description { get; set; }
     }
+
+    private static readonly ILogger Logger = ConsoleLogger.Instance;
 
     private static IEnumerable<TestCaseData> LoadPeTestCases()
     {
@@ -104,7 +117,7 @@ namespace JetBrains.FormatRipper.Tests
       string expectedSecurityDataDirectoryRange,
       string expectedOrderedIncludeRanges)
     {
-      Console.WriteLine($"INFO: Testing PE file: {resourceName}");
+      Logger.Info($"Testing PE file: {resourceName}");
 
       var file = ResourceUtil.OpenRead(ResourceCategory.Pe, resourceName, stream =>
         {
@@ -143,7 +156,7 @@ namespace JetBrains.FormatRipper.Tests
       ValidateUtil.Validate(computeHashInfo!);
       Assert.AreEqual(expectedOrderedIncludeRanges, computeHashInfo!.ToString());
 
-      Console.WriteLine($"INFO: Successfully tested PE file: {resourceName}");
+      Logger.Info($"Successfully tested PE file: {resourceName}");
     }
   }
 }

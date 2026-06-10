@@ -12,6 +12,17 @@ namespace JetBrains.FormatRipper.Tests
   [TestFixture]
   public sealed class MachOFileTest
   {
+    // Local logger implementation for test output
+    private sealed class ConsoleLogger : ILogger
+    {
+      public static readonly ILogger Instance = new ConsoleLogger();
+      private ConsoleLogger() { }
+      public void Info(string str) => Console.WriteLine($"INFO: {str}");
+      public void Warning(string str) => Console.Error.WriteLine($"WARNING: {str}");
+      public void Error(string str) => Console.Error.WriteLine($"ERROR: {str}");
+      public void Trace(string str) => Console.Error.WriteLine($"TRACE: {str}");
+    }
+
     public class TestCase
     {
       public string resourceName { get; set; }
@@ -35,6 +46,8 @@ namespace JetBrains.FormatRipper.Tests
       public string entitlementsDerHash { get; set; }
       public string description { get; set; }
     }
+
+    private static readonly ILogger Logger = ConsoleLogger.Instance;
 
     private static IEnumerable<TestCaseData> LoadMachOTestCases()
     {
@@ -76,12 +89,12 @@ namespace JetBrains.FormatRipper.Tests
     [Test]
     public void TestMachOFile(TestCase testCase)
     {
-      Console.WriteLine($"INFO: Testing MachO file: {testCase.resourceName}");
+      Logger.Info($"Testing MachO file: {testCase.resourceName}");
 
       var resourceCategory = Enum.Parse<ResourceCategory>(testCase.resourceCategory);
       var file = ResourceUtil.OpenRead(resourceCategory, testCase.resourceName, stream =>
         {
-          Console.Error.WriteLine($"TRACE: Parsing MachO file: {testCase.resourceName}");
+          Logger.Trace($"Parsing MachO file: {testCase.resourceName}");
           Assert.IsTrue(MachOFile.Is(stream), $"File {testCase.resourceName} should be recognized as a MachO file");
           return MachOFile.Parse(stream, MachOFile.Mode.SignatureData | MachOFile.Mode.ComputeHashInfo);
         });
@@ -96,7 +109,7 @@ namespace JetBrains.FormatRipper.Tests
         var fileSection = fileSections[n];
         var indexMsg = $"Index {n} for {testCase.resourceName}";
 
-        Console.Error.WriteLine($"TRACE: Testing section {n} of {testCase.resourceName}: {sectionData.description}");
+        Logger.Trace($"Testing section {n} of {testCase.resourceName}: {sectionData.description}");
 
         Assert.AreEqual(sectionData.isLittleEndian, fileSection.IsLittleEndian, indexMsg);
 
@@ -208,7 +221,7 @@ namespace JetBrains.FormatRipper.Tests
           Assert.Null(sectionData.entitlementsDerHash, indexMsg);
       }
 
-      Console.WriteLine($"INFO: Successfully tested {testCase.resourceName}");
+      Logger.Info($"Successfully tested {testCase.resourceName}");
     }
 
     [TestCase("libclang_rt.cc_kext.a")]
@@ -216,17 +229,17 @@ namespace JetBrains.FormatRipper.Tests
     [Test]
     public void ErrorTest(string resourceName)
     {
-      Console.WriteLine($"INFO: Testing error case for MachO file: {resourceName}");
+      Logger.Info($"Testing error case for MachO file: {resourceName}");
 
       ResourceUtil.OpenRead(ResourceCategory.MachO, resourceName, stream =>
         {
-          Console.Error.WriteLine($"TRACE: Verifying {resourceName} is not recognized as a MachO file");
+          Logger.Trace($"Verifying {resourceName} is not recognized as a MachO file");
           Assert.IsFalse(MachOFile.Is(stream), $"File {resourceName} should not be recognized as a MachO file");
 
-          Console.Error.WriteLine($"TRACE: Verifying parsing {resourceName} throws an exception");
+          Logger.Trace($"Verifying parsing {resourceName} throws an exception");
           Assert.That(() => MachOFile.Parse(stream), Throws.Exception, $"Parsing {resourceName} should throw an exception");
 
-          Console.WriteLine($"INFO: Successfully verified error case for {resourceName}");
+          Logger.Info($"Successfully verified error case for {resourceName}");
           return false;
         });
     }
