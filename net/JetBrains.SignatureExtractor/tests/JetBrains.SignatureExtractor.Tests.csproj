@@ -1,17 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFrameworks>net8.0;netcoreapp3.1</TargetFrameworks>
         <TargetFrameworks Condition="'$(JB_TargetFramework)'!=''">$(JB_TargetFramework)</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
         <OutputType>Library</OutputType>
         <LangVersion>12</LangVersion>
     </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.4">
           <PrivateAssets>all</PrivateAssets>
@@ -22,18 +19,15 @@
         <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
         <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
     </ItemGroup>
-
     <ItemGroup>
         <Using Include="NUnit.Framework"/>
     </ItemGroup>
-
     <ItemGroup>
-        <EmbeddedResource Include="..\..\..\data\dmg\*" LinkBase="Resources\Dmg" />
-        <EmbeddedResource Include="..\..\..\data\mach-o\*" LinkBase="Resources\MachO" />
-        <EmbeddedResource Include="..\..\..\data\msi\*" LinkBase="Resources\Msi" />
-        <EmbeddedResource Include="..\..\..\data\pe\*" LinkBase="Resources\Pe" />
+        <EmbeddedResource Include="..\..\..\data\dmg\**\*" LinkBase="Resources\Dmg" />
+        <EmbeddedResource Include="..\..\..\data\mach-o\**\*" LinkBase="Resources\MachO" />
+        <EmbeddedResource Include="..\..\..\data\msi\**\*" LinkBase="Resources\Msi" />
+        <EmbeddedResource Include="..\..\..\data\pe\**\*" LinkBase="Resources\Pe" />
     </ItemGroup>
-
     <ItemGroup>
       <ProjectReference Include="..\src\JetBrains.SignatureExtractor.csproj" />
     </ItemGroup>
