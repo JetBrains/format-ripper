@@ -83,36 +83,36 @@ namespace JetBrains.FormatRipper.Compound
       StreamUtil.ReadBytes(stream, (byte*)&cfh, sizeof(CompoundFileHeader));
       if (!MemoryUtil.ArraysEqual(cfh.HeaderSignature, Declarations.HeaderSignatureSize, ourHeaderSignature))
         throw new FormatException("Invalid CF header signature");
-      if (MemoryUtil.GetLeGuid(cfh.HeaderClsid) != Guid.Empty)
+      if (EndianUtil.GetLeGuid(cfh.HeaderClsid) != Guid.Empty)
         throw new FormatException("Invalid CF header CLSID");
-      if (MemoryUtil.GetLeU2(cfh.ByteOrder) != Declarations.LittleEndianByteOrder)
+      if (EndianUtil.GetLeU2(cfh.ByteOrder) != Declarations.LittleEndianByteOrder)
         throw new FormatException("Invalid CF header byte order");
-      switch (MemoryUtil.GetLeU2(cfh.MajorVersion))
+      switch (EndianUtil.GetLeU2(cfh.MajorVersion))
       {
       case 3:
-        if (MemoryUtil.GetLeU2(cfh.MinorVersion) != 0x3E)
+        if (EndianUtil.GetLeU2(cfh.MinorVersion) != 0x3E)
           throw new FormatException("Invalid CF minor version");
-        if (MemoryUtil.GetLeU2(cfh.SectorShift) != 9)
+        if (EndianUtil.GetLeU2(cfh.SectorShift) != 9)
           throw new FormatException("Invalid CF sector shift");
-        if (MemoryUtil.GetLeU4(cfh.NumberOfDirectorySectors) != 0)
+        if (EndianUtil.GetLeU4(cfh.NumberOfDirectorySectors) != 0)
           throw new FormatException("Invalid CF number of directory sectors");
         break;
       case 4:
-        if (MemoryUtil.GetLeU2(cfh.MinorVersion) != 0x3E)
+        if (EndianUtil.GetLeU2(cfh.MinorVersion) != 0x3E)
           throw new FormatException("Invalid CF minor version");
-        if (MemoryUtil.GetLeU2(cfh.SectorShift) != 0xC)
+        if (EndianUtil.GetLeU2(cfh.SectorShift) != 0xC)
           throw new FormatException("Invalid CF sector shift");
         break;
       default:
-        throw new FormatException($"Unsupported CF major version {MemoryUtil.GetLeU2(cfh.MajorVersion)}");
+        throw new FormatException($"Unsupported CF major version {EndianUtil.GetLeU2(cfh.MajorVersion)}");
       }
 
-      if (MemoryUtil.GetLeU2(cfh.MiniSectorShift) != 6)
+      if (EndianUtil.GetLeU2(cfh.MiniSectorShift) != 6)
         throw new FormatException("Invalid CF mini sector shift");
-      if (MemoryUtil.GetLeU4(cfh.MiniStreamCutoffSize) != 0x00001000)
+      if (EndianUtil.GetLeU4(cfh.MiniStreamCutoffSize) != 0x00001000)
         throw new FormatException("Invalid CF mini stream cutoff size");
 
-      var sectorSize = 1u << MemoryUtil.GetLeU2(cfh.SectorShift);
+      var sectorSize = 1u << EndianUtil.GetLeU2(cfh.SectorShift);
       var entitiesPerSector = sectorSize / sizeof(uint);
       var entitiesPerDirectorySector = sectorSize / sizeof(CompoundFileDirectoryEntry);
 
@@ -130,16 +130,16 @@ namespace JetBrains.FormatRipper.Compound
         var buffer = stackalloc uint[checked((int)entitiesPerSector)];
         StreamUtil.ReadBytes(stream, (byte*)buffer, sizeof(uint) * Declarations.HeaderDiFatSize);
         for (var n = 0; n < Declarations.HeaderDiFatSize; ++n)
-          diFatTable.Add((REGSECT)MemoryUtil.GetLeU4(buffer[n]));
-        var diFatSectorLocation = (REGSECT)MemoryUtil.GetLeU4(cfh.FirstDiFatSectorLocation);
-        for (var k = MemoryUtil.GetLeU4(cfh.NumberOfDiFatSectors); k-- > 0;)
+          diFatTable.Add((REGSECT)EndianUtil.GetLeU4(buffer[n]));
+        var diFatSectorLocation = (REGSECT)EndianUtil.GetLeU4(cfh.FirstDiFatSectorLocation);
+        for (var k = EndianUtil.GetLeU4(cfh.NumberOfDiFatSectors); k-- > 0;)
         {
           stream.Position = GetSectorPosition(diFatSectorLocation);
           StreamUtil.ReadBytes(stream, (byte*)buffer, checked((int)sectorSize));
           var n = 0;
           for (; n < entitiesPerSector - 1; ++n)
-            diFatTable.Add((REGSECT)MemoryUtil.GetLeU4(buffer[n]));
-          diFatSectorLocation = (REGSECT)MemoryUtil.GetLeU4(buffer[n]);
+            diFatTable.Add((REGSECT)EndianUtil.GetLeU4(buffer[n]));
+          diFatSectorLocation = (REGSECT)EndianUtil.GetLeU4(buffer[n]);
         }
       }
 
@@ -150,10 +150,10 @@ namespace JetBrains.FormatRipper.Compound
         stream.Position = GetSectorPosition(diFatTable![checked((int)((uint)sectorNumber / entitiesPerSector))], (uint)sectorNumber % entitiesPerSector * sizeof(uint));
         uint buffer;
         StreamUtil.ReadBytes(stream, (byte*)&buffer, sizeof(uint));
-        return (REGSECT)MemoryUtil.GetLeU4(buffer);
+        return (REGSECT)EndianUtil.GetLeU4(buffer);
       }
 
-      var firstDirectorySectorLocation = (REGSECT)MemoryUtil.GetLeU4(cfh.FirstDirectorySectorLocation);
+      var firstDirectorySectorLocation = (REGSECT)EndianUtil.GetLeU4(cfh.FirstDirectorySectorLocation);
       var directoryEntries = new List<DirectoryEntry>();
       {
         var cfdes = stackalloc CompoundFileDirectoryEntry[checked((int)entitiesPerDirectorySector)];
@@ -165,20 +165,20 @@ namespace JetBrains.FormatRipper.Compound
           StreamUtil.ReadBytes(stream, (byte*)cfdes, checked((int)sectorSize));
           for (var n = 0; n < entitiesPerDirectorySector; ++n)
           {
-            var directoryEntryNameLength = MemoryUtil.GetLeU2(cfdes[n].DirectoryEntryNameLength);
+            var directoryEntryNameLength = EndianUtil.GetLeU2(cfdes[n].DirectoryEntryNameLength);
             if (directoryEntryNameLength is < 0 or > Declarations.DirectoryEntryNameSize || directoryEntryNameLength % 2 != 0)
               throw new FormatException("Invalid CF directory entry name length");
             var name = directoryEntryNameLength == 0 ? "" : new string(Encoding.Unicode.GetChars(MemoryUtil.CopyBytes(cfdes[n].DirectoryEntryName, directoryEntryNameLength - 2)));
             directoryEntries.Add(new DirectoryEntry(
               name,
-              MemoryUtil.GetLeGuid(cfdes[n].Clsid),
+              EndianUtil.GetLeGuid(cfdes[n].Clsid),
               (STGTY)cfdes[n].ObjectType,
               (CF)cfdes[n].ColorFlag,
-              (REGSID)MemoryUtil.GetLeU4(cfdes[n].LeftSiblingId),
-              (REGSID)MemoryUtil.GetLeU4(cfdes[n].RightSiblingId),
-              (REGSID)MemoryUtil.GetLeU4(cfdes[n].ChildId),
-              (REGSECT)MemoryUtil.GetLeU4(cfdes[n].StartingSectorLocation),
-              MemoryUtil.GetLeU8(cfdes[n].StreamSize)));
+              (REGSID)EndianUtil.GetLeU4(cfdes[n].LeftSiblingId),
+              (REGSID)EndianUtil.GetLeU4(cfdes[n].RightSiblingId),
+              (REGSID)EndianUtil.GetLeU4(cfdes[n].ChildId),
+              (REGSECT)EndianUtil.GetLeU4(cfdes[n].StartingSectorLocation),
+              EndianUtil.GetLeU8(cfdes[n].StreamSize)));
           }
         }
       }
@@ -202,7 +202,7 @@ namespace JetBrains.FormatRipper.Compound
         return GetSectorPosition(fatSectorLocation, absoluteOffset % sectorSize);
       }
 
-      var firstMiniFatSectorLocation = (REGSECT)MemoryUtil.GetLeU4(cfh.FirstMiniFatSectorLocation);
+      var firstMiniFatSectorLocation = (REGSECT)EndianUtil.GetLeU4(cfh.FirstMiniFatSectorLocation);
 
       REGSECT GetNextMiniSector(REGSECT miniSectorNumber)
       {
@@ -214,7 +214,7 @@ namespace JetBrains.FormatRipper.Compound
         stream.Position = GetSectorPosition(miniFatSectorLocation, (uint)miniSectorNumber % entitiesPerSector * sizeof(uint));
         uint buffer;
         StreamUtil.ReadBytes(stream, (byte*)&buffer, sizeof(uint));
-        return (REGSECT)MemoryUtil.GetLeU4(buffer);
+        return (REGSECT)EndianUtil.GetLeU4(buffer);
       }
 
       void Walk(bool isMiniStream, REGSECT firstSectorNumber, ulong index, ulong size, SubmitDelegate submit)
@@ -277,7 +277,7 @@ namespace JetBrains.FormatRipper.Compound
         return en.MoveNext() ? en.Current : null;
       }
 
-      var miniStreamCutoffSize = MemoryUtil.GetLeU4(cfh.MiniStreamCutoffSize);
+      var miniStreamCutoffSize = EndianUtil.GetLeU4(cfh.MiniStreamCutoffSize);
 
       var extractBlobs = new List<ExtractStream>();
       if (extractFilter != null)

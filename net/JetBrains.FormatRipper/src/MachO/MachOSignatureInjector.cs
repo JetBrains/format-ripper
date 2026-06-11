@@ -33,7 +33,7 @@ public class MachOSignatureInjector
     sourceStream.Position = 0;
     uint rawMagic;
     StreamUtil.ReadBytes(sourceStream, (byte*)&rawMagic, sizeof(uint));
-    var magic = (MH)MemoryUtil.GetLeU4(rawMagic);
+    var magic = (MH)EndianUtil.GetLeU4(rawMagic);
 
     var isFat = magic is MH.FAT_MAGIC or MH.FAT_CIGAM or MH.FAT_MAGIC_64 or MH.FAT_CIGAM_64;
 
@@ -60,8 +60,8 @@ public class MachOSignatureInjector
     var isFatLittleEndian = fatMagic is MH.FAT_MAGIC or MH.FAT_MAGIC_64;
     var needSwap = BitConverter.IsLittleEndian != isFatLittleEndian;
 
-    uint GetU4(uint v) => needSwap ? MemoryUtil.SwapU4(v) : v;
-    ulong GetU8(ulong v) => needSwap ? MemoryUtil.SwapU8(v) : v;
+    uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+    ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
 
     fat_header fh;
     StreamUtil.ReadBytes(sourceStream, (byte*)&fh, sizeof(fat_header));
@@ -70,7 +70,7 @@ public class MachOSignatureInjector
     if (signatureTransferData.SectionSignatures.Length != nFatArch)
       throw new SignatureInjectionException($"Cannot transfer signatures: source and destination files have different number of sections. The source file has {signatureTransferData.SectionSignatures.Length} section(s) and the destination file has {nFatArch} section(s).");
 
-    uint rawFatMagic = MemoryUtil.GetLeU4((uint)fatMagic);
+    uint rawFatMagic = EndianUtil.GetLeU4((uint)fatMagic);
     StreamUtil.WriteBytes(outputStream, (byte*)&rawFatMagic, sizeof(uint));
     StreamUtil.WriteBytes(outputStream, (byte*)&fh, sizeof(fat_header));
 
@@ -144,7 +144,7 @@ public class MachOSignatureInjector
     sourceStream.Position = sectionInfo.SectionOffset;
     uint rawSubMagic;
     StreamUtil.ReadBytes(sourceStream, (byte*)&rawSubMagic, sizeof(uint));
-    var subMagic = (MH)MemoryUtil.GetLeU4(rawSubMagic);
+    var subMagic = (MH)EndianUtil.GetLeU4(rawSubMagic);
 
     WritePaddingBytes(outputStream, sectionInfo.Alignment);
 
@@ -187,10 +187,10 @@ public class MachOSignatureInjector
     var isLittleEndian = magic is MH.MH_MAGIC or MH.MH_MAGIC_64;
     var needSwap = BitConverter.IsLittleEndian != isLittleEndian;
 
-    uint GetU4(uint v) => needSwap ? MemoryUtil.SwapU4(v) : v;
-    ulong GetU8(ulong v) => needSwap ? MemoryUtil.SwapU8(v) : v;
+    uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+    ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
 
-    uint rawMagic = MemoryUtil.GetLeU4((uint)magic);
+    uint rawMagic = EndianUtil.GetLeU4((uint)magic);
     StreamUtil.WriteBytes(outputStream, (byte*)&rawMagic, sizeof(uint));
 
     uint ncmds;

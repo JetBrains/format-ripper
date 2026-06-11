@@ -56,42 +56,42 @@ namespace JetBrains.FormatRipper.Tests
       string expectedSecurityDataDirectoryRange,
       string expectedOrderedIncludeRanges)
     {
-      var file = ResourceUtil.OpenRead(ResourceCategory.Pe, resourceName, stream =>
+      ResourceUtil.OpenRead(ResourceCategory.Pe, resourceName, stream =>
         {
           Assert.IsTrue(PeFile.Is(stream));
-          return PeFile.Parse(stream, PeFile.Mode.SignatureData | PeFile.Mode.ComputeHashInfo);
+          var file = PeFile.Parse(stream, PeFile.Mode.SignatureData | PeFile.Mode.ComputeHashInfo);
+
+          Assert.AreEqual(expectedMachine, file.Machine);
+          Assert.AreEqual(expectedCharacteristics, file.Characteristics, $"Expected 0x{expectedCharacteristics:X}, but was 0x{file.Characteristics:X}");
+          Assert.AreEqual(expectedSubsystem, file.Subsystem);
+
+          var hasCmsSignature = (expectedOptions & CodeOptions.HasCmsBlob) == CodeOptions.HasCmsBlob;
+          var hasMetadata = (expectedOptions & CodeOptions.HasMetadata) == CodeOptions.HasMetadata;
+          var signedBlob = file.SignatureData.SignedBlob;
+          var cmsBlob = file.SignatureData.CmsBlob;
+
+          Assert.AreEqual(hasCmsSignature, file.HasSignature);
+          Assert.IsNull(signedBlob);
+          Assert.AreEqual(hasCmsSignature, cmsBlob != null);
+
+          if (cmsBlob != null)
+          {
+            byte[] hash;
+            using (var hashAlgorithm = SHA384.Create())
+              hash = hashAlgorithm.ComputeHash(cmsBlob);
+            Assert.AreEqual(expectedCmsBlobHash, HexUtil.ConvertToHexString(hash));
+          }
+          else
+            Assert.IsNull(expectedCmsBlobHash);
+
+          Assert.AreEqual(hasMetadata, file.HasMetadata);
+          Assert.AreEqual(expectedSecurityDataDirectoryRange, file.SecurityDataDirectoryRange.ToString());
+
+          var computeHashInfo = file.ComputeHashInfo;
+          Assert.IsNotNull(computeHashInfo);
+          ValidateUtil.Validate(computeHashInfo!);
+          Assert.AreEqual(expectedOrderedIncludeRanges, computeHashInfo!.ToString());
         });
-
-      Assert.AreEqual(expectedMachine, file.Machine);
-      Assert.AreEqual(expectedCharacteristics, file.Characteristics, $"Expected 0x{expectedCharacteristics:X}, but was 0x{file.Characteristics:X}");
-      Assert.AreEqual(expectedSubsystem, file.Subsystem);
-
-      var hasCmsSignature = (expectedOptions & CodeOptions.HasCmsBlob) == CodeOptions.HasCmsBlob;
-      var hasMetadata = (expectedOptions & CodeOptions.HasMetadata) == CodeOptions.HasMetadata;
-      var signedBlob = file.SignatureData.SignedBlob;
-      var cmsBlob = file.SignatureData.CmsBlob;
-
-      Assert.AreEqual(hasCmsSignature, file.HasSignature);
-      Assert.IsNull(signedBlob);
-      Assert.AreEqual(hasCmsSignature, cmsBlob != null);
-
-      if (cmsBlob != null)
-      {
-        byte[] hash;
-        using (var hashAlgorithm = SHA384.Create())
-          hash = hashAlgorithm.ComputeHash(cmsBlob);
-        Assert.AreEqual(expectedCmsBlobHash, HexUtil.ConvertToHexString(hash));
-      }
-      else
-        Assert.IsNull(expectedCmsBlobHash);
-
-      Assert.AreEqual(hasMetadata, file.HasMetadata);
-      Assert.AreEqual(expectedSecurityDataDirectoryRange, file.SecurityDataDirectoryRange.ToString());
-
-      var computeHashInfo = file.ComputeHashInfo;
-      Assert.IsNotNull(computeHashInfo);
-      ValidateUtil.Validate(computeHashInfo!);
-      Assert.AreEqual(expectedOrderedIncludeRanges, computeHashInfo!.ToString());
     }
   }
 }

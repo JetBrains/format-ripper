@@ -57,9 +57,12 @@ namespace JetBrains.FormatRipper.Tests
       FileType expectedFileType,
       FileProperties expectedFileProperties)
     {
-      var (fileType, fileProperties) = ResourceUtil.OpenRead(category, resourceName, FileTypeExplorer.Detect);
-      Assert.AreEqual(expectedFileType, fileType);
-      Assert.AreEqual(expectedFileProperties, fileProperties);
+      ResourceUtil.OpenRead(category, resourceName, stream =>
+        {
+          var (fileType, fileProperties) = FileTypeExplorer.Detect(stream);
+          Assert.AreEqual(expectedFileType, fileType);
+          Assert.AreEqual(expectedFileProperties, fileProperties);
+        });
     }
   }
 }

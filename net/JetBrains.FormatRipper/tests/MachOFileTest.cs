@@ -99,103 +99,103 @@ namespace JetBrains.FormatRipper.Tests
       bool? expectedIsFatLittleEndian,
       Section[] expectedSections)
     {
-      var file = ResourceUtil.OpenRead(ResourceCategory.MachO, resourceName, stream =>
+      ResourceUtil.OpenRead(ResourceCategory.MachO, resourceName, stream =>
         {
           Assert.IsTrue(MachOFile.Is(stream));
-          return MachOFile.Parse(stream, MachOFile.Mode.SignatureData | MachOFile.Mode.ComputeHashInfo);
+          var file = MachOFile.Parse(stream, MachOFile.Mode.SignatureData | MachOFile.Mode.ComputeHashInfo);
+
+          Assert.AreEqual(expectedIsFatLittleEndian, file.IsFatLittleEndian);
+          Assert.AreEqual(expectedSections.Length, file.Sections.Length);
+          var fileSections = file.Sections;
+          for (var n = 0; n < expectedSections.Length; n++)
+          {
+            var expectedSection = expectedSections[n];
+            var fileSection = fileSections[n];
+            var indexMsg = $"Index {n}";
+            Assert.AreEqual(expectedSection.IsLittleEndian, fileSection.IsLittleEndian, indexMsg);
+            Assert.AreEqual(expectedSection.CpuType, fileSection.CpuType, indexMsg);
+            Assert.AreEqual(expectedSection.CpuSubType, fileSection.CpuSubType, $"{indexMsg}, expected 0x{expectedSection.CpuSubType:X}, but was 0x{fileSection.CpuSubType:X}");
+            Assert.AreEqual(expectedSection.MhFileType, fileSection.MhFileType, indexMsg);
+
+            var hasSignedBlob = (expectedSection.Options & Options.HasSignedBlob) == Options.HasSignedBlob;
+            var hasCmsBlob = (expectedSection.Options & Options.HasCmsBlob) == Options.HasCmsBlob;
+            var hasEntitlements = (expectedSection.Options & Options.HasEntitlements) == Options.HasEntitlements;
+            var hasEntitlementsDer = (expectedSection.Options & Options.HasEntitlementsDer) == Options.HasEntitlementsDer;
+
+            var signedBlob = fileSection.SignatureData.SignedBlob;
+            var cmsBlob = fileSection.SignatureData.CmsBlob;
+            var entitlements = fileSection.Entitlements;
+            var entitlementsDer = fileSection.EntitlementsDer;
+
+            Assert.AreEqual(hasSignedBlob, fileSection.HasSignature, $"{indexMsg} Options.HashSignedBlob mismatch");
+            Assert.AreEqual(hasSignedBlob, signedBlob != null, $"{indexMsg} Options.HashSignedBlob mismatch");
+            Assert.AreEqual(hasCmsBlob, cmsBlob != null, $"{indexMsg} Options.HasCmsBlob mismatch");
+            Assert.AreEqual(hasEntitlements, entitlements != null, $"{indexMsg} Options.HasEntitlements mismatch");
+            Assert.AreEqual(hasEntitlementsDer, entitlementsDer != null, $"{indexMsg} Options.HasEntitlementsDer mismatch");
+
+            if (signedBlob != null)
+            {
+              Assert.AreEqual((byte)0xFA, signedBlob[0], indexMsg);
+              Assert.AreEqual((byte)0xDE, signedBlob[1], indexMsg);
+              Assert.AreEqual((byte)0x0C, signedBlob[2], indexMsg);
+              Assert.AreEqual((byte)0x02, signedBlob[3], indexMsg);
+
+              var length = checked((int)(
+                (uint)signedBlob[4] << 24 |
+                (uint)signedBlob[5] << 16 |
+                (uint)signedBlob[6] << 8 |
+                (uint)signedBlob[7] << 0));
+              Assert.AreEqual(length, signedBlob.Length, indexMsg);
+
+              byte[] hash;
+              using (var hashAlgorithm = SHA384.Create())
+                hash = hashAlgorithm.ComputeHash(signedBlob);
+              Assert.AreEqual(expectedSection.CodeDirectoryBlobHash, HexUtil.ConvertToHexString(hash), indexMsg);
+            }
+            else
+            {
+              Assert.IsFalse(hasCmsBlob);
+              Assert.IsNull(expectedSection.CodeDirectoryBlobHash);
+            }
+
+            if (cmsBlob != null)
+            {
+              byte[] hash;
+              using (var hashAlgorithm = SHA384.Create())
+                hash = hashAlgorithm.ComputeHash(cmsBlob);
+              Assert.AreEqual(expectedSection.CmsDataHash, HexUtil.ConvertToHexString(hash), indexMsg);
+            }
+            else
+              Assert.IsNull(expectedSection.CmsDataHash);
+
+            var computeHashInfo = fileSection.ComputeHashInfo;
+            Assert.IsNotNull(computeHashInfo, indexMsg);
+            ValidateUtil.Validate(computeHashInfo!, indexMsg);
+            Assert.AreEqual(expectedSection.OrderedIncludeRanges, computeHashInfo!.ToString(), indexMsg);
+
+            if (entitlements != null)
+            {
+              byte[] hash;
+              using (var hashAlgorithm = SHA384.Create())
+                hash = hashAlgorithm.ComputeHash(entitlements);
+
+              Assert.AreEqual(expectedSection.EntitlementsHash, HexUtil.ConvertToHexString(hash), indexMsg);
+            }
+            else
+              Assert.Null(expectedSection.EntitlementsHash, indexMsg);
+
+            if (entitlementsDer != null)
+            {
+              byte[] hash;
+              using (var hashAlgorithm = SHA384.Create())
+                hash = hashAlgorithm.ComputeHash(entitlementsDer);
+
+              Assert.AreEqual(expectedSection.EntitlementsDerHash, HexUtil.ConvertToHexString(hash), indexMsg);
+            }
+            else
+              Assert.Null(expectedSection.EntitlementsDerHash, indexMsg);
+          }
         });
-
-      Assert.AreEqual(expectedIsFatLittleEndian, file.IsFatLittleEndian);
-      Assert.AreEqual(expectedSections.Length, file.Sections.Length);
-      var fileSections = file.Sections;
-      for (var n = 0; n < expectedSections.Length; n++)
-      {
-        var expectedSection = expectedSections[n];
-        var fileSection = fileSections[n];
-        var indexMsg = $"Index {n}";
-        Assert.AreEqual(expectedSection.IsLittleEndian, fileSection.IsLittleEndian, indexMsg);
-        Assert.AreEqual(expectedSection.CpuType, fileSection.CpuType, indexMsg);
-        Assert.AreEqual(expectedSection.CpuSubType, fileSection.CpuSubType, $"{indexMsg}, expected 0x{expectedSection.CpuSubType:X}, but was 0x{fileSection.CpuSubType:X}");
-        Assert.AreEqual(expectedSection.MhFileType, fileSection.MhFileType, indexMsg);
-
-        var hasSignedBlob = (expectedSection.Options & Options.HasSignedBlob) == Options.HasSignedBlob;
-        var hasCmsBlob = (expectedSection.Options & Options.HasCmsBlob) == Options.HasCmsBlob;
-        var hasEntitlements = (expectedSection.Options & Options.HasEntitlements) == Options.HasEntitlements;
-        var hasEntitlementsDer = (expectedSection.Options & Options.HasEntitlementsDer) == Options.HasEntitlementsDer;
-
-        var signedBlob = fileSection.SignatureData.SignedBlob;
-        var cmsBlob = fileSection.SignatureData.CmsBlob;
-        var entitlements = fileSection.Entitlements;
-        var entitlementsDer = fileSection.EntitlementsDer;
-
-        Assert.AreEqual(hasSignedBlob, fileSection.HasSignature, $"{indexMsg} Options.HashSignedBlob mismatch");
-        Assert.AreEqual(hasSignedBlob, signedBlob != null, $"{indexMsg} Options.HashSignedBlob mismatch");
-        Assert.AreEqual(hasCmsBlob, cmsBlob != null, $"{indexMsg} Options.HasCmsBlob mismatch");
-        Assert.AreEqual(hasEntitlements, entitlements != null, $"{indexMsg} Options.HasEntitlements mismatch");
-        Assert.AreEqual(hasEntitlementsDer, entitlementsDer != null, $"{indexMsg} Options.HasEntitlementsDer mismatch");
-
-        if (signedBlob != null)
-        {
-          Assert.AreEqual((byte)0xFA, signedBlob[0], indexMsg);
-          Assert.AreEqual((byte)0xDE, signedBlob[1], indexMsg);
-          Assert.AreEqual((byte)0x0C, signedBlob[2], indexMsg);
-          Assert.AreEqual((byte)0x02, signedBlob[3], indexMsg);
-
-          var length = checked((int)(
-            (uint)signedBlob[4] << 24 |
-            (uint)signedBlob[5] << 16 |
-            (uint)signedBlob[6] << 8 |
-            (uint)signedBlob[7] << 0));
-          Assert.AreEqual(length, signedBlob.Length, indexMsg);
-
-          byte[] hash;
-          using (var hashAlgorithm = SHA384.Create())
-            hash = hashAlgorithm.ComputeHash(signedBlob);
-          Assert.AreEqual(expectedSection.CodeDirectoryBlobHash, HexUtil.ConvertToHexString(hash), indexMsg);
-        }
-        else
-        {
-          Assert.IsFalse(hasCmsBlob);
-          Assert.IsNull(expectedSection.CodeDirectoryBlobHash);
-        }
-
-        if (cmsBlob != null)
-        {
-          byte[] hash;
-          using (var hashAlgorithm = SHA384.Create())
-            hash = hashAlgorithm.ComputeHash(cmsBlob);
-          Assert.AreEqual(expectedSection.CmsDataHash, HexUtil.ConvertToHexString(hash), indexMsg);
-        }
-        else
-          Assert.IsNull(expectedSection.CmsDataHash);
-
-        var computeHashInfo = fileSection.ComputeHashInfo;
-        Assert.IsNotNull(computeHashInfo, indexMsg);
-        ValidateUtil.Validate(computeHashInfo!, indexMsg);
-        Assert.AreEqual(expectedSection.OrderedIncludeRanges, computeHashInfo!.ToString(), indexMsg);
-
-        if (entitlements != null)
-        {
-          byte[] hash;
-          using (var hashAlgorithm = SHA384.Create())
-            hash = hashAlgorithm.ComputeHash(entitlements);
-
-          Assert.AreEqual(expectedSection.EntitlementsHash, HexUtil.ConvertToHexString(hash), indexMsg);
-        }
-        else
-          Assert.Null(expectedSection.EntitlementsHash, indexMsg);
-
-        if (entitlementsDer != null)
-        {
-          byte[] hash;
-          using (var hashAlgorithm = SHA384.Create())
-            hash = hashAlgorithm.ComputeHash(entitlementsDer);
-
-          Assert.AreEqual(expectedSection.EntitlementsDerHash, HexUtil.ConvertToHexString(hash), indexMsg);
-        }
-        else
-          Assert.Null(expectedSection.EntitlementsDerHash, indexMsg);
-      }
     }
 
     [TestCase("libclang_rt.cc_kext.a")]
@@ -207,9 +207,7 @@ namespace JetBrains.FormatRipper.Tests
         {
           Assert.IsFalse(MachOFile.Is(stream));
           Assert.That(() => MachOFile.Parse(stream), Throws.Exception);
-          return false;
         });
     }
-
   }
 }

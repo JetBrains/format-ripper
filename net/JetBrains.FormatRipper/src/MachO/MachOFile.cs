@@ -102,15 +102,15 @@ namespace JetBrains.FormatRipper.MachO
       stream.Position = 0;
       uint rawMagic;
       StreamUtil.ReadBytes(stream, (byte*)&rawMagic, sizeof(uint));
-      var magic = (MH)MemoryUtil.GetLeU4(rawMagic);
+      var magic = (MH)EndianUtil.GetLeU4(rawMagic);
 
       if (magic is MH.FAT_MAGIC or MH.FAT_MAGIC_64 or MH.FAT_CIGAM or MH.FAT_CIGAM_64)
       {
         var isFatLittleEndian = magic is MH.FAT_MAGIC or MH.FAT_MAGIC_64;
         var needSwap = BitConverter.IsLittleEndian != isFatLittleEndian;
 
-        uint GetU4(uint v) => needSwap ? MemoryUtil.SwapU4(v) : v;
-        ulong GetU8(ulong v) => needSwap ? MemoryUtil.SwapU8(v) : v;
+        uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+        ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
 
         fat_header fh;
         StreamUtil.ReadBytes(stream, (byte*)&fh, sizeof(fat_header));
@@ -126,7 +126,7 @@ namespace JetBrains.FormatRipper.MachO
             stream.Position = checked((long)GetU8(fatNodes[n].offset));
             uint rawSubMagic;
             StreamUtil.ReadBytes(stream, (byte*)&rawSubMagic, sizeof(uint));
-            var subMagic = (MH)MemoryUtil.GetLeU4(rawSubMagic);
+            var subMagic = (MH)EndianUtil.GetLeU4(rawSubMagic);
 
             if (!Check(subMagic))
               return false;
@@ -142,7 +142,7 @@ namespace JetBrains.FormatRipper.MachO
             stream.Position = GetU4(fatNodes[n].offset);
             uint rawSubMagic;
             StreamUtil.ReadBytes(stream, (byte*)&rawSubMagic, sizeof(uint));
-            var subMagic = (MH)MemoryUtil.GetLeU4(rawSubMagic);
+            var subMagic = (MH)EndianUtil.GetLeU4(rawSubMagic);
 
             if (!Check(subMagic))
               return false;
@@ -165,8 +165,8 @@ namespace JetBrains.FormatRipper.MachO
         var isLittleEndian = magic is MH.MH_MAGIC or MH.MH_MAGIC_64;
         var needSwap = BitConverter.IsLittleEndian != isLittleEndian;
 
-        uint GetU4(uint v) => needSwap ? MemoryUtil.SwapU4(v) : v;
-        ulong GetU8(ulong v) => needSwap ? MemoryUtil.SwapU8(v) : v;
+        uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+        ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
 
         var excludeRanges = new List<StreamRange>();
 
@@ -262,13 +262,13 @@ namespace JetBrains.FormatRipper.MachO
 
                     CS_SuperBlob cssb;
                     StreamUtil.ReadBytes(stream, (byte*)&cssb, sizeof(CS_SuperBlob));
-                    if ((CSMAGIC)MemoryUtil.GetBeU4(cssb.magic) != CSMAGIC.CSMAGIC_EMBEDDED_SIGNATURE)
+                    if ((CSMAGIC)EndianUtil.GetBeU4(cssb.magic) != CSMAGIC.CSMAGIC_EMBEDDED_SIGNATURE)
                       throw new FormatException("Invalid Mach-O code embedded signature magic");
-                    var csLength = MemoryUtil.GetBeU4(cssb.length);
+                    var csLength = EndianUtil.GetBeU4(cssb.length);
                     if (csLength < sizeof(CS_SuperBlob))
                       throw new FormatException("Too small Mach-O code signature super blob");
 
-                    var csCount = MemoryUtil.GetBeU4(cssb.count);
+                    var csCount = EndianUtil.GetBeU4(cssb.count);
                     fixed (byte* scBuf = StreamUtil.ReadBytes(stream, checked((int)csLength - sizeof(CS_SuperBlob))))
                     {
                       ComputeHashInfo[] specialSlotPositions = new ComputeHashInfo[CSSLOT.CSSLOT_HASHABLE_ENTRIES_MAX - 1];
@@ -278,11 +278,11 @@ namespace JetBrains.FormatRipper.MachO
                         var scPtr = scBuf + superBlobEntryIndex * sizeof(CS_BlobIndex);
                         CS_BlobIndex csbi;
                         MemoryUtil.CopyBytes(scPtr, (byte*)&csbi, sizeof(CS_BlobIndex));
-                        uint slotType = MemoryUtil.GetBeU4(csbi.type);
+                        uint slotType = EndianUtil.GetBeU4(csbi.type);
 
                         if (slotType >= CSSLOT.CSSLOT_INFOSLOT && slotType <= CSSLOT.CSSLOT_LIBRARY_CONSTRAINT)
                         {
-                          uint offset = MemoryUtil.GetBeU4(csbi.offset);
+                          uint offset = EndianUtil.GetBeU4(csbi.offset);
                           var csOffsetPtr = scBuf + offset - sizeof(CS_SuperBlob);
 
                           CS_Blob csb;
@@ -290,7 +290,7 @@ namespace JetBrains.FormatRipper.MachO
 
                           specialSlotPositions[slotType - 1] = new ComputeHashInfo(0, new[]
                           {
-                            new StreamRange(checked(imageRange.Position + GetU4(ldc.dataoff) + offset), MemoryUtil.GetBeU4(csb.length))
+                            new StreamRange(checked(imageRange.Position + GetU4(ldc.dataoff) + offset), EndianUtil.GetBeU4(csb.length))
                           }, 0);
                         }
                       }
@@ -299,9 +299,9 @@ namespace JetBrains.FormatRipper.MachO
                       {
                         CS_BlobIndex csbi;
                         MemoryUtil.CopyBytes(scPtr, (byte*)&csbi, sizeof(CS_BlobIndex));
-                        uint offset = MemoryUtil.GetBeU4(csbi.offset);
+                        uint offset = EndianUtil.GetBeU4(csbi.offset);
                         var csOffsetPtr = scBuf + offset - sizeof(CS_SuperBlob);
-                        uint slotType = MemoryUtil.GetBeU4(csbi.type);
+                        uint slotType = EndianUtil.GetBeU4(csbi.type);
                         switch (slotType)
                         {
                           case CSSLOT.CSSLOT_CODEDIRECTORY:
@@ -313,9 +313,9 @@ namespace JetBrains.FormatRipper.MachO
                           {
                             CS_CodeDirectory cscd;
                             MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&cscd, sizeof(CS_CodeDirectory));
-                            if ((CSMAGIC)MemoryUtil.GetBeU4(cscd.magic) != CSMAGIC.CSMAGIC_CODEDIRECTORY)
+                            if ((CSMAGIC)EndianUtil.GetBeU4(cscd.magic) != CSMAGIC.CSMAGIC_CODEDIRECTORY)
                               throw new FormatException("Invalid Mach-O code directory signature magic");
-                            var cscdLength = MemoryUtil.GetBeU4(cscd.length);
+                            var cscdLength = EndianUtil.GetBeU4(cscd.length);
 
                             byte[] currentCodeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, checked((int)cscdLength));
                             if (signatureType == SignatureType.None)
@@ -324,10 +324,10 @@ namespace JetBrains.FormatRipper.MachO
                             if (slotType == CSSLOT.CSSLOT_CODEDIRECTORY)
                               codeDirectoryBlob = currentCodeDirectoryBlob;
 
-                            int codeSlots = checked((int)MemoryUtil.GetBeU4(cscd.nCodeSlots));
-                            int specialSlots = checked((int)MemoryUtil.GetBeU4(cscd.nSpecialSlots));
-                            uint zeroHashOffset = MemoryUtil.GetBeU4(cscd.hashOffset);
-                            long codeLimit = MemoryUtil.GetBeU4(cscd.codeLimit);
+                            int codeSlots = checked((int)EndianUtil.GetBeU4(cscd.nCodeSlots));
+                            int specialSlots = checked((int)EndianUtil.GetBeU4(cscd.nSpecialSlots));
+                            uint zeroHashOffset = EndianUtil.GetBeU4(cscd.hashOffset);
+                            long codeLimit = EndianUtil.GetBeU4(cscd.codeLimit);
                             int pageSize = cscd.pageSize > 0 ? 1 << cscd.pageSize : 0;
                             string hashName = CS_HASHTYPE.GetHashName(cscd.hashType);
 
@@ -372,9 +372,9 @@ namespace JetBrains.FormatRipper.MachO
                           {
                             CS_Blob csb;
                             MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
-                            if ((CSMAGIC)MemoryUtil.GetBeU4(csb.magic) != CSMAGIC.CSMAGIC_BLOBWRAPPER)
+                            if ((CSMAGIC)EndianUtil.GetBeU4(csb.magic) != CSMAGIC.CSMAGIC_BLOBWRAPPER)
                               throw new FormatException("Invalid Mach-O blob wrapper signature magic");
-                            var csbLength = MemoryUtil.GetBeU4(csb.length);
+                            var csbLength = EndianUtil.GetBeU4(csb.length);
                             if (csbLength < sizeof(CS_Blob))
                               throw new FormatException("Too small Mach-O cms signature blob length");
                             cmsSignatureBlob = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob), checked((int)csbLength - sizeof(CS_Blob)));
@@ -386,11 +386,11 @@ namespace JetBrains.FormatRipper.MachO
                             CS_Entitlements csent;
                             MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csent, sizeof(CS_Entitlements));
 
-                            CSMAGIC entitlementsMagic = (CSMAGIC)MemoryUtil.GetBeU4(csent.magic);
+                            CSMAGIC entitlementsMagic = (CSMAGIC)EndianUtil.GetBeU4(csent.magic);
                             if (entitlementsMagic != CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS)
                               throw new FormatException($"Invalid Mach-O entitlements magic. Expected {CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS.ToString("X")} but got {entitlementsMagic.ToString("X")}");
 
-                            uint csentLength = MemoryUtil.GetBeU4(csent.length);
+                            uint csentLength = EndianUtil.GetBeU4(csent.length);
                             entitlements = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Entitlements), checked((int)csentLength - sizeof(CS_Entitlements)));
                           }
                           break;
@@ -399,11 +399,11 @@ namespace JetBrains.FormatRipper.MachO
                             CS_Entitlements csent;
                             MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csent, sizeof(CS_Entitlements));
 
-                            CSMAGIC entitlementsMagic = (CSMAGIC)MemoryUtil.GetBeU4(csent.magic);
+                            CSMAGIC entitlementsMagic = (CSMAGIC)EndianUtil.GetBeU4(csent.magic);
                             if (entitlementsMagic != CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS_DER)
                               throw new FormatException($"Invalid Mach-O der-encoded entitlements magic. Expected {CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS_DER.ToString("X")} but got {entitlementsMagic.ToString("X")}");
 
-                            uint csentLength = MemoryUtil.GetBeU4(csent.length);
+                            uint csentLength = EndianUtil.GetBeU4(csent.length);
                             entitlementsDer = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Entitlements), checked((int)csentLength - sizeof(CS_Entitlements)));
                           }
                             break;
@@ -524,15 +524,15 @@ namespace JetBrains.FormatRipper.MachO
       stream.Position = 0;
       uint rawMagic;
       StreamUtil.ReadBytes(stream, (byte*)&rawMagic, sizeof(uint));
-      var magic = (MH)MemoryUtil.GetLeU4(rawMagic);
+      var magic = (MH)EndianUtil.GetLeU4(rawMagic);
 
       if (magic is MH.FAT_MAGIC or MH.FAT_MAGIC_64 or MH.FAT_CIGAM or MH.FAT_CIGAM_64)
       {
         var isFatLittleEndian = magic is MH.FAT_MAGIC or MH.FAT_MAGIC_64;
         var needSwap = BitConverter.IsLittleEndian != isFatLittleEndian;
 
-        uint GetU4(uint v) => needSwap ? MemoryUtil.SwapU4(v) : v;
-        ulong GetU8(ulong v) => needSwap ? MemoryUtil.SwapU8(v) : v;
+        uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+        ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
 
         fat_header fh;
         StreamUtil.ReadBytes(stream, (byte*)&fh, sizeof(fat_header));
@@ -550,7 +550,7 @@ namespace JetBrains.FormatRipper.MachO
             stream.Position = position;
             uint rawSubMagic;
             StreamUtil.ReadBytes(stream, (byte*)&rawSubMagic, sizeof(uint));
-            var subMagic = (MH)MemoryUtil.GetLeU4(rawSubMagic);
+            var subMagic = (MH)EndianUtil.GetLeU4(rawSubMagic);
 
             sections[n] = Read(new StreamRange(position, checked((long)GetU8(fatNodes[n].size))), subMagic);
             if (sections[n].CpuType != (CPU_TYPE)GetU4(fatNodes[n].cputype))
@@ -570,7 +570,7 @@ namespace JetBrains.FormatRipper.MachO
             stream.Position = position;
             uint rawSubMagic;
             StreamUtil.ReadBytes(stream, (byte*)&rawSubMagic, sizeof(uint));
-            var subMagic = (MH)MemoryUtil.GetLeU4(rawSubMagic);
+            var subMagic = (MH)EndianUtil.GetLeU4(rawSubMagic);
 
             sections[n] = Read(new StreamRange(position, GetU4(fatNodes[n].size)), subMagic);
             if (sections[n].CpuType != (CPU_TYPE)GetU4(fatNodes[n].cputype))

@@ -46,10 +46,10 @@ namespace JetBrains.FormatRipper.Dmg
       UDIF udif;
       StreamUtil.ReadBytes(stream, (byte*)&udif, sizeof(UDIF));
 
-      if ((DmgMagic)MemoryUtil.GetBeU4(udif.Magic) != DmgMagic.KOLY)
+      if ((DmgMagic)EndianUtil.GetBeU4(udif.Magic) != DmgMagic.KOLY)
         return false;
 
-      if (MemoryUtil.GetBeU4(udif.HeaderSize) != sizeof(UDIF))
+      if (EndianUtil.GetBeU4(udif.HeaderSize) != sizeof(UDIF))
         return false;
 
       ulong streamLength = checked((ulong)stream.Length);
@@ -57,10 +57,10 @@ namespace JetBrains.FormatRipper.Dmg
       if (udif.PlistOffset == 0 || udif.PlistLength == 0)
         return false;
 
-      if (MemoryUtil.GetBeU8(udif.PlistOffset) + MemoryUtil.GetBeU8(udif.PlistLength) > streamLength)
+      if (EndianUtil.GetBeU8(udif.PlistOffset) + EndianUtil.GetBeU8(udif.PlistLength) > streamLength)
         return false;
 
-      if (MemoryUtil.GetBeU8(udif.CodeSignatureOffset) + MemoryUtil.GetBeU8(udif.CodeSignatureLength) > streamLength)
+      if (EndianUtil.GetBeU8(udif.CodeSignatureOffset) + EndianUtil.GetBeU8(udif.CodeSignatureLength) > streamLength)
         return false;
 
       return true;
@@ -76,11 +76,11 @@ namespace JetBrains.FormatRipper.Dmg
       UDIF udif;
       StreamUtil.ReadBytes(stream, (byte*)&udif, sizeof(UDIF));
 
-      if ((DmgMagic)MemoryUtil.GetBeU4(udif.Magic) != DmgMagic.KOLY)
+      if ((DmgMagic)EndianUtil.GetBeU4(udif.Magic) != DmgMagic.KOLY)
         throw new FormatException("Invalid DMG file UDIF structure magic");
 
-      ulong signatureOffset = MemoryUtil.GetBeU8(udif.CodeSignatureOffset);
-      ulong signatureLength = MemoryUtil.GetBeU8(udif.CodeSignatureLength);
+      ulong signatureOffset = EndianUtil.GetBeU8(udif.CodeSignatureOffset);
+      ulong signatureLength = EndianUtil.GetBeU8(udif.CodeSignatureLength);
 
       if (signatureOffset + signatureLength > (ulong)stream.Length)
         throw new FormatException($"Invalid signature position. Signature position ({signatureOffset}) + signature length ({signatureLength}) is greater that stream length ({stream.Length})");
@@ -109,13 +109,13 @@ namespace JetBrains.FormatRipper.Dmg
 
         CS_SuperBlob cssb;
         StreamUtil.ReadBytes(stream, (byte*)&cssb, sizeof(CS_SuperBlob));
-        if ((CSMAGIC)MemoryUtil.GetBeU4(cssb.magic) != CSMAGIC.CSMAGIC_EMBEDDED_SIGNATURE)
+        if ((CSMAGIC)EndianUtil.GetBeU4(cssb.magic) != CSMAGIC.CSMAGIC_EMBEDDED_SIGNATURE)
           throw new FormatException("Invalid DMG code embedded signature magic");
-        var csLength = MemoryUtil.GetBeU4(cssb.length);
+        var csLength = EndianUtil.GetBeU4(cssb.length);
         if (csLength < sizeof(CS_SuperBlob))
           throw new FormatException("Too small DMG code signature super blob");
 
-        var csCount = MemoryUtil.GetBeU4(cssb.count);
+        var csCount = EndianUtil.GetBeU4(cssb.count);
         fixed (byte* scBuf = StreamUtil.ReadBytes(stream, checked((int)csLength - sizeof(CS_SuperBlob))))
         {
           ComputeHashInfo[] specialSlotPositions = new ComputeHashInfo[CSSLOT.CSSLOT_HASHABLE_ENTRIES_MAX - 1];
@@ -125,11 +125,11 @@ namespace JetBrains.FormatRipper.Dmg
             var scPtr = scBuf + superBlobEntryIndex * sizeof(CS_BlobIndex);
             CS_BlobIndex csbi;
             MemoryUtil.CopyBytes(scPtr, (byte*)&csbi, sizeof(CS_BlobIndex));
-            uint slotType = MemoryUtil.GetBeU4(csbi.type);
+            uint slotType = EndianUtil.GetBeU4(csbi.type);
 
             if (slotType >= CSSLOT.CSSLOT_INFOSLOT && slotType <= CSSLOT.CSSLOT_LIBRARY_CONSTRAINT)
             {
-              uint offset = MemoryUtil.GetBeU4(csbi.offset);
+              uint offset = EndianUtil.GetBeU4(csbi.offset);
               var csOffsetPtr = scBuf + offset - sizeof(CS_SuperBlob);
 
               CS_Blob csb;
@@ -137,7 +137,7 @@ namespace JetBrains.FormatRipper.Dmg
 
               specialSlotPositions[slotType - 1] = new ComputeHashInfo(0, new[]
               {
-                new StreamRange(checked(imageRange.Position + (long)signatureOffset + offset), MemoryUtil.GetBeU4(csb.length))
+                new StreamRange(checked(imageRange.Position + (long)signatureOffset + offset), EndianUtil.GetBeU4(csb.length))
               }, 0);
             }
           }
@@ -146,9 +146,9 @@ namespace JetBrains.FormatRipper.Dmg
           {
             CS_BlobIndex csbi;
             MemoryUtil.CopyBytes(scPtr, (byte*)&csbi, sizeof(CS_BlobIndex));
-            uint offset = MemoryUtil.GetBeU4(csbi.offset);
+            uint offset = EndianUtil.GetBeU4(csbi.offset);
             var csOffsetPtr = scBuf + offset - sizeof(CS_SuperBlob);
-            uint slotType = MemoryUtil.GetBeU4(csbi.type);
+            uint slotType = EndianUtil.GetBeU4(csbi.type);
             switch (slotType)
             {
               case CSSLOT.CSSLOT_CODEDIRECTORY:
@@ -160,19 +160,19 @@ namespace JetBrains.FormatRipper.Dmg
               {
                 CS_CodeDirectory cscd;
                 MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&cscd, sizeof(CS_CodeDirectory));
-                if ((CSMAGIC)MemoryUtil.GetBeU4(cscd.magic) != CSMAGIC.CSMAGIC_CODEDIRECTORY)
+                if ((CSMAGIC)EndianUtil.GetBeU4(cscd.magic) != CSMAGIC.CSMAGIC_CODEDIRECTORY)
                   throw new FormatException("Invalid DMG code directory signature magic");
-                var cscdLength = MemoryUtil.GetBeU4(cscd.length);
+                var cscdLength = EndianUtil.GetBeU4(cscd.length);
 
                 byte[] currentCodeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, checked((int)cscdLength));
 
                 if (slotType == CSSLOT.CSSLOT_CODEDIRECTORY)
                   codeDirectoryBlob = currentCodeDirectoryBlob;
 
-                int codeSlots = checked((int)MemoryUtil.GetBeU4(cscd.nCodeSlots));
-                int specialSlots = checked((int)MemoryUtil.GetBeU4(cscd.nSpecialSlots));
-                uint zeroHashOffset = MemoryUtil.GetBeU4(cscd.hashOffset);
-                long codeLimit = MemoryUtil.GetBeU4(cscd.codeLimit);
+                int codeSlots = checked((int)EndianUtil.GetBeU4(cscd.nCodeSlots));
+                int specialSlots = checked((int)EndianUtil.GetBeU4(cscd.nSpecialSlots));
+                uint zeroHashOffset = EndianUtil.GetBeU4(cscd.hashOffset);
+                long codeLimit = EndianUtil.GetBeU4(cscd.codeLimit);
                 int pageSize = cscd.pageSize > 0 ? 1 << cscd.pageSize : 0;
                 string hashName = CS_HASHTYPE.GetHashName(cscd.hashType);
 
@@ -217,9 +217,9 @@ namespace JetBrains.FormatRipper.Dmg
               {
                 CS_Blob csb;
                 MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
-                if ((CSMAGIC)MemoryUtil.GetBeU4(csb.magic) != CSMAGIC.CSMAGIC_BLOBWRAPPER)
+                if ((CSMAGIC)EndianUtil.GetBeU4(csb.magic) != CSMAGIC.CSMAGIC_BLOBWRAPPER)
                   throw new FormatException("Invalid DMG blob wrapper signature magic");
-                var csbLength = MemoryUtil.GetBeU4(csb.length);
+                var csbLength = EndianUtil.GetBeU4(csb.length);
                 if (csbLength < sizeof(CS_Blob))
                   throw new FormatException("Too small DMG cms signature blob length");
                 cmsSignatureBlob = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob), checked((int)csbLength - sizeof(CS_Blob)));

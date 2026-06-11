@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using JetBrains.FormatRipper.Elf.Impl;
 using JetBrains.FormatRipper.Impl;
 
@@ -15,7 +14,8 @@ namespace JetBrains.FormatRipper.Elf
     public readonly ELFOSABI EiOsAbi;
     public readonly EM EMachine;
     public readonly ET EType;
-    public readonly string? Interpreter;
+    public readonly ProgramItem[] ProgramItems;
+    public readonly SectionItem[] SectionItems;
 
     private ElfFile(
       ELFCLASS eiClass,
@@ -25,7 +25,8 @@ namespace JetBrains.FormatRipper.Elf
       ET eType,
       EM eMachine,
       EF eFlags,
-      string? interpreter)
+      ProgramItem[] programItems,
+      SectionItem[] sectionItems)
     {
       EiClass = eiClass;
       EiData = eiData;
@@ -34,7 +35,8 @@ namespace JetBrains.FormatRipper.Elf
       EType = eType;
       EMachine = eMachine;
       EFlags = eFlags;
-      Interpreter = interpreter;
+      ProgramItems = programItems;
+      SectionItems = sectionItems;
     }
 
     public static bool Is(Stream stream)
@@ -49,6 +51,72 @@ namespace JetBrains.FormatRipper.Elf
         (EV)eIdent[EI.EI_VERSION] == EV.EV_CURRENT;
     }
 
+    public sealed class ProgramHeader
+    {
+      public readonly ulong Size;
+      public readonly PT Type;
+      public readonly PF Flags;
+
+      public ProgramHeader(ulong size, PT type, PF flags)
+      {
+        Size = size;
+        Type = type;
+        Flags = flags;
+      }
+    }
+
+    public delegate Stream CreateStreamDelegate();
+
+    public sealed class ProgramItem
+    {
+      public readonly ProgramHeader Header;
+      public readonly CreateStreamDelegate CreateStream;
+
+      public ProgramItem(ProgramHeader header, CreateStreamDelegate createStream)
+      {
+        Header = header;
+        CreateStream = createStream;
+      }
+    }
+
+    public sealed class SectionHeader
+    {
+      public readonly string Name;
+      public readonly ulong Size;
+      public readonly ulong Address;
+      public readonly ulong AddressAlign;
+      public readonly SHT Type;
+      public readonly SHF Flags;
+      public readonly ushort Link;
+      public readonly uint Info;
+      public readonly ulong EntSize;
+
+      public SectionHeader(string name, ulong size, ulong address, ulong addressAlign, SHT type, SHF flags, ushort link, uint info, ulong entSize)
+      {
+        Name = name;
+        Size = size;
+        Address = address;
+        AddressAlign = addressAlign;
+        Type = type;
+        Flags = flags;
+        Link = link;
+        Info = info;
+        EntSize = entSize;
+      }
+    }
+
+    public sealed class SectionItem
+    {
+      public readonly SectionHeader Header;
+      public readonly CreateStreamDelegate CreateStream;
+
+      public SectionItem(SectionHeader header, CreateStreamDelegate createStream)
+      {
+        Header = header;
+        CreateStream = createStream;
+      }
+    }
+
     public static ElfFile Parse(Stream stream)
     {
       stream.Position = 0;
@@ -61,20 +129,14 @@ namespace JetBrains.FormatRipper.Elf
         throw new FormatException("Invalid ELF magic numbers");
       if ((EV)eIdent[EI.EI_VERSION] != EV.EV_CURRENT)
         throw new FormatException("Invalid ELF file version");
-
       var eiData = (ELFDATA)eIdent[EI.EI_DATA];
-      var needSwap = BitConverter.IsLittleEndian != eiData switch
-        {
-          ELFDATA.ELFDATA2LSB => true,
-          ELFDATA.ELFDATA2MSB => false,
-          _ => throw new FormatException("Invalid ELF data encoding")
-        };
 
-      ushort GetU2(ushort v) => needSwap ? MemoryUtil.SwapU2(v) : v;
-      uint GetU4(uint v) => needSwap ? MemoryUtil.SwapU4(v) : v;
-      ulong GetU8(ulong v) => needSwap ? MemoryUtil.SwapU8(v) : v;
+      var needSwap = ElfUtil.NeedSwap(eiData);
+      ushort GetU2(ushort v) => needSwap ? EndianUtil.SwapU2(v) : v;
+      uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+      ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
 
-      unsafe Data Read32()
+      unsafe Hdr Read32()
       {
         Elf32_Ehdr ehdr;
         StreamUtil.ReadBytes(stream, (byte*)&ehdr, sizeof(Elf32_Ehdr));
@@ -84,31 +146,68 @@ namespace JetBrains.FormatRipper.Elf
         if (GetU4(ehdr.e_version) != 1u)
           throw new FormatException("Invalid ELF object file version");
 
-        stream.Position = GetU4(ehdr.e_phoff);
-
-        var ePhNum = GetU2(ehdr.e_phnum);
-        var ePhEntSize = GetU2(ehdr.e_phentsize);
-        if (ePhNum > 0 && ePhEntSize < sizeof(Elf32_Phdr))
-          throw new FormatException("Too small ELF program header entry size");
-
-        string? interpreter = null;
-        if (ePhNum > 0)
+        ProgramItem[] phs;
         {
-          fixed (byte* buf = StreamUtil.ReadBytes(stream, checked(ePhNum * ePhEntSize)))
+          var ePhNum = GetU2(ehdr.e_phnum);
+          phs = new ProgramItem[ePhNum];
+          if (ePhNum > 0)
           {
-            for (var ptr = buf; ePhNum-- > 0; ptr += ePhEntSize)
+            var ePhEntSize = GetU2(ehdr.e_phentsize);
+            if (ePhEntSize < sizeof(Elf32_Phdr))
+              throw new FormatException("Too small ELF program header entry size");
+            using var phStream = new ReadOnlyNestedStream(stream, GetU4(ehdr.e_phoff), ePhNum * ePhEntSize);
+            for (ushort n = 0; n < ePhNum; ++n)
             {
               Elf32_Phdr phdr;
-              MemoryUtil.CopyBytes(ptr, (byte*)&phdr, sizeof(Elf32_Phdr));
-              switch ((PT)GetU4(phdr.p_type))
-              {
-                case PT.PT_INTERP:
-                  stream.Position = GetU4(phdr.p_offset);
-                  var interpreterBuf = StreamUtil.ReadBytes(stream, checked((int)GetU4(phdr.p_filesz)));
-                  interpreter = new string(Encoding.UTF8.GetChars(interpreterBuf, 0,
-                    MemoryUtil.GetAsciiStringZSize(interpreterBuf)));
-                  break;
-              }
+              StreamUtil.ReadBytes(phStream, (byte*)&phdr, sizeof(Elf32_Phdr));
+              phStream.Seek(ePhEntSize - sizeof(Elf32_Phdr), SeekOrigin.Current);
+
+              var phOffset = GetU4(phdr.p_offset);
+              var phSize = GetU4(phdr.p_filesz);
+              phs[n] = new ProgramItem(
+                new ProgramHeader(phSize, (PT)GetU4(phdr.p_type), (PF)GetU4(phdr.p_flags)),
+                () => new ReadOnlyNestedStream(stream, phOffset, phSize));
+            }
+          }
+        }
+
+        SectionItem[] shs;
+        {
+          var eShNum = GetU2(ehdr.e_shnum);
+          shs = new SectionItem[eShNum];
+          if (eShNum > 0)
+          {
+            var eShEntSize = GetU2(ehdr.e_shentsize);
+            if (eShEntSize < sizeof(Elf32_Shdr))
+              throw new FormatException("Too small ELF program header entry size");
+            var eShStrNdx = GetU2(ehdr.e_shstrndx);
+            if (eShStrNdx >= eShNum)
+              throw new FormatException("Too large string index section number");
+            using var shStream = new ReadOnlyNestedStream(stream, GetU4(ehdr.e_shoff), eShNum * eShEntSize);
+
+            shStream.Position = eShStrNdx * eShEntSize;
+            Elf32_Shdr strShdr;
+            StreamUtil.ReadBytes(shStream, (byte*)&strShdr, sizeof(Elf32_Shdr));
+            using var stringStream = new ReadOnlyNestedStream(stream, GetU4(strShdr.sh_offset), GetU4(strShdr.sh_size));
+
+            shStream.Position = 0;
+            for (ushort n = 0; n < eShNum; ++n)
+            {
+              Elf32_Shdr shdr;
+              StreamUtil.ReadBytes(shStream, (byte*)&shdr, sizeof(Elf32_Shdr));
+              shStream.Seek(eShEntSize - sizeof(Elf32_Shdr), SeekOrigin.Current);
+
+              stringStream.Position = GetU4(shdr.sh_name);
+              var shName = ElfUtil.ReadStringZ(stringStream);
+
+              var shType = (SHT)GetU4(shdr.sh_type);
+              var shOffset = GetU4(shdr.sh_offset);
+              var shAddr = GetU4(shdr.sh_addr);
+              var shAddrAlign = GetU4(shdr.sh_addralign);
+              var shSize = GetU4(shdr.sh_size);
+              shs[n] = new SectionItem(
+                new SectionHeader(shName, shSize, shAddr, shAddrAlign, shType, (SHF)GetU4(shdr.sh_flags), checked((ushort)GetU4(shdr.sh_link)), GetU4(shdr.sh_info), GetU4(shdr.sh_entsize)),
+                () => shType == SHT.SHT_NOBITS ? throw new InvalidOperationException("Section has no data") : new ReadOnlyNestedStream(stream, shOffset, shSize));
             }
           }
         }
@@ -117,10 +216,11 @@ namespace JetBrains.FormatRipper.Elf
           (ET)GetU2(ehdr.e_type),
           (EM)GetU2(ehdr.e_machine),
           (EF)GetU4(ehdr.e_flags),
-          interpreter);
+          phs,
+          shs);
       }
 
-      unsafe Data Read64()
+      unsafe Hdr Read64()
       {
         Elf64_Ehdr ehdr;
         StreamUtil.ReadBytes(stream, (byte*)&ehdr, sizeof(Elf64_Ehdr));
@@ -130,31 +230,68 @@ namespace JetBrains.FormatRipper.Elf
         if (GetU4(ehdr.e_version) != 1u)
           throw new FormatException("Invalid ELF object file version");
 
-        stream.Position = checked((long)GetU8(ehdr.e_phoff));
-
-        var ePhNum = GetU2(ehdr.e_phnum);
-        var ePhEntSize = GetU2(ehdr.e_phentsize);
-        if (ePhNum > 0 && ePhEntSize < sizeof(Elf64_Phdr))
-          throw new FormatException("Too small ELF program header entry size");
-
-        string? interpreter = null;
-        if (ePhNum > 0)
+        ProgramItem[] phs;
         {
-          fixed (byte* buf = StreamUtil.ReadBytes(stream, checked(ePhNum * ePhEntSize)))
+          var ePhNum = GetU2(ehdr.e_phnum);
+          phs = new ProgramItem[ePhNum];
+          if (ePhNum > 0)
           {
-            for (var ptr = buf; ePhNum-- > 0; ptr += ePhEntSize)
+            var ePhEntSize = GetU2(ehdr.e_phentsize);
+            if (ePhEntSize < sizeof(Elf64_Phdr))
+              throw new FormatException("Too small ELF program header entry size");
+            using var phStream = new ReadOnlyNestedStream(stream, checked((long)GetU8(ehdr.e_phoff)), ePhNum * ePhEntSize);
+            for (ushort n = 0; n < ePhNum; ++n)
             {
               Elf64_Phdr phdr;
-              MemoryUtil.CopyBytes(ptr, (byte*)&phdr, sizeof(Elf64_Phdr));
-              switch ((PT)GetU4(phdr.p_type))
-              {
-                case PT.PT_INTERP:
-                  stream.Position = checked((long)GetU8(phdr.p_offset));
-                  var interpreterBuf = StreamUtil.ReadBytes(stream, checked((int)GetU8(phdr.p_filesz)));
-                  interpreter = new string(Encoding.UTF8.GetChars(interpreterBuf, 0,
-                    MemoryUtil.GetAsciiStringZSize(interpreterBuf)));
-                  break;
-              }
+              StreamUtil.ReadBytes(phStream, (byte*)&phdr, sizeof(Elf64_Phdr));
+              phStream.Seek(ePhEntSize - sizeof(Elf64_Phdr), SeekOrigin.Current);
+
+              var phOffset = GetU8(phdr.p_offset);
+              var phSize = GetU8(phdr.p_filesz);
+              phs[n] = new ProgramItem(
+                new ProgramHeader(phSize, (PT)GetU4(phdr.p_type), (PF)GetU4(phdr.p_flags)),
+                () => new ReadOnlyNestedStream(stream, checked((long)phOffset), checked((long)phSize)));
+            }
+          }
+        }
+
+        SectionItem[] shs;
+        {
+          var eShNum = GetU2(ehdr.e_shnum);
+          shs = new SectionItem[eShNum];
+          if (eShNum > 0)
+          {
+            var eShEntSize = GetU2(ehdr.e_shentsize);
+            if (eShEntSize < sizeof(Elf64_Shdr))
+              throw new FormatException("Too small ELF program header entry size");
+            var eShStrNdx = GetU2(ehdr.e_shstrndx);
+            if (eShStrNdx >= eShNum)
+              throw new FormatException("Too large string index section number");
+            using var shStream = new ReadOnlyNestedStream(stream, checked((long)GetU8(ehdr.e_shoff)), eShNum * eShEntSize);
+
+            shStream.Position = eShStrNdx * eShEntSize;
+            Elf64_Shdr strShdr;
+            StreamUtil.ReadBytes(shStream, (byte*)&strShdr, sizeof(Elf64_Shdr));
+            using var stringStream = new ReadOnlyNestedStream(stream, checked((long)GetU8(strShdr.sh_offset)), checked((long)GetU8(strShdr.sh_size)));
+
+            shStream.Position = 0;
+            for (ushort n = 0; n < eShNum; ++n)
+            {
+              Elf64_Shdr shdr;
+              StreamUtil.ReadBytes(shStream, (byte*)&shdr, sizeof(Elf64_Shdr));
+              shStream.Seek(eShEntSize - sizeof(Elf64_Shdr), SeekOrigin.Current);
+
+              stringStream.Position = GetU4(shdr.sh_name);
+              var shName = ElfUtil.ReadStringZ(stringStream);
+
+              var shType = (SHT)GetU4(shdr.sh_type);
+              var shOffset = GetU8(shdr.sh_offset);
+              var shAddr = GetU8(shdr.sh_addr);
+              var shAddrAlign = GetU8(shdr.sh_addralign);
+              var shSize = GetU8(shdr.sh_size);
+              shs[n] = new SectionItem(
+                new SectionHeader(shName, shSize, shAddr, shAddrAlign, shType, (SHF)checked((uint)GetU8(shdr.sh_flags)), checked((ushort)GetU4(shdr.sh_link)), GetU4(shdr.sh_info), GetU8(shdr.sh_entsize)),
+                () => shType == SHT.SHT_NOBITS ? throw new InvalidOperationException("Section has no data") : new ReadOnlyNestedStream(stream, checked((long)shOffset), checked((long)shSize)));
             }
           }
         }
@@ -163,32 +300,35 @@ namespace JetBrains.FormatRipper.Elf
           (ET)GetU2(ehdr.e_type),
           (EM)GetU2(ehdr.e_machine),
           (EF)GetU4(ehdr.e_flags),
-          interpreter);
+          phs,
+          shs);
       }
 
       var eiClass = (ELFCLASS)eIdent[EI.EI_CLASS];
-      var data = eiClass switch
+      var hdr = eiClass switch
         {
           ELFCLASS.ELFCLASS32 => Read32(),
           ELFCLASS.ELFCLASS64 => Read64(),
           _ => throw new FormatException("Invalid ELF file encoding")
         };
-      return new(eiClass, eiData, (ELFOSABI)eIdent[EI.EI_OSABI], eIdent[EI.EI_ABIVERSION], data.EType, data.EMachine, data.EFlags, data.Interpreter);
+      return new(eiClass, eiData, (ELFOSABI)eIdent[EI.EI_OSABI], eIdent[EI.EI_ABIVERSION], hdr.EType, hdr.EMachine, hdr.EFlags, hdr.ProgramItems, hdr.SectionItems);
     }
 
-    private readonly struct Data
+    private readonly struct Hdr
     {
       public readonly ET EType;
       public readonly EM EMachine;
       public readonly EF EFlags;
-      public readonly string? Interpreter;
+      public readonly ProgramItem[] ProgramItems;
+      public readonly SectionItem[] SectionItems;
 
-      public Data(ET eType, EM eMachine, EF eFlags, string? interpreter)
+      public Hdr(ET eType, EM eMachine, EF eFlags, ProgramItem[] programItems, SectionItem[] sectionItems)
       {
         EType = eType;
         EMachine = eMachine;
         EFlags = eFlags;
-        Interpreter = interpreter;
+        ProgramItems = programItems;
+        SectionItems = sectionItems;
       }
     }
   }

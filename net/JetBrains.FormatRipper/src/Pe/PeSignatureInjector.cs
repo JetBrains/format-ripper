@@ -26,13 +26,13 @@ public class PeSignatureInjector
     sourceStream.Position = 0;
     IMAGE_DOS_HEADER ids;
     StreamUtil.ReadBytes(sourceStream, (byte*)&ids, sizeof(IMAGE_DOS_HEADER));
-    if (MemoryUtil.GetLeU2(ids.e_magic) != Magic.IMAGE_DOS_SIGNATURE)
+    if (EndianUtil.GetLeU2(ids.e_magic) != Magic.IMAGE_DOS_SIGNATURE)
       throw new FormatException("Invalid DOS magic");
-    sourceStream.Position = MemoryUtil.GetLeU4(ids.e_lfanew);
+    sourceStream.Position = EndianUtil.GetLeU4(ids.e_lfanew);
 
     uint peMagic;
     StreamUtil.ReadBytes(sourceStream, (byte*)&peMagic, sizeof(uint));
-    if (MemoryUtil.GetLeU4(peMagic) != Magic.IMAGE_NT_SIGNATURE)
+    if (EndianUtil.GetLeU4(peMagic) != Magic.IMAGE_NT_SIGNATURE)
       throw new FormatException("Invalid PE magic");
 
     long imageFileHeaderPosition = sourceStream.Position;
@@ -42,35 +42,35 @@ public class PeSignatureInjector
 
     IMAGE_FILE_HEADER ifh;
     StreamUtil.ReadBytes(sourceStream, (byte*)&ifh, sizeof(IMAGE_FILE_HEADER));
-    ifh.TimeDateStamp = MemoryUtil.GetLeU4(signatureTransferData.TimeDateStamp);
+    ifh.TimeDateStamp = EndianUtil.GetLeU4(signatureTransferData.TimeDateStamp);
     StreamUtil.WriteBytes(outputStream, (byte*)&ifh, sizeof(IMAGE_FILE_HEADER));
 
     ushort iohMagic;
     StreamUtil.ReadBytes(sourceStream, (byte*)&iohMagic, sizeof(ushort));
     StreamUtil.WriteBytes(outputStream, (byte*)&iohMagic, sizeof(ushort));
     uint numberOfRvaAndSizes = 0;
-    switch (MemoryUtil.GetLeU2(iohMagic))
+    switch (EndianUtil.GetLeU2(iohMagic))
       {
       case Magic.IMAGE_NT_OPTIONAL_HDR32_MAGIC:
         {
-          if (MemoryUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER32))
+          if (EndianUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER32))
             throw new FormatException("Invalid 32-bit option header size");
 
           IMAGE_OPTIONAL_HEADER32 ioh;
           StreamUtil.ReadBytes(sourceStream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER32));
-          numberOfRvaAndSizes = Math.Max(MemoryUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
-          ioh.CheckSum = MemoryUtil.GetLeU4(signatureTransferData.CheckSum);
+          numberOfRvaAndSizes = Math.Max(EndianUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+          ioh.CheckSum = EndianUtil.GetLeU4(signatureTransferData.CheckSum);
           StreamUtil.WriteBytes(outputStream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER32));
         }
         break;
       case Magic.IMAGE_NT_OPTIONAL_HDR64_MAGIC:
         {
-          if (MemoryUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER64))
+          if (EndianUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER64))
             throw new FormatException("Invalid 64-bit option header size");
           IMAGE_OPTIONAL_HEADER64 ioh;
           StreamUtil.ReadBytes(sourceStream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER64));
-          numberOfRvaAndSizes = Math.Max(MemoryUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
-          ioh.CheckSum = MemoryUtil.GetLeU4(signatureTransferData.CheckSum);
+          numberOfRvaAndSizes = Math.Max(EndianUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+          ioh.CheckSum = EndianUtil.GetLeU4(signatureTransferData.CheckSum);
           StreamUtil.WriteBytes(outputStream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER64));
         }
         break;
@@ -85,9 +85,9 @@ public class PeSignatureInjector
     fixed (IMAGE_DATA_DIRECTORY* iddsBuf = new IMAGE_DATA_DIRECTORY[numberOfRvaAndSizes])
     {
       StreamUtil.ReadBytes(sourceStream, (byte*)iddsBuf, rvaSize);
-      existingSignatureOffset = MemoryUtil.GetLeU4(iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY].VirtualAddress);
-      iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY].VirtualAddress = MemoryUtil.GetLeU4(signatureTransferData.SignatureBlobOffset);
-      iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY].Size = MemoryUtil.GetLeU4(signatureTransferData.SignatureBlobSize);
+      existingSignatureOffset = EndianUtil.GetLeU4(iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY].VirtualAddress);
+      iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY].VirtualAddress = EndianUtil.GetLeU4(signatureTransferData.SignatureBlobOffset);
+      iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY].Size = EndianUtil.GetLeU4(signatureTransferData.SignatureBlobSize);
 
       StreamUtil.WriteBytes(outputStream, (byte*)iddsBuf, rvaSize);
     }
@@ -111,9 +111,9 @@ public class PeSignatureInjector
 
     WIN_CERTIFICATE wc = new WIN_CERTIFICATE()
     {
-      dwLength = MemoryUtil.GetLeU4(signatureTransferData.SignatureBlobSize),
-      wRevision = MemoryUtil.GetLeU2(signatureTransferData.CertificateRevision),
-      wCertificateType = MemoryUtil.GetLeU2(signatureTransferData.CertificateType),
+      dwLength = EndianUtil.GetLeU4(signatureTransferData.SignatureBlobSize),
+      wRevision = EndianUtil.GetLeU2(signatureTransferData.CertificateRevision),
+      wCertificateType = EndianUtil.GetLeU2(signatureTransferData.CertificateType),
     };
 
     StreamUtil.WriteBytes(outputStream, (byte*)&wc, sizeof(WIN_CERTIFICATE));
