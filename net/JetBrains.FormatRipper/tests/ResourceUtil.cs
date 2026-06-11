@@ -6,7 +6,7 @@ namespace JetBrains.FormatRipper.Tests
 {
   internal static class ResourceUtil
   {
-    internal static TResult OpenRead<TResult>(ResourceCategory category, string resourceName, Func<Stream, TResult> handler)
+    internal static void OpenRead(ResourceCategory category, string resourceName, Action<Stream> handler, Action<string>? onMissingResource = null)
     {
       var type = typeof(ResourceUtil);
       var fullResourceName = new StringBuilder(type.Namespace).Append(".Resources.").Append(category switch
@@ -23,8 +23,12 @@ namespace JetBrains.FormatRipper.Tests
         .Append('.').Append(resourceName).ToString();
       using var stream = type.Assembly.GetManifestResourceStream(fullResourceName);
       if (stream == null)
-        throw new InvalidOperationException($"Failed to open resource stream for {fullResourceName}");
-      return handler(stream);
+      {
+        var str = $"Missing resource stream for {fullResourceName}";
+        onMissingResource?.Invoke(str);
+        throw new InvalidOperationException(str);
+      }
+      handler(stream);
     }
   }
 }

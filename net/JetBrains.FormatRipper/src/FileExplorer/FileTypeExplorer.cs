@@ -83,7 +83,7 @@ namespace JetBrains.FormatRipper.FileExplorer
           properties = file.EType switch
             {
               ET.ET_EXEC => FileProperties.ExecutableType,
-              ET.ET_DYN => file.Interpreter != null ? FileProperties.ExecutableType : FileProperties.SharedLibraryType,
+              ET.ET_DYN => ElfUtil.HasInterp(file.ProgramItems) ? FileProperties.ExecutableType : FileProperties.SharedLibraryType,
               ET.ET_REL => FileProperties.RelocatableType,
               ET.ET_CORE => FileProperties.CoreDumpType,
               _ => FileProperties.UnknownType

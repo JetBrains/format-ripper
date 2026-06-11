@@ -13,13 +13,13 @@ public class DmgFileTest
   // @formatter:on
   public void TestDmgWithValidParameters(string resourceName, bool hasSignature)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream =>
-    {
-      Assert.IsTrue(DmgFile.Is(stream));
-      return DmgFile.Parse(stream, DmgFile.Mode.SignatureData);
-    });
+    ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream =>
+      {
+        Assert.IsTrue(DmgFile.Is(stream));
+        var file = DmgFile.Parse(stream, DmgFile.Mode.SignatureData);
 
-    Assert.AreEqual(hasSignature, file.HasSignature);
+        Assert.AreEqual(hasSignature, file.HasSignature);
+      });
   }
 
   // @formatter:off
@@ -35,9 +35,8 @@ public class DmgFileTest
   public void TestNonDmgFile(string resourceName, ResourceCategory resourceCategory)
   {
     ResourceUtil.OpenRead(resourceCategory, resourceName, stream =>
-    {
-      Assert.IsFalse(DmgFile.Is(stream));
-      return 0;
-    });
+      {
+        Assert.IsFalse(DmgFile.Is(stream));
+      });
   }
 }

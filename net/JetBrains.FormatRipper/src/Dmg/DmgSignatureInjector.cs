@@ -23,13 +23,13 @@ public class DmgSignatureInjector
     UDIF udif;
     StreamUtil.ReadBytes(sourceStream, (byte*)&udif, sizeof(UDIF));
 
-    if ((DmgMagic)MemoryUtil.GetBeU4(udif.Magic) != DmgMagic.KOLY)
+    if ((DmgMagic)EndianUtil.GetBeU4(udif.Magic) != DmgMagic.KOLY)
       throw new FormatException("Invalid DMG file UDIF structure magic");
 
     sourceStream.Seek(0, SeekOrigin.Begin);
 
-    long existingSignatureOffset = checked((long)MemoryUtil.GetBeU8(udif.CodeSignatureOffset));
-    long existingSignatureLength = checked((long)MemoryUtil.GetBeU8(udif.CodeSignatureLength));
+    long existingSignatureOffset = checked((long)EndianUtil.GetBeU8(udif.CodeSignatureOffset));
+    long existingSignatureLength = checked((long)EndianUtil.GetBeU8(udif.CodeSignatureLength));
 
     long usefullPayloadLength = existingSignatureLength == 0 ? sourceStream.Length - sizeof(UDIF) : existingSignatureOffset;
 
@@ -41,8 +41,8 @@ public class DmgSignatureInjector
     StreamUtil.CopyBytes(sourceStream, outputStream, bytesToCopy);
 
     outputStream.Write(signatureTransferData.SignatureBlob, 0, signatureTransferData.SignatureBlob.Length);
-    udif.CodeSignatureLength = MemoryUtil.GetBeU8((ulong)signatureTransferData.SignatureLength);
-    udif.CodeSignatureOffset = MemoryUtil.GetBeU8((ulong)signatureTransferData.SignatureOffset);
+    udif.CodeSignatureLength = EndianUtil.GetBeU8((ulong)signatureTransferData.SignatureLength);
+    udif.CodeSignatureOffset = EndianUtil.GetBeU8((ulong)signatureTransferData.SignatureOffset);
 
     StreamUtil.WriteBytes(outputStream, (byte*)&udif, sizeof(UDIF));
   }

@@ -145,61 +145,62 @@ namespace JetBrains.FormatRipper.Tests
       string expectedOrderedIncludeRanges,
       StreamInfo[] expectedStreams)
     {
-      var file = ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
+      ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
         {
           Assert.IsTrue(CompoundFile.Is(stream));
-          return CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData | CompoundFile.Mode.ComputeHashInfo, (_, _, _) => true);
-        });
-      Assert.AreEqual(expectedType, file.Type);
+          var file = CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData | CompoundFile.Mode.ComputeHashInfo, (_, _, _) => true);
 
-      var hasCmsBlob = (expectedOptions & CodeOptions.HasCmsBlob) == CodeOptions.HasCmsBlob;
-      var signedBlob = file.SignatureData.SignedBlob;
-      var cmsBlob = file.SignatureData.CmsBlob;
+        Assert.AreEqual(expectedType, file.Type);
 
-      Assert.AreEqual(hasCmsBlob, file.HasSignature);
-      Assert.IsNull(signedBlob);
-      Assert.AreEqual(hasCmsBlob, cmsBlob != null);
+        var hasCmsBlob = (expectedOptions & CodeOptions.HasCmsBlob) == CodeOptions.HasCmsBlob;
+        var signedBlob = file.SignatureData.SignedBlob;
+        var cmsBlob = file.SignatureData.CmsBlob;
 
-      if (cmsBlob != null)
-      {
-        byte[] hash;
-        using (var hashAlgorithm = SHA384.Create())
-          hash = hashAlgorithm.ComputeHash(cmsBlob);
-        Assert.AreEqual(expectedCmsBlobHash, HexUtil.ConvertToHexString(hash));
-      }
-      else
-        Assert.IsNull(expectedCmsBlobHash);
+        Assert.AreEqual(hasCmsBlob, file.HasSignature);
+        Assert.IsNull(signedBlob);
+        Assert.AreEqual(hasCmsBlob, cmsBlob != null);
 
-      var fileExtractStreams = new List<CompoundFile.ExtractStream>(file.ExtractStreams);
-      fileExtractStreams.Sort((x, y) =>
+        if (cmsBlob != null)
         {
-          var minSize = Math.Min(x.Names.Length, y.Names.Length);
-          for (var n = 0; n < minSize; ++n)
+          byte[] hash;
+          using (var hashAlgorithm = SHA384.Create())
+            hash = hashAlgorithm.ComputeHash(cmsBlob);
+          Assert.AreEqual(expectedCmsBlobHash, HexUtil.ConvertToHexString(hash));
+        }
+        else
+          Assert.IsNull(expectedCmsBlobHash);
+
+        var fileExtractStreams = new List<CompoundFile.ExtractStream>(file.ExtractStreams);
+        fileExtractStreams.Sort((x, y) =>
           {
-            var res = string.CompareOrdinal(x.Names[n], y.Names[n]);
-            if (res != 0)
-              return res;
-          }
+            var minSize = Math.Min(x.Names.Length, y.Names.Length);
+            for (var n = 0; n < minSize; ++n)
+            {
+              var res = string.CompareOrdinal(x.Names[n], y.Names[n]);
+              if (res != 0)
+                return res;
+            }
 
-          return x.Names.Length - y.Names.Length;
-        });
+            return x.Names.Length - y.Names.Length;
+          });
 
-      Assert.AreEqual(expectedStreams.Length, fileExtractStreams.Count);
-      for (var n = 0; n < expectedStreams.Length; ++n)
-      {
-        Assert.AreEqual(expectedStreams[n].Clsid, fileExtractStreams[n].Clsid);
-        Assert.AreEqual(expectedStreams[n].Names.Length, fileExtractStreams[n].Names.Length);
-        for (var k = 0; k < expectedStreams[n].Names.Length; ++k)
-          Assert.AreEqual(expectedStreams[n].Names[k], fileExtractStreams[n].Names[k]);
-        byte[] hash;
-        using (var hashAlgorithm = SHA256.Create())
-          hash = hashAlgorithm.ComputeHash(fileExtractStreams[n].Blob);
-        Assert.AreEqual(expectedStreams[n].Hash, HexUtil.ConvertToHexString(hash));
-      }
+        Assert.AreEqual(expectedStreams.Length, fileExtractStreams.Count);
+        for (var n = 0; n < expectedStreams.Length; ++n)
+        {
+          Assert.AreEqual(expectedStreams[n].Clsid, fileExtractStreams[n].Clsid);
+          Assert.AreEqual(expectedStreams[n].Names.Length, fileExtractStreams[n].Names.Length);
+          for (var k = 0; k < expectedStreams[n].Names.Length; ++k)
+            Assert.AreEqual(expectedStreams[n].Names[k], fileExtractStreams[n].Names[k]);
+          byte[] hash;
+          using (var hashAlgorithm = SHA256.Create())
+            hash = hashAlgorithm.ComputeHash(fileExtractStreams[n].Blob);
+          Assert.AreEqual(expectedStreams[n].Hash, HexUtil.ConvertToHexString(hash));
+        }
 
-      var computeHashInfo = file.ComputeHashInfo;
-      Assert.IsNotNull(computeHashInfo);
-      Assert.AreEqual(expectedOrderedIncludeRanges, computeHashInfo!.ToString());
+        var computeHashInfo = file.ComputeHashInfo;
+        Assert.IsNotNull(computeHashInfo);
+        Assert.AreEqual(expectedOrderedIncludeRanges, computeHashInfo!.ToString());
+      });
     }
   }
 }

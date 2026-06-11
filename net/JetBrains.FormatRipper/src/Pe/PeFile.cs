@@ -50,14 +50,14 @@ namespace JetBrains.FormatRipper.Pe
         stream.Position = 0;
         IMAGE_DOS_HEADER ids;
         StreamUtil.ReadBytes(stream, (byte*)&ids, sizeof(IMAGE_DOS_HEADER));
-        if (MemoryUtil.GetLeU2(ids.e_magic) != Magic.IMAGE_DOS_SIGNATURE)
+        if (EndianUtil.GetLeU2(ids.e_magic) != Magic.IMAGE_DOS_SIGNATURE)
           return false;
 
-        stream.Position = MemoryUtil.GetLeU4(ids.e_lfanew);
+        stream.Position = EndianUtil.GetLeU4(ids.e_lfanew);
 
         uint peMagic;
         StreamUtil.ReadBytes(stream, (byte*)&peMagic, sizeof(uint));
-        return MemoryUtil.GetLeU4(peMagic) == Magic.IMAGE_NT_SIGNATURE;
+        return EndianUtil.GetLeU4(peMagic) == Magic.IMAGE_NT_SIGNATURE;
       }
       catch (Exception)
       {
@@ -78,13 +78,13 @@ namespace JetBrains.FormatRipper.Pe
       stream.Position = 0;
       IMAGE_DOS_HEADER ids;
       StreamUtil.ReadBytes(stream, (byte*)&ids, sizeof(IMAGE_DOS_HEADER));
-      if (MemoryUtil.GetLeU2(ids.e_magic) != Magic.IMAGE_DOS_SIGNATURE)
+      if (EndianUtil.GetLeU2(ids.e_magic) != Magic.IMAGE_DOS_SIGNATURE)
         throw new FormatException("Invalid DOS magic");
-      stream.Position = MemoryUtil.GetLeU4(ids.e_lfanew);
+      stream.Position = EndianUtil.GetLeU4(ids.e_lfanew);
 
       uint peMagic;
       StreamUtil.ReadBytes(stream, (byte*)&peMagic, sizeof(uint));
-      if (MemoryUtil.GetLeU4(peMagic) != Magic.IMAGE_NT_SIGNATURE)
+      if (EndianUtil.GetLeU4(peMagic) != Magic.IMAGE_NT_SIGNATURE)
         throw new InvalidDataException("Invalid PE magic");
 
       IMAGE_FILE_HEADER ifh;
@@ -100,35 +100,35 @@ namespace JetBrains.FormatRipper.Pe
       IMAGE_DLLCHARACTERISTICS dllCharacteristics;
       uint numberOfRvaAndSizes;
       StreamRange checkSumRange;
-      switch (MemoryUtil.GetLeU2(iohMagic))
+      switch (EndianUtil.GetLeU2(iohMagic))
       {
       case Magic.IMAGE_NT_OPTIONAL_HDR32_MAGIC:
         {
-          if (MemoryUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER32))
+          if (EndianUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER32))
             throw new FormatException("Invalid 32-bit option header size");
 
           IMAGE_OPTIONAL_HEADER32 ioh;
           checkSumRange = new StreamRange(checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)), sizeof(uint));
           StreamUtil.ReadBytes(stream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER32));
-          sizeOfHeaders = MemoryUtil.GetLeU4(ioh.SizeOfHeaders);
-          subsystem = (IMAGE_SUBSYSTEM)MemoryUtil.GetLeU2(ioh.Subsystem);
-          dllCharacteristics = (IMAGE_DLLCHARACTERISTICS)MemoryUtil.GetLeU2(ioh.DllCharacteristics);
-          numberOfRvaAndSizes = Math.Max(MemoryUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
-          checkSum = MemoryUtil.GetLeU4(ioh.CheckSum);
+          sizeOfHeaders = EndianUtil.GetLeU4(ioh.SizeOfHeaders);
+          subsystem = (IMAGE_SUBSYSTEM)EndianUtil.GetLeU2(ioh.Subsystem);
+          dllCharacteristics = (IMAGE_DLLCHARACTERISTICS)EndianUtil.GetLeU2(ioh.DllCharacteristics);
+          numberOfRvaAndSizes = Math.Max(EndianUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+          checkSum = EndianUtil.GetLeU4(ioh.CheckSum);
         }
         break;
       case Magic.IMAGE_NT_OPTIONAL_HDR64_MAGIC:
         {
-          if (MemoryUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER64))
+          if (EndianUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER64))
             throw new FormatException("Invalid 64-bit option header size");
           IMAGE_OPTIONAL_HEADER64 ioh;
           checkSumRange = new StreamRange(checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)), sizeof(uint));
           StreamUtil.ReadBytes(stream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER64));
-          sizeOfHeaders = MemoryUtil.GetLeU4(ioh.SizeOfHeaders);
-          subsystem = (IMAGE_SUBSYSTEM)MemoryUtil.GetLeU2(ioh.Subsystem);
-          dllCharacteristics = (IMAGE_DLLCHARACTERISTICS)MemoryUtil.GetLeU2(ioh.DllCharacteristics);
-          numberOfRvaAndSizes = Math.Max(MemoryUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
-          checkSum = MemoryUtil.GetLeU4(ioh.CheckSum);
+          sizeOfHeaders = EndianUtil.GetLeU4(ioh.SizeOfHeaders);
+          subsystem = (IMAGE_SUBSYSTEM)EndianUtil.GetLeU2(ioh.Subsystem);
+          dllCharacteristics = (IMAGE_DLLCHARACTERISTICS)EndianUtil.GetLeU2(ioh.DllCharacteristics);
+          numberOfRvaAndSizes = Math.Max(EndianUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+          checkSum = EndianUtil.GetLeU4(ioh.CheckSum);
         }
         break;
       default:
@@ -147,7 +147,7 @@ namespace JetBrains.FormatRipper.Pe
         corIdd = iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR];
       }
 
-      var numberOfSections = MemoryUtil.GetLeU2(ifh.NumberOfSections);
+      var numberOfSections = EndianUtil.GetLeU2(ifh.NumberOfSections);
       var ishs = new IMAGE_SECTION_HEADER[numberOfSections];
       fixed (IMAGE_SECTION_HEADER* ishsBuf = ishs)
       {
@@ -188,13 +188,13 @@ namespace JetBrains.FormatRipper.Pe
 
       Array.Sort(ishs, (x, y) =>
         {
-          if (MemoryUtil.GetLeU4(x.PointerToRawData) < MemoryUtil.GetLeU4(y.PointerToRawData)) return -1;
-          if (MemoryUtil.GetLeU4(x.PointerToRawData) > MemoryUtil.GetLeU4(y.PointerToRawData)) return 1;
+          if (EndianUtil.GetLeU4(x.PointerToRawData) < EndianUtil.GetLeU4(y.PointerToRawData)) return -1;
+          if (EndianUtil.GetLeU4(x.PointerToRawData) > EndianUtil.GetLeU4(y.PointerToRawData)) return 1;
           return 0;
         });
       foreach (var ish in ishs)
         if (ish.PointerToRawData != 0 && ish.SizeOfRawData != 0)
-          sortedHashIncludeRanges.Add(new StreamRange(MemoryUtil.GetLeU4(ish.PointerToRawData), MemoryUtil.GetLeU4(ish.SizeOfRawData)));
+          sortedHashIncludeRanges.Add(new StreamRange(EndianUtil.GetLeU4(ish.PointerToRawData), EndianUtil.GetLeU4(ish.SizeOfRawData)));
       var sizeOfSections = sortedHashIncludeRanges[sortedHashIncludeRanges.Count - 1].Position +
                            sortedHashIncludeRanges[sortedHashIncludeRanges.Count - 1].Size;
       var sizeOfFile = stream.Length;
@@ -203,40 +203,40 @@ namespace JetBrains.FormatRipper.Pe
       var signatureData = new SignatureData();
       if (securityIdd.VirtualAddress != 0 && securityIdd.Size != 0)
       {
-        if (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) < sizeOfFile)
+        if (EndianUtil.GetLeU4(securityIdd.VirtualAddress) < sizeOfFile)
         {
-          sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections, MemoryUtil.GetLeU4(securityIdd.VirtualAddress) - sizeOfSections));
-          if (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size) < sizeOfFile)
+          sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections, EndianUtil.GetLeU4(securityIdd.VirtualAddress) - sizeOfSections));
+          if (EndianUtil.GetLeU4(securityIdd.VirtualAddress) + EndianUtil.GetLeU4(securityIdd.Size) < sizeOfFile)
             sortedHashIncludeRanges.Add(new StreamRange(
-              MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size),
-              sizeOfFile - (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size))));
+              EndianUtil.GetLeU4(securityIdd.VirtualAddress) + EndianUtil.GetLeU4(securityIdd.Size),
+              sizeOfFile - (EndianUtil.GetLeU4(securityIdd.VirtualAddress) + EndianUtil.GetLeU4(securityIdd.Size))));
         }
         else
           sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections, sizeOfFile - sizeOfSections));
 
-        if (MemoryUtil.GetLeU4(securityIdd.VirtualAddress) + MemoryUtil.GetLeU4(securityIdd.Size) == stream.Length)
+        if (EndianUtil.GetLeU4(securityIdd.VirtualAddress) + EndianUtil.GetLeU4(securityIdd.Size) == stream.Length)
         {
           hasSignature = true;
 
           if ((mode & Mode.SignatureData) == Mode.SignatureData)
           {
-            stream.Position = MemoryUtil.GetLeU4(securityIdd.VirtualAddress);
+            stream.Position = EndianUtil.GetLeU4(securityIdd.VirtualAddress);
             WIN_CERTIFICATE wc;
             StreamUtil.ReadBytes(stream, (byte*)&wc, sizeof(WIN_CERTIFICATE));
-            if (MemoryUtil.GetLeU2(wc.wCertificateType) != WinCertificate.WIN_CERT_TYPE_PKCS_SIGNED_DATA)
+            if (EndianUtil.GetLeU2(wc.wCertificateType) != WinCertificate.WIN_CERT_TYPE_PKCS_SIGNED_DATA)
               throw new FormatException("Unsupported PE certificate type");
 
-            byte[] cmsBlob = StreamUtil.ReadBytes(stream, checked((int)(MemoryUtil.GetLeU4(wc.dwLength) - sizeof(WIN_CERTIFICATE))));
+            byte[] cmsBlob = StreamUtil.ReadBytes(stream, checked((int)(EndianUtil.GetLeU4(wc.dwLength) - sizeof(WIN_CERTIFICATE))));
             signatureData = new SignatureData(null, cmsBlob);
 
             peSignatureTransferData = new PeSignatureTransferData()
             {
               CheckSum = checkSum,
-              TimeDateStamp = MemoryUtil.GetLeU4(ifh.TimeDateStamp),
-              SignatureBlobOffset = MemoryUtil.GetLeU4(securityIdd.VirtualAddress),
-              SignatureBlobSize = MemoryUtil.GetLeU4(securityIdd.Size),
-              CertificateType = MemoryUtil.GetLeU2(wc.wCertificateType),
-              CertificateRevision = MemoryUtil.GetLeU2(wc.wRevision),
+              TimeDateStamp = EndianUtil.GetLeU4(ifh.TimeDateStamp),
+              SignatureBlobOffset = EndianUtil.GetLeU4(securityIdd.VirtualAddress),
+              SignatureBlobSize = EndianUtil.GetLeU4(securityIdd.Size),
+              CertificateType = EndianUtil.GetLeU2(wc.wCertificateType),
+              CertificateRevision = EndianUtil.GetLeU2(wc.wRevision),
               SignatureBlob = cmsBlob,
             };
           }
@@ -255,8 +255,8 @@ namespace JetBrains.FormatRipper.Pe
 
       StreamRangeUtil.MergeNeighbors(sortedHashIncludeRanges);
       return new(
-        (IMAGE_FILE_MACHINE)MemoryUtil.GetLeU2(ifh.Machine),
-        (IMAGE_FILE)MemoryUtil.GetLeU2(ifh.Characteristics),
+        (IMAGE_FILE_MACHINE)EndianUtil.GetLeU2(ifh.Machine),
+        (IMAGE_FILE)EndianUtil.GetLeU2(ifh.Characteristics),
         subsystem, dllCharacteristics, hasSignature, signatureData, hasMetadata, securityIddRange,
         computeHashInfo,
         peSignatureTransferData);
@@ -265,9 +265,9 @@ namespace JetBrains.FormatRipper.Pe
     private static uint TranslateVirtualAddress(IMAGE_SECTION_HEADER[] ishs, ref IMAGE_DATA_DIRECTORY idd)
     {
       foreach (var ish in ishs)
-        if (MemoryUtil.GetLeU4(ish.VirtualAddress) <= MemoryUtil.GetLeU4(idd.VirtualAddress) &&
-            MemoryUtil.GetLeU4(idd.VirtualAddress) + MemoryUtil.GetLeU4(idd.Size) < MemoryUtil.GetLeU4(ish.VirtualAddress) + MemoryUtil.GetLeU4(ish.VirtualSize))
-          return MemoryUtil.GetLeU4(ish.PointerToRawData) + (MemoryUtil.GetLeU4(idd.VirtualAddress) - MemoryUtil.GetLeU4(ish.VirtualAddress));
+        if (EndianUtil.GetLeU4(ish.VirtualAddress) <= EndianUtil.GetLeU4(idd.VirtualAddress) &&
+            EndianUtil.GetLeU4(idd.VirtualAddress) + EndianUtil.GetLeU4(idd.Size) < EndianUtil.GetLeU4(ish.VirtualAddress) + EndianUtil.GetLeU4(ish.VirtualSize))
+          return EndianUtil.GetLeU4(ish.PointerToRawData) + (EndianUtil.GetLeU4(idd.VirtualAddress) - EndianUtil.GetLeU4(ish.VirtualAddress));
 
       return 0;
     }
