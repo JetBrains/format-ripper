@@ -25,7 +25,7 @@ namespace JetBrains.FormatRipper.Elf
       return new string(Encoding.UTF8.GetChars(blob, 0, blob.Length));
     }
 
-    public static ushort? Find(ElfFile.ProgramItem[] items, PT type)
+    public static ushort? Find(ElfFile.Program[] items, PT type)
     {
       var length = checked((ushort)items.Length);
       for (ushort n = 0; n < length; n++)
@@ -34,7 +34,7 @@ namespace JetBrains.FormatRipper.Elf
       return null;
     }
 
-    public static ushort? Find(ElfFile.SectionItem[] items, SHT type)
+    public static ushort? Find(ElfFile.Section[] items, SHT type)
     {
       var length = checked((ushort)items.Length);
       for (ushort n = 0; n < length; n++)
@@ -43,9 +43,9 @@ namespace JetBrains.FormatRipper.Elf
       return null;
     }
 
-    public static bool HasInterp(ElfFile.ProgramItem[] items) => Find(items, PT.PT_INTERP) != null;
+    public static bool HasInterp(ElfFile.Program[] items) => Find(items, PT.PT_INTERP) != null;
 
-    public static string? GetInterp(ElfFile.ProgramItem[] items)
+    public static string? GetInterp(ElfFile.Program[] items)
     {
       var interp = Find(items, PT.PT_INTERP);
       if (interp == null)
@@ -54,8 +54,7 @@ namespace JetBrains.FormatRipper.Elf
       return ReadStringZ(stream);
     }
 
-
-    public sealed class SymbolItem
+    public sealed class Symbol
     {
       public readonly string Name;
       public readonly ushort SectionIndex;
@@ -66,7 +65,7 @@ namespace JetBrains.FormatRipper.Elf
       public readonly byte Other;
       public readonly ElfFile.CreateStreamDelegate? CreateStream;
 
-      internal SymbolItem(string name, ushort sectionIndex, ulong value, ulong size, STT type, STB binding, byte other, ElfFile.CreateStreamDelegate? createStream)
+      internal Symbol(string name, ushort sectionIndex, ulong value, ulong size, STT type, STB binding, byte other, ElfFile.CreateStreamDelegate? createStream)
       {
         Name = name;
         Size = size;
@@ -79,31 +78,30 @@ namespace JetBrains.FormatRipper.Elf
       }
     }
 
-    public delegate bool EnumPredicateDelegate(SymbolItem item);
-
-    public static bool EnumSymbols(ElfFile file, ushort symSectionNdx, ushort strSectionNdx, EnumPredicateDelegate predicate)
+    public static Symbol[] GetSymbols(ElfFile file, ushort symSectionIndex, ushort strSectionIndex)
     {
-      if ((SHN)symSectionNdx <= SHN.SHN_UNDEF || SHN.SHN_LORESERVE <= (SHN)symSectionNdx || symSectionNdx >= file.SectionItems.Length)
-        throw new ArgumentOutOfRangeException(nameof(symSectionNdx));
-      if ((SHN)strSectionNdx <= SHN.SHN_UNDEF || SHN.SHN_LORESERVE <= (SHN)strSectionNdx || strSectionNdx >= file.SectionItems.Length)
-        throw new ArgumentOutOfRangeException(nameof(strSectionNdx));
-      var symSection = file.SectionItems[symSectionNdx];
-      var strSection = file.SectionItems[strSectionNdx];
+      if ((SHN)symSectionIndex <= SHN.SHN_UNDEF || SHN.SHN_LORESERVE <= (SHN)symSectionIndex || symSectionIndex >= file.Sections.Length)
+        throw new ArgumentOutOfRangeException(nameof(symSectionIndex));
+      if ((SHN)strSectionIndex <= SHN.SHN_UNDEF || SHN.SHN_LORESERVE <= (SHN)strSectionIndex || strSectionIndex >= file.Sections.Length)
+        throw new ArgumentOutOfRangeException(nameof(strSectionIndex));
+      var symSection = file.Sections[symSectionIndex];
+      var strSection = file.Sections[strSectionIndex];
 
       var needSwap = NeedSwap(file.EiData);
       ushort GetU2(ushort v) => needSwap ? EndianUtil.SwapU2(v) : v;
       uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
       ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
 
-      unsafe bool Read32()
+      unsafe Symbol[] Read32()
       {
         var entrySize = symSection.EntSize != 0 ? checked((int)symSection.EntSize) : sizeof(Elf32_Sym);
         if (entrySize < sizeof(Elf32_Sym))
           throw new FormatException("Invalid ELF symbol header size");
         using var strStream = strSection.CreateStream();
         using var symStream = symSection.CreateStream();
-        var symCount = symStream.Length / entrySize;
-        for (var i = 0; i < symCount; i++)
+        var symCount = checked((int)symStream.Length / entrySize);
+        var symbols = new Symbol[symCount];
+        for (var n = 0; n < symCount; ++n)
         {
           Elf32_Sym shdr;
           StreamUtil.ReadBytes(symStream, (byte*)&shdr, sizeof(Elf32_Sym));
@@ -111,6 +109,7 @@ namespace JetBrains.FormatRipper.Elf
 
           strStream.Position = GetU4(shdr.st_name);
           var str = ReadStringZ(strStream);
+
           var stShNdx = GetU2(shdr.st_shndx);
           var stValue = GetU4(shdr.st_value);
           var stSize = GetU4(shdr.st_size);
@@ -118,55 +117,53 @@ namespace JetBrains.FormatRipper.Elf
           var stBinding = (STB)(shdr.st_info >> 4);
           var stOther = shdr.st_other;
 
+          Symbol symbol;
           if (SHN.SHN_UNDEF < (SHN)stShNdx && (SHN)stShNdx < SHN.SHN_LORESERVE)
           {
-            var sectionItems = file.SectionItems;
-            if (stShNdx >= sectionItems.Length)
+            var sections = file.Sections;
+            if (stShNdx >= sections.Length)
               throw new FormatException("Invalid ELF symbol section number");
 
-            var data = sectionItems[stShNdx];
+            var data = sections[stShNdx];
             if ((data.Flags & SHF.SHF_ALLOC) == 0)
               throw new FormatException("Invalid ELF symbol section flags: allocation is required");
             if (stValue < data.Address || data.Address + data.Size < stValue)
               throw new FormatException("Invalid ELF symbol section address");
 
-            var stShNdxEnd = FindEndOfSectionSequenceIndex(sectionItems, stShNdx, stValue + stSize);
-            if (HasNoBits(file.SectionItems, stShNdx, stShNdxEnd))
-            {
-              if (!predicate(new SymbolItem(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null)))
-                return false;
-            }
+            var stShNdxEnd = FindEndOfSectionSequenceIndex(sections, stShNdx, stValue + stSize);
+            if (HasNoBits(file.Sections, stShNdx, stShNdxEnd))
+              symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null);
             else
             {
               var offset = checked((long)(stValue - data.Address));
               if (stShNdx + 1 == stShNdxEnd)
-              {
-                if (!predicate(new SymbolItem(str, stShNdx, stValue, stSize, stType, stBinding, stOther, () => new ReadOnlyNestedStream(data.CreateStream(), offset, stSize))))
-                  return false;
-              }
+                symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, () => new ReadOnlyNestedStream(data.CreateStream(), offset, stSize));
               else
               {
-                var createStreams = CreateStreamDelegates(sectionItems, stShNdx, stShNdxEnd);
-                if (!predicate(new SymbolItem(str, stShNdx, stValue, stSize, stType, stBinding, stOther, () => new ReadOnlyNestedStream(new ReadOnlyAggregatedStream(CreateStreams(createStreams)), offset, stSize))))
-                  return false;
+                var createStreams = CreateStreamDelegates(sections, stShNdx, stShNdxEnd);
+                symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, () => new ReadOnlyNestedStream(new ReadOnlyAggregatedStream(CreateStreams(createStreams)), offset, stSize));
               }
             }
           }
-          else if (!predicate(new SymbolItem(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null)))
-            return false;
+          else
+            symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null);
+
+          symbols[n] = symbol;
         }
 
-        return true;
+        return symbols;
       }
 
-      unsafe bool Read64()
+      unsafe Symbol[] Read64()
       {
         var entrySize = symSection.EntSize != 0 ? checked((int)symSection.EntSize) : sizeof(Elf64_Sym);
         if (entrySize < sizeof(Elf64_Sym))
           throw new FormatException("Invalid ELF symbol header size");
         using var strStream = strSection.CreateStream();
         using var symStream = symSection.CreateStream();
-        var symCount = symStream.Length / entrySize;
+
+        var symCount = checked((int)symStream.Length / entrySize);
+        var symbols = new Symbol[symCount];
         for (var i = 0; i < symCount; i++)
         {
           Elf64_Sym shdr;
@@ -183,45 +180,41 @@ namespace JetBrains.FormatRipper.Elf
           var stBinding = (STB)(shdr.st_info >> 4);
           var stOther = shdr.st_other;
 
+          Symbol symbol;
           if (SHN.SHN_UNDEF < (SHN)stShNdx && (SHN)stShNdx < SHN.SHN_LORESERVE)
           {
-            var sectionItems = file.SectionItems;
-            if (stShNdx >= sectionItems.Length)
+            var sections = file.Sections;
+            if (stShNdx >= sections.Length)
               throw new FormatException("Invalid ELF symbol section number");
 
-            var data = sectionItems[stShNdx];
+            var data = sections[stShNdx];
             if ((data.Flags & SHF.SHF_ALLOC) == 0)
               throw new FormatException("Invalid ELF symbol section flags: allocation is required");
             if (stValue < data.Address || data.Address + data.Size < stValue)
               throw new FormatException("Invalid ELF symbol section address");
 
-            var stShNdxEnd = FindEndOfSectionSequenceIndex(sectionItems, stShNdx, stValue + stSize);
-            if (HasNoBits(file.SectionItems, stShNdx, stShNdxEnd))
-            {
-              if (!predicate(new SymbolItem(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null)))
-                return false;
-            }
+            var stShNdxEnd = FindEndOfSectionSequenceIndex(sections, stShNdx, stValue + stSize);
+            if (HasNoBits(file.Sections, stShNdx, stShNdxEnd))
+              symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null);
             else
             {
               var offset = checked((long)(stValue - data.Address));
               if (stShNdx + 1 == stShNdxEnd)
-              {
-                if (!predicate(new SymbolItem(str, stShNdx, stValue, stSize, stType, stBinding, stOther, () => new ReadOnlyNestedStream(data.CreateStream(), offset, checked((long)stSize)))))
-                  return false;
-              }
+                symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, () => new ReadOnlyNestedStream(data.CreateStream(), offset, checked((long)stSize)));
               else
               {
-                var createStreams = CreateStreamDelegates(sectionItems, stShNdx, stShNdxEnd);
-                if (!predicate(new SymbolItem(str, stShNdx, stValue, stSize, stType, stBinding, stOther, () => new ReadOnlyNestedStream(new ReadOnlyAggregatedStream(CreateStreams(createStreams)), offset, checked((long)stSize)))))
-                  return false;
+                var createStreams = CreateStreamDelegates(sections, stShNdx, stShNdxEnd);
+                symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, () => new ReadOnlyNestedStream(new ReadOnlyAggregatedStream(CreateStreams(createStreams)), offset, checked((long)stSize)));
               }
             }
           }
-          else if (!predicate(new SymbolItem(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null)))
-            return false;
+          else
+            symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null);
+
+          symbols[i] = symbol;
         }
 
-        return true;
+        return symbols;
       }
 
       return file.EiClass switch
@@ -231,7 +224,7 @@ namespace JetBrains.FormatRipper.Elf
           _ => throw new FormatException("Invalid ELF class encoding")
         };
 
-      static bool HasNoBits(ElfFile.SectionItem[] sectionItems, ushort startIndex, ushort endIndex)
+      static bool HasNoBits(ElfFile.Section[] sectionItems, ushort startIndex, ushort endIndex)
       {
         for (var n = startIndex; n < endIndex; n++)
           if (sectionItems[n].Type == SHT.SHT_NOBITS)
@@ -239,7 +232,7 @@ namespace JetBrains.FormatRipper.Elf
         return false;
       }
 
-      static ElfFile.CreateStreamDelegate[] CreateStreamDelegates(ElfFile.SectionItem[] sectionItems, ushort startIndex, ushort endIndex)
+      static ElfFile.CreateStreamDelegate[] CreateStreamDelegates(ElfFile.Section[] sectionItems, ushort startIndex, ushort endIndex)
       {
         var createStreams = new ElfFile.CreateStreamDelegate[endIndex - startIndex];
         for (var index = startIndex; index < endIndex; index++)
@@ -255,7 +248,7 @@ namespace JetBrains.FormatRipper.Elf
         return streams;
       }
 
-      static ushort FindEndOfSectionSequenceIndex(ElfFile.SectionItem[] fileSectionItems, ushort startIndex, ulong addressEnd)
+      static ushort FindEndOfSectionSequenceIndex(ElfFile.Section[] fileSectionItems, ushort startIndex, ulong addressEnd)
       {
         var endIndex = startIndex;
         while (true)
