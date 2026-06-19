@@ -12,14 +12,14 @@ namespace JetBrains.FormatRipper.Tests
   [TestFixture]
   public sealed partial class ElfFileTest
   {
-    public sealed class ProgramStreamInfo
+    public sealed class Program
     {
       public readonly string Hash;
       public readonly ulong Size;
       public readonly PT Type;
       public readonly PF Flags;
 
-      internal ProgramStreamInfo(string hash, ulong size, PT type, PF flags)
+      internal Program(string hash, ulong size, PT type, PF flags)
       {
         Hash = hash;
         Size = size;
@@ -30,7 +30,7 @@ namespace JetBrains.FormatRipper.Tests
       public override string ToString() => $"{Hash}, {Size}, {Type}, {Flags}";
     }
 
-    public sealed class SectionStreamInfo
+    public sealed class Section
     {
       public readonly string? Hash;
       public readonly ulong Size;
@@ -43,7 +43,7 @@ namespace JetBrains.FormatRipper.Tests
       public readonly ushort Link;
       public readonly uint Info;
 
-      internal SectionStreamInfo(string? hash, ulong size, ulong address, ulong addressAlign, ulong entSize, string name, SHT type, ushort link, uint info, SHF flags)
+      internal Section(string? hash, ulong size, ulong address, ulong addressAlign, ulong entSize, string name, SHT type, ushort link, uint info, SHF flags)
       {
         Hash = hash;
         Size = size;
@@ -60,7 +60,7 @@ namespace JetBrains.FormatRipper.Tests
       public override string ToString() => $"{Hash}, {Size}, 0x{Address:X}, 0x{AddressAlign:X}, {EntSize}, \"{Name}\", {Type}, {Flags}, {Link}, 0x{Info:X}";
     }
 
-    public sealed class SymbolStreamInfo
+    public sealed class Symbol
     {
       public readonly string? Hash;
       public readonly ulong Size;
@@ -71,12 +71,12 @@ namespace JetBrains.FormatRipper.Tests
       public readonly STB Binding;
       public readonly byte Other;
 
-      internal SymbolStreamInfo(string? hash, ulong size, ulong value, SHN sectionIndex, string name, STT type, STB binding, byte other) :
+      internal Symbol(string? hash, ulong size, ulong value, SHN sectionIndex, string name, STT type, STB binding, byte other) :
         this(hash, size, value, (ushort)sectionIndex, name, type, binding, other)
       {
       }
 
-      internal SymbolStreamInfo(string? hash, ulong size, ulong value, ushort sectionIndex, string name, STT type, STB binding, byte other)
+      internal Symbol(string? hash, ulong size, ulong value, ushort sectionIndex, string name, STT type, STB binding, byte other)
       {
         Hash = hash;
         Size = size;
@@ -91,7 +91,7 @@ namespace JetBrains.FormatRipper.Tests
       public override string ToString() => $"{Name}, {Size}, 0x{Value:X}, {SectionIndex}, \"{Name}\", {Type}, {Binding}, 0x{Other:X}";
     }
 
-    private static object?[] MakeSource(
+    private static object?[] Make(
       string resourceName,
       ELFCLASS expectedEiClass,
       ELFDATA expectedEiData,
@@ -101,9 +101,9 @@ namespace JetBrains.FormatRipper.Tests
       EM expectedEMachine,
       EF expectedEFlags,
       string? expectedInterpreter,
-      ProgramStreamInfo[]? expectedProgramInfos,
-      SectionStreamInfo[]? expectedSectionInfos,
-      SymbolStreamInfo[]? expectedSymbolInfos = null) => new object?[]
+      Program[]? expectedPrograms,
+      Section[]? expectedSections,
+      Symbol[]? expectedSymbols = null) => new object?[]
         {
           false,
           resourceName,
@@ -116,12 +116,12 @@ namespace JetBrains.FormatRipper.Tests
           expectedEFlags,
           expectedInterpreter,
           null,
-          expectedProgramInfos,
-          expectedSectionInfos,
-          expectedSymbolInfos
+          expectedPrograms,
+          expectedSections,
+          expectedSymbols
         };
 
-    private static object?[] MakeOptionalSource(
+    private static object?[] MakeOptional(
       string resourceName,
       ELFCLASS expectedEiClass,
       ELFDATA expectedEiData,
@@ -132,9 +132,9 @@ namespace JetBrains.FormatRipper.Tests
       EF expectedEFlags,
       string? expectedInterpreter,
       string? expectedUnityScriptingBackend,
-      ProgramStreamInfo[]? expectedProgramInfos,
-      SectionStreamInfo[]? expectedSectionInfos,
-      SymbolStreamInfo[]? expectedSymbolInfos = null) => new object?[]
+      Program[]? expectedPrograms,
+      Section[]? expectedSections,
+      Symbol[]? expectedSymbols = null) => new object?[]
         {
           true,
           resourceName,
@@ -147,9 +147,9 @@ namespace JetBrains.FormatRipper.Tests
           expectedEFlags,
           expectedInterpreter,
           expectedUnityScriptingBackend,
-          expectedProgramInfos,
-          expectedSectionInfos,
-          expectedSymbolInfos
+          expectedPrograms,
+          expectedSections,
+          expectedSymbols
         };
 
     [TestCaseSource(typeof(ElfFileTest), nameof(Sources))]
@@ -166,9 +166,9 @@ namespace JetBrains.FormatRipper.Tests
       EF expectedEFlags,
       string? expectedInterpreter,
       string? expectedUnityScriptingBackend,
-      ProgramStreamInfo[]? expectedProgramInfos,
-      SectionStreamInfo[]? expectedSectionInfos,
-      SymbolStreamInfo[]? expectedSymbolInfos)
+      Program[]? expectedPrograms,
+      Section[]? expectedSections,
+      Symbol[]? expectedSymbols)
     {
       ResourceUtil.OpenRead(ResourceCategory.Elf, resourceName, stream =>
         {
@@ -182,97 +182,88 @@ namespace JetBrains.FormatRipper.Tests
           Assert.AreEqual(expectedEType, file.EType);
           Assert.AreEqual(expectedEMachine, file.EMachine);
           Assert.AreEqual(expectedEFlags, file.EFlags, $"Expected 0x{expectedEFlags:X}, but was 0x{file.EFlags:X}");
-          Assert.AreEqual(expectedInterpreter, ElfUtil.GetInterp(file.ProgramItems));
+          Assert.AreEqual(expectedInterpreter, ElfUtil.GetInterp(file.Programs));
 
-          if (expectedProgramInfos != null)
+          if (expectedPrograms != null)
           {
-            var programItems = file.ProgramItems;
-            Assert.AreEqual(expectedProgramInfos.Length, programItems.Length);
-            for (var n = 0; n < expectedProgramInfos.Length; ++n)
+            var programs = file.Programs;
+            Assert.AreEqual(expectedPrograms.Length, programs.Length);
+            for (var n = 0; n < expectedPrograms.Length; ++n)
             {
-              var info = expectedProgramInfos[n];
-              var item = programItems[n];
+              var expectedProgram = expectedPrograms[n];
+              var program = programs[n];
 
-              Assert.AreEqual(info.Size, item.Size);
-              Assert.AreEqual(info.Type, item.Type);
-              Assert.AreEqual(info.Flags, item.Flags, $"Expected 0x{info.Flags:X}, but was 0x{item.Flags:X}");
+              Assert.AreEqual(expectedProgram.Size, program.Size);
+              Assert.AreEqual(expectedProgram.Type, program.Type);
+              Assert.AreEqual(expectedProgram.Flags, program.Flags, $"Expected 0x{expectedProgram.Flags:X}, but was 0x{program.Flags:X}");
 
-              var hash = CalculateStreamHash(() => item.CreateStream());
-              Assert.AreEqual(info.Hash, hash);
+              var hash = CalculateStreamHash(() => program.CreateStream());
+              Assert.AreEqual(expectedProgram.Hash, hash);
             }
           }
           else
             GenerateProgramStreamInfos(file);
 
-          if (expectedSectionInfos != null)
+          if (expectedSections != null)
           {
-            var sectionItems = file.SectionItems;
-            Assert.AreEqual(expectedSectionInfos.Length, sectionItems.Length);
-            for (var k = 0; k < expectedSectionInfos.Length; ++k)
+            var sections = file.Sections;
+            Assert.AreEqual(expectedSections.Length, sections.Length);
+            for (var n = 0; n < expectedSections.Length; ++n)
             {
-              var info = expectedSectionInfos[k];
-              var item = sectionItems[k];
+              var expectedSection = expectedSections[n];
+              var section = sections[n];
 
-              Assert.AreEqual(info.Name, item.Name);
-              Assert.AreEqual(info.Size, item.Size);
-              Assert.AreEqual(info.Address, item.Address, $"Expected 0x{info.Address:X}, but was 0x{item.Address:X}");
-              Assert.AreEqual(info.AddressAlign, item.AddressAlign, $"Expected 0x{info.AddressAlign:X}, but was 0x{item.AddressAlign:X}");
-              Assert.AreEqual(info.Type, item.Type);
-              Assert.AreEqual(info.Flags, item.Flags, $"Expected 0x{info.Flags:X}, but was 0x{item.Flags:X}");
-              Assert.AreEqual(info.Link, item.Link);
-              Assert.AreEqual(info.Info, item.Info);
-              Assert.AreEqual(info.EntSize, item.EntSize);
+              Assert.AreEqual(expectedSection.Name, section.Name);
+              Assert.AreEqual(expectedSection.Size, section.Size);
+              Assert.AreEqual(expectedSection.Address, section.Address, $"Expected 0x{expectedSection.Address:X}, but was 0x{section.Address:X}");
+              Assert.AreEqual(expectedSection.AddressAlign, section.AddressAlign, $"Expected 0x{expectedSection.AddressAlign:X}, but was 0x{section.AddressAlign:X}");
+              Assert.AreEqual(expectedSection.Type, section.Type);
+              Assert.AreEqual(expectedSection.Flags, section.Flags, $"Expected 0x{expectedSection.Flags:X}, but was 0x{section.Flags:X}");
+              Assert.AreEqual(expectedSection.Link, section.Link);
+              Assert.AreEqual(expectedSection.Info, section.Info);
+              Assert.AreEqual(expectedSection.EntSize, section.EntSize);
 
-              var hash = item.Type == SHT.SHT_NOBITS ? null : CalculateStreamHash(() => item.CreateStream());
-              Assert.AreEqual(info.Hash, hash);
+              var hash = section.Type == SHT.SHT_NOBITS ? null : CalculateStreamHash(() => section.CreateStream());
+              Assert.AreEqual(expectedSection.Hash, hash);
             }
           }
           else
             GenerateSectionStreamInfos(file);
 
-          string? unityScriptingBackend = null;
-          var symbolItems = new List<ElfUtil.SymbolItem>();
+          var symSectionIndex = ElfUtil.Find(file.Sections, SHT.SHT_DYNSYM) ?? ElfUtil.Find(file.Sections, SHT.SHT_SYMTAB);
+          var symbols = symSectionIndex != null ? ElfUtil.GetSymbols(file, symSectionIndex.Value, file.Sections[symSectionIndex.Value].Link) : new ElfUtil.Symbol[0];
+
+          if (expectedSymbols != null)
           {
-            var symSectionNdx = ElfUtil.Find(file.SectionItems, SHT.SHT_DYNSYM) ?? ElfUtil.Find(file.SectionItems, SHT.SHT_SYMTAB);
-            if (symSectionNdx != null)
+            Assert.AreEqual(expectedSymbols.Length, symbols.Length);
+            for (var n = 0; n < expectedSymbols.Length; ++n)
             {
-              ElfUtil.EnumSymbols(file, symSectionNdx.Value, file.SectionItems[symSectionNdx.Value].Link, symbolInfo =>
-                {
-                  if (symbolInfo is { Type: STT.STT_OBJECT, Binding: STB.STB_GLOBAL, Name: UnityUtil.UNITY_SCRIPTING_BACKEND_ELF_SYMBOL })
-                  {
-                    using var dataStream = symbolInfo.CreateStream!();
-                    unityScriptingBackend = ElfUtil.ReadStringZ(dataStream);
-                  }
+              var expectedSymbol = expectedSymbols[n];
+              var symbol = symbols[n];
 
-                  symbolItems.Add(symbolInfo);
-                  return true;
-                });
-            }
-          }
+              Assert.AreEqual(expectedSymbol.Name, symbol.Name);
+              Assert.AreEqual(expectedSymbol.Size, symbol.Size);
+              Assert.AreEqual(expectedSymbol.Value, symbol.Value, $"Expected 0x{expectedSymbol.Value:X}, but was 0x{symbol.Value:X}");
+              Assert.AreEqual(expectedSymbol.SectionIndex, symbol.SectionIndex, $"Expected {expectedSymbol.SectionIndex}, but was {symbol.SectionIndex}");
+              Assert.AreEqual(expectedSymbol.Type, symbol.Type);
+              Assert.AreEqual(expectedSymbol.Binding, symbol.Binding);
+              Assert.AreEqual(expectedSymbol.Other, symbol.Other);
 
-          if (expectedSymbolInfos != null)
-          {
-            Assert.AreEqual(expectedSymbolInfos.Length, symbolItems.Count);
-            for (var k = 0; k < expectedSymbolInfos.Length; ++k)
-            {
-              var info = expectedSymbolInfos[k];
-              var item = symbolItems[k];
-
-              Assert.AreEqual(info.Name, item.Name);
-              Assert.AreEqual(info.Size, item.Size);
-              Assert.AreEqual(info.Value, item.Value, $"Expected 0x{info.Value:X}, but was 0x{item.Value:X}");
-              Assert.AreEqual(info.SectionIndex, item.SectionIndex, $"Expected {info.SectionIndex}, but was {item.SectionIndex}");
-              Assert.AreEqual(info.Type, item.Type);
-              Assert.AreEqual(info.Binding, item.Binding);
-              Assert.AreEqual(info.Other, item.Other);
-
-              var hash =  item.CreateStream == null ? null : CalculateStreamHash(() => item.CreateStream());
-              Assert.AreEqual(info.Hash, hash);
+              var hash = symbol.CreateStream == null ? null : CalculateStreamHash(() => symbol.CreateStream());
+              Assert.AreEqual(expectedSymbol.Hash, hash);
             }
           }
           else
-            GenerateSymbolStreamInfos(symbolItems);
+            GenerateSymbolStreamInfos(symbols);
 
+          string? unityScriptingBackend = null;
+          foreach (var symbol in symbols)
+            if (symbol is { Type: STT.STT_OBJECT, Binding: STB.STB_GLOBAL, Name: UnityUtil.UNITY_SCRIPTING_BACKEND_ELF_SYMBOL })
+            {
+              using var dataStream = symbol.CreateStream!();
+              unityScriptingBackend = ElfUtil.ReadStringZ(dataStream);
+              break;
+            }
           Assert.AreEqual(expectedUnityScriptingBackend, unityScriptingBackend);
         }, str =>
         {
@@ -295,9 +286,9 @@ namespace JetBrains.FormatRipper.Tests
       Console.WriteLine("          new ProgramStreamInfo[]");
       Console.WriteLine("            {");
 
-      var maxSizeLength = file.ProgramItems.Select(x => x.Size.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxTypeLength = file.ProgramItems.Select(x => ("PT." + Enum.GetName(typeof(PT), x.Type)).Length).DefaultIfEmpty(0).Max();
-      foreach (var programItem in file.ProgramItems)
+      var maxSizeLength = file.Programs.Select(x => x.Size.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxTypeLength = file.Programs.Select(x => ("PT." + Enum.GetName(typeof(PT), x.Type)).Length).DefaultIfEmpty(0).Max();
+      foreach (var programItem in file.Programs)
       {
         var hash = CalculateStreamHash(() => programItem.CreateStream());
 
@@ -338,16 +329,16 @@ namespace JetBrains.FormatRipper.Tests
       Console.WriteLine("            {");
 
       const string @null = "null";
-      var maxHashLength = file.SectionItems.Select(x => x.Type == SHT.SHT_NOBITS ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
-      var maxSizeLength = file.SectionItems.Select(x => x.Size.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxAddressLength = file.SectionItems.Select(x => ("0x" + x.Address.ToString("X")).Length).DefaultIfEmpty(0).Max();
-      var maxAddressAlignLength = file.SectionItems.Select(x => ("0x" + x.AddressAlign.ToString("X")).Length).DefaultIfEmpty(0).Max();
-      var maxNameLength = file.SectionItems.Select(x => x.Name.Length).DefaultIfEmpty(0).Max();
-      var maxTypeLength = file.SectionItems.Select(x => ("SHT." + Enum.GetName(typeof(SHT), x.Type)).Length).DefaultIfEmpty(0).Max();
-      var maxEntSizeLength = file.SectionItems.Select(x => x.EntSize.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxLinkLength = file.SectionItems.Select(x => x.Link.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxInfoLength = file.SectionItems.Select(x => x.Info.ToString().Length).DefaultIfEmpty(0).Max();
-      foreach (var sectionItem in file.SectionItems)
+      var maxHashLength = file.Sections.Select(x => x.Type == SHT.SHT_NOBITS ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
+      var maxSizeLength = file.Sections.Select(x => x.Size.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxAddressLength = file.Sections.Select(x => ("0x" + x.Address.ToString("X")).Length).DefaultIfEmpty(0).Max();
+      var maxAddressAlignLength = file.Sections.Select(x => ("0x" + x.AddressAlign.ToString("X")).Length).DefaultIfEmpty(0).Max();
+      var maxNameLength = file.Sections.Select(x => x.Name.Length).DefaultIfEmpty(0).Max();
+      var maxTypeLength = file.Sections.Select(x => ("SHT." + Enum.GetName(typeof(SHT), x.Type)).Length).DefaultIfEmpty(0).Max();
+      var maxEntSizeLength = file.Sections.Select(x => x.EntSize.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxLinkLength = file.Sections.Select(x => x.Link.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxInfoLength = file.Sections.Select(x => x.Info.ToString().Length).DefaultIfEmpty(0).Max();
+      foreach (var sectionItem in file.Sections)
       {
         var hash = sectionItem.Type == SHT.SHT_NOBITS ? null : CalculateStreamHash(() => sectionItem.CreateStream());
 
@@ -388,7 +379,7 @@ namespace JetBrains.FormatRipper.Tests
       }
     }
 
-    private static void GenerateSymbolStreamInfos(ICollection<ElfUtil.SymbolItem> symbolItems)
+    private static void GenerateSymbolStreamInfos(ICollection<ElfUtil.Symbol> symbolItems)
     {
       if (symbolItems.Count >= 128)
       {

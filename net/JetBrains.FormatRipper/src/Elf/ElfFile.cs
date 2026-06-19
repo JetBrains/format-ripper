@@ -14,8 +14,8 @@ namespace JetBrains.FormatRipper.Elf
     public readonly ELFOSABI EiOsAbi;
     public readonly EM EMachine;
     public readonly ET EType;
-    public readonly ProgramItem[] ProgramItems;
-    public readonly SectionItem[] SectionItems;
+    public readonly Program[] Programs;
+    public readonly Section[] Sections;
 
     private ElfFile(
       ELFCLASS eiClass,
@@ -25,8 +25,8 @@ namespace JetBrains.FormatRipper.Elf
       ET eType,
       EM eMachine,
       EF eFlags,
-      ProgramItem[] programItems,
-      SectionItem[] sectionItems)
+      Program[] programs,
+      Section[] sections)
     {
       EiClass = eiClass;
       EiData = eiData;
@@ -35,8 +35,8 @@ namespace JetBrains.FormatRipper.Elf
       EType = eType;
       EMachine = eMachine;
       EFlags = eFlags;
-      ProgramItems = programItems;
-      SectionItems = sectionItems;
+      Programs = programs;
+      Sections = sections;
     }
 
     public static bool Is(Stream stream)
@@ -53,14 +53,14 @@ namespace JetBrains.FormatRipper.Elf
 
     public delegate Stream CreateStreamDelegate();
 
-    public sealed class ProgramItem
+    public sealed class Program
     {
       public readonly ulong Size;
       public readonly PT Type;
       public readonly PF Flags;
       public readonly CreateStreamDelegate CreateStream;
 
-      internal ProgramItem(ulong size, PT type, PF flags, CreateStreamDelegate createStream)
+      internal Program(ulong size, PT type, PF flags, CreateStreamDelegate createStream)
       {
         Size = size;
         Type = type;
@@ -69,7 +69,7 @@ namespace JetBrains.FormatRipper.Elf
       }
     }
 
-    public sealed class SectionItem
+    public sealed class Section
     {
       public readonly string Name;
       public readonly ulong Size;
@@ -82,7 +82,7 @@ namespace JetBrains.FormatRipper.Elf
       public readonly ulong EntSize;
       public readonly CreateStreamDelegate CreateStream;
 
-      internal SectionItem(string name, ulong size, ulong address, ulong addressAlign, SHT type, SHF flags, ushort link, uint info, ulong entSize, CreateStreamDelegate createStream)
+      internal Section(string name, ulong size, ulong address, ulong addressAlign, SHT type, SHF flags, ushort link, uint info, ulong entSize, CreateStreamDelegate createStream)
       {
         Name = name;
         Size = size;
@@ -126,10 +126,10 @@ namespace JetBrains.FormatRipper.Elf
         if (GetU4(ehdr.e_version) != 1u)
           throw new FormatException("Invalid ELF object file version");
 
-        ProgramItem[] phs;
+        Program[] phs;
         {
           var ePhNum = GetU2(ehdr.e_phnum);
-          phs = new ProgramItem[ePhNum];
+          phs = new Program[ePhNum];
           if (ePhNum > 0)
           {
             var ePhEntSize = GetU2(ehdr.e_phentsize);
@@ -144,17 +144,17 @@ namespace JetBrains.FormatRipper.Elf
 
               var phOffset = GetU4(phdr.p_offset);
               var phSize = GetU4(phdr.p_filesz);
-              phs[n] = new ProgramItem(
+              phs[n] = new Program(
                 phSize, (PT)GetU4(phdr.p_type), (PF)GetU4(phdr.p_flags),
                 () => new ReadOnlyNestedStream(stream, phOffset, phSize));
             }
           }
         }
 
-        SectionItem[] shs;
+        Section[] shs;
         {
           var eShNum = GetU2(ehdr.e_shnum);
-          shs = new SectionItem[eShNum];
+          shs = new Section[eShNum];
           if (eShNum > 0)
           {
             var eShEntSize = GetU2(ehdr.e_shentsize);
@@ -185,7 +185,7 @@ namespace JetBrains.FormatRipper.Elf
               var shAddr = GetU4(shdr.sh_addr);
               var shAddrAlign = GetU4(shdr.sh_addralign);
               var shSize = GetU4(shdr.sh_size);
-              shs[n] = new SectionItem(
+              shs[n] = new Section(
                 shName, shSize, shAddr, shAddrAlign, shType, (SHF)GetU4(shdr.sh_flags), checked((ushort)GetU4(shdr.sh_link)), GetU4(shdr.sh_info), GetU4(shdr.sh_entsize),
                 () => shType == SHT.SHT_NOBITS ? throw new InvalidOperationException("Section has no data") : new ReadOnlyNestedStream(stream, shOffset, shSize));
             }
@@ -210,10 +210,10 @@ namespace JetBrains.FormatRipper.Elf
         if (GetU4(ehdr.e_version) != 1u)
           throw new FormatException("Invalid ELF object file version");
 
-        ProgramItem[] phs;
+        Program[] phs;
         {
           var ePhNum = GetU2(ehdr.e_phnum);
-          phs = new ProgramItem[ePhNum];
+          phs = new Program[ePhNum];
           if (ePhNum > 0)
           {
             var ePhEntSize = GetU2(ehdr.e_phentsize);
@@ -228,17 +228,17 @@ namespace JetBrains.FormatRipper.Elf
 
               var phOffset = GetU8(phdr.p_offset);
               var phSize = GetU8(phdr.p_filesz);
-              phs[n] = new ProgramItem(
+              phs[n] = new Program(
                 phSize, (PT)GetU4(phdr.p_type), (PF)GetU4(phdr.p_flags),
                 () => new ReadOnlyNestedStream(stream, checked((long)phOffset), checked((long)phSize)));
             }
           }
         }
 
-        SectionItem[] shs;
+        Section[] shs;
         {
           var eShNum = GetU2(ehdr.e_shnum);
-          shs = new SectionItem[eShNum];
+          shs = new Section[eShNum];
           if (eShNum > 0)
           {
             var eShEntSize = GetU2(ehdr.e_shentsize);
@@ -269,7 +269,7 @@ namespace JetBrains.FormatRipper.Elf
               var shAddr = GetU8(shdr.sh_addr);
               var shAddrAlign = GetU8(shdr.sh_addralign);
               var shSize = GetU8(shdr.sh_size);
-              shs[n] = new SectionItem(
+              shs[n] = new Section(
                 shName, shSize, shAddr, shAddrAlign, shType, (SHF)checked((uint)GetU8(shdr.sh_flags)), checked((ushort)GetU4(shdr.sh_link)), GetU4(shdr.sh_info), GetU8(shdr.sh_entsize),
                 () => shType == SHT.SHT_NOBITS ? throw new InvalidOperationException("Section has no data") : new ReadOnlyNestedStream(stream, checked((long)shOffset), checked((long)shSize)));
             }
@@ -299,10 +299,10 @@ namespace JetBrains.FormatRipper.Elf
       public readonly ET EType;
       public readonly EM EMachine;
       public readonly EF EFlags;
-      public readonly ProgramItem[] ProgramItems;
-      public readonly SectionItem[] SectionItems;
+      public readonly Program[] ProgramItems;
+      public readonly Section[] SectionItems;
 
-      public Hdr(ET eType, EM eMachine, EF eFlags, ProgramItem[] programItems, SectionItem[] sectionItems)
+      public Hdr(ET eType, EM eMachine, EF eFlags, Program[] programItems, Section[] sectionItems)
       {
         EType = eType;
         EMachine = eMachine;
