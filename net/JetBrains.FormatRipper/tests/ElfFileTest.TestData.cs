@@ -8,7 +8,6 @@ namespace JetBrains.FormatRipper.Tests
   {
     // Note(ww898): Some architectures don't have the difference in interpreters!!! See https://wiki.debian.org/ArchitectureSpecificsMemo for details.
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static readonly object?[] Sources =
       MakeBusyboxStaticNixosSources()
         .Concat(MakeBusyboxAlpineSources())
@@ -31,10 +30,11 @@ namespace JetBrains.FormatRipper.Tests
         .Concat(MakeUnityPlayerNondevelopmentSources())
         .ToArray();
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeBusyboxStaticNixosSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("busybox-static.nixos-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_EXEC, EM.EM_AARCH64, 0, null,
+        MakeSource("busybox-static.nixos-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_AARCH64, 0, null,
           new ProgramStreamInfo[]
             {
               new("7080B6194C8873FF9B5BCCAE6EEFBFF45BF336A6CBFB46BE5A49BF33F9B7E058", 178784, PT.PT_LOAD     , PF.PF_X | PF.PF_R),
@@ -59,7 +59,7 @@ namespace JetBrains.FormatRipper.Tests
               new("409FABABD8B5C888E92C27045C5F1D7F79C6698650645568D4974870EF770B38",    100,      0x0,  0x1, 0, ".shstrtab"   , SHT.SHT_STRTAB    , 0, 0, 0),
             },
           new SymbolStreamInfo[] {}),
-        MakeSource("busybox-static.nixos-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_EXEC, EM.EM_X86_64, 0, null,
+        MakeSource("busybox-static.nixos-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_X86_64, 0, null,
           new ProgramStreamInfo[]
             {
               new("95845EC4B34D50498FE196F3E3A0D737C551F0664968ACBE36F0AC2A91D2D9EA",    400, PT.PT_LOAD     , PF.PF_R),
@@ -88,10 +88,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeBusyboxAlpineSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("busybox.alpine-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_AARCH64, 0, "/lib/ld-musl-aarch64.so.1",
+        MakeSource("busybox.alpine-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_AARCH64, 0, "/lib/ld-musl-aarch64.so.1",
           new ProgramStreamInfo[]
             {
               new("E3234FC43E32FFCC8E9DC561DBE1D47DA4739A0A99D40A2E937BDA8205459C5B",    448, PT.PT_PHDR        , PF.PF_R),
@@ -128,7 +129,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   1984, 0xE5030,  0x8,  0, ".bss"         , SHT.SHT_NOBITS    , 0,  0, SHF.SHF_WRITE | SHF.SHF_ALLOC),
               new("AF83F134C32129F27AA0441DD6A8C317B6AAAB3B1223724BC576108E39807CC3",    177,     0x0,  0x1,  0, ".shstrtab"    , SHT.SHT_STRTAB    , 0,  0, 0),
             }),
-        MakeSource("busybox.alpine-armhf", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-musl-armhf.so.1",
+        MakeSource("busybox.alpine-armhf", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-musl-armhf.so.1",
           new ProgramStreamInfo[]
             {
               new("4E636246A461F20D07050DD8F37469C1311CFEED4ED21D767A260CD38C14EA09",      8, PT.PT_ARM_UNWIND, PF.PF_R),
@@ -166,7 +167,7 @@ namespace JetBrains.FormatRipper.Tests
               new("85AF883195E35C33D20F096C63CB86B0A79D4C410EE8C112F195829B63EB4477",     51,     0x0, 0x1,  0, ".ARM.attributes", SHT.SHT_ARM_ATTRIBUTES, 0,  0, 0),
               new("0C030DB2B2C60A4540D2758AF1BC33E34BFC83C6FEF5333EB8961DCAE51110F0",    188,     0x0, 0x1,  0, ".shstrtab"      , SHT.SHT_STRTAB        , 0,  0, 0),
             }),
-        MakeSource("busybox.alpine-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-musl-i386.so.1",
+        MakeSource("busybox.alpine-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-musl-i386.so.1",
           new ProgramStreamInfo[]
             {
               new("65E607E9569C5EDA32AEC08E53C7C8CC664812CE9373D17914C4359612AE6EC6",    320, PT.PT_PHDR        , PF.PF_R),
@@ -206,7 +207,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   1636, 0xC2020, 0x20,  0, ".bss"         , SHT.SHT_NOBITS  , 0,  0, SHF.SHF_WRITE | SHF.SHF_ALLOC),
               new("5AF7C2D4A1A4B89398319C344A708FDEB61B3D2A72C0227A3DE7104862EC160B",    169,     0x0,  0x1,  0, ".shstrtab"    , SHT.SHT_STRTAB  , 0,  0, 0),
             }),
-        MakeSource("busybox.alpine-ppc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/lib/ld-musl-powerpc64le.so.1",
+        MakeSource("busybox.alpine-ppc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/lib/ld-musl-powerpc64le.so.1",
           new ProgramStreamInfo[]
             {
               new("3658CF660205D4DA6712FB9C01B2BB2F44842D764C33B40B5D6B807572FB9472",     392, PT.PT_PHDR     , PF.PF_R),
@@ -242,7 +243,7 @@ namespace JetBrains.FormatRipper.Tests
               new("139BE059364F612F0412189DC71F3E0938D05740E938ED899CDA886CF5445C8C",     16,      0x0,   0x1,  0, ".gnu.attributes", SHT.SHT_GNU_ATTRIBUTES, 0,  0, 0),
               new("2F0906191A7768B4B3E04D73EE901F3CD82EF0740FBBB7F274D76C797F555030",    169,      0x0,   0x1,  0, ".shstrtab"      , SHT.SHT_STRTAB        , 0,  0, 0),
             }),
-        MakeSource("busybox.alpine-s390x", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_S390, 0, "/lib/ld-musl-s390x.so.1",
+        MakeSource("busybox.alpine-s390x", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_S390, 0, "/lib/ld-musl-s390x.so.1",
           new ProgramStreamInfo[]
             {
               new("BD208FF843387556A084CF4F8084E0FE912968B71B170915BD6EA381D82B1528",    392, PT.PT_PHDR     , PF.PF_R),
@@ -277,7 +278,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   1976, 0xF1030, 0x8,  0, ".bss"        , SHT.SHT_NOBITS  , 0,  0, SHF.SHF_WRITE | SHF.SHF_ALLOC),
               new("D4B4BB068920AA91F6ADBA11B2173E44C41760F058BD7F9BF97191B7C648AC21",    153,     0x0, 0x1,  0, ".shstrtab"   , SHT.SHT_STRTAB  , 0,  0, 0),
             }),
-        MakeSource("busybox.alpine-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, 0, "/lib/ld-musl-x86_64.so.1",
+        MakeSource("busybox.alpine-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/lib/ld-musl-x86_64.so.1",
           new ProgramStreamInfo[]
             {
               new("32EC73F72E4D751DB21535709C4A57E5F7BF4CFBCB414174AD42EC6C287E98B2",    504, PT.PT_PHDR     , PF.PF_R),
@@ -318,10 +319,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeCatsaySources() => new object?[]
       {
         // @formatter:off
-        MakeSource("catsay.ppc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER1, null,
+        MakeSource("catsay.ppc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER1, null,
           new ProgramStreamInfo[]
             {
               new("42E2EC97D657CD57E465670A2406A51B356C9CB22D5E95502091741F8286C274",    392, PT.PT_PHDR     , PF.PF_R),
@@ -359,7 +361,7 @@ namespace JetBrains.FormatRipper.Tests
               new("ED6A6794CDAC0BB4CDFDD425A2409396F27FD8C20ABA2E59E936D4A44AAB0786",  90456,      0x0,  0x8, 24, ".symtab"           , SHT.SHT_SYMTAB  , 23, 177, 0),
               new("6948E649707762DF0B0CDA631C7A806798327DD1C742EDFCE59BAAD18C5A4AF3",  90928,      0x0,  0x1,  0, ".strtab"           , SHT.SHT_STRTAB  ,  0,   0, 0),
             }),
-        MakeSource("catsay.x86", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_EXEC, EM.EM_386, 0, null,
+        MakeSource("catsay.x86", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_386, 0, null,
           new ProgramStreamInfo[]
             {
               new("9DE8BE4B853B2395D298514C7A2BB367A035CCD9BBB14A446FBBB808234DDC64",    224, PT.PT_PHDR     , PF.PF_R),
@@ -400,10 +402,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeCoreutilsNixosSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("coreutils.nixos-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_EXEC, EM.EM_AARCH64, 0, "/nix/store/c1nqsqwl9allxbxhqx3iqfxk363qrnzv-glibc-2.32-54/lib/ld-linux-aarch64.so.1",
+        MakeSource("coreutils.nixos-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_AARCH64, 0, "/nix/store/c1nqsqwl9allxbxhqx3iqfxk363qrnzv-glibc-2.32-54/lib/ld-linux-aarch64.so.1",
           new ProgramStreamInfo[]
             {
               new("96486891F549E7545105AE1E49AE1A3CD71A12B9A17331B76211AC8E96F656A5",     504, PT.PT_PHDR        , PF.PF_R),
@@ -448,7 +451,7 @@ namespace JetBrains.FormatRipper.Tests
               new("556FD5B97B823E31EB53FD27E36DFCCE8C10778E9C5FBD68FB390B1FA197B213",   49597,      0x0,  0x1,  0, ".strtab"       , SHT.SHT_STRTAB     ,  0,    0, 0),
               new("6DBD2039D00E943A21B154E3F90D9856072AF10B24D4193FB013DCA77E74C52C",     244,      0x0,  0x1,  0, ".shstrtab"     , SHT.SHT_STRTAB     ,  0,    0, 0),
             }),
-        MakeSource("coreutils.nixos-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_EXEC, EM.EM_X86_64, 0, "/nix/store/jsp3h3wpzc842j0rz61m5ly71ak6qgdn-glibc-2.32-54/lib/ld-linux-x86-64.so.2",
+        MakeSource("coreutils.nixos-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_X86_64, 0, "/nix/store/jsp3h3wpzc842j0rz61m5ly71ak6qgdn-glibc-2.32-54/lib/ld-linux-x86-64.so.2",
           new ProgramStreamInfo[]
             {
               new("65077EC8408E57BD29E9D7C7DC3DF1B9DCB19BA3787E179F45BCAAA63B525483",     616, PT.PT_PHDR        , PF.PF_R),
@@ -499,10 +502,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeGrepAndroidSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("grep.android-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_386, 0, "/system/bin/linker",
+        MakeSource("grep.android-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/system/bin/linker",
           new ProgramStreamInfo[]
             {
               new("820841CE8FF5EEC3E7776EA1BAC3FBC8B05422CD527785AC716DA9F6214D0C25",   288, PT.PT_PHDR        , PF.PF_R),
@@ -615,7 +619,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0, 0x632C, SHN.SHN_ABS  , "_edata"           , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x632C, SHN.SHN_ABS  , "__bss_start"      , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("grep.android-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, 0, "/system/bin/linker64",
+        MakeSource("grep.android-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/system/bin/linker64",
           new ProgramStreamInfo[]
             {
               new("33DE1890C9C30C67B5EC5BCE2721EA2CFBCDEBAC3BE93F9F986CFB307492A157",   504, PT.PT_PHDR        , PF.PF_R),
@@ -730,10 +734,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeLibpcprofileSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("libpcprofile.so", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, null,
+        MakeSource("libpcprofile.so", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, null,
           new ProgramStreamInfo[]
             {
               new("DC52330482CDA0D17524104FE748D20638456D096410797F4166825F87026AB1", 2304, PT.PT_LOAD     , PF.PF_X | PF.PF_R),
@@ -803,10 +808,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeLibulockmgrSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("libulockmgr.so.1.0.1.x64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, 0U, null,
+        MakeSource("libulockmgr.so.1.0.1.x64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0U, null,
           new ProgramStreamInfo[]
             {
               new("0AD0AB81DB199E22796A23EE01C71DEAD4FC6A17826837753177FDE2375BF909", 3000, PT.PT_LOAD        , PF.PF_R),
@@ -888,10 +894,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeMktempFreebsdSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("mktemp.freebsd-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_AARCH64, 0, "/libexec/ld-elf.so.1",
+        MakeSource("mktemp.freebsd-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_AARCH64, 0, "/libexec/ld-elf.so.1",
           new ProgramStreamInfo[]
             {
               new("43B9AD6F2CCBC7CEA5A947ECD04B773A64B753093E3933D97C1CE21C67E3AA3A",  616, PT.PT_PHDR        , PF.PF_R),
@@ -966,7 +973,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  8, 0x231590,            24, "optarg"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  4, 0x231598,            24, "optind"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.freebsd-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_386, 0, "/libexec/ld-elf.so.1",
+        MakeSource("mktemp.freebsd-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_386, 0, "/libexec/ld-elf.so.1",
           new ProgramStreamInfo[]
             {
               new("821834B1EC0C5CBFB151B9736E6D5477BAF6A893BA2E0CC454AB941DB365F3CF",  352, PT.PT_PHDR        , PF.PF_R),
@@ -1042,7 +1049,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  0, 0x401FF0, SHN.SHN_UNDEF, "rmdir"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  0, 0x402000, SHN.SHN_UNDEF, "strdup"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.freebsd-powerpc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_PPC, 0, "/libexec/ld-elf.so.1",
+        MakeSource("mktemp.freebsd-powerpc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_PPC, 0, "/libexec/ld-elf.so.1",
           new ProgramStreamInfo[]
             {
               new("DCB050B5EC72AAA99184435A907607B99E943DB51498A1A129DCF5D693A3CF67",  352, PT.PT_PHDR        , PF.PF_R),
@@ -1118,7 +1125,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  4, 0x100313E0,            25, "optarg"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  4, 0x10031408,            25, "optind"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.freebsd-powerpc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/libexec/ld-elf.so.1",
+        MakeSource("mktemp.freebsd-powerpc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/libexec/ld-elf.so.1",
           new ProgramStreamInfo[]
             {
               new("FB7E88D3E5DF04702B5DA9B78378D49C68D05356F397A98B06A07CEBD1A7A54B",  616, PT.PT_PHDR        , PF.PF_R),
@@ -1196,7 +1203,7 @@ namespace JetBrains.FormatRipper.Tests
               new("5E928D8B199C65BA326C7A24F79A851100E4EB6E5A95B4AE5F1379140256F0B5", 8, 0x10031A60,            24, "__progname"         , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              , 8, 0x10031A70,            26, "environ"            , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.freebsd-powerpc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/libexec/ld-elf.so.1",
+        MakeSource("mktemp.freebsd-powerpc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/libexec/ld-elf.so.1",
           new ProgramStreamInfo[]
             {
               new("337C35C6F8C664F502A3883EB405AC15A832F4D78309FE1D48A66FEE713F65D0",  616, PT.PT_PHDR        , PF.PF_R),
@@ -1274,7 +1281,7 @@ namespace JetBrains.FormatRipper.Tests
               new("89FBF58F09F5B44BFB534268D88E42122A668CFA182C4E937D4E280F618C88BD", 8, 0x10031B00,            24, "__progname"         , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              , 8, 0x10031B10,            26, "environ"            , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.freebsd-riscv64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_EXEC, EM.EM_RISCV, EF.EF_RISCV_FLOAT_ABI_DOUBLE | EF.EF_RISCV_RVC, "/libexec/ld-elf.so.1",
+        MakeSource("mktemp.freebsd-riscv64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_RISCV, EF.EF_RISCV_FLOAT_ABI_DOUBLE | EF.EF_RISCV_RVC, "/libexec/ld-elf.so.1",
           new ProgramStreamInfo[]
             {
               new("BC3552D27A4044017E32932820C95532C8AEB1F1FDB3EEC65DE3FB89CE14116C",  616, PT.PT_PHDR        , PF.PF_R),
@@ -1352,7 +1359,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  8, 0x14590,            26, "optarg"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  4, 0x14598,            26, "optind"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.freebsd-sparc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_SPARCV9, EF.EF_SPARCV9_RMO, "/libexec/ld-elf.so.1",
+        MakeSource("mktemp.freebsd-sparc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_SPARCV9, EF.EF_SPARCV9_RMO, "/libexec/ld-elf.so.1",
           new ProgramStreamInfo[]
             {
               new("87AAA90A5A5F62B3039C34D1DE7E109CDF60142319AE637F0F397EBD923E112C",  336, PT.PT_PHDR   , PF.PF_X | PF.PF_R),
@@ -1424,7 +1431,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   40, 0x2015E0, SHN.SHN_UNDEF, "mkdtemp"            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   64, 0x201718,            23, "__stack_chk_guard"  , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.freebsd-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, ET.ET_EXEC, EM.EM_X86_64, 0, "/libexec/ld-elf.so.1",
+        MakeSource("mktemp.freebsd-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_X86_64, 0, "/libexec/ld-elf.so.1",
           new ProgramStreamInfo[]
             {
               new("8F82A9F7B1ED0A0939BD70C3C0E45C0C49A8DF1F467B416BCD4CBA704908007B",  616, PT.PT_PHDR        , PF.PF_R),
@@ -1503,10 +1510,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeMktempGentooSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("mktemp.gentoo-armv4tl", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_SOFT, "/lib/ld-linux.so.3",
+        MakeSource("mktemp.gentoo-armv4tl", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_SOFT, "/lib/ld-linux.so.3",
           new ProgramStreamInfo[]
             {
               new("1E2725BF4DB9BCEEBE5528667AF68CC41972639C177EF8F1738EE01A6506070F",     8, PT.PT_ARM_UNWIND, PF.PF_R),
@@ -1631,7 +1639,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "strspn"                       , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "__assert_fail"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.gentoo-armv7a_hf-uclibc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-uClibc.so.0",
+        MakeSource("mktemp.gentoo-armv7a_hf-uclibc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-uClibc.so.0",
           new ProgramStreamInfo[]
             {
               new("903B1C0C32F905D933DD4040ABA0518CF345F3395BC36CD008ACBA1C1A845D60",     8, PT.PT_ARM_UNWIND, PF.PF_R),
@@ -1763,7 +1771,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  0, 0x19394,            20, "__bss_end__"                  , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  0, 0x19394,            20, "__end__"                      , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.gentoo-hppa2.0", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_LINUX, ET.ET_DYN, EM.EM_PARISC, EF.EFA_PARISC_1_1, "/lib/ld.so.1",
+        MakeSource("mktemp.gentoo-hppa2.0", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_LINUX, 0, ET.ET_DYN, EM.EM_PARISC, EF.EFA_PARISC_1_1, "/lib/ld.so.1",
           new ProgramStreamInfo[]
             {
               new("A8181DC67D63464863B0A581E5D0302A46E12514B81A9146B5AA9FBF84DC9C20",   288, PT.PT_PHDR        , PF.PF_R),
@@ -1887,7 +1895,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,    0x0, SHN.SHN_UNDEF, "calloc"                       , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0, 0xC2FC, SHN.SHN_ABS  , "_GLOBAL_OFFSET_TABLE_"        , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.gentoo-ia64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_IA_64, EF.EF_IA_64_ABI64, "/lib/ld-linux-ia64.so.2",
+        MakeSource("mktemp.gentoo-ia64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_IA_64, EF.EF_IA_64_ABI64, "/lib/ld-linux-ia64.so.2",
           new ProgramStreamInfo[]
             {
               new("21EC78239EB4DEB1C382F2F74D563C4112ED8436EEE5D0CF46D4D034D5F71272",   448, PT.PT_PHDR      , PF.PF_R),
@@ -2004,7 +2012,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   0,    0x0, SHN.SHN_UNDEF, "__ctype_b_loc"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0,    0x0, SHN.SHN_UNDEF, "calloc"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.gentoo-m68k", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_68K, 0, "/lib/ld.so.1",
+        MakeSource("mktemp.gentoo-m68k", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_68K, 0, "/lib/ld.so.1",
           new ProgramStreamInfo[]
             {
               new("74B318D10E78C82CA248A1C0443AF36385BA869FF429C9B38B898098A60EBB94",   256, PT.PT_PHDR     , PF.PF_R),
@@ -2123,7 +2131,7 @@ namespace JetBrains.FormatRipper.Tests
               new("1CEEABF0C6A5A30BAD12CDAC0E3AB015A7188A42E6AEBB556AAD00BB9CD693AD",    2, 0x607C,            12, "__libc_csu_fini"              , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("FECB66183685EBEFFA9A1F04D13E90481EE3C395030DF6BFF12846747A35A284",   80, 0x602C,            12, "__libc_csu_init"              , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.gentoo-mipsel3-uclibc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_EXEC, EM.EM_MIPS, EF.EF_MIPS_ARCH_3 | EF.EF_MIPS_ABI_O32 | EF.EF_MIPS_32BITMODE | EF.EF_MIPS_CPIC | EF.EF_MIPS_NOREORDER, "/lib/ld-uClibc.so.0",
+        MakeSource("mktemp.gentoo-mipsel3-uclibc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 1, ET.ET_EXEC, EM.EM_MIPS, EF.EF_MIPS_ARCH_3 | EF.EF_MIPS_ABI_O32 | EF.EF_MIPS_32BITMODE | EF.EF_MIPS_CPIC | EF.EF_MIPS_NOREORDER, "/lib/ld-uClibc.so.0",
           new ProgramStreamInfo[]
             {
               new("030160B49C2E7977AB82BEB98EE8D354E92C67C40CA6A1DC5221E00653191557",   352, PT.PT_PHDR            , PF.PF_X | PF.PF_R),
@@ -2267,7 +2275,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,    0, 0x407E10, SHN.SHN_UNDEF, "__uClibc_main"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,    0, 0x407E00, SHN.SHN_UNDEF, "__cxa_atexit"                 , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.gentoo-sparc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_SPARC32PLUS, EF.EF_SPARC_SUN_US3 | EF.EF_SPARC_SUN_US1 | EF.EF_SPARC_32PLUS, "/lib/ld-linux.so.2",
+        MakeSource("mktemp.gentoo-sparc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_SPARC32PLUS, EF.EF_SPARC_SUN_US3 | EF.EF_SPARC_SUN_US1 | EF.EF_SPARC_32PLUS, "/lib/ld-linux.so.2",
           new ProgramStreamInfo[]
             {
               new("B62949758762EDDC087A42E8A765FA0F31D5228DA42601CA612EEC0A9E136C9F",   288, PT.PT_PHDR        , PF.PF_R),
@@ -2394,10 +2402,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeMktempOpenbsdSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("mktemp.openbsd-alpha", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_ALPHA, 0, "/usr/libexec/ld.so",
+        MakeSource("mktemp.openbsd-alpha", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ALPHA, 0, "/usr/libexec/ld.so",
           new ProgramStreamInfo[]
             {
               new("D4427F68577A057F3941775DC43BC4B87A49E8D76B22AEFB740588ADD2DA18E2",  560, PT.PT_PHDR             , PF.PF_X | PF.PF_R),
@@ -2488,7 +2497,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   0, 0x32028, SHN.SHN_ABS  , "__data_start", STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0, 0x32028, SHN.SHN_ABS  , "__bss_start" , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.openbsd-armv7", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_SOFT, "/usr/libexec/ld.so",
+        MakeSource("mktemp.openbsd-armv7", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_SOFT, "/usr/libexec/ld.so",
           new ProgramStreamInfo[]
             {
               new("25DED2E0339BC394758F418740D99965443276F56D48C74E54A9BEAC6E144B2C",  416, PT.PT_PHDR             , PF.PF_R),
@@ -2569,7 +2578,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 4, 0x311F8,            24, "environ"            , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x31231,            24, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.openbsd-hppa", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_HPUX, ET.ET_DYN, EM.EM_PARISC, EF.EFA_PARISC_1_1, "/usr/libexec/ld.so",
+        MakeSource("mktemp.openbsd-hppa", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_HPUX, 0, ET.ET_DYN, EM.EM_PARISC, EF.EFA_PARISC_1_1, "/usr/libexec/ld.so",
           new ProgramStreamInfo[]
             {
               new("B93AF1903749E8B0A09F455D9E8BB80A96C86FF3C57DBCF5B8AD946B3FD63E2E",  320, PT.PT_PHDR             , PF.PF_X | PF.PF_R),
@@ -2670,7 +2679,7 @@ namespace JetBrains.FormatRipper.Tests
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0,  0xB6C,             3, "__fini"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0, 0x3848, SHN.SHN_ABS  , "_GLOBAL_OFFSET_TABLE_", STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.openbsd-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_386, 0, "/usr/libexec/ld.so",
+        MakeSource("mktemp.openbsd-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/usr/libexec/ld.so",
           new ProgramStreamInfo[]
             {
               new("DBF4789700320776CE9DF13ABAEBE40183B1ED069F6D166B6FC9B425CBBDAC62",  384, PT.PT_PHDR             , PF.PF_R),
@@ -2747,7 +2756,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0,        0x0, SHN.SHN_UNDEF, "vwarnx"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x20001159,            23, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.openbsd-landisk", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_SH, EF.EF_SH2E, "/usr/libexec/ld.so",
+        MakeSource("mktemp.openbsd-landisk", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_SH, EF.EF_SH2E, "/usr/libexec/ld.so",
           new ProgramStreamInfo[]
             {
               new("6043C51D842BA61029DF65F33A682D851EF69AC6461D61438BD91204B877A0E8",  256, PT.PT_PHDR             , PF.PF_X | PF.PF_R),
@@ -2839,7 +2848,7 @@ namespace JetBrains.FormatRipper.Tests
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0,   0xC8C,             4, "__fini"             , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0, 0x11F7C,            19, "___dtors_end"       , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.openbsd-luna88k", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, ET.ET_EXEC, EM.EM_88K, 0, "/usr/libexec/ld.so",
+        MakeSource("mktemp.openbsd-luna88k", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_88K, 0, "/usr/libexec/ld.so",
           new ProgramStreamInfo[]
             {
               new("7BBAEC89D71CF106B800FBF6E34C2860A065EF9E88B0E5CC76235BA0A34A08EC",  320, PT.PT_PHDR             , PF.PF_X | PF.PF_R),
@@ -2915,7 +2924,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  76, 0x22220, SHN.SHN_UNDEF, "mkdtemp"     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 152, 0x22250, SHN.SHN_UNDEF, "vwarnx"      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.openbsd-macppc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_PPC, 0, "/usr/libexec/ld.so",
+        MakeSource("mktemp.openbsd-macppc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC, 0, "/usr/libexec/ld.so",
           new ProgramStreamInfo[]
             {
               new("EEC65CE41099B70B743017FF22F6E4AFEF5A254B73F915B70ECF393B54B0A5A9",  384, PT.PT_PHDR             , PF.PF_R),
@@ -2993,7 +3002,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0,     0x0, SHN.SHN_UNDEF, "vwarnx"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x316D5,            24, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.openbsd-octeon", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_MIPS, EF.EF_MIPS_ARCH_3 | EF.EF_MIPS_CPIC | EF.EF_MIPS_PIC | EF.EF_MIPS_NOREORDER, "/usr/libexec/ld.so",
+        MakeSource("mktemp.openbsd-octeon", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_MIPS, EF.EF_MIPS_ARCH_3 | EF.EF_MIPS_CPIC | EF.EF_MIPS_PIC | EF.EF_MIPS_NOREORDER, "/usr/libexec/ld.so",
           new ProgramStreamInfo[]
             {
               new("7B6BD34BB543CF54DC10EB2A18F0CD4267850AA18EAE387646455316866FFE52",  560, PT.PT_PHDR             , PF.PF_X | PF.PF_R),
@@ -3099,7 +3108,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 400,   0xD70, SHN.SHN_UNDEF, "getenv"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("44BE8A44502F14CF3C91F17ED512334605E68DBB38E50680CF3A8676B363BA15", 108,   0xC88,             2, "fatalx"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.openbsd-powerpc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/usr/libexec/ld.so",
+        MakeSource("mktemp.openbsd-powerpc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/usr/libexec/ld.so",
           new ProgramStreamInfo[]
             {
               new("5237E2079851DFB3ACC765CA7635ABC0CA4F71F1A59551DC0DF0E5252659AEF0",  672, PT.PT_PHDR             , PF.PF_R),
@@ -3178,7 +3187,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0,     0x0, SHN.SHN_UNDEF, "vwarnx"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x60),
               new(null, 0, 0x31A61,            25, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.openbsd-sparc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_SPARCV9, EF.EF_SPARCV9_RMO, "/usr/libexec/ld.so",
+        MakeSource("mktemp.openbsd-sparc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_SPARCV9, EF.EF_SPARCV9_RMO, "/usr/libexec/ld.so",
           new ProgramStreamInfo[]
             {
               new("B41856043C43C70AB936DBFE87DFEF3BD028A37136A7A4485F413F76332FA640",  560, PT.PT_PHDR             , PF.PF_X | PF.PF_R),
@@ -3273,7 +3282,7 @@ namespace JetBrains.FormatRipper.Tests
               new("8559A4DC5DA6632A57FADF60AEBB7CE456CEA65940E1E3A480FBFEA6EC3B0D18", 116,    0x800,             2, "fatal"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0,    0xBE0,             3, "__fini"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("mktemp.openbsd-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, 0, "/usr/libexec/ld.so",
+        MakeSource("mktemp.openbsd-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/usr/libexec/ld.so",
           new ProgramStreamInfo[]
             {
               new("AC19C69BD164A3895E7F6F3E0FF207753A3D2AE97E686065669ACA71CA3E302E",  672, PT.PT_PHDR             , PF.PF_R),
@@ -3353,10 +3362,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeMktempUbuntuSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("mktemp.ubuntu-riscv64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_RISCV, EF.EF_RISCV_RVC | EF.EF_RISCV_FLOAT_ABI_DOUBLE, "/lib/ld-linux-riscv64-lp64d.so.1",
+        MakeSource("mktemp.ubuntu-riscv64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_RISCV, EF.EF_RISCV_RVC | EF.EF_RISCV_FLOAT_ABI_DOUBLE, "/lib/ld-linux-riscv64-lp64d.so.1",
           new ProgramStreamInfo[]
             {
               new("6CCCCF63D212A0D7FF4A556AD1B99771F0CEDB95EF8101BD09723B49290E3CF6",   560, PT.PT_PHDR         , PF.PF_R),
@@ -3479,10 +3489,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeNologinOpenSuseSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("nologin.opensuse-i586", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-linux.so.2",
+        MakeSource("nologin.opensuse-i586", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-linux.so.2",
           new ProgramStreamInfo[]
             {
               new("A17E35BD8F6D755D08F6380AB904C63D446DD5F5960A02501228F37BE8AAC1F4",  384, PT.PT_PHDR        , PF.PF_R),
@@ -3565,7 +3576,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,    0x0, SHN.SHN_UNDEF, "close"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("7B11C1133330CD161071BF23A0C9B6CE5320A8F3A0F83620035A72BE46DF4104", 4, 0x2004,            18, "_IO_stdin_used"               , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("nologin.opensuse-ppc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/lib64/ld64.so.2",
+        MakeSource("nologin.opensuse-ppc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/lib64/ld64.so.2",
           new ProgramStreamInfo[]
             {
               new("CE2D98B084439F347E7B45AB66BC573F425DE691A0A9F94BE7E95C6CB897F239",  504, PT.PT_PHDR        , PF.PF_R),
@@ -3640,7 +3651,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "_ITM_registerTMCloneTable"    , STT.STT_NOTYPE , STB.STB_WEAK  , 0x0),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "setlocale"                    , STT.STT_FUNC   , STB.STB_GLOBAL, 0x60),
             }),
-        MakeSource("nologin.opensuse-s390x", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_S390, 0, "/lib/ld64.so.1",
+        MakeSource("nologin.opensuse-s390x", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_S390, 0, "/lib/ld64.so.1",
           new ProgramStreamInfo[]
             {
               new("201FE8C1D227170824FC8F1C6D50EFBA66EFFA9B24EDEFB0BD7713C7368BB9A4",  504, PT.PT_PHDR        , PF.PF_R),
@@ -3718,10 +3729,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeTempfileUbuntuSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("tempfile.ubuntu-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_AARCH64, 0, "/lib/ld-linux-aarch64.so.1",
+        MakeSource("tempfile.ubuntu-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_AARCH64, 0, "/lib/ld-linux-aarch64.so.1",
           new ProgramStreamInfo[]
             {
               new("7813EE839D108145E383C6E67BACB635E5848582301710BE4AD83D4902ADEEDF",  504, PT.PT_PHDR        , PF.PF_R),
@@ -3798,7 +3810,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "__errno_location"           , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "getenv"                     , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("tempfile.ubuntu-armhf", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-linux-armhf.so.3",
+        MakeSource("tempfile.ubuntu-armhf", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-linux-armhf.so.3",
           new ProgramStreamInfo[]
             {
               new("9E19C435892E8AAE9509B55B609A29696F3BA15F1C98AA9B152E6811B112AD94",    8, PT.PT_MIPS_RTPROC, PF.PF_R),
@@ -3877,7 +3889,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 4, 0x1208C,            23, "progname"                   , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
               new("7B11C1133330CD161071BF23A0C9B6CE5320A8F3A0F83620035A72BE46DF4104", 4,   0xD90,            15, "_IO_stdin_used"             , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("tempfile.ubuntu-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-linux.so.2",
+        MakeSource("tempfile.ubuntu-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-linux.so.2",
           new ProgramStreamInfo[]
             {
               new("D0A7074974E546389DD2403D8FEDF50FA2C4D4CA3AB953A97095AB33BF60DB86",  384, PT.PT_PHDR        , PF.PF_R),
@@ -3956,7 +3968,7 @@ namespace JetBrains.FormatRipper.Tests
               new("7B11C1133330CD161071BF23A0C9B6CE5320A8F3A0F83620035A72BE46DF4104", 4, 0x2004,            18, "_IO_stdin_used"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("9D9F290527A6BE626A8F5985B26E19B237B44872B03631811DF4416FC1713178", 4, 0x2000,            18, "_fp_hw"                     , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("tempfile.ubuntu-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, 0, "/lib64/ld-linux-x86-64.so.2",
+        MakeSource("tempfile.ubuntu-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/lib64/ld-linux-x86-64.so.2",
           new ProgramStreamInfo[]
             {
               new("412CA733D4D13688FFA33DECCA017E5659CD0806E11B1895FDC30C9C4F91E70B",  728, PT.PT_PHDR        , PF.PF_R),
@@ -4038,10 +4050,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeVl805Sources() => new object?[]
       {
         // @formatter:off
-        MakeSource("vl805", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_LINUX, ET.ET_EXEC, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, null,
+        MakeSource("vl805", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_LINUX, 0, ET.ET_EXEC, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, null,
           new ProgramStreamInfo[]
             {
               new("C769728D58E8BD725E69F9CC58F16802A5BEB2B505D92ED175D19652F69FCA8B",   1744, PT.PT_MIPS_RTPROC, PF.PF_R),
@@ -4089,10 +4102,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeObjectFileSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("32bit.o", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_REL, EM.EM_386, EF.EF_NONE, null,
+        MakeSource("32bit.o", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_REL, EM.EM_386, EF.EF_NONE, null,
           new ProgramStreamInfo[] {},
           new SectionStreamInfo[]
             {
@@ -4121,7 +4135,7 @@ namespace JetBrains.FormatRipper.Tests
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0, 0x0,             6, "__x86.get_pc_thunk.ax", STT.STT_FUNC   , STB.STB_GLOBAL, 0x2),
               new(null                                                              ,  0, 0x0, SHN.SHN_UNDEF, "_GLOBAL_OFFSET_TABLE_", STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
             }),
-        MakeSource("64bit.o", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_REL, EM.EM_X86_64, EF.EF_NONE, null,
+        MakeSource("64bit.o", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_REL, EM.EM_X86_64, EF.EF_NONE, null,
           new ProgramStreamInfo[] {},
           new SectionStreamInfo[]
             {
@@ -4148,10 +4162,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeCoreDumpSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("core.2042", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_CORE, EM.EM_X86_64, EF.EF_NONE, null,
+        MakeSource("core.2042", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_CORE, EM.EM_X86_64, EF.EF_NONE, null,
           new ProgramStreamInfo[]
             {
               new("B11E50801F733B7D90CE26C394BCFFA6FB2AB1B5168D6A8C3196A905977E6492",   5084, PT.PT_NOTE, 0),
@@ -4184,10 +4199,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeUnityEditorSources() => new object?[]
       {
         // @formatter:off
-        MakeOptionalSource("unity.editor_coreclr.Unity", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, "/lib64/ld-linux-x86-64.so.2", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity.editor_coreclr.Unity", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, "/lib64/ld-linux-x86-64.so.2", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
           new ProgramStreamInfo[]
             {
               new("A461BCA804327E9F2037AC964C81DE7D88E9DD764959BCC8EFBDA53496C6CB67",       672, PT.PT_PHDR        , PF.PF_R),
@@ -4241,7 +4257,7 @@ namespace JetBrains.FormatRipper.Tests
               new("AAB3137B673C990B4F300DFAC63ED75FC073AC5FA3BFD2C43AEA00C57786ED89",       335,       0x0,    0x1,  0, ".shstrtab"         , SHT.SHT_STRTAB     , 0,  0, 0),
               new("50A784AE42F2318E0A3EB0B8245766F56F9B69429EC55EA00AE802556D925554",        20,       0x0,    0x4,  0, ".gnu_debuglink"    , SHT.SHT_PROGBITS   , 0,  0, 0),
             }),
-        MakeOptionalSource("unity.editor_mono.Unity", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, "/lib64/ld-linux-x86-64.so.2", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity.editor_mono.Unity", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, "/lib64/ld-linux-x86-64.so.2", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE,
           new ProgramStreamInfo[]
             {
               new("E0A460DACECA2A19F4E4D59FDBFA0780B9EAAADC7AAE554D5B7E79D2858C1489",       672, PT.PT_PHDR        , PF.PF_R),
@@ -4298,10 +4314,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeUnityPlayerDevelopmentSources() => new object?[]
       {
         // @formatter:off
-        MakeOptionalSource("unity.player_development_coreclr.UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity.player_development_coreclr.UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
           new ProgramStreamInfo[]
             {
               new("099A466433F5B0596E7D75D476BE84C68DBCB217134F52E0BB86C8AAE235EE7F",      616, PT.PT_PHDR        , PF.PF_R),
@@ -4351,7 +4368,7 @@ namespace JetBrains.FormatRipper.Tests
               new("82CD3E4AEC7287E22EFBFA9F18062BDCB4287DC7AE4BC38C80370BBBA75C969A",      306,       0x0,  0x1,  0, ".shstrtab"         , SHT.SHT_STRTAB     , 0,  0, 0),
               new("186C592240C09929B14802865D09F4F02CE373F19D455BF24290F12A471449F0",       24,       0x0,  0x4,  0, ".gnu_debuglink"    , SHT.SHT_PROGBITS   , 0,  0, 0),
             }),
-        MakeOptionalSource("unity.player_development_il2cpp.UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity.player_development_il2cpp.UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE,
           new ProgramStreamInfo[]
             {
               new("BD80B2FA97FBBEA7457933F63FD4730F7EFF213C24CAEE1BABE041E7895E023C",      616, PT.PT_PHDR        , PF.PF_R),
@@ -4401,7 +4418,7 @@ namespace JetBrains.FormatRipper.Tests
               new("82CD3E4AEC7287E22EFBFA9F18062BDCB4287DC7AE4BC38C80370BBBA75C969A",      306,       0x0,  0x1,  0, ".shstrtab"         , SHT.SHT_STRTAB     , 0,  0, 0),
               new("C92B88F35780A45E85D85FD20CAF72255D6559B1D1918881E8F0E9460AB127F9",       24,       0x0,  0x4,  0, ".gnu_debuglink"    , SHT.SHT_PROGBITS   , 0,  0, 0),
             }),
-        MakeOptionalSource("unity.player_development_mono.UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity.player_development_mono.UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE,
           new ProgramStreamInfo[]
             {
               new("4BCD293B436523EF740434DC832E5712B0B242BA1154D97BCD1F3F31C3D7876F",      616, PT.PT_PHDR        , PF.PF_R),
@@ -4454,10 +4471,11 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeUnityPlayerNondevelopmentSources() => new object?[]
       {
         // @formatter:off
-        MakeOptionalSource("unity.player_nondevelopment_coreclr.UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity.player_nondevelopment_coreclr.UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
           new ProgramStreamInfo[]
             {
               new("AD66F5AC22F93CD982C61A4FFD788A46EEFAFEF74EED38117D157BDFEB5E8D07",      616, PT.PT_PHDR        , PF.PF_R),
@@ -4507,7 +4525,7 @@ namespace JetBrains.FormatRipper.Tests
               new("82CD3E4AEC7287E22EFBFA9F18062BDCB4287DC7AE4BC38C80370BBBA75C969A",      306,       0x0,  0x1,  0, ".shstrtab"         , SHT.SHT_STRTAB     , 0,  0, 0),
               new("6145917F0FB1B62057414048CF04850526FADD5900334BE20F254045BB92C930",       24,       0x0,  0x4,  0, ".gnu_debuglink"    , SHT.SHT_PROGBITS   , 0,  0, 0),
             }),
-        MakeOptionalSource("unity.player_nondevelopment_il2cpp.UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity.player_nondevelopment_il2cpp.UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE,
           new ProgramStreamInfo[]
             {
               new("2014725EB8C7D17EE305CC19BFAE6FA6EB16BEC705E8AE9EC8692E622A1D3FE7",      616, PT.PT_PHDR        , PF.PF_R),
@@ -4557,7 +4575,7 @@ namespace JetBrains.FormatRipper.Tests
               new("82CD3E4AEC7287E22EFBFA9F18062BDCB4287DC7AE4BC38C80370BBBA75C969A",      306,       0x0,  0x1,  0, ".shstrtab"         , SHT.SHT_STRTAB     , 0,  0, 0),
               new("F367931CABE4859873D379CE4DBC3DEE9EB6D4E7B95346614FD31CE0C311DB36",       24,       0x0,  0x4,  0, ".gnu_debuglink"    , SHT.SHT_PROGBITS   , 0,  0, 0),
             }),
-        MakeOptionalSource("unity.player_nondevelopment_mono.UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity.player_nondevelopment_mono.UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE,
           new ProgramStreamInfo[]
             {
               new("FD124E3DA42D1BCCDFF6D1602DBE7C2621AC16EB282AEFCB0B60A4DB74C72FDD",      616, PT.PT_PHDR        , PF.PF_R),
