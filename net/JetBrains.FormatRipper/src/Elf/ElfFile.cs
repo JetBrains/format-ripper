@@ -51,35 +51,25 @@ namespace JetBrains.FormatRipper.Elf
         (EV)eIdent[EI.EI_VERSION] == EV.EV_CURRENT;
     }
 
-    public sealed class ProgramHeader
-    {
-      public readonly ulong Size;
-      public readonly PT Type;
-      public readonly PF Flags;
-
-      public ProgramHeader(ulong size, PT type, PF flags)
-      {
-        Size = size;
-        Type = type;
-        Flags = flags;
-      }
-    }
-
     public delegate Stream CreateStreamDelegate();
 
     public sealed class ProgramItem
     {
-      public readonly ProgramHeader Header;
+      public readonly ulong Size;
+      public readonly PT Type;
+      public readonly PF Flags;
       public readonly CreateStreamDelegate CreateStream;
 
-      public ProgramItem(ProgramHeader header, CreateStreamDelegate createStream)
+      internal ProgramItem(ulong size, PT type, PF flags, CreateStreamDelegate createStream)
       {
-        Header = header;
+        Size = size;
+        Type = type;
+        Flags = flags;
         CreateStream = createStream;
       }
     }
 
-    public sealed class SectionHeader
+    public sealed class SectionItem
     {
       public readonly string Name;
       public readonly ulong Size;
@@ -90,8 +80,9 @@ namespace JetBrains.FormatRipper.Elf
       public readonly ushort Link;
       public readonly uint Info;
       public readonly ulong EntSize;
+      public readonly CreateStreamDelegate CreateStream;
 
-      public SectionHeader(string name, ulong size, ulong address, ulong addressAlign, SHT type, SHF flags, ushort link, uint info, ulong entSize)
+      internal SectionItem(string name, ulong size, ulong address, ulong addressAlign, SHT type, SHF flags, ushort link, uint info, ulong entSize, CreateStreamDelegate createStream)
       {
         Name = name;
         Size = size;
@@ -102,17 +93,6 @@ namespace JetBrains.FormatRipper.Elf
         Link = link;
         Info = info;
         EntSize = entSize;
-      }
-    }
-
-    public sealed class SectionItem
-    {
-      public readonly SectionHeader Header;
-      public readonly CreateStreamDelegate CreateStream;
-
-      public SectionItem(SectionHeader header, CreateStreamDelegate createStream)
-      {
-        Header = header;
         CreateStream = createStream;
       }
     }
@@ -165,7 +145,7 @@ namespace JetBrains.FormatRipper.Elf
               var phOffset = GetU4(phdr.p_offset);
               var phSize = GetU4(phdr.p_filesz);
               phs[n] = new ProgramItem(
-                new ProgramHeader(phSize, (PT)GetU4(phdr.p_type), (PF)GetU4(phdr.p_flags)),
+                phSize, (PT)GetU4(phdr.p_type), (PF)GetU4(phdr.p_flags),
                 () => new ReadOnlyNestedStream(stream, phOffset, phSize));
             }
           }
@@ -206,7 +186,7 @@ namespace JetBrains.FormatRipper.Elf
               var shAddrAlign = GetU4(shdr.sh_addralign);
               var shSize = GetU4(shdr.sh_size);
               shs[n] = new SectionItem(
-                new SectionHeader(shName, shSize, shAddr, shAddrAlign, shType, (SHF)GetU4(shdr.sh_flags), checked((ushort)GetU4(shdr.sh_link)), GetU4(shdr.sh_info), GetU4(shdr.sh_entsize)),
+                shName, shSize, shAddr, shAddrAlign, shType, (SHF)GetU4(shdr.sh_flags), checked((ushort)GetU4(shdr.sh_link)), GetU4(shdr.sh_info), GetU4(shdr.sh_entsize),
                 () => shType == SHT.SHT_NOBITS ? throw new InvalidOperationException("Section has no data") : new ReadOnlyNestedStream(stream, shOffset, shSize));
             }
           }
@@ -249,7 +229,7 @@ namespace JetBrains.FormatRipper.Elf
               var phOffset = GetU8(phdr.p_offset);
               var phSize = GetU8(phdr.p_filesz);
               phs[n] = new ProgramItem(
-                new ProgramHeader(phSize, (PT)GetU4(phdr.p_type), (PF)GetU4(phdr.p_flags)),
+                phSize, (PT)GetU4(phdr.p_type), (PF)GetU4(phdr.p_flags),
                 () => new ReadOnlyNestedStream(stream, checked((long)phOffset), checked((long)phSize)));
             }
           }
@@ -290,7 +270,7 @@ namespace JetBrains.FormatRipper.Elf
               var shAddrAlign = GetU8(shdr.sh_addralign);
               var shSize = GetU8(shdr.sh_size);
               shs[n] = new SectionItem(
-                new SectionHeader(shName, shSize, shAddr, shAddrAlign, shType, (SHF)checked((uint)GetU8(shdr.sh_flags)), checked((ushort)GetU4(shdr.sh_link)), GetU4(shdr.sh_info), GetU8(shdr.sh_entsize)),
+                shName, shSize, shAddr, shAddrAlign, shType, (SHF)checked((uint)GetU8(shdr.sh_flags)), checked((ushort)GetU4(shdr.sh_link)), GetU4(shdr.sh_info), GetU8(shdr.sh_entsize),
                 () => shType == SHT.SHT_NOBITS ? throw new InvalidOperationException("Section has no data") : new ReadOnlyNestedStream(stream, checked((long)shOffset), checked((long)shSize)));
             }
           }

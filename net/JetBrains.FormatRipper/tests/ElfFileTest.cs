@@ -19,7 +19,7 @@ namespace JetBrains.FormatRipper.Tests
       public readonly PT Type;
       public readonly PF Flags;
 
-      public ProgramStreamInfo(string hash, ulong size, PT type, PF flags)
+      internal ProgramStreamInfo(string hash, ulong size, PT type, PF flags)
       {
         Hash = hash;
         Size = size;
@@ -43,7 +43,7 @@ namespace JetBrains.FormatRipper.Tests
       public readonly ushort Link;
       public readonly uint Info;
 
-      public SectionStreamInfo(string? hash, ulong size, ulong address, ulong addressAlign, ulong entSize, string name, SHT type, ushort link, uint info, SHF flags)
+      internal SectionStreamInfo(string? hash, ulong size, ulong address, ulong addressAlign, ulong entSize, string name, SHT type, ushort link, uint info, SHF flags)
       {
         Hash = hash;
         Size = size;
@@ -71,12 +71,12 @@ namespace JetBrains.FormatRipper.Tests
       public readonly STB Binding;
       public readonly byte Other;
 
-      public SymbolStreamInfo(string? hash, ulong size, ulong value, SHN sectionIndex, string name, STT type, STB binding, byte other) :
+      internal SymbolStreamInfo(string? hash, ulong size, ulong value, SHN sectionIndex, string name, STT type, STB binding, byte other) :
         this(hash, size, value, (ushort)sectionIndex, name, type, binding, other)
       {
       }
 
-      public SymbolStreamInfo(string? hash, ulong size, ulong value, ushort sectionIndex, string name, STT type, STB binding, byte other)
+      internal SymbolStreamInfo(string? hash, ulong size, ulong value, ushort sectionIndex, string name, STT type, STB binding, byte other)
       {
         Hash = hash;
         Size = size;
@@ -96,6 +96,7 @@ namespace JetBrains.FormatRipper.Tests
       ELFCLASS expectedEiClass,
       ELFDATA expectedEiData,
       ELFOSABI expectedEiOsAbi,
+      byte expectedEiAbiVersion,
       ET expectedEType,
       EM expectedEMachine,
       EF expectedEFlags,
@@ -109,6 +110,7 @@ namespace JetBrains.FormatRipper.Tests
           expectedEiClass,
           expectedEiData,
           expectedEiOsAbi,
+          expectedEiAbiVersion,
           expectedEType,
           expectedEMachine,
           expectedEFlags,
@@ -124,6 +126,7 @@ namespace JetBrains.FormatRipper.Tests
       ELFCLASS expectedEiClass,
       ELFDATA expectedEiData,
       ELFOSABI expectedEiOsAbi,
+      byte expectedEiAbiVersion,
       ET expectedEType,
       EM expectedEMachine,
       EF expectedEFlags,
@@ -138,6 +141,7 @@ namespace JetBrains.FormatRipper.Tests
           expectedEiClass,
           expectedEiData,
           expectedEiOsAbi,
+          expectedEiAbiVersion,
           expectedEType,
           expectedEMachine,
           expectedEFlags,
@@ -156,6 +160,7 @@ namespace JetBrains.FormatRipper.Tests
       ELFCLASS expectedEiClass,
       ELFDATA expectedEiData,
       ELFOSABI expectedEiOsAbi,
+      byte expectedEiAbiVersion,
       ET expectedEType,
       EM expectedEMachine,
       EF expectedEFlags,
@@ -173,6 +178,7 @@ namespace JetBrains.FormatRipper.Tests
           Assert.AreEqual(expectedEiClass, file.EiClass);
           Assert.AreEqual(expectedEiData, file.EiData);
           Assert.AreEqual(expectedEiOsAbi, file.EiOsAbi);
+          Assert.AreEqual(expectedEiAbiVersion, file.EiAbiVersion);
           Assert.AreEqual(expectedEType, file.EType);
           Assert.AreEqual(expectedEMachine, file.EMachine);
           Assert.AreEqual(expectedEFlags, file.EFlags, $"Expected 0x{expectedEFlags:X}, but was 0x{file.EFlags:X}");
@@ -187,10 +193,9 @@ namespace JetBrains.FormatRipper.Tests
               var info = expectedProgramInfos[n];
               var item = programItems[n];
 
-              var header = item.Header;
-              Assert.AreEqual(info.Size, header.Size);
-              Assert.AreEqual(info.Type, header.Type);
-              Assert.AreEqual(info.Flags, header.Flags, $"Expected 0x{info.Flags:X}, but was 0x{header.Flags:X}");
+              Assert.AreEqual(info.Size, item.Size);
+              Assert.AreEqual(info.Type, item.Type);
+              Assert.AreEqual(info.Flags, item.Flags, $"Expected 0x{info.Flags:X}, but was 0x{item.Flags:X}");
 
               var hash = CalculateStreamHash(() => item.CreateStream());
               Assert.AreEqual(info.Hash, hash);
@@ -208,18 +213,17 @@ namespace JetBrains.FormatRipper.Tests
               var info = expectedSectionInfos[k];
               var item = sectionItems[k];
 
-              var header = item.Header;
-              Assert.AreEqual(info.Name, header.Name);
-              Assert.AreEqual(info.Size, header.Size);
-              Assert.AreEqual(info.Address, header.Address, $"Expected 0x{info.Address:X}, but was 0x{header.Address:X}");
-              Assert.AreEqual(info.AddressAlign, header.AddressAlign, $"Expected 0x{info.AddressAlign:X}, but was 0x{header.AddressAlign:X}");
-              Assert.AreEqual(info.Type, header.Type);
-              Assert.AreEqual(info.Flags, header.Flags, $"Expected 0x{info.Flags:X}, but was 0x{header.Flags:X}");
-              Assert.AreEqual(info.Link, header.Link);
-              Assert.AreEqual(info.Info, header.Info);
-              Assert.AreEqual(info.EntSize, header.EntSize);
+              Assert.AreEqual(info.Name, item.Name);
+              Assert.AreEqual(info.Size, item.Size);
+              Assert.AreEqual(info.Address, item.Address, $"Expected 0x{info.Address:X}, but was 0x{item.Address:X}");
+              Assert.AreEqual(info.AddressAlign, item.AddressAlign, $"Expected 0x{info.AddressAlign:X}, but was 0x{item.AddressAlign:X}");
+              Assert.AreEqual(info.Type, item.Type);
+              Assert.AreEqual(info.Flags, item.Flags, $"Expected 0x{info.Flags:X}, but was 0x{item.Flags:X}");
+              Assert.AreEqual(info.Link, item.Link);
+              Assert.AreEqual(info.Info, item.Info);
+              Assert.AreEqual(info.EntSize, item.EntSize);
 
-              var hash = header.Type == SHT.SHT_NOBITS ? null : CalculateStreamHash(() => item.CreateStream());
+              var hash = item.Type == SHT.SHT_NOBITS ? null : CalculateStreamHash(() => item.CreateStream());
               Assert.AreEqual(info.Hash, hash);
             }
           }
@@ -232,10 +236,9 @@ namespace JetBrains.FormatRipper.Tests
             var symSectionNdx = ElfUtil.Find(file.SectionItems, SHT.SHT_DYNSYM) ?? ElfUtil.Find(file.SectionItems, SHT.SHT_SYMTAB);
             if (symSectionNdx != null)
             {
-              ElfUtil.EnumSymbols(file, symSectionNdx.Value, file.SectionItems[symSectionNdx.Value].Header.Link, symbolInfo =>
+              ElfUtil.EnumSymbols(file, symSectionNdx.Value, file.SectionItems[symSectionNdx.Value].Link, symbolInfo =>
                 {
-                  var symbolInfoHeader = symbolInfo.Header;
-                  if (symbolInfoHeader is { Type: STT.STT_OBJECT, Binding: STB.STB_GLOBAL, Name: UnityUtil.UNITY_SCRIPTING_BACKEND_ELF_SYMBOL })
+                  if (symbolInfo is { Type: STT.STT_OBJECT, Binding: STB.STB_GLOBAL, Name: UnityUtil.UNITY_SCRIPTING_BACKEND_ELF_SYMBOL })
                   {
                     using var dataStream = symbolInfo.CreateStream!();
                     unityScriptingBackend = ElfUtil.ReadStringZ(dataStream);
@@ -255,14 +258,13 @@ namespace JetBrains.FormatRipper.Tests
               var info = expectedSymbolInfos[k];
               var item = symbolItems[k];
 
-              var header = item.Header;
-              Assert.AreEqual(info.Name, header.Name);
-              Assert.AreEqual(info.Size, header.Size);
-              Assert.AreEqual(info.Value, header.Value, $"Expected 0x{info.Value:X}, but was 0x{header.Value:X}");
-              Assert.AreEqual(info.SectionIndex, header.SectionIndex, $"Expected {info.SectionIndex}, but was {header.SectionIndex}");
-              Assert.AreEqual(info.Type, header.Type);
-              Assert.AreEqual(info.Binding, header.Binding);
-              Assert.AreEqual(info.Other, header.Other);
+              Assert.AreEqual(info.Name, item.Name);
+              Assert.AreEqual(info.Size, item.Size);
+              Assert.AreEqual(info.Value, item.Value, $"Expected 0x{info.Value:X}, but was 0x{item.Value:X}");
+              Assert.AreEqual(info.SectionIndex, item.SectionIndex, $"Expected {info.SectionIndex}, but was {item.SectionIndex}");
+              Assert.AreEqual(info.Type, item.Type);
+              Assert.AreEqual(info.Binding, item.Binding);
+              Assert.AreEqual(info.Other, item.Other);
 
               var hash =  item.CreateStream == null ? null : CalculateStreamHash(() => item.CreateStream());
               Assert.AreEqual(info.Hash, hash);
@@ -293,19 +295,18 @@ namespace JetBrains.FormatRipper.Tests
       Console.WriteLine("          new ProgramStreamInfo[]");
       Console.WriteLine("            {");
 
-      var maxSizeLength = file.ProgramItems.Select(x => x.Header.Size.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxTypeLength = file.ProgramItems.Select(x => ("PT." + Enum.GetName(typeof(PT), x.Header.Type)).Length).DefaultIfEmpty(0).Max();
+      var maxSizeLength = file.ProgramItems.Select(x => x.Size.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxTypeLength = file.ProgramItems.Select(x => ("PT." + Enum.GetName(typeof(PT), x.Type)).Length).DefaultIfEmpty(0).Max();
       foreach (var programItem in file.ProgramItems)
       {
-        var programItemHeader = programItem.Header;
         var hash = CalculateStreamHash(() => programItem.CreateStream());
 
         Console.WriteLine(
           "              new({0}, {1}, {2}, {3}),",
           '"' + hash + '"',
-          programItemHeader.Size.ToString().PadLeft(maxSizeLength),
-          ("PT." + Enum.GetName(typeof(PT), programItemHeader.Type)).PadRight(maxTypeLength),
-          GetStr(programItemHeader.Flags));
+          programItem.Size.ToString().PadLeft(maxSizeLength),
+          ("PT." + Enum.GetName(typeof(PT), programItem.Type)).PadRight(maxTypeLength),
+          GetStr(programItem.Flags));
       }
       Console.WriteLine("            },");
 
@@ -337,32 +338,31 @@ namespace JetBrains.FormatRipper.Tests
       Console.WriteLine("            {");
 
       const string @null = "null";
-      var maxHashLength = file.SectionItems.Select(x => x.Header.Type == SHT.SHT_NOBITS ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
-      var maxSizeLength = file.SectionItems.Select(x => x.Header.Size.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxAddressLength = file.SectionItems.Select(x => ("0x" + x.Header.Address.ToString("X")).Length).DefaultIfEmpty(0).Max();
-      var maxAddressAlignLength = file.SectionItems.Select(x => ("0x" + x.Header.AddressAlign.ToString("X")).Length).DefaultIfEmpty(0).Max();
-      var maxNameLength = file.SectionItems.Select(x => x.Header.Name.Length).DefaultIfEmpty(0).Max();
-      var maxTypeLength = file.SectionItems.Select(x => ("SHT." + Enum.GetName(typeof(SHT), x.Header.Type)).Length).DefaultIfEmpty(0).Max();
-      var maxEntSizeLength = file.SectionItems.Select(x => x.Header.EntSize.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxLinkLength = file.SectionItems.Select(x => x.Header.Link.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxInfoLength = file.SectionItems.Select(x => x.Header.Info.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxHashLength = file.SectionItems.Select(x => x.Type == SHT.SHT_NOBITS ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
+      var maxSizeLength = file.SectionItems.Select(x => x.Size.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxAddressLength = file.SectionItems.Select(x => ("0x" + x.Address.ToString("X")).Length).DefaultIfEmpty(0).Max();
+      var maxAddressAlignLength = file.SectionItems.Select(x => ("0x" + x.AddressAlign.ToString("X")).Length).DefaultIfEmpty(0).Max();
+      var maxNameLength = file.SectionItems.Select(x => x.Name.Length).DefaultIfEmpty(0).Max();
+      var maxTypeLength = file.SectionItems.Select(x => ("SHT." + Enum.GetName(typeof(SHT), x.Type)).Length).DefaultIfEmpty(0).Max();
+      var maxEntSizeLength = file.SectionItems.Select(x => x.EntSize.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxLinkLength = file.SectionItems.Select(x => x.Link.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxInfoLength = file.SectionItems.Select(x => x.Info.ToString().Length).DefaultIfEmpty(0).Max();
       foreach (var sectionItem in file.SectionItems)
       {
-        var sectionItemHeader = sectionItem.Header;
-        var hash = sectionItemHeader.Type == SHT.SHT_NOBITS ? null : CalculateStreamHash(() => sectionItem.CreateStream());
+        var hash = sectionItem.Type == SHT.SHT_NOBITS ? null : CalculateStreamHash(() => sectionItem.CreateStream());
 
         Console.WriteLine(
           "              new({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}),",
           (hash == null ? @null : '"' + hash + '"').PadRight(maxHashLength),
-          sectionItemHeader.Size.ToString().PadLeft(maxSizeLength),
-          ("0x" + sectionItemHeader.Address.ToString("X")).PadLeft(maxAddressLength),
-          ("0x" + sectionItemHeader.AddressAlign.ToString("X")).PadLeft(maxAddressAlignLength),
-          sectionItemHeader.EntSize.ToString().PadLeft(maxEntSizeLength),
-          ('"' + sectionItemHeader.Name + '"').PadRight(maxNameLength + 2),
-          ("SHT." + Enum.GetName(typeof(SHT), sectionItemHeader.Type)).PadRight(maxTypeLength),
-          sectionItemHeader.Link.ToString().PadLeft(maxLinkLength),
-          sectionItemHeader.Info.ToString().PadLeft(maxInfoLength),
-          GetStr(sectionItemHeader.Flags));
+          sectionItem.Size.ToString().PadLeft(maxSizeLength),
+          ("0x" + sectionItem.Address.ToString("X")).PadLeft(maxAddressLength),
+          ("0x" + sectionItem.AddressAlign.ToString("X")).PadLeft(maxAddressAlignLength),
+          sectionItem.EntSize.ToString().PadLeft(maxEntSizeLength),
+          ('"' + sectionItem.Name + '"').PadRight(maxNameLength + 2),
+          ("SHT." + Enum.GetName(typeof(SHT), sectionItem.Type)).PadRight(maxTypeLength),
+          sectionItem.Link.ToString().PadLeft(maxLinkLength),
+          sectionItem.Info.ToString().PadLeft(maxInfoLength),
+          GetStr(sectionItem.Flags));
       }
       Console.WriteLine("            },");
 
@@ -401,28 +401,27 @@ namespace JetBrains.FormatRipper.Tests
 
       const string @null = "null";
       var maxHashLength = symbolItems.Select(x => x.CreateStream == null ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
-      var maxNameLength = symbolItems.Select(x => x.Header.Name.Length).DefaultIfEmpty(0).Max();
-      var maxSizeLength = symbolItems.Select(x => x.Header.Size.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxValueLength = symbolItems.Select(x => ("0x" + x.Header.Value.ToString("X")).Length).DefaultIfEmpty(0).Max();
-      var maxSectionIndexLength = symbolItems.Select(x => GetSectionIndexStr(x.Header.SectionIndex).Length).DefaultIfEmpty(0).Max();
-      var maxTypeLength = symbolItems.Select(x => ("STT." + Enum.GetName(typeof(STT), x.Header.Type)).Length).DefaultIfEmpty(0).Max();
-      var maxBindingLength = symbolItems.Select(x => ("STB." + Enum.GetName(typeof(STB), x.Header.Binding)).Length).DefaultIfEmpty(0).Max();
+      var maxNameLength = symbolItems.Select(x => x.Name.Length).DefaultIfEmpty(0).Max();
+      var maxSizeLength = symbolItems.Select(x => x.Size.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxValueLength = symbolItems.Select(x => ("0x" + x.Value.ToString("X")).Length).DefaultIfEmpty(0).Max();
+      var maxSectionIndexLength = symbolItems.Select(x => GetSectionIndexStr(x.SectionIndex).Length).DefaultIfEmpty(0).Max();
+      var maxTypeLength = symbolItems.Select(x => ("STT." + Enum.GetName(typeof(STT), x.Type)).Length).DefaultIfEmpty(0).Max();
+      var maxBindingLength = symbolItems.Select(x => ("STB." + Enum.GetName(typeof(STB), x.Binding)).Length).DefaultIfEmpty(0).Max();
       foreach (var symbolItem in symbolItems)
       {
-        var symbolItemHeader = symbolItem.Header;
         var hash = symbolItem.CreateStream == null ? null : CalculateStreamHash(() => symbolItem.CreateStream());
 
-        var sectionIndexStr = GetSectionIndexStr(symbolItemHeader.SectionIndex);
+        var sectionIndexStr = GetSectionIndexStr(symbolItem.SectionIndex);
         Console.WriteLine(
           "              new({0}, {1}, {2}, {3}, {4}, {5}, {6}, 0x{7:X}),",
           (hash == null ? @null : '"' + hash + '"').PadRight(maxHashLength),
-          symbolItemHeader.Size.ToString().PadLeft(maxSizeLength),
-          ("0x" + symbolItemHeader.Value.ToString("X")).PadLeft(maxValueLength),
+          symbolItem.Size.ToString().PadLeft(maxSizeLength),
+          ("0x" + symbolItem.Value.ToString("X")).PadLeft(maxValueLength),
           sectionIndexStr.StartsWith("SHN.") ? sectionIndexStr.PadRight(maxSectionIndexLength) : sectionIndexStr.PadLeft(maxSectionIndexLength),
-          ('"' + symbolItemHeader.Name + '"').PadRight(maxNameLength + 2),
-          ("STT." + Enum.GetName(typeof(STT), symbolItemHeader.Type)).PadRight(maxTypeLength),
-          ("STB." + Enum.GetName(typeof(STB), symbolItemHeader.Binding)).PadRight(maxBindingLength),
-          symbolItemHeader.Other);
+          ('"' + symbolItem.Name + '"').PadRight(maxNameLength + 2),
+          ("STT." + Enum.GetName(typeof(STT), symbolItem.Type)).PadRight(maxTypeLength),
+          ("STB." + Enum.GetName(typeof(STB), symbolItem.Binding)).PadRight(maxBindingLength),
+          symbolItem.Other);
       }
 
       Console.WriteLine("            },");
