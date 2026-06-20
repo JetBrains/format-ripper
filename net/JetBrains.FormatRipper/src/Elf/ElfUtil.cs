@@ -25,32 +25,32 @@ namespace JetBrains.FormatRipper.Elf
       return new string(Encoding.UTF8.GetChars(blob, 0, blob.Length));
     }
 
-    public static ushort? Find(ElfFile.Program[] items, PT type)
+    public static ushort? Find(ElfFile.Program[] programs, PT type)
     {
-      var length = checked((ushort)items.Length);
+      var length = checked((ushort)programs.Length);
       for (ushort n = 0; n < length; n++)
-        if (items[n].Type == type)
+        if (programs[n].Type == type)
           return n;
       return null;
     }
 
-    public static ushort? Find(ElfFile.Section[] items, SHT type)
+    public static ushort? Find(ElfFile.Section[] sections, SHT type)
     {
-      var length = checked((ushort)items.Length);
+      var length = checked((ushort)sections.Length);
       for (ushort n = 0; n < length; n++)
-        if (items[n].Type == type)
+        if (sections[n].Type == type)
           return n;
       return null;
     }
 
-    public static bool HasInterp(ElfFile.Program[] items) => Find(items, PT.PT_INTERP) != null;
+    public static bool HasInterp(ElfFile.Program[] programs) => Find(programs, PT.PT_INTERP) != null;
 
-    public static string? GetInterp(ElfFile.Program[] items)
+    public static string? GetInterp(ElfFile.Program[] programs)
     {
-      var interp = Find(items, PT.PT_INTERP);
+      var interp = Find(programs, PT.PT_INTERP);
       if (interp == null)
         return null;
-      using var stream = items[interp.Value].CreateStream();
+      using var stream = programs[interp.Value].CreateStream();
       return ReadStringZ(stream);
     }
 
