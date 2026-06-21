@@ -57,8 +57,8 @@ public class MachOSignatureInjector
 
   private static unsafe void ProcessFatMachO(Stream sourceStream, Stream outputStream, MH fatMagic, IMachOSignatureTransferData signatureTransferData)
   {
-    var isFatLittleEndian = fatMagic is MH.FAT_MAGIC or MH.FAT_MAGIC_64;
-    var needSwap = BitConverter.IsLittleEndian != isFatLittleEndian;
+    var fatEndian = fatMagic is MH.FAT_MAGIC or MH.FAT_MAGIC_64 ? MachOFile.Endian.Little : MachOFile.Endian.Big;
+    var needSwap = BitConverter.IsLittleEndian != (fatEndian == MachOFile.Endian.Little);
 
     uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
     ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
@@ -184,8 +184,8 @@ public class MachOSignatureInjector
     long outputStreamInitialPosition = outputStream.Position;
     long PositionFromStart() => outputStream.Position - outputStreamInitialPosition;
 
-    var isLittleEndian = magic is MH.MH_MAGIC or MH.MH_MAGIC_64;
-    var needSwap = BitConverter.IsLittleEndian != isLittleEndian;
+    var isLittleEndian = magic is MH.MH_MAGIC or MH.MH_MAGIC_64 ? MachOFile.Endian.Little : MachOFile.Endian.Big;
+    var needSwap = BitConverter.IsLittleEndian != (isLittleEndian == MachOFile.Endian.Little);
 
     uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
     ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;

@@ -74,7 +74,7 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
     FileIntegrityVerificationParams fileIntegrityVerificationParams)
   {
     if (!section.HashVerificationUnits.Any() || !section.CDHashes.Any())
-      throw new ArgumentException($"Mach-o file was parsed without {nameof(MachOFile.Mode.ComputeHashInfo)} flag", nameof(section));
+      throw new ArgumentException($"Mach-o file was parsed without {nameof(MachOFile.Mode.SignatureData)} flag", nameof(section));
 
     if (section.SignatureType == MachOFile.SignatureType.AdHoc && !signatureVerificationParams.AllowAdhocSignatures)
     {

@@ -13,7 +13,7 @@ namespace JetBrains.SignatureVerifier.Tests
   {
     private const string apple_root = "apple_root.p7b";
 
-    private static MachOFile GetMachOFile(string resourceName) => ResourceUtil.OpenRead(ResourceCategory.MachO, resourceName, stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData | MachOFile.Mode.ComputeHashInfo));
+    private static MachOFile GetMachOFile(string resourceName) => ResourceUtil.OpenRead(ResourceCategory.MachO, resourceName, stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData));
 
     [TestCase(VerifySignatureStatus.Valid, "JetBrains.Profiler.PdbServer")]
     [TestCase(VerifySignatureStatus.Valid, "cat")]

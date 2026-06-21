@@ -137,7 +137,7 @@ namespace JetBrains.FormatRipper.FileExplorer
             };
           if (IsAllHasCodeSignature(fileSections))
             properties |= FileProperties.Signed;
-          if (file.IsFatLittleEndian != null)
+          if (file.FatEndian != null)
             properties |= FileProperties.MultiArch;
           return true;
         }
