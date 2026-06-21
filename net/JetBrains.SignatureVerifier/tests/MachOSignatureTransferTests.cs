@@ -4,6 +4,7 @@ using JetBrains.FormatRipper;
 using JetBrains.FormatRipper.MachO;
 using JetBrains.FormatRipper.Pe;
 using JetBrains.SignatureVerifier.Crypt;
+using JetBrains.Tests;
 using NUnit.Framework;
 using Org.BouncyCastle.Utilities;
 
@@ -24,19 +25,23 @@ public class MachOSignatureTransferTests
   [TestCase("TestCppApp2_adhoc", "TestCppApp2_adhoc_signed")]
   public async Task SignatureShouldBeTransfered(string donor, string acceptor)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.MachO, donor, stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData));
+    var signature = TestDataUtil.OpenRead(ResourceCategory.MachO, donor, stream =>
+    {
+      var file = MachOFile.Parse(stream);
+      return MachOUtil.ReadSignatureTransferData(file, MachOFile.Mode.SignatureData);
+    });
 
-    Assert.NotNull(file.Signature);
+    Assert.NotNull(signature);
 
     using MemoryStream resultFileStream = new MemoryStream();
 
-    ResourceUtil.OpenRead(ResourceCategory.MachO, acceptor, stream =>
+    TestDataUtil.OpenRead(ResourceCategory.MachO, acceptor, stream =>
     {
-      MachOSignatureInjector.InjectSignature(stream, resultFileStream, file.Signature);
+      MachOSignatureInjector.InjectSignature(stream, resultFileStream, signature);
       return 0;
     });
 
-    MachOFile acceptorFile = MachOFile.Parse(resultFileStream, MachOFile.Mode.SignatureData);
+    MachOFile acceptorFile = MachOFile.Parse(resultFileStream);
 
     var verificationParams = new SignatureVerificationParams(null, null, false, false, allowAdhocSignatures: true);
 
@@ -46,11 +51,11 @@ public class MachOSignatureTransferTests
 
     Assert.AreEqual(VerifySignatureStatus.Valid, result.Status, "Signature verification failure");
 
-    byte[] signedFileArray = ResourceUtil.OpenRead(ResourceCategory.MachO, donor, stream =>
+    byte[] signedFileArray = TestDataUtil.OpenRead(ResourceCategory.MachO, donor, stream =>
     {
-      byte[] data = new byte[stream.Length];
-      stream.Read(data, 0, data.Length);
-      return data;
+      using MemoryStream data = new MemoryStream();
+      stream.CopyTo(data);
+      return data.ToArray();
     });
 
     byte[] acceptorFileArray = resultFileStream.ToArray();
@@ -67,15 +72,19 @@ public class MachOSignatureTransferTests
   [TestCase("TestApp_developer", "TestCppApp1")]
   public void SignatureTransferBetweenIncompatibleFilesShouldThrowException(string donor, string acceptor)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.MachO, donor, stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData));
+    var signature = TestDataUtil.OpenRead(ResourceCategory.MachO, donor, stream =>
+    {
+      var file = MachOFile.Parse(stream);
+      return MachOUtil.ReadSignatureTransferData(file, MachOFile.Mode.SignatureData);
+    });
 
-    Assert.NotNull(file.Signature);
+    Assert.NotNull(signature);
 
     using MemoryStream resultFileStream = new MemoryStream();
 
-    ResourceUtil.OpenRead(ResourceCategory.MachO, acceptor, stream =>
+    TestDataUtil.OpenRead(ResourceCategory.MachO, acceptor, stream =>
     {
-      Assert.Throws<SignatureInjectionException>(() => MachOSignatureInjector.InjectSignature(stream, resultFileStream, file.Signature));
+      Assert.Throws<SignatureInjectionException>(() => MachOSignatureInjector.InjectSignature(stream, resultFileStream, signature));
       return 0;
     });
   }

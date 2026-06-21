@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace JetBrains.FormatRipper.MachO
 {
@@ -6,6 +7,7 @@ namespace JetBrains.FormatRipper.MachO
 
   [SuppressMessage("ReSharper", "IdentifierTypo")]
   [SuppressMessage("ReSharper", "InconsistentNaming")]
+  [Flags]
   public enum CPU_TYPE : uint
   {
     // @formatter:off

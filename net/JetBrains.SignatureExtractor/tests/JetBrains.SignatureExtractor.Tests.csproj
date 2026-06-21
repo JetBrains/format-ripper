@@ -23,10 +23,7 @@
         <Using Include="NUnit.Framework"/>
     </ItemGroup>
     <ItemGroup>
-        <EmbeddedResource Include="..\..\..\data\dmg\**\*" LinkBase="Resources\Dmg" />
-        <EmbeddedResource Include="..\..\..\data\mach-o\**\*" LinkBase="Resources\MachO" />
-        <EmbeddedResource Include="..\..\..\data\msi\**\*" LinkBase="Resources\Msi" />
-        <EmbeddedResource Include="..\..\..\data\pe\**\*" LinkBase="Resources\Pe" />
+        <Compile Include="..\..\shared\TestDataUtil.cs" Link="TestDataUtil.cs" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\src\JetBrains.SignatureExtractor.csproj" />

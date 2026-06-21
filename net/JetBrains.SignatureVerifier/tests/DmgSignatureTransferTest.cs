@@ -4,6 +4,7 @@ using JetBrains.FormatRipper;
 using JetBrains.FormatRipper.Dmg;
 using JetBrains.FormatRipper.Pe;
 using JetBrains.SignatureVerifier.Crypt;
+using JetBrains.Tests;
 using NUnit.Framework;
 using Org.BouncyCastle.Utilities;
 
@@ -20,13 +21,13 @@ public class DmgSignatureTransferTest
   [TestCase("test2-signed.dmg", "test2-signed-timestamped.dmg")]
   public async Task SignatureShouldBeTransfered(string donor, string acceptor)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, donor, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData));
+    var file = TestDataUtil.OpenRead(ResourceCategory.Dmg, donor, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData));
 
     Assert.NotNull(file.SignatureTransferData);
 
     using MemoryStream resultFileStream = new MemoryStream();
 
-    ResourceUtil.OpenRead(ResourceCategory.Dmg, acceptor, stream =>
+    TestDataUtil.OpenRead(ResourceCategory.Dmg, acceptor, stream =>
     {
       DmgSignatureInjector.InjectSignature(stream, resultFileStream, file.SignatureTransferData);
       return 0;
@@ -42,11 +43,11 @@ public class DmgSignatureTransferTest
 
     Assert.AreEqual(VerifySignatureStatus.Valid, result.Status, "Signature verification failure");
 
-    byte[] signedFileArray = ResourceUtil.OpenRead(ResourceCategory.Dmg, donor, stream =>
+    byte[] signedFileArray = TestDataUtil.OpenRead(ResourceCategory.Dmg, donor, stream =>
     {
-      byte[] data = new byte[stream.Length];
-      stream.Read(data, 0, data.Length);
-      return data;
+      using MemoryStream data = new MemoryStream();
+      stream.CopyTo(data);
+      return data.ToArray();
     });
 
     byte[] acceptorFileArray = resultFileStream.ToArray();
@@ -62,13 +63,13 @@ public class DmgSignatureTransferTest
   [TestCase("license-signed.dmg", "test.dmg")]
   public void SignatureTransferBetweenIncompatibleFilesShouldThrowException(string donor, string acceptor)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.Dmg, donor, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData));
+    var file = TestDataUtil.OpenRead(ResourceCategory.Dmg, donor, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData));
 
     Assert.NotNull(file.SignatureTransferData);
 
     using MemoryStream resultFileStream = new MemoryStream();
 
-    ResourceUtil.OpenRead(ResourceCategory.Dmg, acceptor, stream =>
+    TestDataUtil.OpenRead(ResourceCategory.Dmg, acceptor, stream =>
     {
       Assert.Throws<SignatureInjectionException>(() => DmgSignatureInjector.InjectSignature(stream, resultFileStream, file.SignatureTransferData));
       return 0;

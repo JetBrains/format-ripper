@@ -1,4 +1,5 @@
 using JetBrains.FormatRipper.Dmg;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.FormatRipper.Tests;
@@ -13,7 +14,7 @@ public class DmgFileTest
   // @formatter:on
   public void TestDmgWithValidParameters(string resourceName, bool hasSignature)
   {
-    ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream =>
+    TestDataUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream =>
       {
         Assert.IsTrue(DmgFile.Is(stream));
         var file = DmgFile.Parse(stream, DmgFile.Mode.SignatureData);
@@ -34,7 +35,7 @@ public class DmgFileTest
   // @formatter:on
   public void TestNonDmgFile(string resourceName, ResourceCategory resourceCategory)
   {
-    ResourceUtil.OpenRead(resourceCategory, resourceName, stream =>
+    TestDataUtil.OpenRead(resourceCategory, resourceName, stream =>
       {
         Assert.IsFalse(DmgFile.Is(stream));
       });

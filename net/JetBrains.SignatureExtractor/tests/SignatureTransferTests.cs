@@ -1,4 +1,5 @@
 using JetBrains.SignatureExtractor;
+using JetBrains.Tests;
 
 namespace JetBrains.SignatureExtractor.Tests;
 
@@ -16,7 +17,7 @@ public class SignatureTransferTests
   [TestCase(ResourceCategory.Dmg  , "test2-signed.dmg"            , "test2-signed-timestamped.dmg")]
   public void SignatureShouldBeTransfered(ResourceCategory resourceCategory, string donor, string acceptor)
   {
-    using var donorFile = ResourceUtil.OpenRead(resourceCategory, donor);
+    using var donorFile = TestDataUtil.OpenRead(resourceCategory, donor);
 
     using MemoryStream signature = new MemoryStream();
 
@@ -26,7 +27,7 @@ public class SignatureTransferTests
 
     signature.Seek(0, SeekOrigin.Begin);
 
-    using var acceptorFile = ResourceUtil.OpenRead(resourceCategory, acceptor);
+    using var acceptorFile = TestDataUtil.OpenRead(resourceCategory, acceptor);
 
     MemoryStream destinationFile = new MemoryStream();
 
@@ -41,7 +42,7 @@ public class SignatureTransferTests
   [TestCase(ResourceCategory.Dmg  , "test2-signed.dmg"      , "test.dmg")]
   public void SignatureShouldNotBeTransferedBetweenDifferentFiles(ResourceCategory resourceCategory, string donor, string acceptor)
   {
-    using var donorFile = ResourceUtil.OpenRead(resourceCategory, donor);
+    using var donorFile = TestDataUtil.OpenRead(resourceCategory, donor);
 
     using MemoryStream signature = new MemoryStream();
 
@@ -51,7 +52,7 @@ public class SignatureTransferTests
 
     signature.Seek(0, SeekOrigin.Begin);
 
-    using var acceptorFile = ResourceUtil.OpenRead(resourceCategory, acceptor);
+    using var acceptorFile = TestDataUtil.OpenRead(resourceCategory, acceptor);
 
     MemoryStream destinationFile = new MemoryStream();
 
@@ -66,7 +67,7 @@ public class SignatureTransferTests
   [TestCase(ResourceCategory.Dmg  , "test2-signed.dmg"      , ResourceCategory.Pe   , "HelloWorld2_signed.exe")]
   public void SignatureShouldNotBeTransferedBetweenIncompatibleFiles(ResourceCategory donorResourceCategory, string donor, ResourceCategory acceptorResourceCategory, string acceptor)
   {
-    using var donorFile = ResourceUtil.OpenRead(donorResourceCategory, donor);
+    using var donorFile = TestDataUtil.OpenRead(donorResourceCategory, donor);
 
     using MemoryStream signature = new MemoryStream();
 
@@ -76,7 +77,7 @@ public class SignatureTransferTests
 
     signature.Seek(0, SeekOrigin.Begin);
 
-    using var acceptorFile = ResourceUtil.OpenRead(acceptorResourceCategory, acceptor);
+    using var acceptorFile = TestDataUtil.OpenRead(acceptorResourceCategory, acceptor);
 
     MemoryStream destinationFile = new MemoryStream();
 
@@ -88,7 +89,7 @@ public class SignatureTransferTests
   [TestCase(ResourceCategory.Dmg  , "test.dmg")]
   public void SignatureExtractionShouldFailOnUnsignedFiles(ResourceCategory donorResourceCategory, string donor)
   {
-    using var donorFile = ResourceUtil.OpenRead(donorResourceCategory, donor);
+    using var donorFile = TestDataUtil.OpenRead(donorResourceCategory, donor);
 
     MemoryStream signature = new MemoryStream();
 
@@ -105,7 +106,7 @@ public class SignatureTransferTests
   [TestCase(ResourceCategory.Dmg  , "test-signed.dmg"       , "test-signed-edited.dmg", false, true)]
   public void SignatureShouldBeTransferedWithoutVerification(ResourceCategory resourceCategory, string donor, string acceptor, bool verifySignature, bool expectSuccess)
   {
-    using var donorFile = ResourceUtil.OpenRead(resourceCategory, donor);
+    using var donorFile = TestDataUtil.OpenRead(resourceCategory, donor);
 
     using MemoryStream signature = new MemoryStream();
 
@@ -115,7 +116,7 @@ public class SignatureTransferTests
 
     signature.Seek(0, SeekOrigin.Begin);
 
-    using var acceptorFile = ResourceUtil.OpenRead(resourceCategory, acceptor);
+    using var acceptorFile = TestDataUtil.OpenRead(resourceCategory, acceptor);
 
     MemoryStream destinationFile = new MemoryStream();
 

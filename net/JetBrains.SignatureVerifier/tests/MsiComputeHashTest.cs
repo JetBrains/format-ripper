@@ -1,4 +1,5 @@
 ﻿using JetBrains.FormatRipper.Compound;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.SignatureVerifier.Tests
@@ -14,7 +15,7 @@ namespace JetBrains.SignatureVerifier.Tests
     [Test]
     public void ComputeHashTest(string resourceName, string hashAlgorithmName, string expectedHash)
     {
-      var hash = ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
+      var hash = TestDataUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
         {
           var file = CompoundFile.Parse(stream, CompoundFile.Mode.ComputeHashInfo);
           Assert.IsNotNull(file.ComputeHashInfo);

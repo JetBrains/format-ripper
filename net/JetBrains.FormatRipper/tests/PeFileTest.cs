@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 using JetBrains.FormatRipper.Pe;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.FormatRipper.Tests
@@ -56,7 +57,7 @@ namespace JetBrains.FormatRipper.Tests
       string expectedSecurityDataDirectoryRange,
       string expectedOrderedIncludeRanges)
     {
-      ResourceUtil.OpenRead(ResourceCategory.Pe, resourceName, stream =>
+      TestDataUtil.OpenRead(ResourceCategory.Pe, resourceName, stream =>
         {
           Assert.IsTrue(PeFile.Is(stream));
           var file = PeFile.Parse(stream, PeFile.Mode.SignatureData | PeFile.Mode.ComputeHashInfo);

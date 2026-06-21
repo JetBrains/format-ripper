@@ -118,14 +118,14 @@ namespace JetBrains.FormatRipper.Dmg
         var csCount = EndianUtil.GetBeU4(cssb.count);
         fixed (byte* scBuf = StreamUtil.ReadBytes(stream, checked((int)csLength - sizeof(CS_SuperBlob))))
         {
-          ComputeHashInfo[] specialSlotPositions = new ComputeHashInfo[CSSLOT.CSSLOT_HASHABLE_ENTRIES_MAX - 1];
+          ComputeHashInfo[] specialSlotPositions = new ComputeHashInfo[(uint)CSSLOT.CSSLOT_HASHABLE_ENTRIES_MAX - 1];
 
           for (int superBlobEntryIndex = 0; superBlobEntryIndex < csCount; superBlobEntryIndex++)
           {
             var scPtr = scBuf + superBlobEntryIndex * sizeof(CS_BlobIndex);
             CS_BlobIndex csbi;
             MemoryUtil.CopyBytes(scPtr, (byte*)&csbi, sizeof(CS_BlobIndex));
-            uint slotType = EndianUtil.GetBeU4(csbi.type);
+            var slotType = (CSSLOT)EndianUtil.GetBeU4(csbi.type);
 
             if (slotType >= CSSLOT.CSSLOT_INFOSLOT && slotType <= CSSLOT.CSSLOT_LIBRARY_CONSTRAINT)
             {
@@ -135,7 +135,7 @@ namespace JetBrains.FormatRipper.Dmg
               CS_Blob csb;
               MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
 
-              specialSlotPositions[slotType - 1] = new ComputeHashInfo(0, new[]
+              specialSlotPositions[(uint)slotType - 1] = new ComputeHashInfo(0, new[]
               {
                 new StreamRange(checked(imageRange.Position + (long)signatureOffset + offset), EndianUtil.GetBeU4(csb.length))
               }, 0);
@@ -148,7 +148,7 @@ namespace JetBrains.FormatRipper.Dmg
             MemoryUtil.CopyBytes(scPtr, (byte*)&csbi, sizeof(CS_BlobIndex));
             uint offset = EndianUtil.GetBeU4(csbi.offset);
             var csOffsetPtr = scBuf + offset - sizeof(CS_SuperBlob);
-            uint slotType = EndianUtil.GetBeU4(csbi.type);
+            var slotType = (CSSLOT)EndianUtil.GetBeU4(csbi.type);
             switch (slotType)
             {
               case CSSLOT.CSSLOT_CODEDIRECTORY:

@@ -1,13 +1,14 @@
 using System.Threading.Tasks;
 using JetBrains.FormatRipper.Dmg;
 using JetBrains.SignatureVerifier.Crypt;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.SignatureVerifier.Tests;
 
 public class DmgSignatureVerifierTests
 {
-  private static DmgFile GetDmgFile(string resourceName) => ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData));
+  private static DmgFile GetDmgFile(string resourceName) => TestDataUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream => DmgFile.Parse(stream, DmgFile.Mode.SignatureData));
 
   // @formatter:off
   [TestCase(VerifySignatureStatus.Valid,            "license-signed.dmg")]
@@ -23,7 +24,7 @@ public class DmgSignatureVerifierTests
 
     DmgFile dmgFile = GetDmgFile(resourceName);
 
-    var result = await ResourceUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream =>
+    var result = await TestDataUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream =>
     {
       DmgSignatureVerifier signatureVerifier = new DmgSignatureVerifier(ConsoleLogger.Instance);
 

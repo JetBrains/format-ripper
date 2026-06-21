@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using JetBrains.FormatRipper.Pe;
 using JetBrains.SignatureVerifier.Crypt;
+using JetBrains.Tests;
 using Moq;
 using NUnit.Framework;
 using Org.BouncyCastle.Asn1;
@@ -159,7 +160,7 @@ namespace JetBrains.SignatureVerifier.Tests
 
     private static Stream getPeStream(string peResourceName)
     {
-      return ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream =>
+      return TestDataUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream =>
         {
           var ms = new MemoryStream();
           stream.CopyTo(ms);

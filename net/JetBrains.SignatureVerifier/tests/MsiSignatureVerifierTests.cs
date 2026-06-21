@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using JetBrains.FormatRipper.Compound;
 using JetBrains.SignatureVerifier.Crypt;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.SignatureVerifier.Tests
@@ -20,7 +21,7 @@ namespace JetBrains.SignatureVerifier.Tests
     [Test]
     public async Task VerifySignTest(VerifySignatureStatus expectedResult, string resourceName)
     {
-      var file = ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
+      var file = TestDataUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
         {
           Assert.IsTrue(CompoundFile.Is(stream));
           return CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData | CompoundFile.Mode.ComputeHashInfo);
@@ -30,7 +31,7 @@ namespace JetBrains.SignatureVerifier.Tests
 
       var authenticodeSignatureVerifier = new AuthenticodeSignatureVerifier(ConsoleLogger.Instance);
 
-      var result = await ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName,
+      var result = await TestDataUtil.OpenRead(ResourceCategory.Msi, resourceName,
           async stream => await authenticodeSignatureVerifier.VerifyAsync(file, stream, verificationParams, FileIntegrityVerificationParams.Default));
 
       Assert.AreEqual(expectedResult, result.Status);

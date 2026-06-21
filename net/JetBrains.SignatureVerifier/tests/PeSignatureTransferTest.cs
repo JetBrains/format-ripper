@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using JetBrains.FormatRipper;
 using JetBrains.FormatRipper.Pe;
 using JetBrains.SignatureVerifier.Crypt;
+using JetBrains.Tests;
 using NUnit.Framework;
 using Org.BouncyCastle.Utilities;
 
@@ -22,13 +23,13 @@ public class PeSignatureTransferTest
   [TestCase("HelloWorld4_signed_timestamped.exe", "HelloWorld3_signed.exe")]
   public async Task SignatureShouldBeTransfered(string donor, string acceptor)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.Pe, donor, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
+    var file = TestDataUtil.OpenRead(ResourceCategory.Pe, donor, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
     Assert.NotNull(file.SignatureTransferData);
 
     using MemoryStream acceptorFileStream = new MemoryStream();
 
-    ResourceUtil.OpenRead(ResourceCategory.Pe, acceptor, stream =>
+    TestDataUtil.OpenRead(ResourceCategory.Pe, acceptor, stream =>
     {
       PeSignatureInjector.InjectSignature(stream, acceptorFileStream, file.SignatureTransferData);
       return 0;
@@ -42,11 +43,11 @@ public class PeSignatureTransferTest
 
     Assert.AreEqual(VerifySignatureStatus.Valid, result.Status, "Signature verification failure");
 
-    byte[] signedFileArray = ResourceUtil.OpenRead(ResourceCategory.Pe, donor, stream =>
+    byte[] signedFileArray = TestDataUtil.OpenRead(ResourceCategory.Pe, donor, stream =>
     {
-      byte[] data = new byte[stream.Length];
-      stream.Read(data, 0, data.Length);
-      return data;
+      using MemoryStream data = new MemoryStream();
+      stream.CopyTo(data);
+      return data.ToArray();
     });
 
     byte[] acceptorFileArray = acceptorFileStream.ToArray();
@@ -59,13 +60,13 @@ public class PeSignatureTransferTest
   [TestCase("HelloWorld2_signed.exe", "HelloWorld1.exe")]
   public void SignatureTransferBetweenIncompatibleFilesShouldThrowException(string donor, string acceptor)
   {
-    var file = ResourceUtil.OpenRead(ResourceCategory.Pe, donor, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
+    var file = TestDataUtil.OpenRead(ResourceCategory.Pe, donor, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
     Assert.NotNull(file.SignatureTransferData);
 
     using MemoryStream acceptorFileStream = new MemoryStream();
 
-    ResourceUtil.OpenRead(ResourceCategory.Pe, acceptor, stream =>
+    TestDataUtil.OpenRead(ResourceCategory.Pe, acceptor, stream =>
     {
       Assert.Throws<SignatureInjectionException>(() => PeSignatureInjector.InjectSignature(stream, acceptorFileStream, file.SignatureTransferData));
       return 0;

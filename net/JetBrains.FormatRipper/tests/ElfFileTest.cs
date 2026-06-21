@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using JetBrains.FormatRipper.Elf;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.FormatRipper.Tests
@@ -101,6 +102,7 @@ namespace JetBrains.FormatRipper.Tests
       EM expectedEMachine,
       EF expectedEFlags,
       string? expectedInterpreter,
+      int expectedSymbolCount,
       Program[]? expectedPrograms,
       Section[]? expectedSections,
       Symbol[]? expectedSymbols = null) => new object?[]
@@ -116,6 +118,7 @@ namespace JetBrains.FormatRipper.Tests
           expectedEFlags,
           expectedInterpreter,
           null,
+          expectedSymbolCount,
           expectedPrograms,
           expectedSections,
           expectedSymbols
@@ -132,6 +135,7 @@ namespace JetBrains.FormatRipper.Tests
       EF expectedEFlags,
       string? expectedInterpreter,
       string? expectedUnityScriptingBackend,
+      int expectedSymbolCount,
       Program[]? expectedPrograms,
       Section[]? expectedSections,
       Symbol[]? expectedSymbols = null) => new object?[]
@@ -147,6 +151,7 @@ namespace JetBrains.FormatRipper.Tests
           expectedEFlags,
           expectedInterpreter,
           expectedUnityScriptingBackend,
+          expectedSymbolCount,
           expectedPrograms,
           expectedSections,
           expectedSymbols
@@ -166,11 +171,12 @@ namespace JetBrains.FormatRipper.Tests
       EF expectedEFlags,
       string? expectedInterpreter,
       string? expectedUnityScriptingBackend,
+      int expectedSymbolCount,
       Program[]? expectedPrograms,
       Section[]? expectedSections,
       Symbol[]? expectedSymbols)
     {
-      ResourceUtil.OpenRead(ResourceCategory.Elf, resourceName, stream =>
+      TestDataUtil.OpenRead(ResourceCategory.Elf, resourceName, stream =>
         {
           Assert.IsTrue(ElfFile.Is(stream));
           var file = ElfFile.Parse(stream);
@@ -232,14 +238,16 @@ namespace JetBrains.FormatRipper.Tests
 
           var symSectionIndex = ElfUtil.Find(file.Sections, SHT.SHT_DYNSYM) ?? ElfUtil.Find(file.Sections, SHT.SHT_SYMTAB);
           var symbols = symSectionIndex != null ? ElfUtil.GetSymbols(file, symSectionIndex.Value, file.Sections[symSectionIndex.Value].Link) : new ElfUtil.Symbol[0];
+          Assert.AreEqual(expectedSymbolCount, symbols.Length, "Unexpected symbol count");
 
+          var verifiedSymbols = SymbolUtil.SelectEdges(symbols);
           if (expectedSymbols != null)
           {
-            Assert.AreEqual(expectedSymbols.Length, symbols.Length);
+            Assert.AreEqual(expectedSymbols.Length, verifiedSymbols.Length);
             for (var n = 0; n < expectedSymbols.Length; ++n)
             {
               var expectedSymbol = expectedSymbols[n];
-              var symbol = symbols[n];
+              var symbol = verifiedSymbols[n];
 
               Assert.AreEqual(expectedSymbol.Name, symbol.Name);
               Assert.AreEqual(expectedSymbol.Size, symbol.Size);
@@ -254,7 +262,7 @@ namespace JetBrains.FormatRipper.Tests
             }
           }
           else
-            GenerateSymbolStreamInfos(symbols);
+            GenerateSymbolStreamInfos(verifiedSymbols);
 
           string? unityScriptingBackend = null;
           foreach (var symbol in symbols)
@@ -306,7 +314,7 @@ namespace JetBrains.FormatRipper.Tests
         if (flags == 0)
           return "0";
         var builder = new StringBuilder();
-        foreach (PF phFlag in Enum.GetValues(typeof(PF)))
+        foreach (PF phFlag in Enum.GetValues(typeof(PF))!)
         {
           var n = (uint)phFlag;
           if ((n & n - 1) != 0)
@@ -362,7 +370,7 @@ namespace JetBrains.FormatRipper.Tests
         if (flags == 0)
           return "0";
         var builder = new StringBuilder();
-        foreach (SHF shFlag in Enum.GetValues(typeof(SHF)))
+        foreach (SHF shFlag in Enum.GetValues(typeof(SHF))!)
         {
           var n = (uint)shFlag;
           if ((n & n - 1) != 0)
@@ -381,12 +389,6 @@ namespace JetBrains.FormatRipper.Tests
 
     private static void GenerateSymbolStreamInfos(ICollection<ElfUtil.Symbol> symbolItems)
     {
-      if (symbolItems.Count >= 128)
-      {
-        Console.WriteLine("Symbol count: {0}", symbolItems.Count);
-        return;
-      }
-
       Console.WriteLine("          new SymbolStreamInfo[]");
       Console.WriteLine("            {");
 

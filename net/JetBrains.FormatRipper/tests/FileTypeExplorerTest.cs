@@ -1,4 +1,5 @@
 ﻿using JetBrains.FormatRipper.FileExplorer;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.FormatRipper.Tests
@@ -57,7 +58,7 @@ namespace JetBrains.FormatRipper.Tests
       FileType expectedFileType,
       FileProperties expectedFileProperties)
     {
-      ResourceUtil.OpenRead(category, resourceName, stream =>
+      TestDataUtil.OpenRead(category, resourceName, stream =>
         {
           var (fileType, fileProperties) = FileTypeExplorer.Detect(stream);
           Assert.AreEqual(expectedFileType, fileType);

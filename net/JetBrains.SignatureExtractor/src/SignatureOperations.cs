@@ -44,12 +44,14 @@ public static class SignatureOperations
 
   static SignatureContainer ExtractMachOSignatures(Stream stream)
   {
-    MachOFile parsedFile = MachOFile.Parse(stream, MachOFile.Mode.SignatureData);
+    MachOFile parsedFile = MachOFile.Parse(stream);
 
-    if (parsedFile.Signature == null || parsedFile.Signature.SectionSignatures.Length == 0)
+    var signature = MachOUtil.ReadSignatureTransferData(parsedFile, MachOFile.Mode.SignatureData);
+
+    if (signature == null || signature.SectionSignatures.Length == 0)
       throw new SignatureExtractionException("No signature found");
 
-    return new SignatureContainer(FileType.MachO, parsedFile.Signature, null, null);
+    return new SignatureContainer(FileType.MachO, signature, null, null);
   }
 
   static SignatureContainer ExtractPeSignatures(Stream stream)
@@ -125,7 +127,7 @@ public static class SignatureOperations
     {
       outputStream.Seek(0, SeekOrigin.Begin);
 
-      MachOFile acceptorFile = MachOFile.Parse(outputStream, MachOFile.Mode.SignatureData);
+      MachOFile acceptorFile = MachOFile.Parse(outputStream);
       var verificationParams = new SignatureVerificationParams(null, null, false, false, allowAdhocSignatures: true);
       MachOSignatureVerifier signatureVerifier = new MachOSignatureVerifier(logger: null);
       result = await signatureVerifier.VerifyAsync(acceptorFile, outputStream, verificationParams, FileIntegrityVerificationParams.Default);

@@ -17,17 +17,6 @@
     <ProjectReference Include="..\src\JetBrains.FormatRipper.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\..\data\elf\**\*" LinkBase="Resources\Elf" />
-    <EmbeddedResource Include="..\..\..\data\mach-o\**\*" LinkBase="Resources\MachO" />
-    <EmbeddedResource Include="..\..\..\data\misc\**\*" LinkBase="Resources\Misc" />
-    <EmbeddedResource Include="..\..\..\data\msi\**\*" LinkBase="Resources\Msi" />
-    <EmbeddedResource Include="..\..\..\data\pe\**\*" LinkBase="Resources\Pe" />
-    <EmbeddedResource Include="..\..\..\data\sh\**\*" LinkBase="Resources\Sh" />
-    <EmbeddedResource Include="..\..\..\data\dmg\**\*" LinkBase="Resources\Dmg" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != 'net20' AND '$(TargetFramework)' != 'net30' AND '$(TargetFramework)' != 'net35'">
-    <EmbeddedResource Include="..\..\..\..\data\elf\**\*" LinkBase="Resources\Elf" />
-    <EmbeddedResource Include="..\..\..\..\data\mach-o\**\*" LinkBase="Resources\MachO" />
-    <EmbeddedResource Include="..\..\..\..\data\pe\**\*" LinkBase="Resources\Pe" />
+    <Compile Include="..\..\shared\TestDataUtil.cs" Link="TestDataUtil.cs" />
   </ItemGroup>
 </Project>

@@ -117,10 +117,10 @@ namespace JetBrains.FormatRipper.FileExplorer
             return fileType;
           }
 
-          static bool IsAllHasCodeSignature(IEnumerable<MachOFile.Section> sections)
+          bool IsAllHasCodeSignature(IEnumerable<MachOFile.Section> sections)
           {
             foreach (var section in sections)
-              if (!section.HasSignature)
+              if (!MachOUtil.ReadLoadCommands(section).HasSignature)
                 return false;
             return true;
           }
@@ -137,7 +137,7 @@ namespace JetBrains.FormatRipper.FileExplorer
             };
           if (IsAllHasCodeSignature(fileSections))
             properties |= FileProperties.Signed;
-          if (file.IsFatLittleEndian != null)
+          if (file.FatEndian != null)
             properties |= FileProperties.MultiArch;
           return true;
         }

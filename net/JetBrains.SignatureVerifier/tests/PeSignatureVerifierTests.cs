@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using JetBrains.FormatRipper.Pe;
 using JetBrains.SignatureVerifier.Crypt;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.SignatureVerifier.Tests
@@ -38,12 +39,12 @@ namespace JetBrains.SignatureVerifier.Tests
     // @formatter:on
     public async Task VerifySignTest(VerifySignatureStatus expectedResult, string peResourceName, bool allowHashMismatches = false)
     {
-      var file = ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData | PeFile.Mode.ComputeHashInfo));
+      var file = TestDataUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData | PeFile.Mode.ComputeHashInfo));
       var verificationParams = new SignatureVerificationParams(null, null, false, false);
 
       var authenticodeSignatureVerifier = new AuthenticodeSignatureVerifier(ConsoleLogger.Instance);
 
-      var result = await ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName,
+      var result = await TestDataUtil.OpenRead(ResourceCategory.Pe, peResourceName,
         async stream => await authenticodeSignatureVerifier.VerifyAsync(file, stream, verificationParams, new FileIntegrityVerificationParams(allowHashMismatches)));
 
       Assert.AreEqual(expectedResult, result.Status);
@@ -59,10 +60,10 @@ namespace JetBrains.SignatureVerifier.Tests
       string timestampRootCertStoreResourceName,
       string peResourceName)
     {
-      var file = ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
+      var file = TestDataUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
-      var result = await ResourceUtil.OpenRead(ResourceCategory.Pe, codesignRootCertStoreResourceName, codeSignRootsStream =>
-        ResourceUtil.OpenRead(ResourceCategory.Pe, timestampRootCertStoreResourceName, timeStampRootsStream =>
+      var result = await TestDataUtil.OpenRead(ResourceCategory.Pe, codesignRootCertStoreResourceName, codeSignRootsStream =>
+        TestDataUtil.OpenRead(ResourceCategory.Pe, timestampRootCertStoreResourceName, timeStampRootsStream =>
           {
             var verificationParams = new SignatureVerificationParams(
               codeSignRootsStream,
@@ -145,11 +146,11 @@ namespace JetBrains.SignatureVerifier.Tests
       string timestampRootCertStoreResourceName,
       DateTime time)
     {
-      var file = ResourceUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
+      var file = TestDataUtil.OpenRead(ResourceCategory.Pe, peResourceName, stream => PeFile.Parse(stream, PeFile.Mode.SignatureData));
 
       return
-        ResourceUtil.OpenRead(ResourceCategory.Pe, codesignRootCertStoreResourceName, codeSignRootsStream =>
-          ResourceUtil.OpenRead(ResourceCategory.Pe, timestampRootCertStoreResourceName, timeStampRootsStream =>
+        TestDataUtil.OpenRead(ResourceCategory.Pe, codesignRootCertStoreResourceName, codeSignRootsStream =>
+          TestDataUtil.OpenRead(ResourceCategory.Pe, timestampRootCertStoreResourceName, timeStampRootsStream =>
             {
               var verificationParams = new SignatureVerificationParams(
                 codeSignRootsStream,

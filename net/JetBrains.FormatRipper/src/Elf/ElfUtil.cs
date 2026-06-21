@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using JetBrains.FormatRipper.Elf.Impl;
 using JetBrains.FormatRipper.Impl;
 
@@ -16,14 +14,7 @@ namespace JetBrains.FormatRipper.Elf
         _ => throw new FormatException("Invalid ELF data encoding")
       };
 
-    public static string ReadStringZ(Stream stream)
-    {
-      var buffer = new List<byte>(16);
-      for (int b; (b = stream.ReadByte()) > 0;)
-        buffer.Add((byte)b);
-      var blob = buffer.ToArray();
-      return new string(Encoding.UTF8.GetChars(blob, 0, blob.Length));
-    }
+    public static string ReadStringZ(Stream stream) => StreamUtil.ReadStringZ(stream);
 
     public static ushort? Find(ElfFile.Program[] programs, PT type)
     {

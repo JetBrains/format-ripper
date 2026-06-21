@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using JetBrains.FormatRipper.Compound;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.FormatRipper.Tests
@@ -145,7 +146,7 @@ namespace JetBrains.FormatRipper.Tests
       string expectedOrderedIncludeRanges,
       StreamInfo[] expectedStreams)
     {
-      ResourceUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
+      TestDataUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
         {
           Assert.IsTrue(CompoundFile.Is(stream));
           var file = CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData | CompoundFile.Mode.ComputeHashInfo, (_, _, _) => true);

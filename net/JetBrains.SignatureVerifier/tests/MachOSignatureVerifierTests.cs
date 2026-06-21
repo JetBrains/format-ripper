@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.FormatRipper.MachO;
 using JetBrains.SignatureVerifier.Crypt;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.SignatureVerifier.Tests
@@ -12,8 +13,6 @@ namespace JetBrains.SignatureVerifier.Tests
   public class MachOSignatureVerifierTests
   {
     private const string apple_root = "apple_root.p7b";
-
-    private static MachOFile GetMachOFile(string resourceName) => ResourceUtil.OpenRead(ResourceCategory.MachO, resourceName, stream => MachOFile.Parse(stream, MachOFile.Mode.SignatureData | MachOFile.Mode.ComputeHashInfo));
 
     [TestCase(VerifySignatureStatus.Valid, "JetBrains.Profiler.PdbServer")]
     [TestCase(VerifySignatureStatus.Valid, "cat")]
@@ -33,10 +32,9 @@ namespace JetBrains.SignatureVerifier.Tests
     {
       var verificationParams = new SignatureVerificationParams(buildChain: false, withRevocationCheck: false);
 
-      MachOFile machOFile = GetMachOFile(machoResourceName);
-
-      var result = await ResourceUtil.OpenRead(ResourceCategory.MachO, machoResourceName, stream =>
+      var result = await TestDataUtil.OpenRead(ResourceCategory.MachO, machoResourceName, stream =>
       {
+        MachOFile machOFile = MachOFile.Parse(stream);
         MachOSignatureVerifier signatureVerifier = new MachOSignatureVerifier(ConsoleLogger.Instance);
 
         return signatureVerifier.VerifyAsync(machOFile, stream, verificationParams, FileIntegrityVerificationParams.Default);
@@ -52,10 +50,9 @@ namespace JetBrains.SignatureVerifier.Tests
     {
       var verificationParams = new SignatureVerificationParams(buildChain: false, withRevocationCheck: false, allowAdhocSignatures: true);
 
-      MachOFile machOFile = GetMachOFile(machoResourceName);
-
-      var result = await ResourceUtil.OpenRead(ResourceCategory.MachO, machoResourceName, stream =>
+      var result = await TestDataUtil.OpenRead(ResourceCategory.MachO, machoResourceName, stream =>
       {
+        MachOFile machOFile = MachOFile.Parse(stream);
         MachOSignatureVerifier signatureVerifier = new MachOSignatureVerifier(ConsoleLogger.Instance);
 
         return signatureVerifier.VerifyAsync(machOFile, stream, verificationParams, FileIntegrityVerificationParams.Default);
@@ -67,8 +64,15 @@ namespace JetBrains.SignatureVerifier.Tests
     [TestCase("libSystem.Net.Security.Native.dylib")]
     public void VerifySignInvalidSignatureFormat(string machoResourceName)
     {
-      foreach (var section in GetMachOFile(machoResourceName).Sections)
-        Assert.That(() => SignedMessage.CreateInstance(section.SignatureData), Throws.Exception, "Invalid signature format");
+      TestDataUtil.OpenRead(ResourceCategory.MachO, machoResourceName, stream =>
+      {
+        foreach (var section in MachOFile.Parse(stream).Sections)
+        {
+          var loadCommandsInfo = MachOUtil.ReadLoadCommands(section, MachOFile.Mode.SignatureData);
+          Assert.That(() => SignedMessage.CreateInstance(loadCommandsInfo.SignatureData), Throws.Exception, "Invalid signature format");
+        }
+        return 0;
+      });
     }
 
     [TestCase(VerifySignatureStatus.Valid, apple_root, "JetBrains.Profiler.PdbServer")]
@@ -85,15 +89,15 @@ namespace JetBrains.SignatureVerifier.Tests
       string codesignRootCertStoreResourceName,
       string machOResourceName)
     {
-      var results = ResourceUtil.OpenRead(ResourceCategory.MachO, codesignRootCertStoreResourceName, codeSignRootsStream =>
+      var results = TestDataUtil.OpenRead(ResourceCategory.MachO, codesignRootCertStoreResourceName, codeSignRootsStream =>
         {
           var verificationParams = new SignatureVerificationParams(codeSignRootsStream, withRevocationCheck: false);
 
-          return ResourceUtil.OpenRead(ResourceCategory.MachO, machOResourceName, stream =>
+          return TestDataUtil.OpenRead(ResourceCategory.MachO, machOResourceName, stream =>
           {
             MachOSignatureVerifier signatureVerifier = new MachOSignatureVerifier(ConsoleLogger.Instance);
 
-            return GetMachOFile(machOResourceName).Sections
+            return MachOFile.Parse(stream).Sections
               .Select(async section =>
               {
                 return await signatureVerifier.VerifyAsync(section, stream, verificationParams, FileIntegrityVerificationParams.Default);
@@ -116,7 +120,7 @@ namespace JetBrains.SignatureVerifier.Tests
       string machOResourceName,
       DateTime validationTime)
     {
-      var results = ResourceUtil.OpenRead(ResourceCategory.MachO, codesignRootCertStoreResourceName, codeSignRootsStream =>
+      var results = TestDataUtil.OpenRead(ResourceCategory.MachO, codesignRootCertStoreResourceName, codeSignRootsStream =>
         {
           var verificationParams = new SignatureVerificationParams(
             codeSignRootsStream,
@@ -124,11 +128,11 @@ namespace JetBrains.SignatureVerifier.Tests
             signatureValidationTimeMode: SignatureValidationTimeMode.SignValidationTime,
             signatureValidationTime: validationTime);
 
-          return ResourceUtil.OpenRead(ResourceCategory.MachO, machOResourceName, stream =>
+          return TestDataUtil.OpenRead(ResourceCategory.MachO, machOResourceName, stream =>
           {
             MachOSignatureVerifier signatureVerifier = new MachOSignatureVerifier(ConsoleLogger.Instance);
 
-            return GetMachOFile(machOResourceName).Sections
+            return MachOFile.Parse(stream).Sections
               .Select(async section =>
               {
                 return await signatureVerifier.VerifyAsync(section, stream, verificationParams, FileIntegrityVerificationParams.Default);

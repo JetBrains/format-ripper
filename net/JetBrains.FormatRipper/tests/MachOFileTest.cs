@@ -1,13 +1,17 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using JetBrains.FormatRipper.MachO;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.FormatRipper.Tests
 {
   [TestFixture]
-  public sealed class MachOFileTest
+  public sealed partial class MachOFileTest
   {
     [Flags]
     public enum Options
@@ -18,139 +22,259 @@ namespace JetBrains.FormatRipper.Tests
       HasEntitlementsDer = 0x8,
     }
 
-    public sealed class Section
+    public sealed class Symbol
     {
-      public readonly bool IsLittleEndian;
-      public readonly CPU_TYPE CpuType;
-      public readonly CPU_SUBTYPE CpuSubType;
-      public readonly MH_FileType MhFileType;
-      public readonly Options Options;
-      public readonly string? CodeDirectoryBlobHash;
-      public readonly string? CmsDataHash;
-      public readonly string OrderedIncludeRanges;
-      public readonly string? EntitlementsHash;
-      public readonly string? EntitlementsDerHash;
+      public readonly string? Hash;
+      public readonly ulong Value;
+      public readonly byte SectionIndex;
+      public readonly string Name;
+      public readonly NT Type;
+      public readonly ND Desc;
 
-      internal Section(
-        bool isLittleEndian,
-        CPU_TYPE cpuType,
-        CPU_SUBTYPE cpuSubType,
-        MH_FileType mhFileType,
-        Options options,
-        string? codeDirectoryBlobHash,
-        string? cmsDataHash,
-        string orderedIncludeRanges,
-        string? entitlementsHash,
-        string? entitlementsDerHash)
+      internal Symbol(string? hash, ulong value, byte sectionIndex, string name, NT type, ND desc)
       {
-        IsLittleEndian = isLittleEndian;
-        CpuType = cpuType;
-        CpuSubType = cpuSubType;
-        MhFileType = mhFileType;
-        Options = options;
-        CodeDirectoryBlobHash = codeDirectoryBlobHash;
-        CmsDataHash = cmsDataHash;
-        OrderedIncludeRanges = orderedIncludeRanges;
-        EntitlementsHash = entitlementsHash;
-        EntitlementsDerHash = entitlementsDerHash;
+        Hash = hash;
+        Value = value;
+        SectionIndex = sectionIndex;
+        Name = name;
+        Type = type;
+        Desc = desc;
+      }
+
+      public override string ToString() => $"{Hash}, 0x{Value:X}, {SectionIndex}, \"{Name}\", 0x{(byte)Type:X}, 0x{(ushort)Desc:X}";
+    }
+
+    public sealed class Command
+    {
+      public readonly string Hash;
+      public readonly uint Size;
+      public readonly LC Type;
+
+      internal Command(string hash, uint size, LC type)
+      {
+        Hash = hash;
+        Size = size;
+        Type = type;
       }
     }
 
-    private static object?[] MakeSource(string filename, bool? isFatLittleEndian, params Section[] sections) => new object?[] { filename, isFatLittleEndian, sections };
+    public sealed class DataSection
+    {
+      public readonly string? Hash;
+      public readonly ulong Address;
+      public readonly ulong Size;
+      public readonly string SectionName;
+      public readonly string SegmentName;
+      public readonly SEC Flags;
 
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
-    private static readonly object?[] Sources =
+      internal DataSection(string? hash, ulong address, ulong size, string sectionName, string segmentName, SEC flags)
       {
-        // @formatter:off
-        MakeSource("addhoc"                               , null , new Section(true , CPU_TYPE.CPU_TYPE_ARM64  , CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL                                 , MH_FileType.MH_EXECUTE, Options.HasSignedBlob                                                                            , "025EB09F62E679E957E46A4AD373229F7C27C47B26B08FA40EA31A1A7B542420B914A510CE134AF352882164266E74F4", null                                                                                              , "0;0;[0:10],[18:3C8],[3E8:8],[3F8:180],[588:BB88]"      , null                                                                                              , null)),
-        MakeSource("cat"                                  , false, new Section(true , CPU_TYPE.CPU_TYPE_X86_64 , CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL                                , MH_FileType.MH_EXECUTE, Options.HasSignedBlob | Options.HasCmsBlob                                                       , "B5E1E4A45BF997C6BDB6D1716BCAE279B62B36B1FCB07E64183BC209F5E2FD4DBE8A759ECB1FB5D44B6678E222E4E4A4", "6BC01E731786AA9C85EAB2A559C4BFEE527EE8F425A4E822BECC9BB9EF8F51F1641C5FB8AB7DB1F524139441AA43191A", "4000;0;[0:10],[18:4B8],[4D8:8],[4E8:180],[678:C118]"   , null                                                                                              , null),
-                                                                   new Section(true , CPU_TYPE.CPU_TYPE_ARM64  , CPU_SUBTYPE.CPU_SUBTYPE_ARM64_E | CPU_SUBTYPE.CPU_SUBTYPE_LIB64   , MH_FileType.MH_EXECUTE, Options.HasSignedBlob | Options.HasCmsBlob                                                       , "2E4DCB03B2CEB5FB1349DBD8432750C33E6718CED1F60D9833BCF06B76105379CCE849CCE52DD45EE32D10EEF90EB9D1", "E614F32D5B5D1DAA208BFB3D9C1931ACEE72CC3EBE0AB29F0058CA45781539C60DAFFB6AA2EE3455A235FE158721F64E", "14000;0;[0:10],[18:418],[438:8],[448:180],[5D8:80D8]"  , null                                                                                              , null)),
-        MakeSource("chmod.ppc64"                          , null , new Section(false, CPU_TYPE.CPU_TYPE_POWERPC, CPU_SUBTYPE.CPU_SUBTYPE_POWERPC_ALL                               , MH_FileType.MH_EXECUTE, 0                                                                                                , null                                                                                              , null                                                                                              , "0;C;[0:10],[18:370],[38C:4],[394:2B8],[65C:3208]"      , null                                                                                              , null)),
-        MakeSource("env-wrapper.x64"                      , null , new Section(true , CPU_TYPE.CPU_TYPE_X86_64 , CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL | CPU_SUBTYPE.CPU_SUBTYPE_LIB64, MH_FileType.MH_EXECUTE, Options.HasSignedBlob | Options.HasCmsBlob | Options.HasEntitlements                             , "99A55C919491A9B604DF28EABBAFE597A8C596C84E9CCC8FD2526107A9537983F19E08E4A3AC6A629DB1893159001159", "C2B4E1CD34B73AE1352473ADF9F88C8F37F38A0371A8100FF3D4D8358C8A8A8CB22CF16BC1B405BD3A20256E61E4E92E", "0;0;[0:10],[18:380],[3A0:8],[3B0:170],[530:1D10]"      , "3EB06BCE5ABE8C6D8DA54C91A62E03DA5F31172CBF9E097CBA5E156B233754401F12B3DA15A51EF0455B5D29C0D6EAAC", null)),
-        MakeSource("fat.bundle"                           , false, new Section(true , CPU_TYPE.CPU_TYPE_I386   , CPU_SUBTYPE.CPU_SUBTYPE_I386_ALL                                  , MH_FileType.MH_BUNDLE , 0                                                                                                , null                                                                                              , null                                                                                              , "1000;8;[0:10],[18:E0],[FC:4],[104:114],[228:E20]"      , null                                                                                              , null),
-                                                                   new Section(true , CPU_TYPE.CPU_TYPE_X86_64 , CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL                                , MH_FileType.MH_BUNDLE , 0                                                                                                , null                                                                                              , null                                                                                              , "3000;8;[0:10],[18:160],[180:8],[190:118],[2B8:DA0]"    , null                                                                                              , null)),
-        MakeSource("fat.dylib"                            , false, new Section(true , CPU_TYPE.CPU_TYPE_X86_64 , CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL                                , MH_FileType.MH_DYLIB  , 0                                                                                                , null                                                                                              , null                                                                                              , "1000;0;[0:10],[18:160],[180:8],[190:140],[2E0:D70]"    , null                                                                                              , null),
-                                                                   new Section(true , CPU_TYPE.CPU_TYPE_I386   , CPU_SUBTYPE.CPU_SUBTYPE_I386_ALL                                  , MH_FileType.MH_DYLIB  , 0                                                                                                , null                                                                                              , null                                                                                              , "3000;C;[0:10],[18:E0],[FC:4],[104:13C],[250:DF4]"      , null                                                                                              , null)),
-        MakeSource("fsnotifier"                           , false, new Section(true , CPU_TYPE.CPU_TYPE_X86_64 , CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL                                , MH_FileType.MH_EXECUTE, 0                                                                                                , null                                                                                              , null                                                                                              , "4000;8;[0:10],[18:4C0],[4E0:8],[4F0:240],[740:8258]"   , null                                                                                              , null),
-                                                                   new Section(true , CPU_TYPE.CPU_TYPE_ARM64  , CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL                                 , MH_FileType.MH_EXECUTE, Options.HasSignedBlob                                                                            , "5CDCC9053E5F2E0581DA1B5EA926EB2A4B9C389324ADDAE416A0C938DB2436DE1C87422DF8A4A71C6109B7BB4BB19745", null                                                                                              , "10000;0;[0:10],[18:468],[488:8],[498:250],[6F8:C2E8]"  , null                                                                                              , null)),
-        MakeSource("JetBrains.Profiler.PdbServer"         , null , new Section(true , CPU_TYPE.CPU_TYPE_X86_64 , CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL | CPU_SUBTYPE.CPU_SUBTYPE_LIB64, MH_FileType.MH_EXECUTE, Options.HasSignedBlob | Options.HasCmsBlob | Options.HasEntitlements                             , "D893A78E3ED66133914AB5BF1C70FBBC26DA0D008E59F84064250C417781CD8D3DA904FCB62D97002C1BED15580851EE", "86D3E5693F0528858A18CBCE2773BB0A348071D40F59459EB8ACB02086C2F2805B7D58B4D65CB65A187EA584AF6A0C2A", "0;0;[0:10],[18:600],[620:8],[630:280],[8C0:19DAE0]"    , "BC11CE9A219A7C5A0EB56F343CA6699829D63CC3C743CA2C64EBA351D02434411B41BBF90045DCCC06A289A964BFCBF2", null)),
-        MakeSource("libhostfxr.dylib"                     , null , new Section(true , CPU_TYPE.CPU_TYPE_X86_64 , CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL                                , MH_FileType.MH_DYLIB  , Options.HasSignedBlob | Options.HasCmsBlob                                                       , "23BA89AC8310F343E691757AE45A4AA60BFDD60214E86D02F41BC2186E47F5C9FFADAE08B04724C736460AF870F4A836", "E2D2A5D0815B8EB03175AB74DB0984C17BC7BBB51416DA9BD055099AB1BFA4411F868133A56A4614518315CA5C46E40D", "0;0;[0:10],[18:608],[628:8],[638:198],[7E0:661F0]"     , null                                                                                              , null)),
-        MakeSource("libMonoSupportW.x64.dylib"            , null , new Section(true , CPU_TYPE.CPU_TYPE_X86_64 , CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL                                , MH_FileType.MH_DYLIB  , Options.HasSignedBlob | Options.HasCmsBlob | Options.HasEntitlements                             , "259BBB50C214B7CD7C8CD38B2E41916ECAB5A1A21875D719CC7CF2DFB9957D9507DCE16EAD39F17AC231CEA3A1D42F59", "A6342A89E763C7223ED91ED95FECBA8B42BD97759C87ABC5E79B2E44F5184EAE36E83F3F112ADD83A2483D4D76408D20", "0;0;[0:10],[18:4C8],[4E8:8],[4F8:1F8],[700:2BBE0]"     , "3EB06BCE5ABE8C6D8DA54C91A62E03DA5F31172CBF9E097CBA5E156B233754401F12B3DA15A51EF0455B5D29C0D6EAAC", null)),
-        MakeSource("libSystem.Net.Security.Native.dylib"  , null , new Section(true , CPU_TYPE.CPU_TYPE_ARM64  , CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL                                 , MH_FileType.MH_DYLIB  , Options.HasSignedBlob | Options.HasCmsBlob                                                       , "11879D3D604B604D2D7132EA9AA6E51E92E44BFE6C6675402888B5A459D7E473AD410EDA26F3E09FEDAA597CAC7BBD05", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", "0;0;[0:10],[18:380],[3A0:8],[3B0:1E0],[5A0:C7C0]"      , null                                                                                              , null)),
-        MakeSource("x64.bundle"                           , null , new Section(true , CPU_TYPE.CPU_TYPE_X86_64 , CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL                                , MH_FileType.MH_BUNDLE , 0                                                                                                , null                                                                                              , null                                                                                              , "0;8;[0:10],[18:160],[180:8],[190:118],[2B8:DA0]"       , null                                                                                              , null)),
-        MakeSource("x64.dylib"                            , null , new Section(true , CPU_TYPE.CPU_TYPE_X86_64 , CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL                                , MH_FileType.MH_DYLIB  , 0                                                                                                , null                                                                                              , null                                                                                              , "0;0;[0:10],[18:160],[180:8],[190:140],[2E0:D70]"       , null                                                                                              , null)),
-        MakeSource("x86.bundle"                           , null , new Section(true , CPU_TYPE.CPU_TYPE_I386   , CPU_SUBTYPE.CPU_SUBTYPE_I386_ALL                                  , MH_FileType.MH_BUNDLE , 0                                                                                                , null                                                                                              , null                                                                                              , "0;8;[0:10],[18:E0],[FC:4],[104:114],[228:E20]"         , null                                                                                              , null)),
-        MakeSource("x86.dylib"                            , null , new Section(true , CPU_TYPE.CPU_TYPE_I386   , CPU_SUBTYPE.CPU_SUBTYPE_I386_ALL                                  , MH_FileType.MH_DYLIB  , 0                                                                                                , null                                                                                              , null                                                                                              , "0;C;[0:10],[18:E0],[FC:4],[104:13C],[250:DF4]"         , null                                                                                              , null)),
-        MakeSource("libclang_rt.asan_iossim_dynamic.dylib", false, new Section(true , CPU_TYPE.CPU_TYPE_I386   , CPU_SUBTYPE.CPU_SUBTYPE_I386_ALL                                  , MH_FileType.MH_DYLIB  , Options.HasSignedBlob | Options.HasCmsBlob                                                       , "1771EDC81D62DB2B2CE6EF1BAE1816D482C103BA23D34DC347E3EFE5953A113A6665B893370E7CFCE487A5E3C841010B", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", "4000;0;[0:10],[18:48C],[4A8:4],[4B0:200],[6C0:E0780]"  , null                                                                                              , null),
-                                                                   new Section(true , CPU_TYPE.CPU_TYPE_X86_64 , CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL                                , MH_FileType.MH_DYLIB  , Options.HasSignedBlob | Options.HasCmsBlob                                                       , "9DB34454E4A80EF9849C850249759DE7BA46ADFF9FCEC765A985BF74363104EA59166CC58208FE32F5EB7BC074A7D430", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", "F0000;0;[0:10],[18:5B8],[5D8:8],[5E8:208],[800:EEFF0]" , null                                                                                              , null),
-                                                                   new Section(true , CPU_TYPE.CPU_TYPE_ARM64  , CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL                                 , MH_FileType.MH_DYLIB  , Options.HasSignedBlob | Options.HasCmsBlob                                                       , "DEE34BB522EE25E88D8CE98D0174BC985F9CEBB83A4DA8C09C8164D2E311FB0AE02BC65A9B58E287468E027971F916EB", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", "1E8000;0;[0:10],[18:5B8],[5D8:8],[5E8:220],[818:E9088]", null                                                                                              , null)),
-        MakeSource("libclang_rt.asan_ios_dynamic.dylib"   , false, new Section(true , CPU_TYPE.CPU_TYPE_ARM    , CPU_SUBTYPE.CPU_SUBTYPE_ARM_V7                                    , MH_FileType.MH_DYLIB  , Options.HasSignedBlob | Options.HasCmsBlob                                                       , "E82E90917F5C554C12E2EB3D7E39C5522FB233BC3D4EA37508E5F200C4000F0FAE10828CE0E81F202F6E85C1910A63CF", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", "4000;0;[0:10],[18:4D0],[4EC:4],[4F4:210],[714:BDB3C]"  , null                                                                                              , null),
-                                                                   new Section(true , CPU_TYPE.CPU_TYPE_ARM    , CPU_SUBTYPE.CPU_SUBTYPE_ARM_V7S                                   , MH_FileType.MH_DYLIB  , Options.HasSignedBlob | Options.HasCmsBlob                                                       , "6AAB394CA282E8838774C0BE0D73BEB6A16FB21561599C5CD6A9C7EAE29CE73E317ABCE032C997B825DE89D754D87B17", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", "CC000;0;[0:10],[18:4D0],[4EC:4],[4F4:210],[714:C1AEC]" , null                                                                                              , null),
-                                                                   new Section(true , CPU_TYPE.CPU_TYPE_ARM    , CPU_SUBTYPE.CPU_SUBTYPE_ARM_V7K                                   , MH_FileType.MH_DYLIB  , Options.HasSignedBlob | Options.HasCmsBlob                                                       , "844CF546207CBB6F191838F50E6B98225348224BD031D008F00FFD4D371402C545E59A84E41E6946509D7CB373CA31A2", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", "198000;0;[0:10],[18:558],[574:4],[57C:210],[79C:C1974]", null                                                                                              , null),
-                                                                   new Section(true , CPU_TYPE.CPU_TYPE_ARM64  , CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL                                 , MH_FileType.MH_DYLIB  , Options.HasSignedBlob | Options.HasCmsBlob                                                       , "EB4B9910F8BD4988D7C23B06CFD1E695889B66C9E517636C83E3E7530DE774D2F9250383581A4E84017191D43E4B910B", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", "264000;0;[0:10],[18:658],[678:8],[688:220],[8B8:E91D8]", null                                                                                              , null)),
-        MakeSource("TestApp_signed_with_entitlements_der" , null , new Section(true , CPU_TYPE.CPU_TYPE_ARM64  , CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL                                 , MH_FileType.MH_EXECUTE, Options.HasSignedBlob | Options.HasCmsBlob | Options.HasEntitlements | Options.HasEntitlementsDer, "227D0BAE1D7478664C77DF40B40BC3B2DC202A92BBE45C37E250EC8E1C60A7E625DDBEE10C3C052ECFBCF8709EC6C019", "3B3C5240C29ED3A89DB8CC44B2A1F4163E974059DA032C5AB088EE677669D91BB8C4F2ABEBD41922264772007B855D63", "0;0;[0:10],[18:5F8],[618:8],[628:1B0],[7E8:18EF8]"     , "4F2269BC47B964BE340F1D84D33F74F3273A94DAE3D9D81109EA732DC6C9A841F866FE0BDDA5BFADC8FFF816EB991054", "7E9C32B43A70476E9A96E1878CB2FFEFD5608DA7F39E2711369FA5EA253E0F57DF173A3A37D09CBEE9756B6CFDE1FC2B")),
-        // @formatter:on[
+        Hash = hash;
+        Address = address;
+        Size = size;
+        SectionName = sectionName;
+        SegmentName = segmentName;
+        Flags = flags;
+      }
+
+      public override string ToString() => $"{Hash}, 0x{Address:X}, {Size}, \"{SectionName}\", \"{SegmentName}\", 0x{(uint)Flags:X}";
+    }
+
+    public sealed class Section
+    {
+      public readonly string Hash;
+      public readonly MachOFile.Endian Endian;
+      public readonly CPU_TYPE CpuType;
+      public readonly CPU_SUBTYPE CpuSubType;
+      public readonly MH_FileType MhFileType;
+      public readonly MH_Flags MhFlags;
+      public readonly Options Options;
+      public readonly string? CodeDirectoryBlobHash;
+      public readonly string? CmsDataHash;
+      public readonly string? EntitlementsHash;
+      public readonly string? EntitlementsDerHash;
+      public readonly int SymbolCount;
+      public readonly Command[] Commands;
+      public readonly DataSection[]? DataSections;
+      public readonly Symbol[]? Symbols;
+
+      internal Section(
+        string hash,
+        MachOFile.Endian endian,
+        CPU_TYPE cpuType,
+        CPU_SUBTYPE cpuSubType,
+        MH_FileType mhFileType,
+        MH_Flags mhFlags,
+        Options options,
+        string? codeDirectoryBlobHash,
+        string? cmsDataHash,
+        string? entitlementsHash,
+        string? entitlementsDerHash,
+        int symbolCount,
+        Command[] commands,
+        DataSection[]? dataSections,
+        Symbol[]? symbols)
+      {
+        Hash = hash;
+        Endian = endian;
+        CpuType = cpuType;
+        CpuSubType = cpuSubType;
+        MhFileType = mhFileType;
+        MhFlags = mhFlags;
+        Options = options;
+        CodeDirectoryBlobHash = codeDirectoryBlobHash;
+        CmsDataHash = cmsDataHash;
+        EntitlementsHash = entitlementsHash;
+        EntitlementsDerHash = entitlementsDerHash;
+        SymbolCount = symbolCount;
+        Commands = commands;
+        DataSections = dataSections;
+        Symbols = symbols;
+      }
+    }
+
+    private static object?[] MakeSource(
+      string filename,
+      Section section) => new object?[]
+      {
+        false,
+        filename,
+        null,
+        null,
+        new[] { section }
+      };
+
+    private static object?[] MakeSource(
+      string filename,
+      MachOFile.Endian fatEndian,
+      params Section[] sections) => new object?[]
+      {
+        false,
+        filename,
+        fatEndian,
+        null,
+        sections
+      };
+
+    private static object?[] MakeSource(
+      string filename,
+      string? expectedUnityScriptingBackend,
+      MachOFile.Endian fatEndian,
+      params Section[] sections) => new object?[]
+      {
+        false,
+        filename,
+        fatEndian,
+        expectedUnityScriptingBackend,
+        sections
+      };
+
+    private static object?[] MakeOptionalSource(
+      string filename,
+      string? expectedUnityScriptingBackend,
+      Section section) => new object?[]
+      {
+        true,
+        filename,
+        null,
+        expectedUnityScriptingBackend,
+        new[] { section }
+      };
+
+    private static object?[] MakeOptionalSource(
+      string filename,
+      string? expectedUnityScriptingBackend,
+      MachOFile.Endian fatEndian,
+      params Section[] sections) => new object?[]
+      {
+        true,
+        filename,
+        fatEndian,
+        expectedUnityScriptingBackend,
+        sections
       };
 
     [TestCaseSource(typeof(MachOFileTest), nameof(Sources))]
     [Test]
     public void Test(
+      bool canIgnoreMissingResource,
       string resourceName,
-      bool? expectedIsFatLittleEndian,
+      MachOFile.Endian? expectedFatEndian,
+      string? expectedUnityScriptingBackend,
       Section[] expectedSections)
     {
-      ResourceUtil.OpenRead(ResourceCategory.MachO, resourceName, stream =>
+      TestDataUtil.OpenRead(ResourceCategory.MachO, resourceName, stream =>
         {
           Assert.IsTrue(MachOFile.Is(stream));
-          var file = MachOFile.Parse(stream, MachOFile.Mode.SignatureData | MachOFile.Mode.ComputeHashInfo);
+          var file = MachOFile.Parse(stream);
 
-          Assert.AreEqual(expectedIsFatLittleEndian, file.IsFatLittleEndian);
-          Assert.AreEqual(expectedSections.Length, file.Sections.Length);
-          var fileSections = file.Sections;
-          for (var n = 0; n < expectedSections.Length; n++)
+          var sections = file.Sections;
+          Assert.AreEqual(expectedFatEndian, file.FatEndian);
+          Assert.AreEqual(expectedSections.Length, sections.Length);
+
+          string? unityScriptingBackend = null;
+          for (var n = 0; n < sections.Length; n++)
           {
+            var section = sections[n];
             var expectedSection = expectedSections[n];
-            var fileSection = fileSections[n];
-            var indexMsg = $"Index {n}";
-            Assert.AreEqual(expectedSection.IsLittleEndian, fileSection.IsLittleEndian, indexMsg);
-            Assert.AreEqual(expectedSection.CpuType, fileSection.CpuType, indexMsg);
-            Assert.AreEqual(expectedSection.CpuSubType, fileSection.CpuSubType, $"{indexMsg}, expected 0x{expectedSection.CpuSubType:X}, but was 0x{fileSection.CpuSubType:X}");
-            Assert.AreEqual(expectedSection.MhFileType, fileSection.MhFileType, indexMsg);
+
+            Assert.AreEqual(expectedSection.Hash, CalculateStreamHash384(() => section.CreateStream()));
+            Assert.AreEqual(expectedSection.Endian, section.Endian);
+            Assert.AreEqual(expectedSection.CpuType, section.CpuType);
+            Assert.AreEqual(expectedSection.CpuSubType, section.CpuSubType);
+            Assert.AreEqual(expectedSection.MhFileType, section.MhFileType);
+            Assert.AreEqual(expectedSection.MhFlags, section.MhFlags);
+
+            var expectedCommands = expectedSection.Commands;
+            var commands = section.Commands;
+            Assert.AreEqual(expectedCommands.Length, commands.Length);
+            for (var k = 0; k < expectedCommands.Length; k++)
+            {
+              var expectedCommand = expectedCommands[k];
+              var command = commands[k];
+
+              Assert.AreEqual(expectedCommand.Type, command.Type);
+              Assert.AreEqual(expectedCommand.Size, command.Size);
+
+              var hash = CalculateStreamHash(() => command.CreateStream());
+              Assert.AreEqual(expectedCommand.Hash, hash);
+            }
 
             var hasSignedBlob = (expectedSection.Options & Options.HasSignedBlob) == Options.HasSignedBlob;
             var hasCmsBlob = (expectedSection.Options & Options.HasCmsBlob) == Options.HasCmsBlob;
             var hasEntitlements = (expectedSection.Options & Options.HasEntitlements) == Options.HasEntitlements;
             var hasEntitlementsDer = (expectedSection.Options & Options.HasEntitlementsDer) == Options.HasEntitlementsDer;
 
-            var signedBlob = fileSection.SignatureData.SignedBlob;
-            var cmsBlob = fileSection.SignatureData.CmsBlob;
-            var entitlements = fileSection.Entitlements;
-            var entitlementsDer = fileSection.EntitlementsDer;
+            var loadCommandsInfo = MachOUtil.ReadLoadCommands(section, MachOFile.Mode.SignatureData);
+            var signedBlob = loadCommandsInfo.SignatureData.SignedBlob;
+            var cmsBlob = loadCommandsInfo.SignatureData.CmsBlob;
+            var entitlements = loadCommandsInfo.Entitlements;
+            var entitlementsDer = loadCommandsInfo.EntitlementsDer;
 
-            Assert.AreEqual(hasSignedBlob, fileSection.HasSignature, $"{indexMsg} Options.HashSignedBlob mismatch");
-            Assert.AreEqual(hasSignedBlob, signedBlob != null, $"{indexMsg} Options.HashSignedBlob mismatch");
-            Assert.AreEqual(hasCmsBlob, cmsBlob != null, $"{indexMsg} Options.HasCmsBlob mismatch");
-            Assert.AreEqual(hasEntitlements, entitlements != null, $"{indexMsg} Options.HasEntitlements mismatch");
-            Assert.AreEqual(hasEntitlementsDer, entitlementsDer != null, $"{indexMsg} Options.HasEntitlementsDer mismatch");
+            Assert.AreEqual(hasSignedBlob, loadCommandsInfo.HasSignature);
+            Assert.AreEqual(hasSignedBlob, signedBlob != null);
+            Assert.AreEqual(hasCmsBlob, cmsBlob != null);
+            Assert.AreEqual(hasEntitlements, entitlements != null);
+            Assert.AreEqual(hasEntitlementsDer, entitlementsDer != null);
 
             if (signedBlob != null)
             {
-              Assert.AreEqual((byte)0xFA, signedBlob[0], indexMsg);
-              Assert.AreEqual((byte)0xDE, signedBlob[1], indexMsg);
-              Assert.AreEqual((byte)0x0C, signedBlob[2], indexMsg);
-              Assert.AreEqual((byte)0x02, signedBlob[3], indexMsg);
+              Assert.AreEqual((byte)0xFA, signedBlob[0]);
+              Assert.AreEqual((byte)0xDE, signedBlob[1]);
+              Assert.AreEqual((byte)0x0C, signedBlob[2]);
+              Assert.AreEqual((byte)0x02, signedBlob[3]);
 
               var length = checked((int)(
                 (uint)signedBlob[4] << 24 |
                 (uint)signedBlob[5] << 16 |
                 (uint)signedBlob[6] << 8 |
                 (uint)signedBlob[7] << 0));
-              Assert.AreEqual(length, signedBlob.Length, indexMsg);
+              Assert.AreEqual(length, signedBlob.Length);
 
               byte[] hash;
               using (var hashAlgorithm = SHA384.Create())
                 hash = hashAlgorithm.ComputeHash(signedBlob);
-              Assert.AreEqual(expectedSection.CodeDirectoryBlobHash, HexUtil.ConvertToHexString(hash), indexMsg);
+              Assert.AreEqual(expectedSection.CodeDirectoryBlobHash, HexUtil.ConvertToHexString(hash));
             }
             else
             {
@@ -163,15 +287,10 @@ namespace JetBrains.FormatRipper.Tests
               byte[] hash;
               using (var hashAlgorithm = SHA384.Create())
                 hash = hashAlgorithm.ComputeHash(cmsBlob);
-              Assert.AreEqual(expectedSection.CmsDataHash, HexUtil.ConvertToHexString(hash), indexMsg);
+              Assert.AreEqual(expectedSection.CmsDataHash, HexUtil.ConvertToHexString(hash));
             }
             else
               Assert.IsNull(expectedSection.CmsDataHash);
-
-            var computeHashInfo = fileSection.ComputeHashInfo;
-            Assert.IsNotNull(computeHashInfo, indexMsg);
-            ValidateUtil.Validate(computeHashInfo!, indexMsg);
-            Assert.AreEqual(expectedSection.OrderedIncludeRanges, computeHashInfo!.ToString(), indexMsg);
 
             if (entitlements != null)
             {
@@ -179,10 +298,10 @@ namespace JetBrains.FormatRipper.Tests
               using (var hashAlgorithm = SHA384.Create())
                 hash = hashAlgorithm.ComputeHash(entitlements);
 
-              Assert.AreEqual(expectedSection.EntitlementsHash, HexUtil.ConvertToHexString(hash), indexMsg);
+              Assert.AreEqual(expectedSection.EntitlementsHash, HexUtil.ConvertToHexString(hash));
             }
             else
-              Assert.Null(expectedSection.EntitlementsHash, indexMsg);
+              Assert.Null(expectedSection.EntitlementsHash);
 
             if (entitlementsDer != null)
             {
@@ -190,11 +309,76 @@ namespace JetBrains.FormatRipper.Tests
               using (var hashAlgorithm = SHA384.Create())
                 hash = hashAlgorithm.ComputeHash(entitlementsDer);
 
-              Assert.AreEqual(expectedSection.EntitlementsDerHash, HexUtil.ConvertToHexString(hash), indexMsg);
+              Assert.AreEqual(expectedSection.EntitlementsDerHash, HexUtil.ConvertToHexString(hash));
             }
             else
-              Assert.Null(expectedSection.EntitlementsDerHash, indexMsg);
+              Assert.Null(expectedSection.EntitlementsDerHash);
+
+            var dataSections = MachOUtil.ReadDataSections(section);
+            if (expectedSection.DataSections != null)
+            {
+              var expectedDataSections = expectedSection.DataSections;
+              Assert.AreEqual(expectedDataSections.Length, dataSections.Count, $"Unexpected data section count in the section {n}");
+              for (var k = 0; k < expectedDataSections.Length; ++k)
+                AssertDataSection(expectedDataSections[k], dataSections[k]);
+            }
+            else
+              GenerateDataSectionInfos(dataSections);
+
+            var symbols = new List<MachOUtil.Symbol>(expectedSection.SymbolCount);
+            Assert.IsTrue(MachOUtil.GetSymbols(section, dataSections, symbol =>
+              {
+                symbols.Add(symbol);
+                return true;
+              }));
+            Assert.AreEqual(expectedSection.SymbolCount, symbols.Count, $"Unexpected symbol count in the section {n}");
+
+            var verifiedSymbols = SymbolUtil.SelectEdges(symbols);
+            if (expectedSection.Symbols != null)
+            {
+              var expectedSectionSymbols = expectedSection.Symbols;
+              Assert.AreEqual(expectedSectionSymbols.Length, verifiedSymbols.Length);
+              for (var k = 0; k < expectedSectionSymbols.Length; ++k)
+              {
+                var expectedSymbol = expectedSectionSymbols[k];
+                var symbol = verifiedSymbols[k];
+
+                Assert.AreEqual(expectedSymbol.Name, symbol.Name);
+                Assert.AreEqual(expectedSymbol.Value, symbol.Value, $"Expected 0x{expectedSymbol.Value:X}, but was 0x{symbol.Value:X}");
+                Assert.AreEqual(expectedSymbol.SectionIndex, symbol.SectionIndex);
+                Assert.AreEqual(expectedSymbol.Type, symbol.Type, $"Expected 0x{(byte)expectedSymbol.Type:X}, but was 0x{(byte)symbol.Type:X}");
+                Assert.AreEqual(expectedSymbol.Desc, symbol.Description, $"Expected 0x{(ushort)expectedSymbol.Desc:X}, but was 0x{(ushort)symbol.Description:X}");
+
+                var hash = symbol.CreateStream == null ? null : CalculateStreamHash(() => symbol.CreateStream());
+                Assert.AreEqual(expectedSymbol.Hash, hash);
+              }
+            }
+            else
+              GenerateSymbolInfos(verifiedSymbols);
+
+            if (unityScriptingBackend == null)
+              foreach (var symbol in symbols)
+                if (symbol.Name == UnityUtil.UNITY_SCRIPTING_BACKEND_MACHO_PE_SYMBOL &&
+                    (symbol.Type & (NT.N_STAB | NT.N_TYPE | NT.N_EXT)) == (NT.N_SECT | NT.N_EXT))
+                {
+                  using var dataStream = symbol.CreateStream!();
+                  unityScriptingBackend = MachOUtil.ReadStringZ(dataStream);
+                  break;
+                }
           }
+
+          if (unityScriptingBackend != null)
+            Assert.Contains(unityScriptingBackend, new[]
+              {
+                UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
+                UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE,
+                UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE
+              });
+          Assert.AreEqual(expectedUnityScriptingBackend, unityScriptingBackend);
+        }, str =>
+        {
+          if (canIgnoreMissingResource)
+            Assert.Ignore(str);
         });
     }
 
@@ -203,11 +387,239 @@ namespace JetBrains.FormatRipper.Tests
     [Test]
     public void ErrorTest(string resourceName)
     {
-      ResourceUtil.OpenRead(ResourceCategory.MachO, resourceName, stream =>
+      TestDataUtil.OpenRead(ResourceCategory.MachO, resourceName, stream =>
         {
           Assert.IsFalse(MachOFile.Is(stream));
           Assert.That(() => MachOFile.Parse(stream), Throws.Exception);
         });
+    }
+
+    private const int Sha256HashStringLength = 2 * 256 / 8;
+    private const string @null = "null";
+
+    private static string CalculateStreamHash(Func<Stream> createStream)
+    {
+      using var itemStream = createStream();
+      using var hashAlgorithm = SHA256.Create();
+      return HexUtil.ConvertToHexString(hashAlgorithm.ComputeHash(itemStream));
+    }
+
+    private static string CalculateStreamHash384(Func<Stream> createStream)
+    {
+      using var itemStream = createStream();
+      using var hashAlgorithm = SHA384.Create();
+      return HexUtil.ConvertToHexString(hashAlgorithm.ComputeHash(itemStream));
+    }
+
+    private static void AssertDataSection(DataSection expectedDataSection, MachOUtil.DataSection dataSection)
+    {
+      Assert.AreEqual(expectedDataSection.Address, dataSection.Address, $"Expected 0x{expectedDataSection.Address:X}, but was 0x{dataSection.Address:X}");
+      Assert.AreEqual(expectedDataSection.Size, dataSection.Size);
+      Assert.AreEqual(expectedDataSection.SectionName, dataSection.SectionName);
+      Assert.AreEqual(expectedDataSection.SegmentName, dataSection.SegmentName);
+      Assert.AreEqual(expectedDataSection.Flags, dataSection.Flags, $"Expected 0x{(uint)expectedDataSection.Flags:X}, but was 0x{(uint)dataSection.Flags:X}");
+
+      var hash = dataSection.CreateSection == null ? null : CalculateStreamHash(() => dataSection.CreateSection());
+      Assert.AreEqual(expectedDataSection.Hash, hash);
+    }
+
+    private static void GenerateDataSectionInfos(ICollection<MachOUtil.DataSection> dataSectionItems)
+    {
+      Console.WriteLine("            new DataSection[]");
+      Console.WriteLine("              {");
+
+      var maxHashLength = dataSectionItems.Select(x => x.CreateSection == null ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
+      var maxAddressLength = dataSectionItems.Select(x => ("0x" + x.Address.ToString("X")).Length).DefaultIfEmpty(0).Max();
+      var maxSizeLength = dataSectionItems.Select(x => x.Size.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxSectionNameLength = dataSectionItems.Select(x => x.SectionName.Length).DefaultIfEmpty(0).Max();
+      var maxSegmentNameLength = dataSectionItems.Select(x => x.SegmentName.Length).DefaultIfEmpty(0).Max();
+      foreach (var dataSectionItem in dataSectionItems)
+        Console.WriteLine("                {0},", GetStr(dataSectionItem, maxHashLength, maxAddressLength, maxSizeLength, maxSectionNameLength, maxSegmentNameLength));
+
+      Console.WriteLine("              },");
+
+      static string GetStr(MachOUtil.DataSection dataSectionItem, int maxHashLength, int maxAddressLength, int maxSizeLength, int maxSectionNameLength, int maxSegmentNameLength) => string.Format(
+        "new({0}, {1}, {2}, {3}, {4}, {5})",
+        (dataSectionItem.CreateSection == null ? @null : '"' + CalculateStreamHash(() => dataSectionItem.CreateSection()) + '"').PadRight(maxHashLength),
+        ("0x" + dataSectionItem.Address.ToString("X")).PadLeft(maxAddressLength),
+        dataSectionItem.Size.ToString().PadLeft(maxSizeLength),
+        ('"' + dataSectionItem.SectionName + '"').PadRight(maxSectionNameLength + 2),
+        ('"' + dataSectionItem.SegmentName + '"').PadRight(maxSegmentNameLength + 2),
+        GetFlagsStr(dataSectionItem.Flags));
+
+      static string GetFlagsStr(SEC flags)
+      {
+        // Note: the section type is a value in the low byte, the section attributes are the flags in the high bytes
+        var names = Enum.GetNames(typeof(SEC));
+        var values = (SEC[])Enum.GetValues(typeof(SEC));
+
+        var type = flags & SEC.SECTION_TYPE;
+        var builder = new StringBuilder(GetTypeStr());
+        var rest = (uint)(flags & SEC.SECTION_ATTRIBUTES);
+        for (var n = names.Length - 1; n >= 0; --n)
+        {
+          var value = (uint)values[n];
+          if (value == 0 || (rest & value) != value || IsMask(names[n]))
+            continue;
+          rest &= ~value;
+          builder.Append(" | SEC." + names[n]);
+        }
+
+        if (rest != 0)
+          builder.Append($" | (SEC)0x{rest:X8}");
+        return builder.ToString();
+
+        string GetTypeStr()
+        {
+          for (var n = 0; n < names.Length; ++n)
+            if (values[n] == type && !IsMask(names[n]))
+              return "SEC." + names[n];
+          return $"(SEC)0x{(uint)type:X2}";
+        }
+
+        static bool IsMask(string name) => name is nameof(SEC.SECTION_ATTRIBUTES) or nameof(SEC.SECTION_ATTRIBUTES_USR) or nameof(SEC.SECTION_ATTRIBUTES_SYS) or nameof(SEC.SECTION_TYPE);
+      }
+    }
+
+    private static void GenerateSymbolInfos(ICollection<MachOUtil.Symbol> symbolItems)
+    {
+      Console.WriteLine("            new Symbol[]");
+      Console.WriteLine("              {");
+
+      var maxHashLength = symbolItems.Select(x => x.CreateStream == null ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
+      var maxNameLength = symbolItems.Select(x => x.Name.Length).DefaultIfEmpty(0).Max();
+      var maxValueLength = symbolItems.Select(x => ("0x" + x.Value.ToString("X")).Length).DefaultIfEmpty(0).Max();
+      var maxSectionIndexLength = symbolItems.Select(x => x.SectionIndex.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxTypeLength = symbolItems.Select(x => GetTypeStr(x.Type).Length).DefaultIfEmpty(0).Max();
+      foreach (var symbolItem in symbolItems)
+      {
+        var hash = symbolItem.CreateStream == null ? null : CalculateStreamHash(() => symbolItem.CreateStream());
+
+        Console.WriteLine(
+          "                new({0}, {1}, {2}, {3}, {4}, {5}),",
+          (hash == null ? @null : '"' + hash + '"').PadRight(maxHashLength),
+          ("0x" + symbolItem.Value.ToString("X")).PadLeft(maxValueLength),
+          symbolItem.SectionIndex.ToString().PadLeft(maxSectionIndexLength),
+          ('"' + symbolItem.Name + '"').PadRight(maxNameLength + 2),
+          GetTypeStr(symbolItem.Type).PadRight(maxTypeLength),
+          GetDescStr(symbolItem.Type, symbolItem.Value, symbolItem.Description));
+      }
+
+      Console.WriteLine("              },");
+
+      static string GetTypeStr(NT type)
+      {
+        if ((type & NT.N_STAB) != 0)
+          return GetStr(type);
+
+        var builder = new StringBuilder();
+        if ((type & NT.N_PEXT) != 0)
+          builder.Append("NT.N_PEXT | ");
+        builder.Append(GetStr(type & NT.N_TYPE));
+        if ((type & NT.N_EXT) != 0)
+          builder.Append(" | NT.N_EXT");
+        return builder.ToString();
+      }
+
+      static string GetStr(NT type)
+      {
+        // Note: N_SECT aliases the N_TYPE mask and N_RBRAC aliases the N_STAB mask, so the masks are skipped here
+        var names = Enum.GetNames(typeof(NT));
+        var values = (NT[])Enum.GetValues(typeof(NT));
+        for (var n = 0; n < names.Length; ++n)
+          if (values[n] == type && names[n] is not (nameof(NT.N_STAB) or nameof(NT.N_PEXT) or nameof(NT.N_TYPE) or nameof(NT.N_EXT)))
+            return "NT." + names[n];
+        return $"(NT)0x{(byte)type:X2}";
+      }
+
+      static string GetDescStr(NT type, ulong value, ND desc)
+      {
+        // Note: the n_desc field of a stab is a plain number, not a set of flags
+        if ((type & NT.N_STAB) != 0)
+          return desc == 0 ? "0" : $"(ND)0x{(ushort)desc:X4}";
+
+        // Note: a common symbol is an undefined external one with the non-zero value which holds the symbol size
+        var isCommon = (type & (NT.N_TYPE | NT.N_EXT)) == (NT.N_UNDF | NT.N_EXT) && value != 0;
+        var isUndefined = (type & NT.N_TYPE) is NT.N_UNDF or NT.N_PBUD;
+        var rest = (ushort)desc;
+        var builder = new StringBuilder();
+
+        void Append(string str)
+        {
+          if (builder.Length > 0)
+            builder.Append(" | ");
+          builder.Append(str);
+        }
+
+        void AppendFlag(ND flag, string name)
+        {
+          if ((rest & (ushort)flag) == 0)
+            return;
+          rest &= (ushort)~(ushort)flag;
+          Append("ND." + name);
+        }
+
+        string? setter = null;
+        byte field = 0;
+
+        if (isCommon)
+        {
+          field = NDUtil.GetCommAlign(desc);
+          rest &= unchecked((ushort)~(ushort)ND.COMM_ALIGN);
+          if (field != 0)
+            setter = nameof(NDUtil.SetCommAlign);
+        }
+        else if (isUndefined)
+        {
+          field = NDUtil.GetLibraryOrdinal(desc);
+          rest &= unchecked((ushort)~(ushort)ND.LIBRARY_ORDINAL);
+          switch ((ND)(field << 8))
+          {
+          case ND.SELF_LIBRARY_ORDINAL: break;
+          case ND.MAX_LIBRARY_ORDINAL: Append("ND." + nameof(ND.MAX_LIBRARY_ORDINAL)); break;
+          case ND.DYNAMIC_LOOKUP_ORDINAL: Append("ND." + nameof(ND.DYNAMIC_LOOKUP_ORDINAL)); break;
+          case ND.EXECUTABLE_ORDINAL: Append("ND." + nameof(ND.EXECUTABLE_ORDINAL)); break;
+          default: setter = nameof(NDUtil.SetLibraryOrdinal); break;
+          }
+        }
+        else
+        {
+          AppendFlag(ND.N_COLD_FUNC, nameof(ND.N_COLD_FUNC));
+          AppendFlag(ND.N_ALT_ENTRY, nameof(ND.N_ALT_ENTRY));
+          AppendFlag(ND.N_SYMBOL_RESOLVER, nameof(ND.N_SYMBOL_RESOLVER));
+        }
+
+        AppendFlag(ND.N_WEAK_DEF, isUndefined ? nameof(ND.N_REF_TO_WEAK) : nameof(ND.N_WEAK_DEF));
+        AppendFlag(ND.N_WEAK_REF, nameof(ND.N_WEAK_REF));
+        AppendFlag(ND.N_NO_DEAD_STRIP, nameof(ND.N_NO_DEAD_STRIP));
+        AppendFlag(ND.REFERENCED_DYNAMICALLY, nameof(ND.REFERENCED_DYNAMICALLY));
+        AppendFlag(ND.N_ARM_THUMB_DEF, nameof(ND.N_ARM_THUMB_DEF));
+
+        var referenceName = (rest & (ushort)ND.REFERENCE_TYPE) switch
+          {
+            (ushort)ND.REFERENCE_FLAG_UNDEFINED_LAZY => nameof(ND.REFERENCE_FLAG_UNDEFINED_LAZY),
+            (ushort)ND.REFERENCE_FLAG_DEFINED => nameof(ND.REFERENCE_FLAG_DEFINED),
+            (ushort)ND.REFERENCE_FLAG_PRIVATE_DEFINED => nameof(ND.REFERENCE_FLAG_PRIVATE_DEFINED),
+            (ushort)ND.REFERENCE_FLAG_PRIVATE_UNDEFINED_NON_LAZY => nameof(ND.REFERENCE_FLAG_PRIVATE_UNDEFINED_NON_LAZY),
+            (ushort)ND.REFERENCE_FLAG_PRIVATE_UNDEFINED_LAZY => nameof(ND.REFERENCE_FLAG_PRIVATE_UNDEFINED_LAZY),
+            _ => null
+          };
+        if (referenceName != null)
+        {
+          rest &= unchecked((ushort)~(ushort)ND.REFERENCE_TYPE);
+          Append("ND." + referenceName);
+        }
+
+        if (rest != 0)
+          Append($"(ND)0x{rest:X4}");
+
+        if (setter != null)
+          return builder.Length == 0
+            ? $"{nameof(NDUtil)}.{setter}({field})"
+            : $"{nameof(NDUtil)}.{setter}({field}, {builder})";
+
+        return builder.Length == 0 ? "0" : builder.ToString();
+      }
     }
   }
 }

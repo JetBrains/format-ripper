@@ -1,4 +1,5 @@
 ﻿using JetBrains.FormatRipper.Sh;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.FormatRipper.Tests
@@ -11,7 +12,7 @@ namespace JetBrains.FormatRipper.Tests
     [Test]
     public void Test(string resourceName)
     {
-      ResourceUtil.OpenRead(ResourceCategory.Sh, resourceName, stream =>
+      TestDataUtil.OpenRead(ResourceCategory.Sh, resourceName, stream =>
         {
           Assert.IsTrue(ShFile.Is(stream));
         });

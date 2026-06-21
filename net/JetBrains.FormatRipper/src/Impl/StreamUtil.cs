@@ -26,6 +26,15 @@ namespace JetBrains.FormatRipper.Impl
       return buffer;
     }
 
+    internal static string ReadStringZ(Stream stream)
+    {
+      var buffer = new List<byte>(16);
+      for (int b; (b = stream.ReadByte()) > 0;)
+        buffer.Add((byte)b);
+      var blob = buffer.ToArray();
+      return new string(Encoding.UTF8.GetChars(blob, 0, blob.Length));
+    }
+
     internal static unsafe void ReadBytes(Stream stream, byte* dst, int size)
     {
       // Note(ww898): It is strongly required to avoid crashes because expression `v = *(V*)b` makes a cast for type which can require the bigger alignment then the alignment in the GC allocations.

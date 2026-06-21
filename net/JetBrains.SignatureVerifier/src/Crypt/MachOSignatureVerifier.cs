@@ -73,10 +73,12 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
     SignatureVerificationParams signatureVerificationParams,
     FileIntegrityVerificationParams fileIntegrityVerificationParams)
   {
-    if (!section.HashVerificationUnits.Any() || !section.CDHashes.Any())
-      throw new ArgumentException($"Mach-o file was parsed without {nameof(MachOFile.Mode.ComputeHashInfo)} flag", nameof(section));
+    var loadCommandsInfo = MachOUtil.ReadLoadCommands(section, MachOFile.Mode.SignatureData);
 
-    if (section.SignatureType == MachOFile.SignatureType.AdHoc && !signatureVerificationParams.AllowAdhocSignatures)
+    if (!loadCommandsInfo.HashVerificationUnits.Any() || !loadCommandsInfo.CDHashes.Any())
+      throw new ArgumentException($"Mach-o file was parsed without {nameof(MachOFile.Mode.SignatureData)} flag", nameof(section));
+
+    if (loadCommandsInfo.SignatureType == MachOFile.SignatureType.AdHoc && !signatureVerificationParams.AllowAdhocSignatures)
     {
       _logger?.Warning($"Mach-O file has adhoc signature which is not allowed. Set {nameof(SignatureVerificationParams.AllowAdhocSignatures)} to true is you want to check adhoc signatures.");
       return new VerifySignatureResult(VerifySignatureStatus.InvalidSignature);
@@ -84,11 +86,11 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
 
     SignedMessage signedMessage = null;
 
-    bool skipSignedMessageVerification = section.SignatureType == MachOFile.SignatureType.AdHoc & signatureVerificationParams.AllowAdhocSignatures;
+    bool skipSignedMessageVerification = loadCommandsInfo.SignatureType == MachOFile.SignatureType.AdHoc & signatureVerificationParams.AllowAdhocSignatures;
 
     if (!skipSignedMessageVerification)
     {
-      signedMessage = SignedMessage.CreateInstance(section.SignatureData);
+      signedMessage = SignedMessage.CreateInstance(loadCommandsInfo.SignatureData);
       var signatureVerificationResult = await _signedMessageVerifier.VerifySignatureAsync(signedMessage, signatureVerificationParams);
 
       if (!signatureVerificationResult.IsValid)
@@ -98,14 +100,14 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
       }
     }
 
-    if (!section.HashVerificationUnits.Any())
+    if (!loadCommandsInfo.HashVerificationUnits.Any())
     {
       _logger?.Warning("Mach-O file signature verification failed: no hash verification units was found in the file");
       return new VerifySignatureResult(VerifySignatureStatus.InvalidFileHash);
     }
 
     // Verify hash slots (regular and special) in all Code Directories
-    var codeDirectoryValidationResult = VerifyHashVerificationUnits(stream, section.HashVerificationUnits);
+    var codeDirectoryValidationResult = VerifyHashVerificationUnits(stream, loadCommandsInfo.HashVerificationUnits);
 
     if (!codeDirectoryValidationResult.IsValid)
     {
@@ -113,15 +115,15 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
       return codeDirectoryValidationResult;
     }
 
-    if (!section.CDHashes.Any())
+    if (!loadCommandsInfo.CDHashes.Any())
     {
       _logger?.Warning("Mach-O file signature verification failed: no code directory hashes (CDHash) was found in the file");
       return new VerifySignatureResult(VerifySignatureStatus.InvalidFileHash);
     }
 
-    if (section.CDHashes.Count() > 1 && !skipSignedMessageVerification)
+    if (loadCommandsInfo.CDHashes.Count() > 1 && !skipSignedMessageVerification)
     {
-      var cdHashesVerificationResult = VerifyCDHashes(stream, section.CDHashes, signedMessage);
+      var cdHashesVerificationResult = VerifyCDHashes(stream, loadCommandsInfo.CDHashes, signedMessage);
 
       if (!cdHashesVerificationResult.IsValid)
       {

@@ -57,8 +57,8 @@ public class MachOSignatureInjector
 
   private static unsafe void ProcessFatMachO(Stream sourceStream, Stream outputStream, MH fatMagic, IMachOSignatureTransferData signatureTransferData)
   {
-    var isFatLittleEndian = fatMagic is MH.FAT_MAGIC or MH.FAT_MAGIC_64;
-    var needSwap = BitConverter.IsLittleEndian != isFatLittleEndian;
+    var fatEndian = fatMagic is MH.FAT_MAGIC or MH.FAT_MAGIC_64 ? MachOFile.Endian.Little : MachOFile.Endian.Big;
+    var needSwap = BitConverter.IsLittleEndian != (fatEndian == MachOFile.Endian.Little);
 
     uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
     ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
@@ -184,8 +184,8 @@ public class MachOSignatureInjector
     long outputStreamInitialPosition = outputStream.Position;
     long PositionFromStart() => outputStream.Position - outputStreamInitialPosition;
 
-    var isLittleEndian = magic is MH.MH_MAGIC or MH.MH_MAGIC_64;
-    var needSwap = BitConverter.IsLittleEndian != isLittleEndian;
+    var isLittleEndian = magic is MH.MH_MAGIC or MH.MH_MAGIC_64 ? MachOFile.Endian.Little : MachOFile.Endian.Big;
+    var needSwap = BitConverter.IsLittleEndian != (isLittleEndian == MachOFile.Endian.Little);
 
     uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
     ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
@@ -253,7 +253,6 @@ public class MachOSignatureInjector
         load_command lc;
         MemoryUtil.CopyBytes(cmdPtr, (byte*)&lc, sizeof(load_command));
         uint cmdSize = GetU4(lc.cmdsize);
-        var payloadLcPtr = cmdPtr + sizeof(load_command);
         var commandType = (LC)GetU4(lc.cmd);
 
         if (commandNumber == sectionSignature.LastLinkeditCommandNumber)
@@ -261,20 +260,20 @@ public class MachOSignatureInjector
           if (commandType == LC.LC_SEGMENT_64)
           {
             segment_command_64 sc;
-            MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command_64));
+            MemoryUtil.CopyBytes(cmdPtr, (byte*)&sc, sizeof(segment_command_64));
             sc.vmsize = GetU8(sectionSignature.LastLinkeditVmSize64);
             sc.filesize = GetU8(sectionSignature.LastLinkeditFileSize64);
 
-            MemoryUtil.CopyBytes((byte*)&sc, payloadLcPtr, sizeof(segment_command_64));
+            MemoryUtil.CopyBytes((byte*)&sc, cmdPtr, sizeof(segment_command_64));
           }
           else if (commandType == LC.LC_SEGMENT)
           {
             segment_command sc;
-            MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command));
+            MemoryUtil.CopyBytes(cmdPtr, (byte*)&sc, sizeof(segment_command));
             sc.vmsize = GetU4(sectionSignature.LastLinkeditVmSize32);
             sc.filesize = GetU4(sectionSignature.LastLinkeditFileSize32);
 
-            MemoryUtil.CopyBytes((byte*)&sc, payloadLcPtr, sizeof(segment_command));
+            MemoryUtil.CopyBytes((byte*)&sc, cmdPtr, sizeof(segment_command));
           }
           else
           {
@@ -285,14 +284,14 @@ public class MachOSignatureInjector
         if (commandType == LC.LC_CODE_SIGNATURE)
         {
           linkedit_data_command ldc;
-          MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&ldc, sizeof(linkedit_data_command));
+          MemoryUtil.CopyBytes(cmdPtr, (byte*)&ldc, sizeof(linkedit_data_command));
 
           oldSignatureOffset = GetU4(ldc.dataoff);
 
           ldc.dataoff = GetU4(sectionSignature.LinkEditDataOffset);
           ldc.datasize = GetU4(sectionSignature.LinkEditDataSize);
 
-          MemoryUtil.CopyBytes((byte*)&ldc, payloadLcPtr, sizeof(linkedit_data_command));
+          MemoryUtil.CopyBytes((byte*)&ldc, cmdPtr, sizeof(linkedit_data_command));
         }
 
         cmdPtr += cmdSize;
@@ -303,23 +302,17 @@ public class MachOSignatureInjector
 
     if (signatureLoadCommandMissing)
     {
-      load_command signatureLc = new load_command()
+      linkedit_data_command signatureLdc = new linkedit_data_command()
       {
         cmd = GetU4((uint)LC.LC_CODE_SIGNATURE),
         cmdsize = GetU4(sectionSignature.LcCodeSignatureSize),
-      };
-
-      StreamUtil.WriteBytes(outputStream, (byte*)&signatureLc, sizeof(load_command));
-
-      linkedit_data_command signatureLdc = new linkedit_data_command()
-      {
         dataoff = GetU4(sectionSignature.LinkEditDataOffset),
         datasize = GetU4(sectionSignature.LinkEditDataSize),
       };
 
       StreamUtil.WriteBytes(outputStream, (byte*)&signatureLdc, sizeof(linkedit_data_command));
 
-      sourceStream.Seek(sizeof(load_command) + sizeof(linkedit_data_command), SeekOrigin.Current);
+      sourceStream.Seek(sizeof(linkedit_data_command), SeekOrigin.Current);
     }
 
     long end = oldSignatureOffset != 0 ? sourceStreamRange.Position + oldSignatureOffset : sourceStreamRange.Position + sourceStreamRange.Size;

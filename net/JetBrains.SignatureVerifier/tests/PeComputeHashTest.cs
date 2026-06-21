@@ -1,4 +1,5 @@
 ﻿using JetBrains.FormatRipper.Pe;
+using JetBrains.Tests;
 using NUnit.Framework;
 
 namespace JetBrains.SignatureVerifier.Tests
@@ -32,7 +33,7 @@ namespace JetBrains.SignatureVerifier.Tests
     // @formatter:on
     public void Test(string resourceName, string hashAlgorithmName, string expectedResult)
     {
-      var result = ResourceUtil.OpenRead(ResourceCategory.Pe, resourceName, stream =>
+      var result = TestDataUtil.OpenRead(ResourceCategory.Pe, resourceName, stream =>
         {
           var file = PeFile.Parse(stream, PeFile.Mode.ComputeHashInfo);
           Assert.IsNotNull(file.ComputeHashInfo);
