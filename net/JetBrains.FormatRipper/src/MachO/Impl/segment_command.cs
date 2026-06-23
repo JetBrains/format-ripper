@@ -14,6 +14,8 @@ namespace JetBrains.FormatRipper.MachO.Impl
   [StructLayout(LayoutKind.Sequential)]
   internal unsafe struct segment_command
   {
+    internal UInt32 cmd; /* type of load command */
+    internal UInt32 cmdsize; /* total size of command in bytes */
     internal fixed byte segname[16]; /* segment name */
     internal UInt32 vmaddr; /* memory address of this segment */
     internal UInt32 vmsize; /* memory size of this segment */

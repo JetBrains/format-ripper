@@ -12,6 +12,8 @@ namespace JetBrains.FormatRipper.MachO.Impl
   [StructLayout(LayoutKind.Sequential)]
   internal struct linkedit_data_command
   {
+    internal UInt32 cmd; /* type of load command */
+    internal UInt32 cmdsize; /* total size of command in bytes */
     internal UInt32 dataoff; /* file offset of data in __LINKEDIT segment */
     internal UInt32 datasize; /* file size of data in __LINKEDIT segment  */
   }

@@ -208,21 +208,19 @@ namespace JetBrains.FormatRipper.MachO
             {
               load_command lc;
               MemoryUtil.CopyBytes(cmdPtr, (byte*)&lc, sizeof(load_command));
-              var payloadLcPtr = cmdPtr + sizeof(load_command);
 
               var commandType = (LC)GetU4(lc.cmd);
               var commandSize = GetU4(lc.cmdsize);
 
-              var payloadOffset = checked(imageRange.Position + cmdOffset + (cmdPtr - buf)) + sizeof(load_command);
-              var payloadSize = checked(commandSize - (uint)sizeof(load_command));
-              commands[commandNumber - 1] = new Command(commandType, payloadSize, () => new ReadOnlyNestedStream(stream, payloadOffset, payloadSize));
+              var payloadOffset = checked(imageRange.Position + cmdOffset + (cmdPtr - buf));
+              commands[commandNumber - 1] = new Command(commandType, commandSize, () => new ReadOnlyNestedStream(stream, payloadOffset, commandSize));
 
               switch (commandType)
               {
                 case LC.LC_SEGMENT:
                 {
                   segment_command sc;
-                  MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command));
+                  MemoryUtil.CopyBytes(cmdPtr, (byte*)&sc, sizeof(segment_command));
 
                   sectionSignatureTransferData.LastLinkeditCommandNumber = commandNumber;
                   sectionSignatureTransferData.LastLinkeditVmSize32 = GetU4(sc.vmsize);
@@ -232,7 +230,7 @@ namespace JetBrains.FormatRipper.MachO
                 case LC.LC_SEGMENT_64:
                 {
                   segment_command_64 sc;
-                  MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&sc, sizeof(segment_command_64));
+                  MemoryUtil.CopyBytes(cmdPtr, (byte*)&sc, sizeof(segment_command_64));
 
                   sectionSignatureTransferData.LastLinkeditCommandNumber = commandNumber;
                   sectionSignatureTransferData.LastLinkeditVmSize64 = GetU8(sc.vmsize);
@@ -242,7 +240,7 @@ namespace JetBrains.FormatRipper.MachO
                 case LC.LC_CODE_SIGNATURE:
                 {
                   linkedit_data_command ldc;
-                  MemoryUtil.CopyBytes(payloadLcPtr, (byte*)&ldc, sizeof(linkedit_data_command));
+                  MemoryUtil.CopyBytes(cmdPtr, (byte*)&ldc, sizeof(linkedit_data_command));
 
                   sectionSignatureTransferData.LcCodeSignatureSize = GetU4(lc.cmdsize);
                   sectionSignatureTransferData.LinkEditDataOffset = GetU4(ldc.dataoff);
