@@ -174,7 +174,7 @@ namespace JetBrains.FormatRipper.MachO
 
     public static unsafe MachOFile Parse(Stream stream, Mode mode = Mode.Default)
     {
-      Section Read(MH magic, StreamRange imageRange)
+      Section Read(MH magic, StreamRange imageRange, Stream sectionStream)
       {
         if (magic is not (MH.MH_MAGIC or MH.MH_MAGIC_64 or MH.MH_CIGAM or MH.MH_CIGAM_64))
           throw new FormatException("Unknown Mach-O magic numbers");
@@ -184,8 +184,31 @@ namespace JetBrains.FormatRipper.MachO
         uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
         ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
 
-        LoadCommandsInfo ReadLoadCommands(long cmdOffset, uint nCmds, uint sizeOfCmds)
+        Command[] ReadCommands(uint nCmds, Stream commandStream)
         {
+          var commands = new Command[checked((int)nCmds)];
+          for (var n = 0; n < commands.Length; ++n)
+          {
+            var offset = commandStream.Position;
+
+            load_command lc;
+            StreamUtil.ReadBytes(commandStream, (byte*)&lc, sizeof(load_command));
+            var cmd = (LC)GetU4(lc.cmd);
+            var cmdSize = GetU4(lc.cmdsize);
+            if (cmdSize < sizeof(load_command))
+              throw new FormatException($"Invalid {nameof(load_command)} size");
+
+            commands[n] = new Command(cmd, cmdSize, () => new ReadOnlyNestedStream(commandStream, offset, cmdSize));
+            commandStream.Position = offset + cmdSize;
+          }
+
+          return commands;
+        }
+
+        LoadCommandsInfo ReadLoadCommands(Command[] commands, uint sizeOfCmds)
+        {
+          var nCmds = (uint)commands.Length;
+
           var hasSignature = false;
           SignatureType signatureType = SignatureType.None;
           byte[]? codeDirectoryBlob = null;
@@ -194,226 +217,225 @@ namespace JetBrains.FormatRipper.MachO
           byte[]? entitlementsDer = null;
           List<HashVerificationUnit> hashVerificationUnits = new List<HashVerificationUnit>();
           List<CDHash> cdHashes = new List<CDHash>();
-          var commands = new Command[checked((int)nCmds)];
-          uint commandNumber = 0;
           var sectionSignatureTransferData = new MachOSectionSignatureTransferData()
           {
             NumberOfLoadCommands = nCmds,
             SizeOfLoadCommands = sizeOfCmds,
           };
 
-          fixed (byte* buf = StreamUtil.ReadBytes(stream, checked((int)sizeOfCmds)))
+          for (var n = 0u; n < nCmds; ++n)
           {
-            for (var cmdPtr = buf; commandNumber++ < nCmds;)
+            var command = commands[n];
+            switch (command.Type)
             {
-              load_command lc;
-              MemoryUtil.CopyBytes(cmdPtr, (byte*)&lc, sizeof(load_command));
-
-              var commandType = (LC)GetU4(lc.cmd);
-              var commandSize = GetU4(lc.cmdsize);
-
-              var payloadOffset = checked(imageRange.Position + cmdOffset + (cmdPtr - buf));
-              commands[commandNumber - 1] = new Command(commandType, commandSize, () => new ReadOnlyNestedStream(stream, payloadOffset, commandSize));
-
-              switch (commandType)
+            case LC.LC_SEGMENT:
+              using (var cmdStream = command.CreateStream())
               {
-                case LC.LC_SEGMENT:
+                segment_command sc;
+                StreamUtil.ReadBytes(cmdStream, (byte*)&sc, sizeof(segment_command));
+                if ((LC)GetU4(sc.cmd) != LC.LC_SEGMENT)
+                  throw new FormatException($"Invalid {nameof(segment_command)} type");
+                if (GetU4(sc.cmdsize) < sizeof(segment_command))
+                  throw new FormatException($"Invalid {nameof(segment_command)} size");
+
+                sectionSignatureTransferData.LastLinkeditCommandNumber = n + 1;
+                sectionSignatureTransferData.LastLinkeditVmSize32 = GetU4(sc.vmsize);
+                sectionSignatureTransferData.LastLinkeditFileSize32 = GetU4(sc.filesize);
+                break;
+              }
+            case LC.LC_SEGMENT_64:
+              using (var cmdStream = command.CreateStream())
+              {
+                segment_command_64 sc;
+                StreamUtil.ReadBytes(cmdStream, (byte*)&sc, sizeof(segment_command_64));
+                if ((LC)GetU4(sc.cmd) != LC.LC_SEGMENT_64)
+                  throw new FormatException($"Invalid {nameof(segment_command_64)} type");
+                if (GetU4(sc.cmdsize) < sizeof(segment_command_64))
+                  throw new FormatException($"Invalid {nameof(segment_command_64)} size");
+
+                sectionSignatureTransferData.LastLinkeditCommandNumber = n + 1;
+                sectionSignatureTransferData.LastLinkeditVmSize64 = GetU8(sc.vmsize);
+                sectionSignatureTransferData.LastLinkeditFileSize64 = GetU8(sc.filesize);
+                break;
+              }
+            case LC.LC_CODE_SIGNATURE:
+              using (var cmdStream = command.CreateStream())
+              {
+                linkedit_data_command ldc;
+                StreamUtil.ReadBytes(cmdStream, (byte*)&ldc, sizeof(linkedit_data_command));
+                if ((LC)GetU4(ldc.cmd) != LC.LC_CODE_SIGNATURE)
+                  throw new FormatException($"Invalid {nameof(linkedit_data_command)} type");
+                if (GetU4(ldc.cmdsize) < sizeof(linkedit_data_command))
+                  throw new FormatException($"Invalid {nameof(linkedit_data_command)} size");
+
+                sectionSignatureTransferData.LcCodeSignatureSize = GetU4(ldc.cmdsize);
+                sectionSignatureTransferData.LinkEditDataOffset = GetU4(ldc.dataoff);
+                sectionSignatureTransferData.LinkEditDataSize = GetU4(ldc.datasize);
+
+                if ((mode & Mode.SignatureData) == Mode.SignatureData)
                 {
-                  segment_command sc;
-                  MemoryUtil.CopyBytes(cmdPtr, (byte*)&sc, sizeof(segment_command));
+                  stream.Position = checked(imageRange.Position + GetU4(ldc.dataoff));
+                  sectionSignatureTransferData.SignatureBlob = StreamUtil.ReadBytes(stream, checked((int)GetU4(ldc.datasize)));
+                  stream.Position = checked(imageRange.Position + GetU4(ldc.dataoff));
 
-                  sectionSignatureTransferData.LastLinkeditCommandNumber = commandNumber;
-                  sectionSignatureTransferData.LastLinkeditVmSize32 = GetU4(sc.vmsize);
-                  sectionSignatureTransferData.LastLinkeditFileSize32 = GetU4(sc.filesize);
-                  break;
-                }
-                case LC.LC_SEGMENT_64:
-                {
-                  segment_command_64 sc;
-                  MemoryUtil.CopyBytes(cmdPtr, (byte*)&sc, sizeof(segment_command_64));
+                  CS_SuperBlob cssb;
+                  StreamUtil.ReadBytes(stream, (byte*)&cssb, sizeof(CS_SuperBlob));
+                  if ((CSMAGIC)EndianUtil.GetBeU4(cssb.magic) != CSMAGIC.CSMAGIC_EMBEDDED_SIGNATURE)
+                    throw new FormatException("Invalid Mach-O code embedded signature magic");
+                  var csLength = EndianUtil.GetBeU4(cssb.length);
+                  if (csLength < sizeof(CS_SuperBlob))
+                    throw new FormatException("Too small Mach-O code signature super blob");
 
-                  sectionSignatureTransferData.LastLinkeditCommandNumber = commandNumber;
-                  sectionSignatureTransferData.LastLinkeditVmSize64 = GetU8(sc.vmsize);
-                  sectionSignatureTransferData.LastLinkeditFileSize64 = GetU8(sc.filesize);
-                  break;
-                }
-                case LC.LC_CODE_SIGNATURE:
-                {
-                  linkedit_data_command ldc;
-                  MemoryUtil.CopyBytes(cmdPtr, (byte*)&ldc, sizeof(linkedit_data_command));
-
-                  sectionSignatureTransferData.LcCodeSignatureSize = GetU4(lc.cmdsize);
-                  sectionSignatureTransferData.LinkEditDataOffset = GetU4(ldc.dataoff);
-                  sectionSignatureTransferData.LinkEditDataSize = GetU4(ldc.datasize);
-
-                  if ((mode & Mode.SignatureData) == Mode.SignatureData)
+                  var csCount = EndianUtil.GetBeU4(cssb.count);
+                  fixed (byte* scBuf = StreamUtil.ReadBytes(stream, checked((int)csLength - sizeof(CS_SuperBlob))))
                   {
-                    stream.Position = checked(imageRange.Position + GetU4(ldc.dataoff));
-                    sectionSignatureTransferData.SignatureBlob = StreamUtil.ReadBytes(stream, checked((int)GetU4(ldc.datasize)));
-                    stream.Position = checked(imageRange.Position + GetU4(ldc.dataoff));
+                    ComputeHashInfo[] specialSlotPositions = new ComputeHashInfo[(uint)CSSLOT.CSSLOT_HASHABLE_ENTRIES_MAX - 1];
 
-                    CS_SuperBlob cssb;
-                    StreamUtil.ReadBytes(stream, (byte*)&cssb, sizeof(CS_SuperBlob));
-                    if ((CSMAGIC)EndianUtil.GetBeU4(cssb.magic) != CSMAGIC.CSMAGIC_EMBEDDED_SIGNATURE)
-                      throw new FormatException("Invalid Mach-O code embedded signature magic");
-                    var csLength = EndianUtil.GetBeU4(cssb.length);
-                    if (csLength < sizeof(CS_SuperBlob))
-                      throw new FormatException("Too small Mach-O code signature super blob");
-
-                    var csCount = EndianUtil.GetBeU4(cssb.count);
-                    fixed (byte* scBuf = StreamUtil.ReadBytes(stream, checked((int)csLength - sizeof(CS_SuperBlob))))
+                    for(int superBlobEntryIndex = 0; superBlobEntryIndex < csCount; superBlobEntryIndex++)
                     {
-                      ComputeHashInfo[] specialSlotPositions = new ComputeHashInfo[CSSLOT.CSSLOT_HASHABLE_ENTRIES_MAX - 1];
+                      var scPtr = scBuf + superBlobEntryIndex * sizeof(CS_BlobIndex);
+                      CS_BlobIndex csbi;
+                      MemoryUtil.CopyBytes(scPtr, (byte*)&csbi, sizeof(CS_BlobIndex));
+                      var slotType = (CSSLOT)EndianUtil.GetBeU4(csbi.type);
 
-                      for(int superBlobEntryIndex = 0; superBlobEntryIndex < csCount; superBlobEntryIndex++)
+                      if (slotType >= CSSLOT.CSSLOT_INFOSLOT && slotType <= CSSLOT.CSSLOT_LIBRARY_CONSTRAINT)
                       {
-                        var scPtr = scBuf + superBlobEntryIndex * sizeof(CS_BlobIndex);
-                        CS_BlobIndex csbi;
-                        MemoryUtil.CopyBytes(scPtr, (byte*)&csbi, sizeof(CS_BlobIndex));
-                        uint slotType = EndianUtil.GetBeU4(csbi.type);
+                        uint offset = EndianUtil.GetBeU4(csbi.offset);
+                        var csOffsetPtr = scBuf + offset - sizeof(CS_SuperBlob);
 
-                        if (slotType >= CSSLOT.CSSLOT_INFOSLOT && slotType <= CSSLOT.CSSLOT_LIBRARY_CONSTRAINT)
-                        {
-                          uint offset = EndianUtil.GetBeU4(csbi.offset);
-                          var csOffsetPtr = scBuf + offset - sizeof(CS_SuperBlob);
+                        CS_Blob csb;
+                        MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
 
-                          CS_Blob csb;
-                          MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
-
-                          specialSlotPositions[slotType - 1] = new ComputeHashInfo(0, new[]
+                        specialSlotPositions[(uint)slotType - 1] = new ComputeHashInfo(0, new[]
                           {
                             new StreamRange(checked(imageRange.Position + GetU4(ldc.dataoff) + offset), EndianUtil.GetBeU4(csb.length))
                           }, 0);
-                        }
                       }
+                    }
 
-                      for (var scPtr = scBuf; csCount-- > 0; scPtr += sizeof(CS_BlobIndex))
+                    for (var scPtr = scBuf; csCount-- > 0; scPtr += sizeof(CS_BlobIndex))
+                    {
+                      CS_BlobIndex csbi;
+                      MemoryUtil.CopyBytes(scPtr, (byte*)&csbi, sizeof(CS_BlobIndex));
+                      uint offset = EndianUtil.GetBeU4(csbi.offset);
+                      var csOffsetPtr = scBuf + offset - sizeof(CS_SuperBlob);
+                      var slotType = (CSSLOT)EndianUtil.GetBeU4(csbi.type);
+                      switch (slotType)
                       {
-                        CS_BlobIndex csbi;
-                        MemoryUtil.CopyBytes(scPtr, (byte*)&csbi, sizeof(CS_BlobIndex));
-                        uint offset = EndianUtil.GetBeU4(csbi.offset);
-                        var csOffsetPtr = scBuf + offset - sizeof(CS_SuperBlob);
-                        uint slotType = EndianUtil.GetBeU4(csbi.type);
-                        switch (slotType)
+                      case CSSLOT.CSSLOT_CODEDIRECTORY:
+                      case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES:
+                      case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES1:
+                      case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES2:
+                      case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES3:
+                      case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES4:
                         {
-                          case CSSLOT.CSSLOT_CODEDIRECTORY:
-                          case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES:
-                          case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES1:
-                          case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES2:
-                          case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES3:
-                          case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES4:
-                          {
-                            CS_CodeDirectory cscd;
-                            MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&cscd, sizeof(CS_CodeDirectory));
-                            if ((CSMAGIC)EndianUtil.GetBeU4(cscd.magic) != CSMAGIC.CSMAGIC_CODEDIRECTORY)
-                              throw new FormatException("Invalid Mach-O code directory signature magic");
-                            var cscdLength = EndianUtil.GetBeU4(cscd.length);
+                          CS_CodeDirectory cscd;
+                          MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&cscd, sizeof(CS_CodeDirectory));
+                          if ((CSMAGIC)EndianUtil.GetBeU4(cscd.magic) != CSMAGIC.CSMAGIC_CODEDIRECTORY)
+                            throw new FormatException("Invalid Mach-O code directory signature magic");
+                          var cscdLength = EndianUtil.GetBeU4(cscd.length);
 
-                            byte[] currentCodeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, checked((int)cscdLength));
-                            if (signatureType == SignatureType.None)
-                              signatureType = SignatureType.AdHoc;
+                          byte[] currentCodeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, checked((int)cscdLength));
+                          if (signatureType == SignatureType.None)
+                            signatureType = SignatureType.AdHoc;
 
-                            if (slotType == CSSLOT.CSSLOT_CODEDIRECTORY)
-                              codeDirectoryBlob = currentCodeDirectoryBlob;
+                          if (slotType == CSSLOT.CSSLOT_CODEDIRECTORY)
+                            codeDirectoryBlob = currentCodeDirectoryBlob;
 
-                            int codeSlots = checked((int)EndianUtil.GetBeU4(cscd.nCodeSlots));
-                            int specialSlots = checked((int)EndianUtil.GetBeU4(cscd.nSpecialSlots));
-                            uint zeroHashOffset = EndianUtil.GetBeU4(cscd.hashOffset);
-                            long codeLimit = EndianUtil.GetBeU4(cscd.codeLimit);
-                            int pageSize = cscd.pageSize > 0 ? 1 << cscd.pageSize : 0;
-                            string hashName = CS_HASHTYPE.GetHashName(cscd.hashType);
+                          int codeSlots = checked((int)EndianUtil.GetBeU4(cscd.nCodeSlots));
+                          int specialSlots = checked((int)EndianUtil.GetBeU4(cscd.nSpecialSlots));
+                          uint zeroHashOffset = EndianUtil.GetBeU4(cscd.hashOffset);
+                          long codeLimit = EndianUtil.GetBeU4(cscd.codeLimit);
+                          int pageSize = cscd.pageSize > 0 ? 1 << cscd.pageSize : 0;
+                          string hashName = CS_HASHTYPE.GetHashName(cscd.hashType);
 
-                            var cdHash = new CDHash(hashName, new ComputeHashInfo(0, new[]
+                          var cdHash = new CDHash(hashName, new ComputeHashInfo(0, new[]
                             {
                               new StreamRange(checked(imageRange.Position + GetU4(ldc.dataoff) + offset), cscdLength)
                             }, 0));
 
-                            cdHashes.Add(cdHash);
+                          cdHashes.Add(cdHash);
 
-                            for (int i = 0; i < codeSlots; i++)
-                            {
-                              byte[] hash = new byte[cscd.hashSize];
-                              Array.Copy(currentCodeDirectoryBlob, checked((int)zeroHashOffset + i * cscd.hashSize), hash, 0, cscd.hashSize);
+                          for (int i = 0; i < codeSlots; i++)
+                          {
+                            byte[] hash = new byte[cscd.hashSize];
+                            Array.Copy(currentCodeDirectoryBlob, checked((int)zeroHashOffset + i * cscd.hashSize), hash, 0, cscd.hashSize);
 
-                              long pageStart = i * pageSize;
-                              long currentPageSize;
-                              if (pageSize > 0)
-                                currentPageSize = pageStart + pageSize > codeLimit ? codeLimit - pageStart : pageSize;
-                              else
-                                currentPageSize = codeLimit - pageStart;
+                            long pageStart = i * pageSize;
+                            long currentPageSize;
+                            if (pageSize > 0)
+                              currentPageSize = pageStart + pageSize > codeLimit ? codeLimit - pageStart : pageSize;
+                            else
+                              currentPageSize = codeLimit - pageStart;
 
-                              var computeHashInfo = new ComputeHashInfo(0, new[]
+                            var computeHashInfo = new ComputeHashInfo(0, new[]
                               {
                                 new StreamRange(pageStart + imageRange.Position, currentPageSize)
                               }, 0);
 
-                              hashVerificationUnits.Add(new HashVerificationUnit(hashName, hash, computeHashInfo));
-                            }
-
-                            for (uint i = 1; i <= specialSlots; i++)
-                            {
-                              byte[] hash = new byte[cscd.hashSize];
-                              Array.Copy(currentCodeDirectoryBlob, checked((int)(zeroHashOffset - i * cscd.hashSize)), hash, 0, cscd.hashSize);
-
-                              if (specialSlotPositions[i - 1] != null)
-                                hashVerificationUnits.Add(new HashVerificationUnit(hashName, hash, specialSlotPositions[i - 1]));
-                            }
+                            hashVerificationUnits.Add(new HashVerificationUnit(hashName, hash, computeHashInfo));
                           }
-                          break;
-                          case CSSLOT.CSSLOT_CMS_SIGNATURE:
+
+                          for (uint i = 1; i <= specialSlots; i++)
                           {
-                            CS_Blob csb;
-                            MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
-                            if ((CSMAGIC)EndianUtil.GetBeU4(csb.magic) != CSMAGIC.CSMAGIC_BLOBWRAPPER)
-                              throw new FormatException("Invalid Mach-O blob wrapper signature magic");
-                            var csbLength = EndianUtil.GetBeU4(csb.length);
-                            if (csbLength < sizeof(CS_Blob))
-                              throw new FormatException("Too small Mach-O cms signature blob length");
-                            cmsSignatureBlob = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob), checked((int)csbLength - sizeof(CS_Blob)));
-                            signatureType = SignatureType.Regular;
+                            byte[] hash = new byte[cscd.hashSize];
+                            Array.Copy(currentCodeDirectoryBlob, checked((int)(zeroHashOffset - i * cscd.hashSize)), hash, 0, cscd.hashSize);
+
+                            if (specialSlotPositions[i - 1] != null)
+                              hashVerificationUnits.Add(new HashVerificationUnit(hashName, hash, specialSlotPositions[i - 1]));
                           }
-                          break;
-                          case CSSLOT.CSSLOT_ENTITLEMENTS:
-                          {
-                            CS_Entitlements csent;
-                            MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csent, sizeof(CS_Entitlements));
-
-                            CSMAGIC entitlementsMagic = (CSMAGIC)EndianUtil.GetBeU4(csent.magic);
-                            if (entitlementsMagic != CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS)
-                              throw new FormatException($"Invalid Mach-O entitlements magic. Expected {CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS.ToString("X")} but got {entitlementsMagic.ToString("X")}");
-
-                            uint csentLength = EndianUtil.GetBeU4(csent.length);
-                            entitlements = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Entitlements), checked((int)csentLength - sizeof(CS_Entitlements)));
-                          }
-                          break;
-                          case CSSLOT.CSSLOT_ENTITLEMENTS_DER:
-                          {
-                            CS_Entitlements csent;
-                            MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csent, sizeof(CS_Entitlements));
-
-                            CSMAGIC entitlementsMagic = (CSMAGIC)EndianUtil.GetBeU4(csent.magic);
-                            if (entitlementsMagic != CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS_DER)
-                              throw new FormatException($"Invalid Mach-O der-encoded entitlements magic. Expected {CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS_DER.ToString("X")} but got {entitlementsMagic.ToString("X")}");
-
-                            uint csentLength = EndianUtil.GetBeU4(csent.length);
-                            entitlementsDer = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Entitlements), checked((int)csentLength - sizeof(CS_Entitlements)));
-                          }
-                            break;
                         }
+                        break;
+                      case CSSLOT.CSSLOT_CMS_SIGNATURE:
+                        {
+                          CS_Blob csb;
+                          MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
+                          if ((CSMAGIC)EndianUtil.GetBeU4(csb.magic) != CSMAGIC.CSMAGIC_BLOBWRAPPER)
+                            throw new FormatException("Invalid Mach-O blob wrapper signature magic");
+                          var csbLength = EndianUtil.GetBeU4(csb.length);
+                          if (csbLength < sizeof(CS_Blob))
+                            throw new FormatException("Too small Mach-O cms signature blob length");
+                          cmsSignatureBlob = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob), checked((int)csbLength - sizeof(CS_Blob)));
+                          signatureType = SignatureType.Regular;
+                        }
+                        break;
+                      case CSSLOT.CSSLOT_ENTITLEMENTS:
+                        {
+                          CS_Entitlements csent;
+                          MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csent, sizeof(CS_Entitlements));
+
+                          CSMAGIC entitlementsMagic = (CSMAGIC)EndianUtil.GetBeU4(csent.magic);
+                          if (entitlementsMagic != CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS)
+                            throw new FormatException($"Invalid Mach-O entitlements magic. Expected {CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS.ToString("X")} but got {entitlementsMagic.ToString("X")}");
+
+                          uint csentLength = EndianUtil.GetBeU4(csent.length);
+                          entitlements = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Entitlements), checked((int)csentLength - sizeof(CS_Entitlements)));
+                        }
+                        break;
+                      case CSSLOT.CSSLOT_ENTITLEMENTS_DER:
+                        {
+                          CS_Entitlements csent;
+                          MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csent, sizeof(CS_Entitlements));
+
+                          CSMAGIC entitlementsMagic = (CSMAGIC)EndianUtil.GetBeU4(csent.magic);
+                          if (entitlementsMagic != CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS_DER)
+                            throw new FormatException($"Invalid Mach-O der-encoded entitlements magic. Expected {CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS_DER.ToString("X")} but got {entitlementsMagic.ToString("X")}");
+
+                          uint csentLength = EndianUtil.GetBeU4(csent.length);
+                          entitlementsDer = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Entitlements), checked((int)csentLength - sizeof(CS_Entitlements)));
+                        }
+                        break;
                       }
                     }
                   }
                 }
-                hasSignature = true;
-                break;
               }
-
-              cmdPtr += GetU4(lc.cmdsize);
+              hasSignature = true;
+              break;
             }
           }
 
           return new(
-            commands,
             hasSignature,
             signatureType,
             new SignatureData(codeDirectoryBlob, cmsSignatureBlob),
@@ -428,8 +450,17 @@ namespace JetBrains.FormatRipper.MachO
         {
           mach_header_64 mh;
           StreamUtil.ReadBytes(stream, (byte*)&mh, sizeof(mach_header_64));
+          var nCmds = GetU4(mh.ncmds);
+          var sizeOfCmds = GetU4(mh.sizeofcmds);
 
-          var loadCommands = ReadLoadCommands(sizeof(MH) + sizeof(mach_header_64), GetU4(mh.ncmds), GetU4(mh.sizeofcmds));
+          var offset = stream.Position;
+
+          Command[] commands;
+          using (var commandsStream = new ReadOnlyNestedStream(stream, offset, sizeOfCmds))
+            commands = ReadCommands(nCmds, commandsStream);
+
+          stream.Position = offset;
+          var loadCommands = ReadLoadCommands(commands, sizeOfCmds);
 
           return new Section(
             endian,
@@ -437,7 +468,7 @@ namespace JetBrains.FormatRipper.MachO
             (CPU_SUBTYPE)GetU4(mh.cpusubtype),
             (MH_FileType)GetU4(mh.filetype),
             (MH_Flags)GetU4(mh.flags),
-            loadCommands.Commands,
+            commands,
             loadCommands.HasSignature,
             loadCommands.SignatureType,
             loadCommands.SignatureData,
@@ -451,8 +482,17 @@ namespace JetBrains.FormatRipper.MachO
         {
           mach_header mh;
           StreamUtil.ReadBytes(stream, (byte*)&mh, sizeof(mach_header));
+          var nCmds = GetU4(mh.ncmds);
+          var sizeOfCmds = GetU4(mh.sizeofcmds);
 
-          var loadCommands = ReadLoadCommands(sizeof(MH) + sizeof(mach_header), GetU4(mh.ncmds), GetU4(mh.sizeofcmds));
+          var offset = stream.Position;
+
+          Command[] commands;
+          using (var commandsStream = new ReadOnlyNestedStream(stream, offset, sizeOfCmds))
+            commands = ReadCommands(nCmds, commandsStream);
+
+          stream.Position = offset;
+          var loadCommands = ReadLoadCommands(commands, sizeOfCmds);
 
           return new Section(
             endian,
@@ -460,7 +500,7 @@ namespace JetBrains.FormatRipper.MachO
             (CPU_SUBTYPE)GetU4(mh.cpusubtype),
             (MH_FileType)GetU4(mh.filetype),
             (MH_Flags)GetU4(mh.flags),
-            loadCommands.Commands,
+            commands,
             loadCommands.HasSignature,
             loadCommands.SignatureType,
             loadCommands.SignatureData,
@@ -489,21 +529,19 @@ namespace JetBrains.FormatRipper.MachO
         var sections = new Section[nFatArch];
         if (magic is MH.FAT_CIGAM_64 or MH.FAT_MAGIC_64)
         {
-          var fatNodes = new fat_arch_64[checked((int)nFatArch)];
-          fixed (fat_arch_64* ptr = fatNodes)
-            StreamUtil.ReadBytes(stream, (byte*)ptr, checked((int)nFatArch * sizeof(fat_arch_64)));
-          for (var n = 0; n < nFatArch; ++n)
+          using var fatStream = new ReadOnlyNestedStream(stream, stream.Position, checked((int)nFatArch * sizeof(fat_arch_64)));
+          for (var n = 0u; n < nFatArch; ++n)
           {
-            ref var fatNode = ref fatNodes[n];
-            var cpuType = (CPU_TYPE)GetU4(fatNode.cputype);
-            var cpuSubType = (CPU_SUBTYPE)GetU4(fatNode.cpusubtype);
-            var offset = GetU8(fatNode.offset);
-            var subSize = GetU8(fatNode.size);
+            fat_arch_64 fa;
+            StreamUtil.ReadBytes(fatStream, (byte*)&fa, sizeof(fat_arch_64));
+            var cpuType = (CPU_TYPE)GetU4(fa.cputype);
+            var cpuSubType = (CPU_SUBTYPE)GetU4(fa.cpusubtype);
+            var offset = GetU8(fa.offset);
+            var size = GetU8(fa.size);
 
-            stream.Position = checked((long)offset);
-            var subMagic = ReadMagic(stream);
-
-            var section = Read(subMagic, new StreamRange(checked((long)offset), checked((long)subSize)));
+            using var sectionStream = new ReadOnlyNestedStream(stream, checked((long)offset), checked((long)size));
+            var sectionMagic = ReadMagic(sectionStream);
+            var section = Read(sectionMagic, new StreamRange(checked((long)offset), checked((long)size)), sectionStream);
             if (section.CpuType != cpuType)
               throw new FormatException("Inconsistent cpu type in fat header");
             if (section.CpuSubType != cpuSubType)
@@ -513,21 +551,19 @@ namespace JetBrains.FormatRipper.MachO
         }
         else
         {
-          var fatNodes = new fat_arch[checked((int)nFatArch)];
-          fixed (fat_arch* ptr = fatNodes)
-            StreamUtil.ReadBytes(stream, (byte*)ptr, checked((int)nFatArch * sizeof(fat_arch)));
-          for (var n = 0; n < nFatArch; ++n)
+          using var fatStream = new ReadOnlyNestedStream(stream, stream.Position, checked((int)nFatArch * sizeof(fat_arch)));
+          for (var n = 0u; n < nFatArch; ++n)
           {
-            ref var fatNode = ref fatNodes[n];
-            var cpuType = (CPU_TYPE)GetU4(fatNode.cputype);
-            var cpuSubType = (CPU_SUBTYPE)GetU4(fatNode.cpusubtype);
-            var offset = GetU4(fatNode.offset);
-            var size = GetU4(fatNode.size);
+            fat_arch fa;
+            StreamUtil.ReadBytes(fatStream, (byte*)&fa, sizeof(fat_arch));
+            var cpuType = (CPU_TYPE)GetU4(fa.cputype);
+            var cpuSubType = (CPU_SUBTYPE)GetU4(fa.cpusubtype);
+            var offset = GetU4(fa.offset);
+            var size = GetU4(fa.size);
 
-            stream.Position = offset;
-            var subMagic = ReadMagic(stream);
-
-            var section = Read(subMagic, new StreamRange(offset, size));
+            using var sectionStream = new ReadOnlyNestedStream(stream, offset, size);
+            var sectionMagic = ReadMagic(sectionStream);
+            var section = Read(sectionMagic, new StreamRange(offset, size), sectionStream);
             if (section.CpuType != cpuType)
               throw new FormatException("Inconsistent cpu type in fat header");
             if (section.CpuSubType != cpuSubType)
@@ -539,7 +575,7 @@ namespace JetBrains.FormatRipper.MachO
         return new(fatEndian, sections);
       }
 
-      return new(null, new[] { Read(magic, new StreamRange(0, stream.Length)) });
+      return new(null, new[] { Read(magic, new StreamRange(0, stream.Length), stream) });
     }
 
     private static unsafe MH ReadMagic(Stream stream)
@@ -551,7 +587,6 @@ namespace JetBrains.FormatRipper.MachO
 
     private sealed class LoadCommandsInfo
     {
-      public readonly Command[] Commands;
       public readonly bool HasSignature;
       public readonly SignatureType SignatureType;
       public readonly SignatureData SignatureData;
@@ -561,9 +596,8 @@ namespace JetBrains.FormatRipper.MachO
       public readonly byte[]? Entitlements;
       public readonly byte[]? EntitlementsDer;
 
-      public LoadCommandsInfo(Command[] commands, bool hasSignature, SignatureType signatureType, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes, MachOSectionSignatureTransferData? sectionSignatureTransferData, byte[]? entitlements, byte[]? entitlementsDer)
+      public LoadCommandsInfo(bool hasSignature, SignatureType signatureType, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes, MachOSectionSignatureTransferData? sectionSignatureTransferData, byte[]? entitlements, byte[]? entitlementsDer)
       {
-        Commands = commands;
         HasSignature = hasSignature;
         SignatureType = signatureType;
         SignatureData = signatureData;
