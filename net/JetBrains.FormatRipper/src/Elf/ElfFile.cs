@@ -109,15 +109,22 @@ namespace JetBrains.FormatRipper.Elf
         throw new FormatException("Invalid ELF magic numbers");
       if ((EV)eIdent[EI.EI_VERSION] != EV.EV_CURRENT)
         throw new FormatException("Invalid ELF file version");
+      var eiClass = (ELFCLASS)eIdent[EI.EI_CLASS];
       var eiData = (ELFDATA)eIdent[EI.EI_DATA];
+      var hdr = eiClass switch
+        {
+          ELFCLASS.ELFCLASS32 => Read32(eiData, stream),
+          ELFCLASS.ELFCLASS64 => Read64(eiData, stream),
+          _ => throw new FormatException("Invalid ELF file encoding")
+        };
+      return new(eiClass, eiData, (ELFOSABI)eIdent[EI.EI_OSABI], eIdent[EI.EI_ABIVERSION], hdr.EType, hdr.EMachine, hdr.EFlags, hdr.Programs, hdr.Sections);
 
-      var needSwap = ElfUtil.NeedSwap(eiData);
-      ushort GetU2(ushort v) => needSwap ? EndianUtil.SwapU2(v) : v;
-      uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
-      ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
-
-      unsafe Hdr Read32()
+      static unsafe Hdr Read32(ELFDATA eiData, Stream stream)
       {
+        var needSwap = ElfUtil.NeedSwap(eiData);
+        ushort GetU2(ushort v) => needSwap ? EndianUtil.SwapU2(v) : v;
+        uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+
         Elf32_Ehdr ehdr;
         StreamUtil.ReadBytes(stream, (byte*)&ehdr, sizeof(Elf32_Ehdr));
 
@@ -145,7 +152,9 @@ namespace JetBrains.FormatRipper.Elf
               var phOffset = GetU4(phdr.p_offset);
               var phSize = GetU4(phdr.p_filesz);
               programs[n] = new Program(
-                phSize, (PT)GetU4(phdr.p_type), (PF)GetU4(phdr.p_flags),
+                phSize,
+                (PT)GetU4(phdr.p_type),
+                (PF)GetU4(phdr.p_flags),
                 () => new ReadOnlyNestedStream(stream, phOffset, phSize));
             }
           }
@@ -186,7 +195,15 @@ namespace JetBrains.FormatRipper.Elf
               var shAddrAlign = GetU4(shdr.sh_addralign);
               var shSize = GetU4(shdr.sh_size);
               sections[n] = new Section(
-                shName, shSize, shAddr, shAddrAlign, shType, (SHF)GetU4(shdr.sh_flags), checked((ushort)GetU4(shdr.sh_link)), GetU4(shdr.sh_info), GetU4(shdr.sh_entsize),
+                shName,
+                shSize,
+                shAddr,
+                shAddrAlign,
+                shType,
+                (SHF)GetU4(shdr.sh_flags),
+                checked((ushort)GetU4(shdr.sh_link)),
+                GetU4(shdr.sh_info),
+                GetU4(shdr.sh_entsize),
                 () => shType == SHT.SHT_NOBITS ? throw new InvalidOperationException("Section has no data") : new ReadOnlyNestedStream(stream, shOffset, shSize));
             }
           }
@@ -200,8 +217,13 @@ namespace JetBrains.FormatRipper.Elf
           sections);
       }
 
-      unsafe Hdr Read64()
+      static unsafe Hdr Read64(ELFDATA eiData, Stream stream)
       {
+        var needSwap = ElfUtil.NeedSwap(eiData);
+        ushort GetU2(ushort v) => needSwap ? EndianUtil.SwapU2(v) : v;
+        uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+        ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
+
         Elf64_Ehdr ehdr;
         StreamUtil.ReadBytes(stream, (byte*)&ehdr, sizeof(Elf64_Ehdr));
 
@@ -229,7 +251,9 @@ namespace JetBrains.FormatRipper.Elf
               var phOffset = GetU8(phdr.p_offset);
               var phSize = GetU8(phdr.p_filesz);
               programs[n] = new Program(
-                phSize, (PT)GetU4(phdr.p_type), (PF)GetU4(phdr.p_flags),
+                phSize,
+                (PT)GetU4(phdr.p_type),
+                (PF)GetU4(phdr.p_flags),
                 () => new ReadOnlyNestedStream(stream, checked((long)phOffset), checked((long)phSize)));
             }
           }
@@ -270,7 +294,15 @@ namespace JetBrains.FormatRipper.Elf
               var shAddrAlign = GetU8(shdr.sh_addralign);
               var shSize = GetU8(shdr.sh_size);
               sections[n] = new Section(
-                shName, shSize, shAddr, shAddrAlign, shType, (SHF)checked((uint)GetU8(shdr.sh_flags)), checked((ushort)GetU4(shdr.sh_link)), GetU4(shdr.sh_info), GetU8(shdr.sh_entsize),
+                shName,
+                shSize,
+                shAddr,
+                shAddrAlign,
+                shType,
+                (SHF)checked((uint)GetU8(shdr.sh_flags)),
+                checked((ushort)GetU4(shdr.sh_link)),
+                GetU4(shdr.sh_info),
+                GetU8(shdr.sh_entsize),
                 () => shType == SHT.SHT_NOBITS ? throw new InvalidOperationException("Section has no data") : new ReadOnlyNestedStream(stream, checked((long)shOffset), checked((long)shSize)));
             }
           }
@@ -283,15 +315,6 @@ namespace JetBrains.FormatRipper.Elf
           programs,
           sections);
       }
-
-      var eiClass = (ELFCLASS)eIdent[EI.EI_CLASS];
-      var hdr = eiClass switch
-        {
-          ELFCLASS.ELFCLASS32 => Read32(),
-          ELFCLASS.ELFCLASS64 => Read64(),
-          _ => throw new FormatException("Invalid ELF file encoding")
-        };
-      return new(eiClass, eiData, (ELFOSABI)eIdent[EI.EI_OSABI], eIdent[EI.EI_ABIVERSION], hdr.EType, hdr.EMachine, hdr.EFlags, hdr.Programs, hdr.Sections);
     }
 
     private sealed class Hdr

@@ -84,16 +84,22 @@ namespace JetBrains.FormatRipper.Elf
         throw new ArgumentOutOfRangeException(nameof(symSectionIndex));
       if ((SHN)strSectionIndex <= SHN.SHN_UNDEF || SHN.SHN_LORESERVE <= (SHN)strSectionIndex || strSectionIndex >= file.Sections.Length)
         throw new ArgumentOutOfRangeException(nameof(strSectionIndex));
-      var symSection = file.Sections[symSectionIndex];
-      var strSection = file.Sections[strSectionIndex];
+      return file.EiClass switch
+        {
+          ELFCLASS.ELFCLASS32 => Read32(file.EiData, file.Sections, symSectionIndex, strSectionIndex),
+          ELFCLASS.ELFCLASS64 => Read64(file.EiData, file.Sections, symSectionIndex, strSectionIndex),
+          _ => throw new FormatException("Invalid ELF class encoding")
+        };
 
-      var needSwap = NeedSwap(file.EiData);
-      ushort GetU2(ushort v) => needSwap ? EndianUtil.SwapU2(v) : v;
-      uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
-      ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
-
-      unsafe Symbol[] Read32()
+      static unsafe Symbol[] Read32(ELFDATA eiData, ElfFile.Section[] sections, ushort symSectionIndex, ushort strSectionIndex)
       {
+        var symSection = sections[symSectionIndex];
+        var strSection = sections[strSectionIndex];
+
+        var needSwap = NeedSwap(eiData);
+        ushort GetU2(ushort v) => needSwap ? EndianUtil.SwapU2(v) : v;
+        uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+
         var entrySize = symSection.EntSize != 0 ? checked((int)symSection.EntSize) : sizeof(Elf32_Sym);
         if (entrySize < sizeof(Elf32_Sym))
           throw new FormatException("Invalid ELF symbol header size");
@@ -120,7 +126,6 @@ namespace JetBrains.FormatRipper.Elf
           Symbol symbol;
           if (SHN.SHN_UNDEF < (SHN)stShNdx && (SHN)stShNdx < SHN.SHN_LORESERVE)
           {
-            var sections = file.Sections;
             if (stShNdx >= sections.Length)
               throw new FormatException("Invalid ELF symbol section number");
 
@@ -131,7 +136,7 @@ namespace JetBrains.FormatRipper.Elf
               throw new FormatException("Invalid ELF symbol section address");
 
             var stShNdxEnd = FindEndOfSectionSequenceIndex(sections, stShNdx, stValue + stSize);
-            if (HasNoBits(file.Sections, stShNdx, stShNdxEnd))
+            if (HasNoBits(sections, stShNdx, stShNdxEnd))
               symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null);
             else
             {
@@ -154,8 +159,16 @@ namespace JetBrains.FormatRipper.Elf
         return symbols;
       }
 
-      unsafe Symbol[] Read64()
+      static unsafe Symbol[] Read64(ELFDATA eiData, ElfFile.Section[] sections, ushort symSectionIndex, ushort strSectionIndex)
       {
+        var symSection = sections[symSectionIndex];
+        var strSection = sections[strSectionIndex];
+
+        var needSwap = NeedSwap(eiData);
+        ushort GetU2(ushort v) => needSwap ? EndianUtil.SwapU2(v) : v;
+        uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+        ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
+
         var entrySize = symSection.EntSize != 0 ? checked((int)symSection.EntSize) : sizeof(Elf64_Sym);
         if (entrySize < sizeof(Elf64_Sym))
           throw new FormatException("Invalid ELF symbol header size");
@@ -183,7 +196,6 @@ namespace JetBrains.FormatRipper.Elf
           Symbol symbol;
           if (SHN.SHN_UNDEF < (SHN)stShNdx && (SHN)stShNdx < SHN.SHN_LORESERVE)
           {
-            var sections = file.Sections;
             if (stShNdx >= sections.Length)
               throw new FormatException("Invalid ELF symbol section number");
 
@@ -194,7 +206,7 @@ namespace JetBrains.FormatRipper.Elf
               throw new FormatException("Invalid ELF symbol section address");
 
             var stShNdxEnd = FindEndOfSectionSequenceIndex(sections, stShNdx, stValue + stSize);
-            if (HasNoBits(file.Sections, stShNdx, stShNdxEnd))
+            if (HasNoBits(sections, stShNdx, stShNdxEnd))
               symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null);
             else
             {
@@ -216,13 +228,6 @@ namespace JetBrains.FormatRipper.Elf
 
         return symbols;
       }
-
-      return file.EiClass switch
-        {
-          ELFCLASS.ELFCLASS32 => Read32(),
-          ELFCLASS.ELFCLASS64 => Read64(),
-          _ => throw new FormatException("Invalid ELF class encoding")
-        };
 
       static bool HasNoBits(ElfFile.Section[] sectionItems, ushort startIndex, ushort endIndex)
       {
