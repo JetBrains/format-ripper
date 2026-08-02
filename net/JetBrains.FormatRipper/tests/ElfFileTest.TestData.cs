@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using JetBrains.FormatRipper.Elf;
 
 namespace JetBrains.FormatRipper.Tests
@@ -30,6 +31,7 @@ namespace JetBrains.FormatRipper.Tests
         .Concat(MakeUnityPlayerNondevelopmentSources())
         .ToArray();
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeBusyboxStaticNixosSources() => new object?[]
       {
@@ -88,6 +90,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeBusyboxAlpineSources() => new object?[]
       {
@@ -1537,6 +1540,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeCatsaySources() => new object?[]
       {
@@ -2026,6 +2030,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeCoreutilsNixosSources() => new object?[]
       {
@@ -2532,6 +2537,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeGrepAndroidSources() => new object?[]
       {
@@ -2764,6 +2770,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeLibpcprofileSources() => new object?[]
       {
@@ -2838,6 +2845,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeLibulockmgrSources() => new object?[]
       {
@@ -2924,6 +2932,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeMktempFreebsdSources() => new object?[]
       {
@@ -3540,6 +3549,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeMktempGentooSources() => new object?[]
       {
@@ -4432,6 +4442,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeMktempOpenbsdSources() => new object?[]
       {
@@ -5392,6 +5403,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeMktempUbuntuSources() => new object?[]
       {
@@ -5519,6 +5531,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeNologinOpenSuseSources() => new object?[]
       {
@@ -5759,6 +5772,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeTempfileUbuntuSources() => new object?[]
       {
@@ -6080,6 +6094,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeVl805Sources() => new object?[]
       {
@@ -6132,6 +6147,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeObjectFileSources() => new object?[]
       {
@@ -6192,6 +6208,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeCoreDumpSources() => new object?[]
       {
@@ -6229,6 +6246,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeUnityEditorSources() => new object?[]
       {
@@ -6750,6 +6768,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeUnityPlayerDevelopmentSources() => new object?[]
       {
@@ -7516,6 +7535,7 @@ namespace JetBrains.FormatRipper.Tests
         // @formatter:on
       };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static object?[] MakeUnityPlayerNondevelopmentSources() => new object?[]
       {

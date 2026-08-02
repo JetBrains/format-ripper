@@ -1,4 +1,8 @@
-﻿namespace JetBrains.FormatRipper.MachO
+#if !(NET20 || NET30 || NET35 || NET40)
+using System.Runtime.CompilerServices;
+#endif
+
+namespace JetBrains.FormatRipper.MachO
 {
   // Note(ww898): See https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/nlist.h
 
@@ -9,10 +13,22 @@
   // in the MH_TWOLEVEL images only.
   public static class NDUtil
   {
+#if !(NET20 || NET30 || NET35 || NET40)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static byte GetCommAlign(ND desc) => (byte)((ushort)(desc & ND.COMM_ALIGN) >> 8);
+#if !(NET20 || NET30 || NET35 || NET40)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static ND SetCommAlign(byte align, ND desc = 0) => (desc & ~ND.COMM_ALIGN) | ((ND)(align << 8) & ND.COMM_ALIGN);
 
+#if !(NET20 || NET30 || NET35 || NET40)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static byte GetLibraryOrdinal(ND desc) => (byte)((ushort)(desc & ND.LIBRARY_ORDINAL) >> 8);
+#if !(NET20 || NET30 || NET35 || NET40)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static ND SetLibraryOrdinal(byte ordinal, ND desc = 0) => (desc & ~ND.LIBRARY_ORDINAL) | ((ND)(ordinal << 8) & ND.LIBRARY_ORDINAL);
   }
 }
