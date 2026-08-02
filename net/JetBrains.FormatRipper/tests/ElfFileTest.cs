@@ -237,8 +237,14 @@ namespace JetBrains.FormatRipper.Tests
             GenerateSectionStreamInfos(file);
 
           var symSectionIndex = ElfUtil.Find(file.Sections, SHT.SHT_DYNSYM) ?? ElfUtil.Find(file.Sections, SHT.SHT_SYMTAB);
-          var symbols = symSectionIndex != null ? ElfUtil.GetSymbols(file, symSectionIndex.Value, file.Sections[symSectionIndex.Value].Link) : new ElfUtil.Symbol[0];
-          Assert.AreEqual(expectedSymbolCount, symbols.Length, "Unexpected symbol count");
+          var symbols = new List<ElfUtil.Symbol>(expectedSymbolCount);
+          if (symSectionIndex != null)
+            Assert.IsTrue(ElfUtil.GetSymbols(file, symSectionIndex.Value, file.Sections[symSectionIndex.Value].Link, symbol =>
+              {
+                symbols.Add(symbol);
+                return true;
+              }));
+          Assert.AreEqual(expectedSymbolCount, symbols.Count, "Unexpected symbol count");
 
           var verifiedSymbols = SymbolUtil.SelectEdges(symbols);
           if (expectedSymbols != null)

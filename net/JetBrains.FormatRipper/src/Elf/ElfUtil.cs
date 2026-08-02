@@ -69,7 +69,9 @@ namespace JetBrains.FormatRipper.Elf
       }
     }
 
-    public static Symbol[] GetSymbols(ElfFile file, ushort symSectionIndex, ushort strSectionIndex)
+    public delegate bool SymbolFilterDelegate(Symbol symbol);
+
+    public static bool GetSymbols(ElfFile file, ushort symSectionIndex, ushort strSectionIndex, SymbolFilterDelegate symbolFilter)
     {
       if ((SHN)symSectionIndex <= SHN.SHN_UNDEF || SHN.SHN_LORESERVE <= (SHN)symSectionIndex || symSectionIndex >= file.Sections.Length)
         throw new ArgumentOutOfRangeException(nameof(symSectionIndex));
@@ -77,12 +79,12 @@ namespace JetBrains.FormatRipper.Elf
         throw new ArgumentOutOfRangeException(nameof(strSectionIndex));
       return file.EiClass switch
         {
-          ELFCLASS.ELFCLASS32 => Read32(file.EiData, file.Sections, symSectionIndex, strSectionIndex),
-          ELFCLASS.ELFCLASS64 => Read64(file.EiData, file.Sections, symSectionIndex, strSectionIndex),
+          ELFCLASS.ELFCLASS32 => Read32(file.EiData, file.Sections, symSectionIndex, strSectionIndex, symbolFilter),
+          ELFCLASS.ELFCLASS64 => Read64(file.EiData, file.Sections, symSectionIndex, strSectionIndex, symbolFilter),
           _ => throw new FormatException("Invalid ELF class encoding")
         };
 
-      static unsafe Symbol[] Read32(ELFDATA eiData, ElfFile.Section[] sections, ushort symSectionIndex, ushort strSectionIndex)
+      static unsafe bool Read32(ELFDATA eiData, ElfFile.Section[] sections, ushort symSectionIndex, ushort strSectionIndex, SymbolFilterDelegate symbolFilter)
       {
         var symSection = sections[symSectionIndex];
         var strSection = sections[strSectionIndex];
@@ -97,7 +99,6 @@ namespace JetBrains.FormatRipper.Elf
         using var strStream = strSection.CreateStream();
         using var symStream = symSection.CreateStream();
         var symCount = checked((int)symStream.Length / entrySize);
-        var symbols = new Symbol[symCount];
         for (var n = 0; n < symCount; ++n)
         {
           Elf32_Sym shdr;
@@ -114,7 +115,7 @@ namespace JetBrains.FormatRipper.Elf
           var stBinding = (STB)(shdr.st_info >> 4);
           var stOther = shdr.st_other;
 
-          Symbol symbol;
+          ElfFile.CreateStreamDelegate? createStream = null;
           if (SHN.SHN_UNDEF < (SHN)stShNdx && (SHN)stShNdx < SHN.SHN_LORESERVE)
           {
             if (stShNdx >= sections.Length)
@@ -127,30 +128,27 @@ namespace JetBrains.FormatRipper.Elf
               throw new FormatException("Invalid ELF symbol section address");
 
             var stShNdxEnd = FindEndOfSectionSequenceIndex(sections, stShNdx, stValue + stSize);
-            if (HasNoBits(sections, stShNdx, stShNdxEnd))
-              symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null);
-            else
+            if (!HasNoBits(sections, stShNdx, stShNdxEnd))
             {
               var offset = checked((long)(stValue - data.Address));
               if (stShNdx + 1 == stShNdxEnd)
-                symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, () => new ReadOnlyNestedStream(data.CreateStream(), offset, stSize));
+                createStream = () => new ReadOnlyNestedStream(data.CreateStream(), offset, stSize);
               else
               {
                 var createStreams = CreateStreamDelegates(sections, stShNdx, stShNdxEnd);
-                symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, () => new ReadOnlyNestedStream(new ReadOnlyAggregatedStream(CreateStreams(createStreams)), offset, stSize));
+                createStream = () => new ReadOnlyNestedStream(new ReadOnlyAggregatedStream(CreateStreams(createStreams)), offset, stSize);
               }
             }
           }
-          else
-            symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null);
 
-          symbols[n] = symbol;
+          if (!symbolFilter(new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, createStream)))
+            return false;
         }
 
-        return symbols;
+        return true;
       }
 
-      static unsafe Symbol[] Read64(ELFDATA eiData, ElfFile.Section[] sections, ushort symSectionIndex, ushort strSectionIndex)
+      static unsafe bool Read64(ELFDATA eiData, ElfFile.Section[] sections, ushort symSectionIndex, ushort strSectionIndex, SymbolFilterDelegate symbolFilter)
       {
         var symSection = sections[symSectionIndex];
         var strSection = sections[strSectionIndex];
@@ -167,8 +165,7 @@ namespace JetBrains.FormatRipper.Elf
         using var symStream = symSection.CreateStream();
 
         var symCount = checked((int)symStream.Length / entrySize);
-        var symbols = new Symbol[symCount];
-        for (var i = 0; i < symCount; i++)
+        for (var n = 0; n < symCount; ++n)
         {
           Elf64_Sym shdr;
           StreamUtil.ReadBytes(symStream, (byte*)&shdr, sizeof(Elf64_Sym));
@@ -184,7 +181,7 @@ namespace JetBrains.FormatRipper.Elf
           var stBinding = (STB)(shdr.st_info >> 4);
           var stOther = shdr.st_other;
 
-          Symbol symbol;
+          ElfFile.CreateStreamDelegate? createStream = null;
           if (SHN.SHN_UNDEF < (SHN)stShNdx && (SHN)stShNdx < SHN.SHN_LORESERVE)
           {
             if (stShNdx >= sections.Length)
@@ -197,27 +194,24 @@ namespace JetBrains.FormatRipper.Elf
               throw new FormatException("Invalid ELF symbol section address");
 
             var stShNdxEnd = FindEndOfSectionSequenceIndex(sections, stShNdx, stValue + stSize);
-            if (HasNoBits(sections, stShNdx, stShNdxEnd))
-              symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null);
-            else
+            if (!HasNoBits(sections, stShNdx, stShNdxEnd))
             {
               var offset = checked((long)(stValue - data.Address));
               if (stShNdx + 1 == stShNdxEnd)
-                symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, () => new ReadOnlyNestedStream(data.CreateStream(), offset, checked((long)stSize)));
+                createStream = () => new ReadOnlyNestedStream(data.CreateStream(), offset, checked((long)stSize));
               else
               {
                 var createStreams = CreateStreamDelegates(sections, stShNdx, stShNdxEnd);
-                symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, () => new ReadOnlyNestedStream(new ReadOnlyAggregatedStream(CreateStreams(createStreams)), offset, checked((long)stSize)));
+                createStream = () => new ReadOnlyNestedStream(new ReadOnlyAggregatedStream(CreateStreams(createStreams)), offset, checked((long)stSize));
               }
             }
           }
-          else
-            symbol = new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, null);
 
-          symbols[i] = symbol;
+          if (!symbolFilter(new Symbol(str, stShNdx, stValue, stSize, stType, stBinding, stOther, createStream)))
+            return false;
         }
 
-        return symbols;
+        return true;
       }
 
       static bool HasNoBits(ElfFile.Section[] sectionItems, ushort startIndex, ushort endIndex)
