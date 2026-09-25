@@ -358,7 +358,7 @@ namespace JetBrains.FormatRipper.Tests
 
             if (unityScriptingBackend == null)
               foreach (var symbol in symbols)
-                if (symbol.Name == UnityUtil.UNITY_SCRIPTING_BACKEND_MACHO_PE_SYMBOL &&
+                if (symbol.Name == UnityUtil.UNITY_SCRIPTING_BACKEND_MACHO_SYMBOL &&
                     (symbol.Type & (NT.N_STAB | NT.N_TYPE | NT.N_EXT)) == (NT.N_SECT | NT.N_EXT))
                 {
                   using var dataStream = symbol.CreateStream!();

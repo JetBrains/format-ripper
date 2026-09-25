@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using JetBrains.FormatRipper.Pe;
 using JetBrains.Tests;
 using NUnit.Framework;
@@ -7,7 +11,7 @@ using NUnit.Framework;
 namespace JetBrains.FormatRipper.Tests
 {
   [TestFixture]
-  public sealed class PeFileTest
+  public sealed partial class PeFileTest
   {
     [Flags]
     public enum CodeOptions
@@ -16,38 +20,80 @@ namespace JetBrains.FormatRipper.Tests
       HasMetadata = 0x2
     }
 
-    // @formatter:off
-    [TestCase("Armature.Interface.dll"                            , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386 , IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , CodeOptions.HasMetadata                         , null                                                                                              , "[118:8]", "0;0;[0:D8],[DC:3C],[120:14E0]")]
-    [TestCase("IntelAudioService.exe"                             , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE                                                                                                                         , CodeOptions.HasCmsBlob | CodeOptions.HasMetadata, "CABDFDBE1E041E2B42301E8DC9A9B8D05E7DCE63D2A773FA971213DE105816E128D7DC73FEB979A688F00332C355577B", "[128:8]", "0;0;[0:D8],[DC:4C],[130:5DAD0]")]
-    [TestCase("JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386 , IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_RELOCS_STRIPPED | IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE                                           , CodeOptions.HasCmsBlob                          , "D908B8DB1EF44291479A18163385753CEBB2E7DD256F1DDDA7C79A5E33052872792FEE7564FEFABF4D9D5D133ABF4641", "[1A8:8]", "0;0;[0:168],[16C:3C],[1B0:2279AF0]")]
-    [TestCase("JetBrains.ReSharper.TestResources.dll"             , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386 , IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , CodeOptions.HasCmsBlob | CodeOptions.HasMetadata, "E84F3F5361510E25262DB51D4F3D7B762F6958553D4A84196F0DCB79618772DC5CF808FB2B253A62FB4A604BE2683019", "[118:8]", "0;0;[0:D8],[DC:3C],[120:18E0]")]
-    [TestCase("ServiceModelRegUI.dll"                             , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , CodeOptions.HasCmsBlob                          , "F25E3A0B4B930208C6524CE6F9E762BFE99C8657A0A0796144A93C003C94C8032EA50CF215043588A35BF12AB47F1DCA", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]")]
-    [TestCase("ServiceModelRegUI_broken_counter_sign.dll"         , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , CodeOptions.HasCmsBlob                          , "F84C34B0F4D2B5201D53EF92B4A437256B1D5130CA9A7C3A035DE1FEB23CC4DC5B461ED8AD82DDA15CA7DDE025DB37B3", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]")]
-    [TestCase("ServiceModelRegUI_broken_hash.dll"                 , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , CodeOptions.HasCmsBlob                          , "9A265A0C8B9955A18B4BCF6795B85F54DBDD0510BB0D9B336B33679C0C44B167154702A649B63E50198AA4507EA991BA", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]")]
-    [TestCase("ServiceModelRegUI_broken_nested_sign.dll"          , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , CodeOptions.HasCmsBlob                          , "51213207ED1B0DC09F70B9879D42D269C83068E362D7B9855F71450C49B1CAAE321DA8773FFC738DCDA2FC35C67F1B48", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]")]
-    [TestCase("ServiceModelRegUI_broken_nested_sign_timestamp.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , CodeOptions.HasCmsBlob                          , "5BFAB068C6A7298B2947EE17914FB9FC6D849C78BD442B9E9CB56E04490F5FD647A58E0DEADDE3E68FE7F1068C4BC9BE", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]")]
-    [TestCase("ServiceModelRegUI_broken_sign.dll"                 , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , CodeOptions.HasCmsBlob                          , "23D9D4D67504B25A67D897743A4CFCC6DD7B810A12E50F0D834E3FBC05BB03FF92C78EF1536F53345E9DB87B6BF18857", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]")]
-    [TestCase("ServiceModelRegUI_empty_sign.dll"                  , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , 0                                               , null                                                                                              , "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]")]
-    [TestCase("ServiceModelRegUI_no_sign.dll"                     , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , 0                                               , null                                                                                              , "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]")]
-    [TestCase("ServiceModelRegUI_trimmed_sign.dll"                , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , 0                                               , null                                                                                              , "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]")]
-    [TestCase("System.Security.Principal.Windows.dll"             , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386 , IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , CodeOptions.HasCmsBlob | CodeOptions.HasMetadata, "81E2CE2291B5BDF0724639FA17360E4C707EF513FE15ED032A35742F910BA54CF76EA74BDE0B304A6839427DFD018A0C", "[118:8]", "0;0;[0:D8],[DC:3C],[120:16E0]")]
-    [TestCase("api-ms-win-core-rtlsupport-l1-1-0.dll"             , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386 , IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                                   , CodeOptions.HasCmsBlob                          , "F9EE34D26BDD204A45D80A43382C4B241E9A166F84670E6625761B44012CED0904D351676D2BB08849EE24F5592B41E5", "[150:8]", "0;0;[0:110],[114:3C],[158:6A8]")]
-    [TestCase("dotnet.exe"                                        , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE                                                                                                                         , CodeOptions.HasCmsBlob                          , "5270038904B10DC31E236C424C863FA35F4B7822D826774C759E69EA05C1EA167F8CC56A2B6EE214DEF5774CB4B54569", "[1A8:8]", "0;0;[0:158],[15C:4C],[1B0:1B050]")]
-    [TestCase("libcrypto-1_1-x64.dll"                             , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , CodeOptions.HasCmsBlob                          , "4E6C2E9F3EC563CC8580BD5ABFB8AFFB160E079260E0A3C3776146FBBC34C2EA3A51C19CC5B7F60888C69FC99122C749", "[1A0:8]", "0;0;[0:150],[154:4C],[1A8:299058]")]
-    [TestCase("libssl-1_1-x64.dll"                                , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , CodeOptions.HasCmsBlob                          , "7BF27779F75B36FB25542EB7E8269CCDA7B592485457ECD236CB12323DC1EFA0B4106772C30FE43FDF5091DF1D9C761E", "[1A0:8]", "0;0;[0:150],[154:4C],[1A8:A0258]")]
-    [TestCase("shell32.dll"                                       , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , CodeOptions.HasCmsBlob                          , "DE053E2A73D93500D8AAA51DD6DF217C48CBA4BBDB8D3420F4A326C601A02D761C656C48B6130FBC9715BDA8EF6A76C3", "[1A8:8]", "0;0;[0:158],[15C:4C],[1B0:735650]")]
-    [TestCase("uninst.exe"                                        , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386 , IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_RELOCS_STRIPPED | IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LINE_NUMS_STRIPPED | IMAGE_FILE.IMAGE_FILE_LOCAL_SYMS_STRIPPED | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE, 0                                               , null                                                                                              , "[170:8]", "0;0;[0:130],[134:3C],[178:F2AF]")]
-    [TestCase("winrsmgr.arm.dll"                                  , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARMNT, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE.IMAGE_FILE_DLL                                                       , 0                                               , null                                                                                              , "[150:8]", "0;0;[0:110],[114:3C],[158:2EA8]")]
-    [TestCase("winrsmgr.arm64.dll"                                , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARM64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , 0                                               , null                                                                                              , "[150:8]", "0;0;[0:100],[104:4C],[158:6A8]")]
-    [TestCase("winrsmgr.x64.dll"                                  , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                             , 0                                               , null                                                                                              , "[150:8]", "0;0;[0:100],[104:4C],[158:6A8]")]
-    [TestCase("winrsmgr.x86.dll"                                  , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386 , IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE.IMAGE_FILE_DLL                                                                                                   , 0                                               , null                                                                                              , "[150:8]", "0;0;[0:110],[114:3C],[158:6A8]")]
-    [TestCase("wscadminui.arm.exe"                                , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARMNT, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE                                                                                   , 0                                               , null                                                                                              , "[180:8]", "0;0;[0:140],[144:3C],[188:6E78]")]
-    [TestCase("wscadminui.arm64.exe"                              , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARM64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE                                                                                                                         , 0                                               , null                                                                                              , "[188:8]", "0;0;[0:138],[13C:4C],[190:2270]")]
-    [TestCase("wscadminui.x64.exe"                                , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE                                                                                                                         , 0                                               , null                                                                                              , "[190:8]", "0;0;[0:140],[144:4C],[198:2268]")]
-    [TestCase("wscadminui.x86.exe"                                , IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386 , IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE                                                                                                                               , 0                                               , null                                                                                              , "[180:8]", "0;0;[0:140],[144:3C],[188:1E78]")]
-    // @formatter:on
-    [Test]
-    public void Test(
+    public sealed class Section
+    {
+      public readonly string? Hash;
+      public readonly uint VirtualAddress;
+      public readonly uint VirtualSize;
+      public readonly uint SizeOfRawData;
+      public readonly string Name;
+      public readonly IMAGE_SCN Characteristics;
+
+      internal Section(string? hash, uint virtualAddress, uint virtualSize, uint sizeOfRawData, string name, IMAGE_SCN characteristics)
+      {
+        Hash = hash;
+        VirtualAddress = virtualAddress;
+        VirtualSize = virtualSize;
+        SizeOfRawData = sizeOfRawData;
+        Name = name;
+        Characteristics = characteristics;
+      }
+
+      public override string ToString() => $"{Hash}, 0x{VirtualAddress:X}, {VirtualSize}, {SizeOfRawData}, \"{Name}\", 0x{(uint)Characteristics:X}";
+    }
+
+    public sealed class Export
+    {
+      public readonly string? Hash;
+      public readonly uint Ordinal;
+      public readonly uint VirtualAddress;
+      public readonly string? Name;
+      public readonly string? Forwarder;
+
+      internal Export(string? hash, uint ordinal, uint virtualAddress, string? name, string? forwarder)
+      {
+        Hash = hash;
+        Ordinal = ordinal;
+        VirtualAddress = virtualAddress;
+        Name = name;
+        Forwarder = forwarder;
+      }
+
+      public override string ToString() => $"{Hash}, {Ordinal}, 0x{VirtualAddress:X}, \"{Name}\", \"{Forwarder}\"";
+    }
+
+    public sealed class Symbol
+    {
+      public readonly string? Hash;
+      public readonly uint Value;
+      public readonly ushort SectionNumber;
+      public readonly string Name;
+      public readonly IMAGE_SYM_TYPE BaseType;
+      public readonly IMAGE_SYM_DTYPE DerivedType;
+      public readonly IMAGE_SYM_CLASS StorageClass;
+      public readonly byte NumberOfAuxSymbols;
+
+      internal Symbol(string? hash, uint value, IMAGE_SYM sectionNumber, string name, IMAGE_SYM_TYPE baseType, IMAGE_SYM_DTYPE derivedType, IMAGE_SYM_CLASS storageClass, byte numberOfAuxSymbols) :
+        this(hash, value, (ushort)sectionNumber, name, baseType, derivedType, storageClass, numberOfAuxSymbols)
+      {
+      }
+
+      internal Symbol(string? hash, uint value, ushort sectionNumber, string name, IMAGE_SYM_TYPE baseType, IMAGE_SYM_DTYPE derivedType, IMAGE_SYM_CLASS storageClass, byte numberOfAuxSymbols)
+      {
+        Hash = hash;
+        Value = value;
+        SectionNumber = sectionNumber;
+        Name = name;
+        BaseType = baseType;
+        DerivedType = derivedType;
+        StorageClass = storageClass;
+        NumberOfAuxSymbols = numberOfAuxSymbols;
+      }
+
+      public override string ToString() => $"{Hash}, 0x{Value:X}, {SectionNumber}, \"{Name}\", {BaseType}, {DerivedType}, {StorageClass}, {NumberOfAuxSymbols}";
+    }
+
+    private static object?[] Make(
       string resourceName,
       IMAGE_FILE_MACHINE expectedMachine,
       IMAGE_SUBSYSTEM expectedSubsystem,
@@ -55,7 +101,81 @@ namespace JetBrains.FormatRipper.Tests
       CodeOptions expectedOptions,
       string? expectedCmsBlobHash,
       string expectedSecurityDataDirectoryRange,
-      string expectedOrderedIncludeRanges)
+      string expectedOrderedIncludeRanges,
+      int expectedExportCount,
+      int expectedSymbolCount,
+      Section[]? expectedSections,
+      Export[]? expectedExports,
+      Symbol[]? expectedSymbols = null) => new object?[]
+        {
+          false,
+          resourceName,
+          expectedMachine,
+          expectedSubsystem,
+          expectedCharacteristics,
+          expectedOptions,
+          expectedCmsBlobHash,
+          expectedSecurityDataDirectoryRange,
+          expectedOrderedIncludeRanges,
+          null,
+          expectedExportCount,
+          expectedSymbolCount,
+          expectedSections,
+          expectedExports,
+          expectedSymbols
+        };
+
+    private static object?[] MakeOptional(
+      string resourceName,
+      IMAGE_FILE_MACHINE expectedMachine,
+      IMAGE_SUBSYSTEM expectedSubsystem,
+      IMAGE_FILE expectedCharacteristics,
+      CodeOptions expectedOptions,
+      string? expectedCmsBlobHash,
+      string expectedSecurityDataDirectoryRange,
+      string expectedOrderedIncludeRanges,
+      string? expectedUnityScriptingBackend,
+      int expectedExportCount,
+      int expectedSymbolCount,
+      Section[]? expectedSections,
+      Export[]? expectedExports,
+      Symbol[]? expectedSymbols = null) => new object?[]
+        {
+          true,
+          resourceName,
+          expectedMachine,
+          expectedSubsystem,
+          expectedCharacteristics,
+          expectedOptions,
+          expectedCmsBlobHash,
+          expectedSecurityDataDirectoryRange,
+          expectedOrderedIncludeRanges,
+          expectedUnityScriptingBackend,
+          expectedExportCount,
+          expectedSymbolCount,
+          expectedSections,
+          expectedExports,
+          expectedSymbols
+        };
+
+    [TestCaseSource(typeof(PeFileTest), nameof(Sources))]
+    [Test]
+    public void Test(
+      bool canIgnoreMissingResource,
+      string resourceName,
+      IMAGE_FILE_MACHINE expectedMachine,
+      IMAGE_SUBSYSTEM expectedSubsystem,
+      IMAGE_FILE expectedCharacteristics,
+      CodeOptions expectedOptions,
+      string? expectedCmsBlobHash,
+      string expectedSecurityDataDirectoryRange,
+      string expectedOrderedIncludeRanges,
+      string? expectedUnityScriptingBackend,
+      int expectedExportCount,
+      int expectedSymbolCount,
+      Section[]? expectedSections,
+      Export[]? expectedExports,
+      Symbol[]? expectedSymbols)
     {
       TestDataUtil.OpenRead(ResourceCategory.Pe, resourceName, stream =>
         {
@@ -92,7 +212,269 @@ namespace JetBrains.FormatRipper.Tests
           Assert.IsNotNull(computeHashInfo);
           ValidateUtil.Validate(computeHashInfo!);
           Assert.AreEqual(expectedOrderedIncludeRanges, computeHashInfo!.ToString());
+
+          if (expectedSections != null)
+          {
+            var sections = file.Sections;
+            Assert.AreEqual(expectedSections.Length, sections.Length);
+            for (var n = 0; n < expectedSections.Length; ++n)
+            {
+              var expectedSection = expectedSections[n];
+              var section = sections[n];
+
+              Assert.AreEqual(expectedSection.Name, section.Name);
+              Assert.AreEqual(expectedSection.VirtualAddress, section.VirtualAddress, $"Expected 0x{expectedSection.VirtualAddress:X}, but was 0x{section.VirtualAddress:X}");
+              Assert.AreEqual(expectedSection.VirtualSize, section.VirtualSize);
+              Assert.AreEqual(expectedSection.SizeOfRawData, section.SizeOfRawData);
+              Assert.AreEqual(expectedSection.Characteristics, section.Characteristics, $"Expected 0x{(uint)expectedSection.Characteristics:X}, but was 0x{(uint)section.Characteristics:X}");
+
+              var hash = section.CreateStream == null ? null : CalculateStreamHash(() => section.CreateStream());
+              Assert.AreEqual(expectedSection.Hash, hash);
+            }
+          }
+          else
+            GenerateSectionInfos(file.Sections);
+
+          var exports = new List<PeUtil.Export>(expectedExportCount);
+          Assert.IsTrue(PeUtil.GetExports(file, export =>
+            {
+              exports.Add(export);
+              return true;
+            }));
+          Assert.AreEqual(expectedExportCount, exports.Count, "Unexpected export count");
+
+          var verifiedExports = SymbolUtil.SelectEdges(exports);
+          if (expectedExports != null)
+          {
+            Assert.AreEqual(expectedExports.Length, verifiedExports.Length);
+            for (var n = 0; n < expectedExports.Length; ++n)
+            {
+              var expectedExport = expectedExports[n];
+              var export = verifiedExports[n];
+
+              Assert.AreEqual(expectedExport.Name, export.Name);
+              Assert.AreEqual(expectedExport.Ordinal, export.Ordinal);
+              Assert.AreEqual(expectedExport.VirtualAddress, export.VirtualAddress, $"Expected 0x{expectedExport.VirtualAddress:X}, but was 0x{export.VirtualAddress:X}");
+              Assert.AreEqual(expectedExport.Forwarder, export.Forwarder);
+
+              var hash = export.CreateStream == null ? null : CalculateStreamHash(() => export.CreateStream());
+              Assert.AreEqual(expectedExport.Hash, hash);
+            }
+          }
+          else
+            GenerateExportInfos(verifiedExports);
+
+          var symbols = new List<PeUtil.Symbol>(expectedSymbolCount);
+          Assert.IsTrue(PeUtil.GetSymbols(file, symbol =>
+            {
+              symbols.Add(symbol);
+              return true;
+            }));
+          Assert.AreEqual(expectedSymbolCount, symbols.Count, "Unexpected symbol count");
+
+          var verifiedSymbols = SymbolUtil.SelectEdges(symbols);
+          if (expectedSymbols != null)
+          {
+            Assert.AreEqual(expectedSymbols.Length, verifiedSymbols.Length);
+            for (var n = 0; n < expectedSymbols.Length; ++n)
+            {
+              var expectedSymbol = expectedSymbols[n];
+              var symbol = verifiedSymbols[n];
+
+              Assert.AreEqual(expectedSymbol.Name, symbol.Name);
+              Assert.AreEqual(expectedSymbol.Value, symbol.Value, $"Expected 0x{expectedSymbol.Value:X}, but was 0x{symbol.Value:X}");
+              Assert.AreEqual(expectedSymbol.SectionNumber, symbol.SectionNumber, $"Expected 0x{expectedSymbol.SectionNumber:X}, but was 0x{symbol.SectionNumber:X}");
+              Assert.AreEqual(expectedSymbol.BaseType, symbol.BaseType);
+              Assert.AreEqual(expectedSymbol.DerivedType, symbol.DerivedType);
+              Assert.AreEqual(expectedSymbol.StorageClass, symbol.StorageClass);
+              Assert.AreEqual(expectedSymbol.NumberOfAuxSymbols, symbol.NumberOfAuxSymbols);
+
+              var hash = symbol.CreateStream == null ? null : CalculateStreamHash(() => symbol.CreateStream());
+              Assert.AreEqual(expectedSymbol.Hash, hash);
+            }
+          }
+          else
+            GenerateSymbolInfos(verifiedSymbols);
+
+          string? unityScriptingBackend = null;
+          foreach (var export in exports)
+            if (export is { Name: UnityUtil.UNITY_SCRIPTING_BACKEND_ELF_PE_SYMBOL, Forwarder: null })
+            {
+              using var dataStream = export.CreateStream!();
+              unityScriptingBackend = PeUtil.ReadStringZ(dataStream);
+              break;
+            }
+
+          if (unityScriptingBackend != null)
+            Assert.Contains(unityScriptingBackend, new[]
+              {
+                UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
+                UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE,
+                UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE
+              });
+          Assert.AreEqual(expectedUnityScriptingBackend, unityScriptingBackend);
+        }, str =>
+        {
+          if (canIgnoreMissingResource)
+            Assert.Ignore(str);
         });
+    }
+
+    [TestCase("HelloWorld1_realigned.exe")]
+    [TestCase("HelloWorld1_realigned_signed.exe")]
+    [Test]
+    public void SymbolsErrorTest(string resourceName)
+    {
+      TestDataUtil.OpenRead(ResourceCategory.Pe, resourceName, stream =>
+        {
+          var file = PeFile.Parse(stream);
+          Assert.That(() => PeUtil.GetSymbols(file, _ => true), Throws.TypeOf<FormatException>());
+        });
+    }
+
+    private const int Sha256HashStringLength = 2 * 256 / 8;
+    private const string @null = "null";
+
+    private static string CalculateStreamHash(Func<Stream> createStream)
+    {
+      using var itemStream = createStream();
+      using var hashAlgorithm = SHA256.Create();
+      return HexUtil.ConvertToHexString(hashAlgorithm.ComputeHash(itemStream));
+    }
+
+    private static void GenerateSectionInfos(PeFile.Section[] sections)
+    {
+      Console.WriteLine("          new Section[]");
+      Console.WriteLine("            {");
+
+      var maxHashLength = sections.Select(x => x.CreateStream == null ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
+      var maxVirtualAddressLength = sections.Select(x => ("0x" + x.VirtualAddress.ToString("X")).Length).DefaultIfEmpty(0).Max();
+      var maxVirtualSizeLength = sections.Select(x => x.VirtualSize.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxSizeOfRawDataLength = sections.Select(x => x.SizeOfRawData.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxNameLength = sections.Select(x => x.Name.Length).DefaultIfEmpty(0).Max();
+      foreach (var section in sections)
+      {
+        var hash = section.CreateStream == null ? null : CalculateStreamHash(() => section.CreateStream());
+
+        Console.WriteLine(
+          "              new({0}, {1}, {2}, {3}, {4}, {5}),",
+          (hash == null ? @null : '"' + hash + '"').PadRight(maxHashLength),
+          ("0x" + section.VirtualAddress.ToString("X")).PadLeft(maxVirtualAddressLength),
+          section.VirtualSize.ToString().PadLeft(maxVirtualSizeLength),
+          section.SizeOfRawData.ToString().PadLeft(maxSizeOfRawDataLength),
+          ('"' + section.Name + '"').PadRight(maxNameLength + 2),
+          GetCharacteristicsStr(section.Characteristics));
+      }
+
+      Console.WriteLine("            },");
+
+      static string GetCharacteristicsStr(IMAGE_SCN characteristics)
+      {
+        // Note: the alignment is a value in the IMAGE_SCN_ALIGN_MASK bits, the other bits are the flags
+        var names = Enum.GetNames(typeof(IMAGE_SCN));
+        var values = (IMAGE_SCN[])Enum.GetValues(typeof(IMAGE_SCN));
+
+        var builder = new StringBuilder();
+
+        void Append(string str)
+        {
+          if (builder.Length > 0)
+            builder.Append(" | ");
+          builder.Append(str);
+        }
+
+        var align = characteristics & IMAGE_SCN.IMAGE_SCN_ALIGN_MASK;
+        if (align != 0)
+        {
+          var index = Array.IndexOf(values, align);
+          Append(index >= 0 && align != IMAGE_SCN.IMAGE_SCN_ALIGN_MASK ? "IMAGE_SCN." + names[index] : $"(IMAGE_SCN)0x{(uint)align:X8}");
+        }
+
+        var rest = (uint)(characteristics & ~IMAGE_SCN.IMAGE_SCN_ALIGN_MASK);
+        for (var n = 0; n < names.Length; ++n)
+        {
+          var value = (uint)values[n];
+          if (value == 0 || (value & (value - 1)) != 0 || (value & (uint)IMAGE_SCN.IMAGE_SCN_ALIGN_MASK) != 0 || (rest & value) != value)
+            continue;
+          rest &= ~value;
+          Append("IMAGE_SCN." + names[n]);
+        }
+
+        if (rest != 0)
+          Append($"(IMAGE_SCN)0x{rest:X8}");
+        return builder.Length == 0 ? "0" : builder.ToString();
+      }
+    }
+
+    private static void GenerateExportInfos(ICollection<PeUtil.Export> exports)
+    {
+      Console.WriteLine("          new Export[]");
+      Console.WriteLine("            {");
+
+      var maxHashLength = exports.Select(x => x.CreateStream == null ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
+      var maxOrdinalLength = exports.Select(x => x.Ordinal.ToString().Length).DefaultIfEmpty(0).Max();
+      var maxVirtualAddressLength = exports.Select(x => ("0x" + x.VirtualAddress.ToString("X")).Length).DefaultIfEmpty(0).Max();
+      var maxNameLength = exports.Select(x => GetStr(x.Name).Length).DefaultIfEmpty(0).Max();
+      foreach (var export in exports)
+      {
+        var hash = export.CreateStream == null ? null : CalculateStreamHash(() => export.CreateStream());
+
+        Console.WriteLine(
+          "              new({0}, {1}, {2}, {3}, {4}),",
+          (hash == null ? @null : '"' + hash + '"').PadRight(maxHashLength),
+          export.Ordinal.ToString().PadLeft(maxOrdinalLength),
+          ("0x" + export.VirtualAddress.ToString("X")).PadLeft(maxVirtualAddressLength),
+          GetStr(export.Name).PadRight(maxNameLength),
+          GetStr(export.Forwarder));
+      }
+
+      Console.WriteLine("            },");
+
+      static string GetStr(string? str) => str == null ? @null : '"' + str + '"';
+    }
+
+    private static void GenerateSymbolInfos(ICollection<PeUtil.Symbol> symbols)
+    {
+      Console.WriteLine("          new Symbol[]");
+      Console.WriteLine("            {");
+
+      var maxHashLength = symbols.Select(x => x.CreateStream == null ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
+      var maxValueLength = symbols.Select(x => ("0x" + x.Value.ToString("X")).Length).DefaultIfEmpty(0).Max();
+      var maxSectionNumberLength = symbols.Select(x => GetSectionNumberStr(x.SectionNumber).Length).DefaultIfEmpty(0).Max();
+      var maxNameLength = symbols.Select(x => x.Name.Length).DefaultIfEmpty(0).Max();
+      var maxBaseTypeLength = symbols.Select(x => GetEnumStr(x.BaseType).Length).DefaultIfEmpty(0).Max();
+      var maxDerivedTypeLength = symbols.Select(x => GetEnumStr(x.DerivedType).Length).DefaultIfEmpty(0).Max();
+      var maxStorageClassLength = symbols.Select(x => GetEnumStr(x.StorageClass).Length).DefaultIfEmpty(0).Max();
+      foreach (var symbol in symbols)
+      {
+        var hash = symbol.CreateStream == null ? null : CalculateStreamHash(() => symbol.CreateStream());
+
+        var sectionNumberStr = GetSectionNumberStr(symbol.SectionNumber);
+        Console.WriteLine(
+          "              new({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}),",
+          (hash == null ? @null : '"' + hash + '"').PadRight(maxHashLength),
+          ("0x" + symbol.Value.ToString("X")).PadLeft(maxValueLength),
+          sectionNumberStr.StartsWith("IMAGE_SYM.") ? sectionNumberStr.PadRight(maxSectionNumberLength) : sectionNumberStr.PadLeft(maxSectionNumberLength),
+          ('"' + symbol.Name + '"').PadRight(maxNameLength + 2),
+          GetEnumStr(symbol.BaseType).PadRight(maxBaseTypeLength),
+          GetEnumStr(symbol.DerivedType).PadRight(maxDerivedTypeLength),
+          GetEnumStr(symbol.StorageClass).PadRight(maxStorageClassLength),
+          symbol.NumberOfAuxSymbols);
+      }
+
+      Console.WriteLine("            },");
+
+      static string GetSectionNumberStr(ushort sectionNumber)
+      {
+        var name = (IMAGE_SYM)sectionNumber == IMAGE_SYM.IMAGE_SYM_UNDEFINED || (IMAGE_SYM)sectionNumber > IMAGE_SYM.IMAGE_SYM_SECTION_MAX ? Enum.GetName(typeof(IMAGE_SYM), (IMAGE_SYM)sectionNumber) : null;
+        return name != null ? "IMAGE_SYM." + name : sectionNumber.ToString();
+      }
+
+      static string GetEnumStr<T>(T value) where T : struct, Enum
+      {
+        var name = Enum.GetName(typeof(T), value);
+        return name != null ? typeof(T).Name + "." + name : $"({typeof(T).Name})0x{Convert.ToUInt64(value):X}";
+      }
     }
   }
 }

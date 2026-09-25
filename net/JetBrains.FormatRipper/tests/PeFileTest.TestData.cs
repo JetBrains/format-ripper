@@ -1,0 +1,2043 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using JetBrains.FormatRipper.Pe;
+
+namespace JetBrains.FormatRipper.Tests
+{
+  public sealed partial class PeFileTest
+  {
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    private static readonly object?[] Sources =
+      MakeArmatureInterfaceSources()
+        .Concat(MakeHelloWorldSources())
+        .Concat(MakeIntelAudioServiceSources())
+        .Concat(MakeJetBrainsDotUltimateSources())
+        .Concat(MakeJetBrainsReSharperTestResourcesSources())
+        .Concat(MakeServiceModelRegUiSources())
+        .Concat(MakeSystemSecurityPrincipalWindowsSources())
+        .Concat(MakeTestCAppSources())
+        .Concat(MakeApiMsWinCoreRtlSupportSources())
+        .Concat(MakeDotnetSources())
+        .Concat(MakeLibcryptoSources())
+        .Concat(MakeLibsslSources())
+        .Concat(MakeShell32Sources())
+        .Concat(MakeUninstSources())
+        .Concat(MakeWinrsmgrSources())
+        .Concat(MakeWscadminuiSources())
+        .Concat(MakeUnityEditorSources())
+        .Concat(MakeUnityPlayerDevelopmentSources())
+        .Concat(MakeUnityPlayerNondevelopmentSources())
+        .ToArray();
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeArmatureInterfaceSources() => new object?[]
+      {
+        // @formatter:off
+        Make("Armature.Interface.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasMetadata, null, "[118:8]", "0;0;[0:D8],[DC:3C],[120:14E0]", 0, 0,
+          new Section[]
+            {
+              new("9F5791373B9DA00178749595F8927282B9EDCB4983D3547F5AC0037898628110", 0x2000, 2592, 3072, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("0B19EF73B198F7A79544AF024FBD93DF00565A71B0AAF85AD51341F0F6BD8858", 0x4000, 1168, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("7997FCCB921BBBEC48AFFE39184E36CD9083112DE35C4C09D21058E992F193F9", 0x6000,   12,  512, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeHelloWorldSources() => new object?[]
+      {
+        // @formatter:off
+        Make("HelloWorld1.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LINE_NUMS_STRIPPED | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DEBUG_STRIPPED, 0, null, "[128:8]", "0;0;[0:D8],[DC:4C],[130:AEA1]", 0, 821,
+          new Section[]
+            {
+              new("6EA397D7F634740CD088BF99142760838E1433A39FC7D57040A8C86F92854004", 0x1000, 7912, 8192, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("B756F65C13514C2E15365C261880F8DB53B7EB72A83E93C945A30EF7B4548068", 0x3000,  160,  512, ".data" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("FE9912700CA8F5DAD53FD9A591250826DE379DF7576AE5949395148FB707D227", 0x4000, 2536, 2560, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("3CC43B8E7998BC1AACE5659258552315A6F8D3F4D37E98A27A3E452FB494905F", 0x5000,  588, 1024, ".pdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("B1B506CAE93F7C1C23383C46A721B49910C85DC50816BBE02403C3F684647EC6", 0x6000,  600, 1024, ".xdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new(null                                                              , 0x7000,  352,    0, ".bss"  , IMAGE_SCN.IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("009F90F944A2941668F055A123116863DE634D34C74923F6F2A5274A3ADC9D27", 0x8000, 1652, 2048, ".idata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("57D332391C999BE6CFD6176DD5E24BCB5EB7E443C6A70195DBBC57DECAFB31CC", 0x9000,   96,  512, ".CRT"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("076A27C79E5ACE2A3D47F9DD2E83E4FF6EA8872B3C2218F66C92B89B55F36560", 0xA000,   16,  512, ".tls"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("515DCABC6686ACF9D3D2A7A54F8337460255A705AE8085291ACAA45844B71808", 0xB000, 1256, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("6F568A123BA3D1ECDF918D9DDCA2729F1814BA8EF6B8EF382D37A24A2EF95076", 0xC000,  124,  512, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+              new(null                                                              ,     0x54, IMAGE_SYM.IMAGE_SYM_DEBUG    , ".file"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_FILE    , 1),
+              new(null                                                              ,      0x4,                             6, "argc"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,      0x8,                             6, "argv"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x10,                             6, "envp"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x18,                             6, "argret"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x1C,                             6, "mainret"                                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x20,                             6, "managedapp"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x24,                             6, "has_cctor"                                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x28,                             6, "startinfo"                                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("6EA397D7F634740CD088BF99142760838E1433A39FC7D57040A8C86F92854004",      0x0,                             1, "__mingw_invalidParameterHandler"            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("36BBA598619F19682C2311F79B3C4A2D6221DEB98BBC4094FAB9C2D3BCD7847E",     0x17,                             1, "pre_c_init"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("08D25CAF26B50372D979014CCEABFE40267AB68E40A3DB2B2595B022A4300BB7",    0x500,                             3, ".rdata$.refptr.__mingw_app_type"            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("64310D7882EBACFB10F0205A9E689B8636E6B1E5B375235AC539ED3595E38364",    0x5D0,                             3, ".rdata$.refptr._fmode"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("FB04024A889B4C0DB893CF5F8B17F23405CC3B5208A4D123CBB5802A39ED57E3",    0x5B0,                             3, ".rdata$.refptr._commode"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("7693061E534091BEAFBB6682419FDDABD2D7DF0D859919ED03C3698387F0A4D3",    0x450,                             3, ".rdata$.refptr._MINGW_INSTALL_DEBUG_MATHERR", IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("9C4A75CD646C0ACCBF04C389F7C9B7E39C02777025157024A8FBDA97C2DCC32A",    0x5F0,                             3, ".rdata$.refptr._matherr"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("CCB9704D3BF1667FDFE4961C633791FE24A86B0F102C709994D08E241023229D",     0x9A,                             1, "pre_cpp_init"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("B1D2DD0FDFA1F6DCD2399F9C1FCC893A8FA96C3A9A1531555ADF56404DBF824F",    0x600,                             3, ".rdata$.refptr._newmode"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("8B4E85C53629E7321C632222A307BB9521F923D65782CCE734C3E200DF5CD6E5",    0x5C0,                             3, ".rdata$.refptr._dowildcard"                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("20940599A68A2B54C846A82E00C401CBF4D9E311D282662DD3B607A362C4AF4D",     0xF6,                             1, "WinMainCRTStartup"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("8036EFEFFF4AFB578B8D3169A9F55607CBF34334F79530C6B057396861A186E7",    0x105,                             1, ".l_startw"                                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_LABEL   , 0),
+              new("A67F8B878CDA27EEFB759550B9480E2DEFC717403D1761380A86050CBE4083E0",    0x11B,                             1, ".l_endw"                                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_LABEL   , 0),
+              new("301FA84EF235BFDF607F5CFAE9A7129AFFA650E8F05E984B572BEB3DD57EB98A",    0x125,                             1, "mainCRTStartup"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("E6AF67F3C151C5A44E354C81FDB3E85A8340F224B92F8CB5672E8B8A604379BF",    0x134,                             1, ".l_start"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_LABEL   , 0),
+              new("C62A30D3B0F479C4F67FD06F37E98FC2B871966EBEF34C615603788638AEA2BA",    0x14A,                             1, ".l_end"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_LABEL   , 0),
+              new("7B191DFAC00F0987A3AC3F514F0940C5774BB5B3665D64D1A33E30457E3CAD91",    0x154,                             1, "__tmainCRTStartup"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("1CE827827DC8B70AD0F0A7ECDD703E66DAB188476F73C70DE4EB827CFB708866",    0x550,                             3, ".rdata$.refptr.__native_startup_lock"       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("021FD8AC27ED686225FBFA898E765DE29481D793890E53C13F3938E72024CE7F",    0x560,                             3, ".rdata$.refptr.__native_startup_state"      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("EA3E77D1AA006F0A7F25FF5E9D786DC5FEFD55F21B6F8A0C5E1BB38B35070E1E",    0x5A0,                             3, ".rdata$.refptr.__xi_z"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("EDB1CCCBCA0A57F54C731DFE699FC4FDFD551DB4D5C6425CE5F4D48B226C1F96",    0x590,                             3, ".rdata$.refptr.__xi_a"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("5AEB91749508D32C6744C1B920AD596A93252295471E19E72B5314AD9E7ED04F",    0x580,                             3, ".rdata$.refptr.__xc_z"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("BFA82A54C47EFD4C59FB638F5F5C672EC08EE0F3B581F470937BBE0F7D9B726E",    0x570,                             3, ".rdata$.refptr.__xc_a"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("A0BA963DC25B1843026F53C6FF9B83DEA85B988BFC806C12EB6574AF5DCE55E3",    0x4A0,                             3, ".rdata$.refptr.__dyn_tls_init_callback"     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("14C91188F727FDA0A6B665AF55FFCCFFC2612AC01C0038E9744D2070BADFC47D",    0x5E0,                             3, ".rdata$.refptr._gnu_exception_handler"      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("02DDD5C89E8E81A737D9769A0F9839A43C7236BE2762EAAE8AB33F76E5594F90",    0x540,                             3, ".rdata$.refptr.__mingw_oldexcpt_handler"    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("B6EC398A9CB3A1EE659DA397505D6D0D23ED5442E6F235D429ABCD747D96B61C",    0x4D0,                             3, ".rdata$.refptr.__imp___initenv"             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("87C658B5559FFF4BB744BECCEBDFF277F8C1893F2EEF5E7F2C6C0F80F57EF0E2",    0x378,                             1, "check_managed_app"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("31B95757C86F34694863B3BD705ECE441C1388BFE39502F2D4A7570EC81AA29E",    0x510,                             3, ".rdata$.refptr.__mingw_initltsdrot_force"   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("B9910192EB812B2B4B7C71E3C4A2CD6F9C890451956C4A8C740960FAC8F9F1B7",    0x520,                             3, ".rdata$.refptr.__mingw_initltsdyn_force"    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("28D96B910D5A624D9DBCF6DBE401E224C790DBD6D2E1E8AB29860B9E155928F0",    0x530,                             3, ".rdata$.refptr.__mingw_initltssuo_force"    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("42F1D52A4B32CDE76AD3B27876C78471E0EC0333AB17EA7B095F04F2A52DA6B4",    0x4C0,                             3, ".rdata$.refptr.__image_base__"              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("B943B21AD84356CDD28989F0D08267A12AE6DF57A6BC920FD4F607FCE82659A4",    0x47C,                             1, "duplicate_ppstrings"                        , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("FC31FC2E69FEA853BB97E2A11A1871B85B1BDBB6C174C030C1DA6367DBBAF0CD",    0x583,                             1, "atexit"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("3530D9335D65F1C3AB995ADE6DBA7930D92DD36DA5570F6E98426981B37BFAB1",    0x4B0,                             3, ".rdata$.refptr.__globallocalestatus"        , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("6EA397D7F634740CD088BF99142760838E1433A39FC7D57040A8C86F92854004",      0x0,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("B756F65C13514C2E15365C261880F8DB53B7EB72A83E93C945A30EF7B4548068",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new(null                                                              ,      0x0,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("554A548B2CEFF5BB81D303B40A7B59F1DFB44F72181BF73FBA86D641875FB4E8",     0x20,                             8, ".CRT$XIAA"                                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("8579B7CD3BB9249870A3FFA886C59C1A3A67C8606656274D1B4B9873CEBA209F",      0x8,                             8, ".CRT$XCAA"                                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("B1B506CAE93F7C1C23383C46A721B49910C85DC50816BBE02403C3F684647EC6",      0x0,                             5, ".xdata"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("3CC43B8E7998BC1AACE5659258552315A6F8D3F4D37E98A27A3E452FB494905F",      0x0,                             4, ".pdata"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("A8266EC10168260DE71CA30FFB455D53614E888A36465909C2AB6F95F4C94DE8",    0x610,                             3, ".rdata$zzz"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new(null                                                              ,     0x65, IMAGE_SYM.IMAGE_SYM_DEBUG    , ".file"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_FILE    , 1),
+              new("89C93A1EBDC325D2140AD0FC367F37F16A70736579CA3805A1249D44A1EBAFDE",    0x5C0,                             1, "__gcc_register_frame"                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 1),
+              new("A1AC30CEB3F2F1C1AAE32C7A4E2B29199402DFC23AB9B38503F3F5C2E8688802",    0x5D0,                             1, "__gcc_deregister_frame"                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("89C93A1EBDC325D2140AD0FC367F37F16A70736579CA3805A1249D44A1EBAFDE",    0x5C0,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("B756F65C13514C2E15365C261880F8DB53B7EB72A83E93C945A30EF7B4548068",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new(null                                                              ,     0x30,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("4176F53880B0DFF9C0AE7F66BE9D9895E69DADC3B037EF860CECE2E323E5E53D",     0x98,                             5, ".xdata"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("51144BB123A12084C4C2491EC1F77C8B89AEC36F1192F0FEE47341685E1FAC0A",     0x6C,                             4, ".pdata"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("60F1366F90BDFB713B0E2A8AFB2FC538FEDCB172B5BBE7FECCDA04913AF580C9",    0x630,                             3, ".rdata$zzz"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new(null                                                              ,     0x90, IMAGE_SYM.IMAGE_SYM_DEBUG    , ".file"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_FILE    , 1),
+              new("D2E3D71FF73DE9B7529E78AD4500598D7EF8AD72B39DBCE47E9A87FF14B1D383",   0x1E30,                             1, "main"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 1),
+              new("2C326E98DAFBF88AA08152FC519B6BDD6DA0570B35D1884C65FC1FCF5DD36493",    0x460,                             3, ".rdata$.refptr._ZSt4cout"                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("4136EFAAE74B4F2A76F210A99B9A968A61C9913C31BE504D36401B2DEEC86073",    0x5E0,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("B756F65C13514C2E15365C261880F8DB53B7EB72A83E93C945A30EF7B4548068",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new(null                                                              ,     0x30,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("FE9912700CA8F5DAD53FD9A591250826DE379DF7576AE5949395148FB707D227",      0x0,                             3, ".rdata"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("D2E3D71FF73DE9B7529E78AD4500598D7EF8AD72B39DBCE47E9A87FF14B1D383",   0x1E30,                             1, ".text.startup"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("164DD7461AD9564D4F6A8DBC42AC45A1A069DD619C9CF5CFCFC52180126C2722",     0xA0,                             5, ".xdata.startup"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("17CD8A8DE8902F583763AD06522169DB323BBBA2AE088BA07195F3AF17461E89",     0x84,                             4, ".pdata.startup"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("03589256CD065293EB61A57BC3DC42C883CC1880F2E3051D02153634F816B91C",    0x650,                             3, ".rdata$zzz"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("4136EFAAE74B4F2A76F210A99B9A968A61C9913C31BE504D36401B2DEEC86073",    0x5E0,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("B756F65C13514C2E15365C261880F8DB53B7EB72A83E93C945A30EF7B4548068",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x30,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("77474F3F2C130DEDEC1218CC1496A5D7FBAA3462DE5995A80D68CA49B877654F",    0x5D0,                             7, ".idata$7"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("888D9C5FFB71BF567EAC211253F6404FE23F23A307D22466465F9895AA9150AB",    0x1F8,                             7, ".idata$5"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("74810086D0AC7D7CEFA2FFF41A9475453FDA804DD23C6B78B15FC3942AA6EFE0",     0xA0,                             7, ".idata$4"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("D4D4A7680ABC1D3E28E9A4E3017C23D2BC37ACEDE181D195F0B6425CC35A571D",    0x3CA,                             7, ".idata$6"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("24F7122300BD429D11FC8D5EC58544F7E525F40E90C8994621B888E26653C7F6",    0x5E8,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("B756F65C13514C2E15365C261880F8DB53B7EB72A83E93C945A30EF7B4548068",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x30,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("81710F35209C2D2CE3468E63A112991C396248134D91472E1B214BFC5805DC35",    0x5C0,                             7, ".idata$7"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("79A9CDB682CD1270C5B35E21E696CA717E5FCB31CBA33E0A9C32EBCDDEC72814",    0x1D8,                             7, ".idata$5"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("4C59A4A1FF53D4486395AAE585DF0CE53DD1D75E0EC2ACB4AEBE403A3838E8EB",     0x80,                             7, ".idata$4"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("4CD34206D0F2717ED41AE7224680C9C0251B08544308C4890F86BDA691440CFF",    0x392,                             7, ".idata$6"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("294DD5FDA43096B477CFA2E6B9F6345F0632A949E9BDB5EEFB9FFD52F9926183",    0x5F0,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("B756F65C13514C2E15365C261880F8DB53B7EB72A83E93C945A30EF7B4548068",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x30,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("A65583419F6943B8C8B493DF19CDA86DDA23C249755A7C0B753112205500E570",    0x5BC,                             7, ".idata$7"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("6F2A9B99FB0E77D664C476164022C78D172E3437F190D704E4EFA0B6169E4E1F",    0x1D0,                             7, ".idata$5"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("E17FA8668405C2B433B6EC72BF57775655CB1A3C4777AF2F18316818FDCED347",     0x78,                             7, ".idata$4"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("A2FB0A80C7326C12A7D58257A17F734C3B147BBD77A8C87FBBFE9571F1CF4AF1",    0x374,                             7, ".idata$6"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x9E, IMAGE_SYM.IMAGE_SYM_DEBUG    , ".file"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_FILE    , 1),
+              new("BA853D4F1136CD40B4102CDD8CB3E0A4F4462CA83E4230536A19B01E7AE294B0",     0x50,                             7, "hname"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("197338752E868A63FED72F84D899DDCF15794C838D16E4ADF241E66AEB9A8EEA",    0x1A8,                             7, "fthunk"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("D187C5354592744DC3F3D43774D4DA6165EBD0BB6E5B3763AAD8AA62E0A9A9BF",    0x600,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("B756F65C13514C2E15365C261880F8DB53B7EB72A83E93C945A30EF7B4548068",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new(null                                                              ,     0x30,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("009F90F944A2941668F055A123116863DE634D34C74923F6F2A5274A3ADC9D27",      0x0,                             7, ".idata$2"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("5468D72780F1FDBE98C92271B3B0E044ADD9590F9A45C896078AEE7B3383AC25",     0x18,                             8, "___crt_xc_end__"                            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("28D96B910D5A624D9DBCF6DBE401E224C790DBD6D2E1E8AB29860B9E155928F0",    0x530,                             3, ".refptr.__mingw_initltssuo_force"           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("1CE827827DC8B70AD0F0A7ECDD703E66DAB188476F73C70DE4EB827CFB708866",    0x550,                             3, ".refptr.__native_startup_lock"              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("A8CBF7341AF0C7983855A8EB8328F1E5EF4B155B3295D2B2669FB9216BD8899D",    0x1B0,                             7, "__imp_EnterCriticalSection"                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0x60,                             6, "_tls_index"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("A7F7003825E24511B115F41D5321EC0BC6455B431D109BC58688D638B7FCEA27",   0x1DD0,                             1, "signal"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0x40,                             6, "__native_startup_state"                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("57D332391C999BE6CFD6176DD5E24BCB5EB7E443C6A70195DBBC57DECAFB31CC",      0x0,                             8, "___crt_xc_start__"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("3A1174CE62D989D286572D9DDCF0707E7D1D693EBE689B6DDE5DD53056A28D9F",   0x1DE0,                             1, "strncmp"                                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("2FD4D40F50264EEF9ED698F6C1319CCE3CC79E55D802C49B3E664530D6580AAE",   0x1EC0,                             1, "___CTOR_LIST__"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("A0BA963DC25B1843026F53C6FF9B83DEA85B988BFC806C12EB6574AF5DCE55E3",    0x4A0,                             3, ".refptr.__dyn_tls_init_callback"            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("C53F3FFFB2210BC5E7BCD343968E2295DA7ECAED9212D74F04AF19549E11EB30",    0x2A0,                             7, "__imp_signal"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("A84D550F351A58CD56DF83EBC6133D17AF76D85893144564AAB2F5E8D2D1FB5C",    0x2D8,                             7, "__imp__ZNSo5flushEv"                        , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("B9910192EB812B2B4B7C71E3C4A2CD6F9C890451956C4A8C740960FAC8F9F1B7",    0x520,                             3, ".refptr.__mingw_initltsdyn_force"           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0x18, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__rt_psrelocs_size"                         , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("2C326E98DAFBF88AA08152FC519B6BDD6DA0570B35D1884C65FC1FCF5DD36493",    0x460,                             3, ".refptr._ZSt4cout"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("DC915F927246CF87961199611103718BB372E2F4C17AC6FF12EF5C0CD5FE7264",    0x2A8,                             7, "__imp_strlen"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("C772151B9F2543BF41E5F7753760EB43E0BC88E0477C4B45C5D044B5887EB4C2",    0x298,                             7, "__imp_malloc"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("14C91188F727FDA0A6B665AF55FFCCFFC2612AC01C0038E9744D2070BADFC47D",    0x5E0,                             3, ".refptr._gnu_exception_handler"             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,    0x200, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__file_alignment__"                         , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("141F7F1D291E60A7AFDA66F30F3B7F20D8FCEF9DFF62AB5791CE226BDD4D4CCC",    0x1C0,                             7, "__imp_InitializeCriticalSection"            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("C2617D832D9FF1A9C018365DD0006F1082EDC605CF1E7A5E049EA3F351B8778C",   0x1D50,                             1, "__getmainargs"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("77659B8D43F74EDCB749B36A29E0132F703092A9B19EF7EA08636D85EC91FC7B",   0x1E10,                             1, "InitializeCriticalSection"                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("0F3CB41BD1471E37A7E0C9BFE090849A59D74AB9E40F190A1A7B24C0110AD1E0",    0x280,                             7, "__imp_exit"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("D06C9EF0A4BAA03331E8CAE913AA3C47A9F9B919711081A39097006D6E652D21",    0x2B8,                             7, "__imp_vfprintf"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("34A1AD8DD9A64B5C268641E696FDA3B1E3773712369F1CDFBADBD89C25827A2F",    0x59C,                             7, "__nm__ZSt4cout"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x4, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__major_os_version__"                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("554A548B2CEFF5BB81D303B40A7B59F1DFB44F72181BF73FBA86D641875FB4E8",     0x20,                             8, "__mingw_pcinit"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("4D64BA23D2C68976F5A77F154C268A89CA4E3E8FDEFC58F3BC75885B7773C185",    0x210,                             7, "__imp___initenv"                            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("197338752E868A63FED72F84D899DDCF15794C838D16E4ADF241E66AEB9A8EEA",    0x1A8,                             7, "__IAT_start__"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("0A907B5D81019915BB9CE56F700C934CEEF4C871AE996F24E72A5C6A4D4352C7",    0x238,                             7, "__imp__cexit"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("360D579DBD14759B41AFDF7FB5E80C0101E15150AE401D59F92A1E32D129F7CB",     0x48,                             8, "__xl_z"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x0, IMAGE_SYM.IMAGE_SYM_UNDEFINED, "__end__"                                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("6F2A9B99FB0E77D664C476164022C78D172E3437F190D704E4EFA0B6169E4E1F",    0x1D0,                             7, "__imp_SetUnhandledExceptionFilter"          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("051456CC4CAB48572A0C8660C9CFB729EE3221FA8C6C06F08A6CF871350D157A",    0x268,                             7, "__imp__onexit"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("21B7565EDCA6D31ACB271C48D030EC7A2F677252C3C1E4F7B9C67ED1884AD52D",   0x1ED8,                             1, "__DTOR_LIST__"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("5468D72780F1FDBE98C92271B3B0E044ADD9590F9A45C896078AEE7B3383AC25",     0x18,                             8, "__xi_a"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("EBD5F2AF4C7C0464DE07E03B4ACF15DB596C6DFB04744323F1AF743B08129F7F",   0x1D60,                             1, "__set_app_type"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("79A9CDB682CD1270C5B35E21E696CA717E5FCB31CBA33E0A9C32EBCDDEC72814",    0x1D8,                             7, "__imp_Sleep"                                , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("C02D3B3382CF98824D12AB3C78161DF4F0BCB35C13ED5A625CD829A0E0866E11",   0x1E08,                             1, "LeaveCriticalSection"                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("57D332391C999BE6CFD6176DD5E24BCB5EB7E443C6A70195DBBC57DECAFB31CC",      0x0,                             8, "__xc_a"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("D371499AA7208B4804F05899C5B2AFC2A22A9D4E39F607F714F9A2FABDC3A68E",    0x228,                             7, "__imp___setusermatherr"                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              , 0x100000, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__size_of_heap_reserve__"                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("1FE2373734955E60C172999142934B52E69BA7AB9039B3C18EA54082BA32AFCD",     0x50,                             8, "___crt_xt_start__"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x3, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__subsystem__"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0xB0,                             6, "_fmode"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("AC4A1497153993AC9E2558E991497F16CAA6AF876FB620C854966E1B841F11FB",   0x1D70,                             1, "_amsg_exit"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("64C2BB672FAAFA4180DFF55A59E24E021BA34B595B404BF0C3E1DB16A6A4337A",    0x1E0,                             7, "__imp_TlsGetValue"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("3285E5557292B4E16C3AF311F209851DC3B0CAAE72BA5A704AEE35F72DA3BE81",   0x1D68,                             1, "__setusermatherr"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("FB04024A889B4C0DB893CF5F8B17F23405CC3B5208A4D123CBB5802A39ED57E3",    0x5B0,                             3, ".refptr._commode"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("C0032C63A1213BBD87F5F99738446E0D46AF23800E919695F90288372C7F3A68",    0x288,                             7, "__imp_fprintf"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("8579B7CD3BB9249870A3FFA886C59C1A3A67C8606656274D1B4B9873CEBA209F",      0x8,                             8, "__mingw_pcppinit"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("2F7CD068EFFA10F705CA6AA7F555B2525044066DB1998B8D683231BF293E8919",     0x70,                             2, "__imp___p__commode"                         , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("DC08BF170E2E35E22EA1BAAA6DF7B0EB08957D720D3E607D956B3DFA3153BBC4",    0x2C8,                             7, "__imp__ZNKSt5ctypeIcE13_M_widen_initEv"     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("0E81E6F94F45B7FDE9F9517C6D793C806AEED85B5A41D5CE8AA5DDFD60652528",    0x1E8,                             7, "__imp_VirtualProtect"                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("BF0F13A0477C0433A3F8B69DC9285C3662F6B00B4ACEE4ECAF8221C0578182E4",    0x2D0,                             7, "__imp__ZNSo3putEc"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("58C7439DCA39BB1A5B8199A9C0F6EC9C2BA762DBC827767A0EE08F3620793CCA",     0x38,                             8, "__xl_c"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("882993B55CC0C527F0A6059B69B3FAF4EF3CCB9CECD3D8847CA0E49A1444DEBE",     0x10,                             9, "___tls_end__"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("772D2DD869346FB8BCD5AEBDC298FBF9954790AC6FB7B5BE3435F7B2F1323CCC",    0x1F0,                             7, "__imp_VirtualQuery"                         , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("FC5E49C59F05505C954126E5A3C3CE7D159E2E225F04869A60081669B74E1008",    0x250,                             7, "__imp__initterm"                            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("BD8BF15BF4189F7758A1E3977BAC746F467B4C7CDDE13AF0AA588824E33ADDE5",     0x20,                             2, "_dowildcard"                                , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0x68,                             6, "__mingw_initltsdyn_force"                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("91E1C0B2544B97C732EC528A61EF4477B0A4BD17DB0FFB769C33BEC3DF53E6F2",    0x218,                             7, "__imp___iob_func"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("00EDD46C8A317D53C62CF801E9C98B16CBA67104932C308598641D1914478798",    0x148,                             3, "__dyn_tls_init_callback"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("D187C5354592744DC3F3D43774D4DA6165EBD0BB6E5B3763AAD8AA62E0A9A9BF",    0x600,                             1, "_ZSt16__throw_bad_castv"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("29DA2A18FE53E2BB28B6E58B4D8486850D2BD9B3F588C7D1E7547E9EFE41074F",    0x2F0,                             7, "__imp__ZSt4cout"                            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("42F1D52A4B32CDE76AD3B27876C78471E0EC0333AB17EA7B095F04F2A52DA6B4",    0x4C0,                             3, ".refptr.__image_base__"                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0x50,                             6, "_newmode"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("AA9B39E4DF8E6FC89F716D5B0DB61D32817CB36D08EADE8A14EBD2C93281D755",   0x1D80,                             1, "_initterm"                                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("7A1CC2DD521C5BA57CE198B31F41EB9DEEB2F622C00DCABABE91EEC26433F27B",   0x1DC0,                             1, "fwrite"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("9059EB8E7662B2AAB8CD3ED5D2A8C2FF54D02F35C8C8E9967A612DA5B76CFD02",    0x2B0,                             7, "__imp_strncmp"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("64310D7882EBACFB10F0205A9E689B8636E6B1E5B375235AC539ED3595E38364",    0x5D0,                             3, ".refptr._fmode"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("A6138F629D28E0B1AC023BA505EDE5DC5DCF85E40EB3D5F7EF2EDAC308BC2E6D",     0x90,                             2, "__imp___acrt_iob_func"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x0, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__major_image_version__"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x0, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__loader_flags__"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("2C326E98DAFBF88AA08152FC519B6BDD6DA0570B35D1884C65FC1FCF5DD36493",    0x460,                             3, "__fu0__ZSt4cout"                            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("7E39FAA91D5867A0C5F2DBF0AF58441BF88A58E4D4C1BC22D05582C6A641BB76",    0x4E0,                             3, ".refptr.__imp__commode"                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("D34CF960E8298C0BE90F81072D6538498CB06CC54D77AF340FD3CF7F34ADD7B3",   0x1C80,                             1, "___chkstk_ms"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0x48,                             6, "__native_startup_lock"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("29DA2A18FE53E2BB28B6E58B4D8486850D2BD9B3F588C7D1E7547E9EFE41074F",    0x2F0,                             7, "__imp__ZSt4cout"                            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("0AF3CF464DACF0BF9947D4939089BF4C32BEBE83781595F39370E5FB3EBE1380",   0x1D98,                             1, "_onexit"                                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("9D908ECFB6B256DEF8B49A7C504E6C889C4B0E41FE6CE3E01863DD7B61A20AA0",    0x9E8,                             3, "__rt_psrelocs_end"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("8083372A45EF45082DCE330C0B9A0C3E8D96B05458AA69835E67D699C40C24D2",   0x1DB0,                             1, "exit"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("C898102AE79375BA859A0327FCB6B3DB458C099DF9C78AE5715419D8F1494084",     0x88,                             2, "__imp__get_invalid_parameter_handler"       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x2, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__minor_subsystem_version__"                , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x0, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__minor_image_version__"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("590CF4DC242972B74334D74013F29FE1DC0E68F768E21DB3B1C12CE65119B2ED",    0x220,                             7, "__imp___set_app_type"                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("EDA0998877502C3CE345AAC9B885DC3155EC38C006F4283EDA50BA57C6F900BD",    0x2E8,                             7, "__imp__ZSt16__throw_bad_castv"              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("BFA82A54C47EFD4C59FB638F5F5C672EC08EE0F3B581F470937BBE0F7D9B726E",    0x570,                             3, ".refptr.__xc_a"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("07931C1AFF1509F6434F918BE066DE90156495CA6DA5D97D7C1891C5176FE4B4",   0x1DD8,                             1, "strlen"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("EA3E77D1AA006F0A7F25FF5E9D786DC5FEFD55F21B6F8A0C5E1BB38B35070E1E",    0x5A0,                             3, ".refptr.__xi_z"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("7693061E534091BEAFBB6682419FDDABD2D7DF0D859919ED03C3698387F0A4D3",    0x450,                             3, ".refptr._MINGW_INSTALL_DEBUG_MATHERR"       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("CDB4E3540C6A6B7CE1AC761791611044D42E8BF3485CD49D127E97C3D67FD9F5",    0x240,                             7, "__imp__commode"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("A3A07594403DBD2CDFE55AB1C4009BA50A8C1675C5994BE136BCFF8280FEAA84",   0x1E28,                             1, "DeleteCriticalSection"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("9D908ECFB6B256DEF8B49A7C504E6C889C4B0E41FE6CE3E01863DD7B61A20AA0",    0x9E8,                             3, "__RUNTIME_PSEUDO_RELOC_LIST_END__"          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("5AEB91749508D32C6744C1B920AD596A93252295471E19E72B5314AD9E7ED04F",    0x580,                             3, ".refptr.__xc_z"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("1FE2373734955E60C172999142934B52E69BA7AB9039B3C18EA54082BA32AFCD",     0x50,                             8, "___crt_xt_end__"                            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("C1F3B67248B616C3C2D6643BE71FF37341565BF01DF8F8734D1C68F07AF66FB9",   0x1DE8,                             1, "vfprintf"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("974C7ED2F4BBB0A0346F45690D72C072E9E3963414BF483D87577494E14E4ADA",   0x1D88,                             1, "free"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0x80,                             6, "__mingw_app_type"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeIntelAudioServiceSources() => new object?[]
+      {
+        // @formatter:off
+        Make("IntelAudioService.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE, CodeOptions.HasCmsBlob | CodeOptions.HasMetadata, "CABDFDBE1E041E2B42301E8DC9A9B8D05E7DCE63D2A773FA971213DE105816E128D7DC73FEB979A688F00332C355577B", "[128:8]", "0;0;[0:D8],[DC:4C],[130:5DAD0]", 0, 0,
+          new Section[]
+            {
+              new("CF8F62AA1D6B2A87CB849D980CA3C89A3C757C45B53A3ABD9F23D62B2C6AC96F",  0x2000, 381304, 381440, ".text", IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("C19EB59AEB29A23681AB1EAFF52029A13B7A832F4B01247B5BFF999D15E5DC45", 0x60000,   1604,   2048, ".rsrc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeJetBrainsDotUltimateSources() => new object?[]
+      {
+        // @formatter:off
+        Make("JetBrains.dotUltimate.2021.3.EAP1D.Checked.web.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_RELOCS_STRIPPED | IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE, CodeOptions.HasCmsBlob, "D908B8DB1EF44291479A18163385753CEBB2E7DD256F1DDDA7C79A5E33052872792FEE7564FEFABF4D9D5D133ABF4641", "[1A8:8]", "0;0;[0:168],[16C:3C],[1B0:2279AF0]", 0, 0,
+          new Section[]
+            {
+              new("2A0BFC56569F6CABAE9B6352059B48BB7861854238F8F660E6F5C2391C5E8766",  0x1000, 205110, 205312, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("8B99B2BD9A5ACEBE1EAEBC86F3EC53A3D24EC45FB17F39F4279777F714B42E3B", 0x34000,  95580,  95744, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("D77D6CBCC1A4C25ABFFC4726BDC1DDD48093A529522C39F314AE6F9C2C752130", 0x4C000,   9000,   5120, ".data" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("8A71965FC1ED7610C33054DED573C96326F68AD1B9DA4CC97E149216042BDE0C", 0x4F000, 518536, 518656, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeJetBrainsReSharperTestResourcesSources() => new object?[]
+      {
+        // @formatter:off
+        Make("JetBrains.ReSharper.TestResources.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob | CodeOptions.HasMetadata, "E84F3F5361510E25262DB51D4F3D7B762F6958553D4A84196F0DCB79618772DC5CF808FB2B253A62FB4A604BE2683019", "[118:8]", "0;0;[0:D8],[DC:3C],[120:18E0]", 0, 0,
+          new Section[]
+            {
+              new("BE543ADC2A32A7ED9F20A2FF7633A37785BF831958CA78E46606092036A02199", 0x2000, 4092, 4096, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("B6BB9FD44AEA8DA35C62FED33FFEDFEB5405BF6A05472FA4557E1C14E4DA3473", 0x4000, 1188, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("FBDA17B84E9D0ECEC21CC9A8756AA5E5721F6033445AA02802B478F5479DAC75", 0x6000,   12,  512, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeServiceModelRegUiSources() => new object?[]
+      {
+        // @formatter:off
+        Make("ServiceModelRegUI.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "F25E3A0B4B930208C6524CE6F9E762BFE99C8657A0A0796144A93C003C94C8032EA50CF215043588A35BF12AB47F1DCA", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
+          new Section[]
+            {
+              new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("ServiceModelRegUI_broken_counter_sign.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "F84C34B0F4D2B5201D53EF92B4A437256B1D5130CA9A7C3A035DE1FEB23CC4DC5B461ED8AD82DDA15CA7DDE025DB37B3", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
+          new Section[]
+            {
+              new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("ServiceModelRegUI_broken_hash.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "9A265A0C8B9955A18B4BCF6795B85F54DBDD0510BB0D9B336B33679C0C44B167154702A649B63E50198AA4507EA991BA", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
+          new Section[]
+            {
+              new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("ServiceModelRegUI_broken_nested_sign.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "51213207ED1B0DC09F70B9879D42D269C83068E362D7B9855F71450C49B1CAAE321DA8773FFC738DCDA2FC35C67F1B48", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
+          new Section[]
+            {
+              new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("ServiceModelRegUI_broken_nested_sign_timestamp.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "5BFAB068C6A7298B2947EE17914FB9FC6D849C78BD442B9E9CB56E04490F5FD647A58E0DEADDE3E68FE7F1068C4BC9BE", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
+          new Section[]
+            {
+              new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("ServiceModelRegUI_broken_sign.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "23D9D4D67504B25A67D897743A4CFCC6DD7B810A12E50F0D834E3FBC05BB03FF92C78EF1536F53345E9DB87B6BF18857", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
+          new Section[]
+            {
+              new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("ServiceModelRegUI_empty_sign.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
+          new Section[]
+            {
+              new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("ServiceModelRegUI_no_sign.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
+          new Section[]
+            {
+              new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("ServiceModelRegUI_trimmed_sign.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
+          new Section[]
+            {
+              new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeSystemSecurityPrincipalWindowsSources() => new object?[]
+      {
+        // @formatter:off
+        Make("System.Security.Principal.Windows.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob | CodeOptions.HasMetadata, "81E2CE2291B5BDF0724639FA17360E4C707EF513FE15ED032A35742F910BA54CF76EA74BDE0B304A6839427DFD018A0C", "[118:8]", "0;0;[0:D8],[DC:3C],[120:16E0]", 0, 0,
+          new Section[]
+            {
+              new("EEDB00E62659DFF395703B2A62ECF53B06C11CCB13BA223A01B6EC34541E4341", 0x2000, 3208, 3584, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("6269095F285B58584313231F8B7535C6166DA56623F09D7C5D48FC85609B5C1F", 0x4000, 1480, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("937DCC437937440C911BD1A77A5A2E820D9DB2185A6612482D16D1B9A06D30FE", 0x6000,   12,  512, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeTestCAppSources() => new object?[]
+      {
+        // @formatter:off
+        Make("TestCApp.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LINE_NUMS_STRIPPED | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DEBUG_STRIPPED, 0, null, "[128:8]", "0;0;[0:D8],[DC:4C],[130:139A1]", 0, 1082,
+          new Section[]
+            {
+              new("E5E127043BB868B481CE84A3CB58AE7F2DE6F0377E7A7E2C6AB39080A140CEA7",  0x1000, 32920, 33280, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("54E6616E27B12CCB1F9A88D0FC4F09424B7B015AFC6209026151023E99F6051A",  0xA000,   240,   512, ".data" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("E92FF77B7CB1E21F0DD7FE2F6BCC3645A51A75B8EBB8DD8A741801A644401CEB",  0xB000,  3616,  4096, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("E47484A24F1AB166CCDC5B599366C33D659991969748811C5C386AE5B4475C5A",  0xC000,  1404,  1536, ".pdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("A23B747233CC734ED3BCBAE451037A0DA8E1E44C50900FBF983757733C803017",  0xD000,  1400,  1536, ".xdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new(null                                                              ,  0xE000,  2912,     0, ".bss"  , IMAGE_SCN.IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("61FBA067DD55596384E25890595BDCF385239358F0C3E92D9F5869380C175774",  0xF000,  1744,  2048, ".idata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("9CA568B0D8942E6A373F5BB094BE12B0EE5B701BF941B6948D32DF3F1D25E5C2", 0x10000,    96,   512, ".CRT"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("076A27C79E5ACE2A3D47F9DD2E83E4FF6EA8872B3C2218F66C92B89B55F36560", 0x11000,    16,   512, ".tls"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("11A19C0FD0E0DE507DF1B17BFE171D3F845DC882F3A479FA667855347EBC1AEF", 0x12000,  1256,  1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("61DFC96152854BD5CC0623CA81DDB57530257AAADDD3151BE0D4451834D46E0F", 0x13000,   136,   512, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+              new(null                                                              ,     0x54, IMAGE_SYM.IMAGE_SYM_DEBUG    , ".file"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_FILE    , 1),
+              new(null                                                              ,      0x4,                             6, "argc"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,      0x8,                             6, "argv"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x10,                             6, "envp"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x18,                             6, "argret"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x1C,                             6, "mainret"                                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x20,                             6, "managedapp"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x24,                             6, "has_cctor"                                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x28,                             6, "startinfo"                                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("E5E127043BB868B481CE84A3CB58AE7F2DE6F0377E7A7E2C6AB39080A140CEA7",      0x0,                             1, "__mingw_invalidParameterHandler"            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("1076A4D850AFE986BC63670BD12F7C037648AE52171F432C606307CD06969262",     0x17,                             1, "pre_c_init"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("9C4164DF2A4C49904057B4118298BBCA53E26350A639B9667A1C22EE825BEEAF",    0x760,                             3, ".rdata$.refptr.__mingw_app_type"            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("484447CDF70CE3C6812E723827A01A7AE1F393153C73BB323A20D3C5BC5FC2C3",    0x840,                             3, ".rdata$.refptr._fmode"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("51165AEC6AB5EADF52C12D9DD2B226E16829364C33D7A585B4288C83347C39C2",    0x820,                             3, ".rdata$.refptr._commode"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("9F714122FCDBB27392603EB26DC72AC9B154E3C9AA4AC516D4289154850A3073",    0x6B0,                             3, ".rdata$.refptr._MINGW_INSTALL_DEBUG_MATHERR", IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("CF9F2E850C977B377C4E458BDD9A242895DFE50A94BEBC8AABCF4494287604C0",    0x860,                             3, ".rdata$.refptr._matherr"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("39FA66700C6AEFC2E800657E2513E7699E15F96C970B34A13599B5F437FC6005",     0x9A,                             1, "pre_cpp_init"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("75EB25E37BF383435F85152EC7D6E3DFAE553A08327962F2DE106F10DEF69E6F",    0x870,                             3, ".rdata$.refptr._newmode"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("98F53BA05A357C3B924904B67EB0126E1B98E3AD26385EB8868E9EC02A5E44C6",    0x830,                             3, ".rdata$.refptr._dowildcard"                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("FA5C9FF628892139D7E745FC955C94603CEE63191E053853A8374E253FAC825F",     0xF6,                             1, "WinMainCRTStartup"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("76DD4B04EE5E0EEA05ACA68D4DBA4960A01A6B8A33E8F8BD69314BE7ED4F33EE",    0x105,                             1, ".l_startw"                                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_LABEL   , 0),
+              new("A29D8FE13A296894FDA247A63B0A838B6A0B572477CCE94B4DB607A47D1D248B",    0x11B,                             1, ".l_endw"                                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_LABEL   , 0),
+              new("9E6D331094092257636D3323890540F985FA71AEA486BECA597234250F184128",    0x125,                             1, "mainCRTStartup"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("D24208537AE2AEAC4930E0B8D022BD7C4912D2506D05D849EE12DCFBE60949C7",    0x134,                             1, ".l_start"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_LABEL   , 0),
+              new("98D96C16225D5A7381EA7BE7BD40AE665D1F16341B6852A81BB4285693AAE747",    0x14A,                             1, ".l_end"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_LABEL   , 0),
+              new("8B68B83C6190169D55D975F8A266ECF2CD65B863AD154BF525B6CDC5CAE0EEC9",    0x154,                             1, "__tmainCRTStartup"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("F479535F0C481B902F32777F0AB2AF5F9DD9E71BAAB3E214B5FBCF51A4D45779",    0x7B0,                             3, ".rdata$.refptr.__native_startup_lock"       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("FE8264776913329217ABB2CA7C4161F7F8EACD863389BCAE0260F217521C748A",    0x7C0,                             3, ".rdata$.refptr.__native_startup_state"      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("97971B9F61381967A56E70433591C0F0C196B7954C4679CE1826719F01739066",    0x810,                             3, ".rdata$.refptr.__xi_z"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("C4895417FE07A12CBADC852B50649E4D33CADAFE3D268A8C39E01D661C3BC1BC",    0x800,                             3, ".rdata$.refptr.__xi_a"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("B0368CDE9CDAD11C0883018D7F7EE26F166BD36B2DADEA3535F8AC7333AD9BEF",    0x7F0,                             3, ".rdata$.refptr.__xc_z"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("112EC655F73EE80798532722CCD6AB63FED17E4BAD8A8F8CB8A6C22C4536E2C8",    0x7E0,                             3, ".rdata$.refptr.__xc_a"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("2D683875B3C944B6A882A7F07B7B21941E34743F61921841C76A8C1D9D353A13",    0x700,                             3, ".rdata$.refptr.__dyn_tls_init_callback"     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("6F9D4246551E9FCD3B4B4D24F51BAF578F7C9E0B2802177C09FFDB501A2EA60D",    0x850,                             3, ".rdata$.refptr._gnu_exception_handler"      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("C2F43B9C8F489B5F9D42348C06BF06C9C186EF648FDF56E30418A5C38D8D5989",    0x7A0,                             3, ".rdata$.refptr.__mingw_oldexcpt_handler"    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("74061BF78703D5C4B1BED5CAD4CBF70D596A9B15492485B91276642FA408DAC5",    0x730,                             3, ".rdata$.refptr.__imp___initenv"             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("4F254CEC62491D58CAA88D6F210E195EE4DF299FF6CCA63E0DE48E43F8BCA93B",    0x378,                             1, "check_managed_app"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("6F0FD20A42C7F26BD91D1873FF052054BC4FA06609D550CBCF7FBC837E755B6D",    0x770,                             3, ".rdata$.refptr.__mingw_initltsdrot_force"   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("7370ACE97FEF520C6F40F148AE6D6DF2AA85713B7A0A6A70F2CF5D84601AF591",    0x780,                             3, ".rdata$.refptr.__mingw_initltsdyn_force"    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("7FBCF59F640B5EE2AB5C4859350E370074D50CA9BC6D90D903E9D13058CD1A47",    0x790,                             3, ".rdata$.refptr.__mingw_initltssuo_force"    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("BDFB2063D0331DD07D61270CDE4586F70BE3F813C531EED87AAA02DB96FC668F",    0x720,                             3, ".rdata$.refptr.__image_base__"              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("F3F497CA8080278A16DD53B65D13E0F61CAA575E6D6923E96AB7AA12C21FB030",    0x47C,                             1, "duplicate_ppstrings"                        , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("3A75AB0FF38A0CCB0EC9921898F7D9EEE370C087C1CA2F516C2D406993BCAD54",    0x583,                             1, "atexit"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("76D2A649DE20702605C679DFF0287CB79B43E513B7539B8A3C64DC85D7874967",    0x710,                             3, ".rdata$.refptr.__globallocalestatus"        , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("E5E127043BB868B481CE84A3CB58AE7F2DE6F0377E7A7E2C6AB39080A140CEA7",      0x0,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("54E6616E27B12CCB1F9A88D0FC4F09424B7B015AFC6209026151023E99F6051A",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new(null                                                              ,      0x0,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("494AC02312F59801300852EE7D0C7CD533A551E2D56DB7D8EBD41E4240770863",     0x20,                             8, ".CRT$XIAA"                                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("4C11BE7887C9C6E2232359406C48FFBD57ECA98218B838734811996C3639C020",      0x8,                             8, ".CRT$XCAA"                                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("A23B747233CC734ED3BCBAE451037A0DA8E1E44C50900FBF983757733C803017",      0x0,                             5, ".xdata"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("E47484A24F1AB166CCDC5B599366C33D659991969748811C5C386AE5B4475C5A",      0x0,                             4, ".pdata"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("BD25A8736E1AB71695347A6C3785B715FAC45ABFDB1A2058CAF8830EE169AE9C",    0x880,                             3, ".rdata$zzz"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new(null                                                              ,     0x65, IMAGE_SYM.IMAGE_SYM_DEBUG    , ".file"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_FILE    , 1),
+              new("91AB1B865B4CFB9180927ACAD1D4BA8D505D867B14E0D811BFD4B970CECDC81D",    0x5C0,                             1, "__gcc_register_frame"                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 1),
+              new("8FAB7739C2C78607FBD63BAE654DC7F625F0AB86519BC1AA3E8FEF219423C863",    0x5D0,                             1, "__gcc_deregister_frame"                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("91AB1B865B4CFB9180927ACAD1D4BA8D505D867B14E0D811BFD4B970CECDC81D",    0x5C0,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("54E6616E27B12CCB1F9A88D0FC4F09424B7B015AFC6209026151023E99F6051A",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new(null                                                              ,     0x30,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("FE636BAF605C44501473E344F3FF2C9BF4AEFD6C50AB406AF6D77864D281568E",     0x98,                             5, ".xdata"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("4F72CD538BF749269DC376F53BDE5AF0EAD061F518735C36CD03B76716E09905",     0x6C,                             4, ".pdata"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("4B41CA5C5FE45E4818EF87A1F95F3DA74DE9082EC3E3B691C72A8C53CB7804FA",    0x8A0,                             3, ".rdata$zzz"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new(null                                                              ,     0x93, IMAGE_SYM.IMAGE_SYM_DEBUG    , ".file"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_FILE    , 1),
+              new("7856686D197DAA56DB9A92742A6F5CCB4C63B1C91E9FD7A8012AC25061926E58",    0x5E0,                             1, "printf.constprop.0"                         , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("DDC1F11F600B9011AB3E8F564860C6787C4008086D53A32FCCB7D38DBF5F19BA",   0x8040,                             1, "main"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("7856686D197DAA56DB9A92742A6F5CCB4C63B1C91E9FD7A8012AC25061926E58",    0x5E0,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("54E6616E27B12CCB1F9A88D0FC4F09424B7B015AFC6209026151023E99F6051A",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new(null                                                              ,     0x30,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("E92FF77B7CB1E21F0DD7FE2F6BCC3645A51A75B8EBB8DD8A741801A644401CEB",      0x0,                             3, ".rdata"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("80447CEB352ACA4BB65FA98AC1F2B158E36BCCA58F6510A69985A70748372B65",     0xA0,                             5, ".xdata"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("70E25C90C9FE428DCD10E87C285C6DCD80AD56331624BA777F23844769FBD87F",     0x84,                             4, ".pdata"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("DDC1F11F600B9011AB3E8F564860C6787C4008086D53A32FCCB7D38DBF5F19BA",   0x8040,                             1, ".text.startup"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("0793EEE5494E50457868492D390E8882F6292C657F2A8961EA5D6DB26AD6043A",     0xA8,                             5, ".xdata.startup"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("25A80176101D8C6BE1C909E21B606601764ED5BECAA782B3BED78EF5BB99DF98",     0x90,                             4, ".pdata.startup"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("4C066F553DCBBA5838D561F56B6FF29650A860D5FEF7BBD2BE30B2ADB292D329",    0x8C0,                             3, ".rdata$zzz"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("38947A0A195DDEEFA624B88AC17AD989D682C668B105256FD17A42BF4623932B",    0x630,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("54E6616E27B12CCB1F9A88D0FC4F09424B7B015AFC6209026151023E99F6051A",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x30,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("DD55CD9060B730F3D9EAE574AB7FC6F7C8C96CAF5A26A18FB00622AAAE494D1C",    0x62C,                             7, ".idata$7"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("62E4478A5AF53B1D915F9B6E474133488D907882A689CDF55DEF1FD57D11B27A",    0x230,                             7, ".idata$5"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("8F7A3F31E9390B9549271802DF1FE8FA96607E20617FAECF059EBE1F03627724",     0xA8,                             7, ".idata$4"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("A485AC43143AEABEC0F5D46E0B05AFF81EED1AD19F7B03EC85671240DB9F7836",    0x45A,                             7, ".idata$6"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("188AC6AF70970D763C5528B0EA0B6ADB7575B33882F8E09A724F09F3440774B8",    0x638,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("54E6616E27B12CCB1F9A88D0FC4F09424B7B015AFC6209026151023E99F6051A",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x30,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("BD67FA94B7E32DB5C94A761906A1F21EA69D376611B607123E628C2A33C8409E",    0x618,                             7, ".idata$7"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("E5C6C6C38D2A82EB53BA750D0040675AF555748713798A2EBB8C63A45F4B4C1E",    0x208,                             7, ".idata$5"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("080FB2EC08126357F919AFEBC89E38E12499E551EE910422271233931606E61F",     0x80,                             7, ".idata$4"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("2B680904CCCDAA5E07DB48C893D37557569F182F971B8BE660440F2B51E81009",    0x40C,                             7, ".idata$6"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("701FE8A8AF13E5647F3E0FE2E7ADDDE184A95423C1C563EDCA26B794EDB5193E",    0x640,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("54E6616E27B12CCB1F9A88D0FC4F09424B7B015AFC6209026151023E99F6051A",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0x30,                             6, ".bss"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("BB5FFD11956F0EB64204766ADDF6B1557E7227F3D4F9DE3CB0427213ADCF9AFE",    0x614,                             7, ".idata$7"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("2E0B55E011C04A3BB7C5C101FBD4DBF65BE0418A164566F9156E8E47EB1D0A20",    0x200,                             7, ".idata$5"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("BF14C50C40EEB99ED6C97C4CC75C3ABCB59526C7890C1FC8F36A49A8497A80F8",     0x78,                             7, ".idata$4"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("5D9BF95591CC75528A6479D7FF1369EA983D1B3E6754C3EDBAD37B364458E396",    0x3EE,                             7, ".idata$6"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new(null                                                              ,     0xA1, IMAGE_SYM.IMAGE_SYM_DEBUG    , ".file"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_FILE    , 1),
+              new("242365A0D9F1E966FE10C988B79B81D3B63E43FFABB5A284E2EFA9A3CFEA1BB2",     0x40,                             7, "hname"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("B5D44E9EB1E57292A18F7D7E7251E23FC16B33064AF3FD6A3F65F58576AB4A57",    0x1C8,                             7, "fthunk"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 0),
+              new("C3CF53816A6E72E437D179D160C5BECF731308182CA97BE73921EC8463D73C62",    0x650,                             1, ".text"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new("54E6616E27B12CCB1F9A88D0FC4F09424B7B015AFC6209026151023E99F6051A",      0x0,                             2, ".data"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC  , 1),
+              new(null                                                              ,     0x40,                             6, "__native_startup_state"                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("9CA568B0D8942E6A373F5BB094BE12B0EE5B701BF941B6948D32DF3F1D25E5C2",      0x0,                             8, "___crt_xc_start__"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("583E951F60F6DC8F5E4668C85697344E31EDB72C2E4B11D7F22A2819FD2686C5",   0x7FC8,                             1, "strncmp"                                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("03DC1593CAA19D2D025F7212F5B0140BB8DA7EAD4403574F5085EE3BEDE5BF7D",   0x8070,                             1, "___CTOR_LIST__"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("2D683875B3C944B6A882A7F07B7B21941E34743F61921841C76A8C1D9D353A13",    0x700,                             3, ".refptr.__dyn_tls_init_callback"            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("4B4A7158AE9D1B4A0F1D585FF385946AE6955F79FA510DD7F3DB68348CB174BE",    0x318,                             7, "__imp_signal"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("7370ACE97FEF520C6F40F148AE6D6DF2AA85713B7A0A6A70F2CF5D84601AF591",    0x780,                             3, ".refptr.__mingw_initltsdyn_force"           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x0, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__rt_psrelocs_size"                         , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("BD4894E89B1E32F1AB262855F5DCFDBF16E989E2168980197E09C64D35D4ABCB",    0x228,                             7, "__imp_WideCharToMultiByte"                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("CCEE1EE26A532F78A1A5C65E9E497AF0DE0C68B3A116AF3B7A23FDC961C2E6B4",    0x328,                             7, "__imp_strlen"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("5BDD1CC749DB5A6CCC1FF2666779D472A6B5B5EB0B9F7EF9EBCB39E40CAF118C",    0x560,                             3, "__bigtens_D2A"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("8584E0628466DDA8D2EBDD1AE4AAA98ECBCF5233DDCD67291F8507E0DBBE8DD3",    0x310,                             7, "__imp_malloc"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("6F9D4246551E9FCD3B4B4D24F51BAF578F7C9E0B2802177C09FFDB501A2EA60D",    0x850,                             3, ".refptr._gnu_exception_handler"             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,    0x200, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__file_alignment__"                         , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("6A0EAA9DEF5F32BC4D7BACFB34767758D98599D1A62BD1FFEA00B6BE08585BDD",    0x1E0,                             7, "__imp_InitializeCriticalSection"            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("A33D3A33623DFC9EC9062B786834E7724D85E62D7DB030CA48C2B93FBE646C1F",   0x7F00,                             1, "__getmainargs"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("EED3A9034288F54F4AFA716B6F5289F06113D6EDC9A966A249FA7D86FD6B9313",   0x8018,                             1, "InitializeCriticalSection"                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("A201B78CE25069EC0E9E75C9C40D0A8B42F61F12F228D4A2BB62644C8192FF6C",   0x7EF0,                             1, "___lc_codepage_func"                        , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("E9A213C2555446B66A6E7FCFB807B17C185E65D43B317C215E4B18DB0E278E79",    0x2E8,                             7, "__imp_exit"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("B5E9633EEBF1B6090AED65E011650FD671BF450B5CDC7367DD88FD939E6B1B81",   0x7F58,                             1, "memset"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("3546E9811AD5AF0A6D4AEB6003656B614739C0E8E9377092198ADA32220977BF",    0x338,                             7, "__imp_vfprintf"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x4, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__major_os_version__"                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("494AC02312F59801300852EE7D0C7CD533A551E2D56DB7D8EBD41E4240770863",     0x20,                             8, "__mingw_pcinit"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("EB193E58D322F624A801F037337DE855C61B48EB6B87913CDCCF7BD370CC8B41",    0x1E8,                             7, "__imp_IsDBCSLeadByteEx"                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("9E8EF9EAE5265EDEF328B3512434456EF8880F6E7E49A31D7E52F459DFD7F54F",    0x258,                             7, "__imp___initenv"                            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("B5D44E9EB1E57292A18F7D7E7251E23FC16B33064AF3FD6A3F65F58576AB4A57",    0x1C8,                             7, "__IAT_start__"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("E959D9A8C931DE115D9F105C83ADF37C10CDF7D48B745F951CBEC3F3A57EE40B",    0x280,                             7, "__imp__cexit"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("360D579DBD14759B41AFDF7FB5E80C0101E15150AE401D59F92A1E32D129F7CB",     0x48,                             8, "__xl_z"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x0, IMAGE_SYM.IMAGE_SYM_UNDEFINED, "__end__"                                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("2E0B55E011C04A3BB7C5C101FBD4DBF65BE0418A164566F9156E8E47EB1D0A20",    0x200,                             7, "__imp_SetUnhandledExceptionFilter"          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("6130EE655D580222FAE9250C93FC6C6EAB79573649DB07364954FA990B8ABC5A",    0x2C8,                             7, "__imp__onexit"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("047F4DDA31FDFFC803CECCE3A02209DFAE5657574DCEECFFF9C379B6AEC4F0E9",   0x8088,                             1, "__DTOR_LIST__"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("12DD903D8EDE6265F8EAB2ACCD0A41CFABA40E671671E3456DBF88A1D6595D86",     0x18,                             8, "__xi_a"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("A0E26BF27FAEA5C2650EDE36BCC67A938D40B804E952B71C4CFD05814730CD72",   0x7FE0,                             1, "WideCharToMultiByte"                        , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("B709D0B77146D922F4F8D475F0AFF467555C6CD7B0F9A1A006A448C9BDAB1C5C",   0x7F10,                             1, "__set_app_type"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("E5C6C6C38D2A82EB53BA750D0040675AF555748713798A2EBB8C63A45F4B4C1E",    0x208,                             7, "__imp_Sleep"                                , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("A894E317D7F5EDA68807FAA3E55F9BC86FABD9A53938074FC4C5378720CF93CF",   0x8008,                             1, "LeaveCriticalSection"                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("9CA568B0D8942E6A373F5BB094BE12B0EE5B701BF941B6948D32DF3F1D25E5C2",      0x0,                             8, "__xc_a"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("FDEE5D79DFCED2061D3F8D73D52906FF4C6F33A9E952594153F11750571EF831",    0x270,                             7, "__imp___setusermatherr"                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              , 0x100000, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__size_of_heap_reserve__"                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("1FE2373734955E60C172999142934B52E69BA7AB9039B3C18EA54082BA32AFCD",     0x50,                             8, "___crt_xt_start__"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x3, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__subsystem__"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0xB0,                             6, "_fmode"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("71FA0BBC38E8BA7AF0E85CFEEF906B5516053D62D2D918BE9717FBB0E0C4AEF4",   0x7F20,                             1, "_amsg_exit"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("DA39E0CBE8E1ACC492C4ED6BFAD57EF30FA987002DD6F4CE347D71B23C0B9714",    0x210,                             7, "__imp_TlsGetValue"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("4B8435D8431CBE709A824B5B563652D4E1321C3AFF0E85108772AF72C5B7C867",   0x7F18,                             1, "__setusermatherr"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("51165AEC6AB5EADF52C12D9DD2B226E16829364C33D7A585B4288C83347C39C2",    0x820,                             3, ".refptr._commode"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("12C1A72246DB640E4FDAAA95A20FB1CAA2D4CFBF4573BFEAB43F083D29DCC1F4",    0x2F0,                             7, "__imp_fprintf"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("4C11BE7887C9C6E2232359406C48FFBD57ECA98218B838734811996C3639C020",      0x8,                             8, "__mingw_pcppinit"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("EE054F232FA03FEFE9C7ACC3B8CDC7B22E03C1CB70190FFF6B02247CF11C10F5",     0xB0,                             2, "__imp___p__commode"                         , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("BDBFA80A893CC44C55B76BB948E97511EBEACF2C4C93A6B57676444166BAA155",   0x8000,                             1, "MultiByteToWideChar"                        , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("7A9D762B343161BD36306BFD2394A2D03CF95DFDED0E00E484440BB1B28B5454",    0x218,                             7, "__imp_VirtualProtect"                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("817CE0A55616E48981C2BEFEFD0053EC7890FFDEB1E927B55937D8F7190DF0F0",   0x7F90,                             1, "fputc"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("1385998D569D6A67629B169DB82634056A925B5AD03606763287FCBBDCAD0ECA",     0x38,                             8, "__xl_c"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("882993B55CC0C527F0A6059B69B3FAF4EF3CCB9CECD3D8847CA0E49A1444DEBE",     0x10,                             9, "___tls_end__"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("EB9B7AE941F9B5E66E7828FBD17AC5CB47D23C209A8518EFB398418471D3ED0F",    0x220,                             7, "__imp_VirtualQuery"                         , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("974BED893C7C5D9C794EDD7CC2D595702D2F8EA05C6032350B7FF157E2830DD3",    0x2A0,                             7, "__imp__initterm"                            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("98777252E3CCF6BCB5D0050DD11BEA1D2D3DD249771C7D00E35262E2EF138B70",     0x20,                             2, "_dowildcard"                                , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0x68,                             6, "__mingw_initltsdyn_force"                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("907D62D45EA023AF9E6524C58C777D38FE29BDDB6BDE026D0277306ED50E48B6",    0x260,                             7, "__imp___iob_func"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("546A9532889E6D6B2223129A0FAA35A5EAD94902B4B50519195D7179A625E3CE",    0x308,                             7, "__imp_localeconv"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("3704D428D88C04D6F7D1ED085224DA99B50E163CAD6A4DDF70C69DE2540E9E22",   0x7FA0,                             1, "localeconv"                                 , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("D8C54BC29A2617A0AF06C34BC9999676C9C48E03472E3EC153B462F20622DF3C",     0x48,                             3, "__dyn_tls_init_callback"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("BDFB2063D0331DD07D61270CDE4586F70BE3F813C531EED87AAA02DB96FC668F",    0x720,                             3, ".refptr.__image_base__"                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0x50,                             6, "_newmode"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("F85E34B21292FB4D46682971975AF42310D76A70CA494EB814523C5A0984D014",   0x7F38,                             1, "_initterm"                                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("55B97B287DAF8EE8121E3CF108E6DAC6572FA16CC72ADF53AB51AB6E51E1DCB0",   0x7F98,                             1, "fwrite"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("D6DA174C65398D9C942AE25D5A2F69A11058C563EA30E81FE30F76AFCFD8FCC3",    0x330,                             7, "__imp_strncmp"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("484447CDF70CE3C6812E723827A01A7AE1F393153C73BB323A20D3C5BC5FC2C3",    0x840,                             3, ".refptr._fmode"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("376FCCCA2D2826FF66F4707A0F7E887629589D2EBC3AD0529949E57083687DEC",     0xE0,                             2, "__imp___acrt_iob_func"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x0, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__major_image_version__"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x0, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__loader_flags__"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("F1BCA49E9ECC8EB35DF37C84CB2B9F8B872B7745B027C1979315204032A449E0",    0x7D0,                             3, ".refptr.__tens_D2A"                         , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("BEA0512F9A82806AD2706408D3D60A94CB8DB15A83F16B82AA99416016D6CC3E",    0x740,                             3, ".refptr.__imp__commode"                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("0C6E27502704218D57F92BA6C0F4D0AB84DEB1A756C4D903F1A1BCB5483E4D26",   0x1CA0,                             1, "___chkstk_ms"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0x48,                             6, "__native_startup_lock"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("873F11D8A5CCF6DFDA03CFCD0BCA8ED37B887B7B1793BBEDC40DEC7D5C9E0D77",    0x340,                             7, "__imp_wcslen"                               , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("1034824E1577291091F34AF3B0E3FD22081B5102090C63BECF2DC8FD1CB6F0A5",    0x240,                             7, "__imp____lc_codepage_func"                  , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("C4514EAA88A5B6DFB3E0B064A8DCF6F068E20D10A7570AAE9E075853CB6F76F0",   0x7F60,                             1, "_onexit"                                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("4B48F21A4B7A02BFBEC19EF880A967A02334A3CDCEF8AE83DE2EF327BA8BC5DD",    0xE20,                             3, "__rt_psrelocs_end"                          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("2B0F1F977B68A93842554C4B1E3D93E2AE431F307217CB5AB3BBA0361EE26555",   0x7F80,                             1, "exit"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("9A5B774B74A6EEE7264C26D5D3E251F727F47CC4D389DEAC82D92D2A54FA42D3",     0xD8,                             2, "__imp__get_invalid_parameter_handler"       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x2, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__minor_subsystem_version__"                , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,      0x0, IMAGE_SYM.IMAGE_SYM_ABSOLUTE , "__minor_image_version__"                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("6D5C9C2D52F99262CF2BE369BA2F83811BE5EA0EA9BFFCDC11919E3AACFC385A",    0x2D0,                             7, "__imp__unlock"                              , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("DFE1CFAF01BDE32078FA652099B4AADFB20CA59A633DF7B88F0FA7F711E6BA03",    0x268,                             7, "__imp___set_app_type"                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("A665792C175E1DA8C7430E17FCE0C8D6E214907025190717D138312ED3B6AE79",   0x7F30,                             1, "_errno"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("112EC655F73EE80798532722CCD6AB63FED17E4BAD8A8F8CB8A6C22C4536E2C8",    0x7E0,                             3, ".refptr.__xc_a"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("4ECEB6DD77559ED3D753848973D8209E89F3C6DF7B0BBBC036B713EE7AC5C195",   0x7FC0,                             1, "strlen"                                     , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("97971B9F61381967A56E70433591C0F0C196B7954C4679CE1826719F01739066",    0x810,                             3, ".refptr.__xi_z"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("9F714122FCDBB27392603EB26DC72AC9B154E3C9AA4AC516D4289154850A3073",    0x6B0,                             3, ".refptr._MINGW_INSTALL_DEBUG_MATHERR"       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("A55039711087DFDD4E15D74221CA11E72EEE0740627B25038CB549AD05A4FF4A",    0x288,                             7, "__imp__commode"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("6D805AE33F67AB4B6C67529C6D3F7A744FE76F929ABBBF4A53FA059AB2303A6B",   0x8030,                             1, "DeleteCriticalSection"                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("4B48F21A4B7A02BFBEC19EF880A967A02334A3CDCEF8AE83DE2EF327BA8BC5DD",    0xE20,                             3, "__RUNTIME_PSEUDO_RELOC_LIST_END__"          , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("0078668B84E122E3077FB9A12DEC30B4E6C2B05D7C25F05662CEFDC373CA47E9",   0x7F68,                             1, "_unlock"                                    , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("B0368CDE9CDAD11C0883018D7F7EE26F166BD36B2DADEA3535F8AC7333AD9BEF",    0x7F0,                             3, ".refptr.__xc_z"                             , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("1FE2373734955E60C172999142934B52E69BA7AB9039B3C18EA54082BA32AFCD",     0x50,                             8, "___crt_xt_end__"                            , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("98CCF07D261EAB14572D1AE60F462D99E464419F300C7359340F1B382C681193",   0x7FD0,                             1, "vfprintf"                                   , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new("9300ECFB7703EB33204140912A325B907AA96AA32FCE695548C18EBF533C0B67",   0x7F48,                             1, "free"                                       , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+              new(null                                                              ,     0x80,                             6, "__mingw_app_type"                           , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL, 0),
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeApiMsWinCoreRtlSupportSources() => new object?[]
+      {
+        // @formatter:off
+        Make("api-ms-win-core-rtlsupport-l1-1-0.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "F9EE34D26BDD204A45D80A43382C4B241E9A166F84670E6625761B44012CED0904D351676D2BB08849EE24F5592B41E5", "[150:8]", "0;0;[0:110],[114:3C],[158:6A8]", 3, 0,
+          new Section[]
+            {
+              new("E3001CF701076F276A2D584E70039756D490FDF8FB4ADEA1DB1E53E4609A493C", 0x1000,  488,  512, ".text", IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("813A88A1140311AD021D3991453D221CF5EFC51142B5B30990B746C44B4D648C", 0x2000, 1008, 1024, ".rsrc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+              new(null, 1, 0x117E, "RtlCaptureContext"       , "ntdll.RtlCaptureContext"),
+              new(null, 2, 0x11AF, "RtlCaptureStackBackTrace", "ntdll.RtlCaptureStackBackTrace"),
+              new(null, 3, 0x11D8, "RtlUnwind"               , "ntdll.RtlUnwind"),
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeDotnetSources() => new object?[]
+      {
+        // @formatter:off
+        Make("dotnet.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE, CodeOptions.HasCmsBlob, "5270038904B10DC31E236C424C863FA35F4B7822D826774C759E69EA05C1EA167F8CC56A2B6EE214DEF5774CB4B54569", "[1A8:8]", "0;0;[0:158],[15C:4C],[1B0:1B050]", 0, 0,
+          new Section[]
+            {
+              new("A404743CA40FB06938C86296069E40572FAA5018BB43800B947270AD981CB8A3",  0x1000, 69788, 70144, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("5883C92D6B2DB441B6731931A1193665DA5D95A3174188C775EF8A564646BE70", 0x13000, 29382, 29696, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("8387CF6DD8A8372981C9BAEC400C2F7E30CA92E5EF9A27EEF0B2155C2302A727", 0x1B000,  4216,  1536, ".data" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("69A4F991606DC8BC3D8BE9CFF7A9E28FE7085B7F662CA440865565252E6152E3", 0x1D000,  4248,  4608, ".pdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("00C7877AF6C69DDB76A9F2858B3CFB9DF9E45E2BFE47DE2E5BAA34F9DDCA73DC", 0x1F000,   244,   512, "_RDATA", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("9A10AA65728A04AE1E13FFE3F1D06F3E74FA02BD72AF973A83A0F2CAEDA82988", 0x20000,  2544,  2560, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("F20F1FB85654BB18F6A862B114DB9BFDD3ED18FEAD68A97F1A9FBB8CEDCA2E24", 0x21000,   784,  1024, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeLibcryptoSources() => new object?[]
+      {
+        // @formatter:off
+        Make("libcrypto-1_1-x64.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "4E6C2E9F3EC563CC8580BD5ABFB8AFFB160E079260E0A3C3776146FBBC34C2EA3A51C19CC5B7F60888C69FC99122C749", "[1A0:8]", "0;0;[0:150],[154:4C],[1A8:299058]", 4393, 0,
+          new Section[]
+            {
+              new("235A1F42FBC0D3E686453B576FBF10A199116D1D3E86C1B93CF99CD627874EA3",   0x1000, 1710919, 1711104, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("ED198641ECF14C304CFECCAED28F66D9C3FBB376C202C15CCE3F3A99A1483F07", 0x1A3000,  846237,  846336, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("DEE3F4102ADC0172DE67A9E91D090BC07AE9B6FEBC28751F10284B9F11722E5C", 0x272000,   30497,   10752, ".data" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("B32FAD9F354175D426B9BE823788554D8C3C4454047FD8958A78D18AC615AC9A", 0x27A000,  113772,  114176, ".pdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("2EAB7C92E4CB19894E295AC74810ED0000FA6982DDA1CA28DC8B0A9DA3DC1355", 0x296000,    8238,    8704, ".idata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("D6EAAC8D37DE832781452773421842580C203782059D36871EC0AB7DC7458F96", 0x299000,     288,     512, ".gfids", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("D7B01250C4CB7A774D83CF0A65E05BA35D63371EE0BEB1B58BF01F60AA9A6867", 0x29A000,     283,     512, ".00cfg", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("55F5E395E530461D815F5958E3F0F94E91C496B66450205F3C8818FFCCE539D6", 0x29B000,    1660,    2048, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("5F945F7B9D7191BD58DE4DD3AC786CB6FE0FC6CEABD9FB49943A97481A90CAEB", 0x29C000,   28719,   29184, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+              new("BA063550DBF4E1BEA9E16A49A207C1C0F4AF5BC340C2DA02318F3C9AB826B9A1",    1, 0x15AA, "ACCESS_DESCRIPTION_free"                   , null),
+              new("902021F6D03C1F78FAFEF7FC27B70ECC13E9B712BF04A6D0B10080C69A4985AC",    2, 0x421E, "ACCESS_DESCRIPTION_it"                     , null),
+              new("04D0B39B6E14F2297E9802CE9A03D152B81F61CFDB1A8284EF8465D1DD19A431",    3, 0x609B, "ACCESS_DESCRIPTION_new"                    , null),
+              new("A577D6110B8966B2B02CFBB02B43503EA29284D062088726F2EF28548042596B",    4, 0x4327, "ADMISSIONS_free"                           , null),
+              new("137B1788221FEDB649AA94FA3511DBC037240ADBE6C696F57CE854B131D5AB2C",    5, 0x4377, "ADMISSIONS_get0_admissionAuthority"        , null),
+              new("0BA712935F47757A9F2CE4840B066A2A5308C49959AF07A7D27977BF81616A4C",    6, 0x6622, "ADMISSIONS_get0_namingAuthority"           , null),
+              new("2702A20FED23DAB6DD5A986E39E8F30011CB0F33F475D9247D2AD68842BE8BC3",    7, 0x6695, "ADMISSIONS_get0_professionInfos"           , null),
+              new("9E7B72C01D51D5CB1EB8A5C44BA798F9BBAB425604C4832F291AFAEBBD61B098",    8, 0x484A, "ADMISSIONS_it"                             , null),
+              new("1915FCEB8F34ABED61BE2AA0F53888FB4645EA488916E59DFB9CE073321BF0C4",    9, 0x702C, "ADMISSIONS_new"                            , null),
+              new("B78EA2BB84A2FFEF2AA7299A483A0A81C57537314B2BED120CEE46C6CD272F57",   10, 0x382D, "ADMISSIONS_set0_admissionAuthority"        , null),
+              new("1198AA0E753B37C2D2F6C3D9861E9593D7E522DA8F18F1AD27E1309853321D94",   11, 0x6433, "ADMISSIONS_set0_namingAuthority"           , null),
+              new("0DAE2CAB0D6F79D4327E7B4A9C944E6F4E5B0BD55B0EB214D8CDA5C090F3F983",   12, 0x36B6, "ADMISSIONS_set0_professionInfos"           , null),
+              new("721A004E22EDBAD447131B3A1346641204535B53A3BFFD5B93F78E9C7C040FA2",   13, 0x54C0, "ADMISSION_SYNTAX_free"                     , null),
+              new("A8A9FB2C265DFA256239AA28A9947AE9C6D40D733D43964C6F1207F3D38D5D75",   14, 0x4A02, "ADMISSION_SYNTAX_get0_admissionAuthority"  , null),
+              new("AF68DFE900062F939F5E3ACAF2EFF3F98DE317025711C8E63AB9128BEC806F3B",   15, 0x338C, "ADMISSION_SYNTAX_get0_contentsOfAdmissions", null),
+              new("3B096144DFDF2423A6C2A15C7BFF7450F30ED0D3A7A849E917E4EA3645D7BA11",   16, 0x1271, "ADMISSION_SYNTAX_it"                       , null),
+              new("6C9D9420CF937B3AA94929FC813FA3A7E817EDAB45CCD0560E17C2E0AD5800A1",   17, 0x161D, "ADMISSION_SYNTAX_new"                      , null),
+              new("E5F69277EB64329EBADC2A98F7D21760E60CBB144FFDA5D6651A5F9A0D5EE1F7",   18, 0x6280, "ADMISSION_SYNTAX_set0_admissionAuthority"  , null),
+              new("C9AA856EE435A72ECD95E093FF1CCF0A5835F734C97278F6117B59BB84B43305",   19, 0x436D, "ADMISSION_SYNTAX_set0_contentsOfAdmissions", null),
+              new("A1CD7974B85CDF4CE48ADE5C70A6BD087F8C68ADFF299A7CEE5AE6CF31C69698",   20, 0x66B3, "AES_bi_ige_encrypt"                        , null),
+              new("8A7F81F3B57F8F14373B6ECE95261D6DC17B1E71FB02767663D8E10987E0D2E7",   21, 0x4688, "AES_cbc_encrypt"                           , null),
+              new("9B4A65DD75EB8B42ECAC80F5A74A7594981F3557AC37B0F857F94D43B6DC96B5",   22, 0x6091, "AES_cfb128_encrypt"                        , null),
+              new("4C2DECDBC7354E96CE127FD9FE7962A2F172EC876F9D3BD3ED437D72E0252979",   23, 0x4F2A, "AES_cfb1_encrypt"                          , null),
+              new("18FC18871E5DE26C18A32C1B3440AC3684A35DB4CA9D4504207BB5DC8874E7B2",   24, 0x36B1, "AES_cfb8_encrypt"                          , null),
+              new("4E25B700C1A1CB711DA9E6471A5656625F82C5F28C29C37CB1B79ED50BB00BF8",   25, 0x18CF, "AES_decrypt"                               , null),
+              new("E7596B629B1E404F311588E8CD82CC04CE0783CA10FBD04014D0AAD946868F6B",   26, 0x30B7, "AES_ecb_encrypt"                           , null),
+              new("FB43378CF3A3FB5C20672CCA46FFF39DB86D90C77C1DFD204698CCCCC7EBE3ED",   27, 0x1947, "AES_encrypt"                               , null),
+              new("78F0C5900952D95B950A1DF2D315DAFF112DA5335107733F3A2A0CE70C309D0E",   28, 0x59F7, "AES_ige_encrypt"                           , null),
+              new("635E740EC52062C1FA4A364B01E982CFDADA96CAD2A4D9D14A805AF25A3D280D",   29, 0x40BB, "AES_ofb128_encrypt"                        , null),
+              new("AF445808FB8001263C49DB5B00A06448E08365141C7A182F162616F52F28D146",   30, 0x2838, "AES_options"                               , null),
+              new("1122CC86C5079B3962976D313BD95C9F18548DD7A734B89AB91FF2551A9E09EF",   31, 0x33DC, "AES_set_decrypt_key"                       , null),
+              new("75BBEAC8AE3E84DF16199883F29C4758B8E700C438BD4334BB9AE90296796BBE",   32, 0x4F8E, "AES_set_encrypt_key"                       , null),
+              new("CE882E222F1E20FFDA969B18A004693BE06552A3A2FB95C6D0CD884EAE079104",   33, 0x4115, "AES_unwrap_key"                            , null),
+              new("44F179949A2A19E6A6B212565511F164D0B9F171E60AB7B3CD1BDE3987ECBAB1",   34, 0x45C0, "AES_wrap_key"                              , null),
+              new("B8CDA3288EAFF37CD9BCFFC5B83D0F8E8822684794F7FABA0B809127C7AC12B0",   35, 0x6B3B, "ASIdOrRange_free"                          , null),
+              new("737FC0157F544AF1C2272CDBF7C73748C927DDDE386CD72BD3A709FA964B7BA2",   36, 0x6A05, "ASIdOrRange_it"                            , null),
+              new("1713DE05F0DF3F9738154D60F592B2D0C071F6E1193C0A39080172CF56ECF6BC",   37, 0x475A, "ASIdOrRange_new"                           , null),
+              new("91246156CF8F21E5DD2DBF21494986C2AAFEE9C39E238BECF4005161C29A4068",   38, 0x3C6A, "ASIdentifierChoice_free"                   , null),
+              new("07EC3F5E0FF90139CB7858F91CA092B75578C85EC97237916A86C0AACB30EFEA",   39, 0x14EC, "ASIdentifierChoice_it"                     , null),
+              new("61EFAD9DAB192ED74BFEAD45D266362BA37A2BC552D4E7AD4899D5CFF9AB4207",   40, 0x4C5F, "ASIdentifierChoice_new"                    , null),
+              new("FCD6704635EB140791491CCC8E30C66EA7609A80D249009ED1E0B3F837F105EA",   41, 0x281A, "ASIdentifiers_free"                        , null),
+              new("4AE1027972C595E06F365860E0E1A1D4F0354B80BC3C6A1F8F6606094F05D0D9",   42, 0x5B3C, "ASIdentifiers_it"                          , null),
+              new("1528E7DC0948A89FF06005F323B9425ADF591AB81FA2AF807D4B32FDDC860FC3",   43, 0x3ACB, "ASIdentifiers_new"                         , null),
+              new("685DEA09BD94E652181FBD720C93BCFFC5A7BA9C2EE626AD371B36012111A32E",   44, 0x6A0A, "ASN1_ANY_it"                               , null),
+              new("96FB2CED6631DF1D28947E349CA9375A3C4440AA98E00A56F0C2AB6C2C37D4D3",   45, 0x302B, "ASN1_BIT_STRING_check"                     , null),
+              new("3F730BDB44E0802E77796B89F7ECB54E6947677D425333B788D0DC04AF5BC4A6",   46, 0x321A, "ASN1_BIT_STRING_free"                      , null),
+              new("297A7E602E5B35D8790515195225586504285EA3DF0795C8E9B9B02780CC5F14",   47, 0x17C1, "ASN1_BIT_STRING_get_bit"                   , null),
+              new("B2837C69EDE53B47A5AFDCBAA25A15C1FF90FBC1FAC326A7A399E67688EE543F",   48, 0x10C3, "ASN1_BIT_STRING_it"                        , null),
+              new("6FDC78AD7D91E878F956C2386630EA1579879FCB8DC1C5A0A68D04AFD55142E0",   49, 0x6C67, "ASN1_BIT_STRING_name_print"                , null),
+              new("E2A31595EC6BEBBDE2053C254D1359C396F15BEE054DE9E58215D0C6B0FF2488",   50, 0x4548, "ASN1_BIT_STRING_new"                       , null),
+              new("67878C0B796EFDC4B6F8E7B6F4FC485748D2C88FC3A15DD6855D9D31604DCDCC",   51, 0x277F, "ASN1_BIT_STRING_num_asc"                   , null),
+              new("E2F2B58AC3CA7B5391A256BD4662989460EB1A72B8BABE8BEBB1565DE0CD6C35",   52, 0x451B, "ASN1_BIT_STRING_set"                       , null),
+              new("7FB18FE39511D0AC9304A9EBF6A6FBB6E74A992C2B1CEA7A7224C244EA656E36",   53, 0x18BB, "ASN1_BIT_STRING_set_asc"                   , null),
+              new("DDF920C10A559246C00DEE4236EEFA8B8F7C17B124496F4688B934EA23804194",   54, 0x1942, "ASN1_BIT_STRING_set_bit"                   , null),
+              new("355437D4A4F38B8612E31734BD3E0EA2EB8884CD6B9DBD38571FDEF205FEE9BB",   55, 0x615E, "ASN1_BMPSTRING_free"                       , null),
+              new("9BE7438CBE5C56DD056FC76020AF63CDCF02E352A01831FF4E23ACFEF396D766",   56, 0x2D5B, "ASN1_BMPSTRING_it"                         , null),
+              new("8F1CC090960E6F199F3D0B20AC56CBFA106642D90D55A1E1B26528961DDF598D",   57, 0x2EAF, "ASN1_BMPSTRING_new"                        , null),
+              new("22E8A0F9B2F6148E2B3CA18AFFA709F9B38196B1E9683068E1CAE23AFDB43835",   58, 0x1D7A, "ASN1_BOOLEAN_it"                           , null),
+              new("F0AFBE7E19CD99A37E57880CDE549FC5FFC7E8509AC2D8828A328E82A70ADAC1",   59, 0x6749, "ASN1_ENUMERATED_free"                      , null),
+              new("9BD40DF2875473EF25127ECA8D3FF97228FC225EB7F9A22A18A67AD9C04888AD",   60, 0x2595, "ASN1_ENUMERATED_get"                       , null),
+              new("EF8241F81EFDEED694110ADC8D1394E8951B18F298460BA092B07763826D780D",   61, 0x4FDE, "ASN1_ENUMERATED_get_int64"                 , null),
+              new("B1DB49CC1F93C1CBD9CA25C9274E2072DF48FFDBE5252D97C7477B3C5C1356D5",   62, 0x345E, "ASN1_ENUMERATED_it"                        , null),
+              new("6968533D896CB472FF64756D5D335534A9256C123B77585E23ABD71A657B6292",   63, 0x25C2, "ASN1_ENUMERATED_new"                       , null),
+              new("12D9D9CB8934C7CF38400CAB6C1DD74536B6F55B8052265329E7163BCCD4C0D0",   64, 0x2798, "ASN1_ENUMERATED_set"                       , null),
+              new("E12BE17E0C52F351891E746B03B251191EB1FC77AB8815DF52DE9D07F7F92A98",   65, 0x5FE7, "ASN1_ENUMERATED_set_int64"                 , null),
+              new("57CEC2B095A9D42B0BB30F06916B782B3C864DDB04CDD028F73A56C4F867AC33",   66, 0x6BE0, "ASN1_ENUMERATED_to_BN"                     , null),
+              new("FF6BE5C9AEFF130D7B3133DCD6F87D99CD9F4F3F723383C2D942049D92F9A19E",   67, 0x7153, "ASN1_FBOOLEAN_it"                          , null),
+              new("E2ABF95CE7FE57467623B748922C2C61B059EE45C2FB5F8CE272E73072F4ECAF",   68, 0x229D, "ASN1_GENERALIZEDTIME_adj"                  , null),
+              new("EAB9CAE9114093E48E91E191F51C42B0368F2718A8A30EC28A0AB992ED42BF0E",   69, 0x4057, "ASN1_GENERALIZEDTIME_check"                , null),
+              new("B882951ED362470E5677AD24C50B90E63741C45C4B74A3048FF3FA5DF5453E02",   70, 0x675D, "ASN1_GENERALIZEDTIME_free"                 , null),
+              new("82FE59B39C29E3BD30027773FD5356FB585D51B5DC0ACCE21F4C734450D44E0F",   71, 0x18F7, "ASN1_GENERALIZEDTIME_it"                   , null),
+              new("71C47E5E64AA6C606BC39A9A9CA666B8E359254DDED6B0D5CA1919A42DD0FEA0",   72, 0x2261, "ASN1_GENERALIZEDTIME_new"                  , null),
+              new("9B126E81CFE79DA52BCFD8B683A7093AF8BFC3954BC88A5527E86499433D068C",   73, 0x4516, "ASN1_GENERALIZEDTIME_print"                , null),
+              new("B4DDFB700128886378DF201B64AAEBD9E2FCEB6B05A3446DB17FEB198301E34A",   74, 0x227A, "ASN1_GENERALIZEDTIME_set"                  , null),
+              new("336F56C125611C008EEB2C7F7676ACB31025D9926B26E61EDFE466B9C611B081",   75, 0x64F6, "ASN1_GENERALIZEDTIME_set_string"           , null),
+              new("891A960B2141AD020D63D59C9523D44B207D352EF6FB8F4774AFC4F2E22AE700",   76, 0x2978, "ASN1_GENERALSTRING_free"                   , null),
+              new("F3FBBBF464384F39833115BDB6EA4EB8F117B1A15F14A116F0734E43C67B5FED",   77, 0x5D4E, "ASN1_GENERALSTRING_it"                     , null),
+              new("EB81333AFB92D37839AE921390B760F001DACC30C29DF7106AE6661E09E30390",   78, 0x3F3A, "ASN1_GENERALSTRING_new"                    , null),
+              new("BE43EACF9B203446CBC377E3E0A7221489851519956C472248F28A4FE4E8FD03",   79, 0x3544, "ASN1_IA5STRING_free"                       , null),
+              new("945223AA18CF27A8200AF6CBB9C804BF5620C98AFBAAD667892F22E985EDA022",   80, 0x177B, "ASN1_IA5STRING_it"                         , null),
+              new("BB0E8456EC2E5BDD04B691647F8BC3153F9A1723BF672681ECBCA6CFBFC8A684",   81, 0x24AF, "ASN1_IA5STRING_new"                        , null),
+              new("2B320D8698D67434C6B6F040FE95B96A513C7EBB3BFA9C8A72202C3AF5B0BE46",   82, 0x531C, "ASN1_INTEGER_cmp"                          , null),
+              new("D78DFC2881608793FD50EADF0D498FC03D77B6D44A8F02E3741B889A61F9200E",   83, 0x5254, "ASN1_INTEGER_dup"                          , null),
+              new("2FFEDE345562C04FEA6E986E1558FD2F2C73D0D34F524B7765CAE68F2416C20F",   84, 0x1FFA, "ASN1_INTEGER_free"                         , null),
+              new("9950EFAA89F8802007E48FC9C3D729D4FB82A3C6143C219390304056BFFC0C43",   85, 0x5312, "ASN1_INTEGER_get"                          , null),
+              new("74EC2A1CE1CE85488303D4E79429EE9F3C394BA416DD35F4682D603AB9F63FAC",   86, 0x4142, "ASN1_INTEGER_get_int64"                    , null),
+              new("B0C4F5CC74161EF919F23FF96D8F59D7048DAB10796DFDA92929F5FBE7676113",   87, 0x1E24, "ASN1_INTEGER_get_uint64"                   , null),
+              new("84BE2839AFCB584F891FD7A655F374E096BAD74564CFF46766332FC7A62C72F0",   88, 0x525E, "ASN1_INTEGER_it"                           , null),
+              new("04AFEDBCDB4703BD6A74DF80B9CB6A9B87550A9BFF2F443E81D8D321F16C81B9",   89, 0x5349, "ASN1_INTEGER_new"                          , null),
+              new("E3971178952FACDD22E3FD8A87AAB5000531F7BDF4D0A37052DC02873669A9B7",   90, 0x52C2, "ASN1_INTEGER_set"                          , null),
+              new("4F03E18424A3776A75595DC32BD76A7859354447D79D068762DDCE92DDD6A845",   91, 0x406B, "ASN1_INTEGER_set_int64"                    , null),
+              new("C5A35834D924AE1AD43113AE2E47A035BAE4C3DAFBDD8FC95127845AAF619E54",   92, 0x5F6A, "ASN1_INTEGER_set_uint64"                   , null),
+              new("27D14E3C8F200989B4FB892F56A416A0E32A68BE90D26497749258B308414980",   93, 0x430E, "ASN1_INTEGER_to_BN"                        , null),
+              new("5AFD47F023A7CEB34EDE936860567DA22EB3DF47330F563AD00C24A10A2AB613",   94, 0x5EAC, "ASN1_ITEM_get"                             , null),
+              new("DD6BE2184A55EFACEB8447E7D2B68CB2E72B4E1F12E47F9F594722700AE56A8B",   95, 0x169F, "ASN1_ITEM_lookup"                          , null),
+              new("C075E6D7BD60E49A6CF2816C436B5EA1D2A52A975DA2D786AB8372E991981A38",   96, 0x57EA, "ASN1_NULL_free"                            , null),
+              new("CE3BA341586BD3CC451AA2C0AFF9D4DB7672774B097A755FA160A30C9A671FB5",   97, 0x41BF, "ASN1_NULL_it"                              , null),
+              new("7AB3F208C58C45E17BC02FD226406D49F4E360A17CC6FF7AE4708F8910ED6593",   98, 0x2AD6, "ASN1_NULL_new"                             , null),
+              new("3C080778CD97201892B6F6D26C1BED9328D21E375A17C0D0458A0F0B6FC95EEB",   99, 0x39AE, "ASN1_OBJECT_create"                        , null),
+              new("10197246199F1FBBB39D384EF381B2F62F985F9B688B21FE1A9DE17AA76FAA15",  100, 0x26A3, "ASN1_OBJECT_free"                          , null),
+              new("5AC187B954D081A51DD77F7EA2341E51AA45CE6FE8C1B08356C093CDFA470BBB", 4294, 0x34FE, "i2d_PKCS8PrivateKey_nid_bio"               , null),
+              new("E82B6751B33E2847F78F6A6D95F7140787FE171D58962D970F74A48E1962AE15", 4295, 0x2293, "i2d_PKCS8PrivateKey_nid_fp"                , null),
+              new("ED19BF92CF5B0E3F5B38D1A402F92508A5FF5DB07AD25C1D82EACBEE0C53FA69", 4296, 0x5C95, "i2d_PKCS8_PRIV_KEY_INFO"                   , null),
+              new("0378D128C109BD20571C9AF8FCC0D2AA0FD78E39942FB01E3E2E08EFEEE036F3", 4297, 0x18DE, "i2d_PKCS8_PRIV_KEY_INFO_bio"               , null),
+              new("B4987CAB0F0A52EEA9D646E556ED3E48A1E18B01635EC8B86AA914695C8155E3", 4298, 0x6497, "i2d_PKCS8_PRIV_KEY_INFO_fp"                , null),
+              new("54B8D5CF100C502679E9E054129158E9CCA6FB6B1824F074AD272C7CE803E687", 4299, 0x50F1, "i2d_PKCS8_bio"                             , null),
+              new("ED4C8B8A10389EFA77C3EF4158059992D727629CD556D53164FD03DFAB4E5697", 4300, 0x5637, "i2d_PKCS8_fp"                              , null),
+              new("61621F17FD29A0BEDA3F2B055368200B801A37A2C82313312B09A388C4D261B8", 4301, 0x5BEB, "i2d_PKEY_USAGE_PERIOD"                     , null),
+              new("C3CA8293308772C9F39311A1384007A6058593A66B362B3043D1A39BA3CC54BF", 4302, 0x44C6, "i2d_POLICYINFO"                            , null),
+              new("DA9FCB2B97DDDB5AB63607CC9DA25E9E2B28BFA1FAF611BACDB002D26B3CCD0A", 4303, 0x19F6, "i2d_POLICYQUALINFO"                        , null),
+              new("D99BE28DFF6F629A063C5BC24B112CB1780CBA5276F9EFEF9CD949DE62A79502", 4304, 0x18A7, "i2d_PROFESSION_INFO"                       , null),
+              new("4A359A22A8CB0C69135E0CAE39ABD4D23DEFB30346B687C2920B4105140D422A", 4305, 0x3ADF, "i2d_PROXY_CERT_INFO_EXTENSION"             , null),
+              new("3FCFAA9B4FF9312690323AB54C9B6976A4D1F1948833ADAFC58105CA3859B512", 4306, 0x498F, "i2d_PROXY_POLICY"                          , null),
+              new("4802FD371809FA0278CAACA399340E7A82DAA466EDE9F1769B389302119C91CE", 4307, 0x1005, "i2d_PUBKEY"                                , null),
+              new("328F6974861AB80CD2A45069BCF36B201D71A8D78023E9C34D3713B9E9BD8246", 4308, 0x59D9, "i2d_PUBKEY_bio"                            , null),
+              new("3E5BFA52F8D8C541E5F8FD21E1CBBEB9BD4856D4247E53B930A6E1845813D4B0", 4309, 0x3B61, "i2d_PUBKEY_fp"                             , null),
+              new("591307DB4E193975EAC28EF89A0559D709121D81FDE13A00D7DA1E54B7331BC6", 4310, 0x3F94, "i2d_PrivateKey"                            , null),
+              new("AE55964268CEB562DB57E251A6BBBEBD8EED0C615A24697DBACFC3A9F2706B3B", 4311, 0x3D8C, "i2d_PrivateKey_bio"                        , null),
+              new("F8F2DB6C264853A6E87462E4E2403EB932792327FE60CD4CEE4BB52D7A842021", 4312, 0x6645, "i2d_PrivateKey_fp"                         , null),
+              new("9F1E7E5A3B38837A83FD6A11A52F7CA8C771371EE6409B665B4F4D74B9474EAD", 4313, 0x3CD8, "i2d_PublicKey"                             , null),
+              new("4EF3F3A6457DD07706B5214FB1E6A55B84E7AC0AFC54A3C4B4868311FB4900C0", 4314, 0x69EC, "i2d_RSAPrivateKey"                         , null),
+              new("4C2ECF4B4A52724356031A7EE62FB74B3369EBC91C89F7771D82718A567AE379", 4315, 0x2C3E, "i2d_RSAPrivateKey_bio"                     , null),
+              new("36E44DF0DBDA675840AD61778B18DCAF8574B9364ECE79D394CDF405A8065E69", 4316, 0x394A, "i2d_RSAPrivateKey_fp"                      , null),
+              new("BAC1269D7F1D59C516F751E35D84BBDABB003E2BD981D825182171C6E9FA111D", 4317, 0x57EF, "i2d_RSAPublicKey"                          , null),
+              new("ABD0FFFCF8B61EC3C4799D08860E0A23540E8AE08CC355E9A072AE8FFD319702", 4318, 0x6E88, "i2d_RSAPublicKey_bio"                      , null),
+              new("40E1ED2957E0EBAFE46A04B34932338094674714CB96FB5F8BC236CB60B1692B", 4319, 0x4B6A, "i2d_RSAPublicKey_fp"                       , null),
+              new("241568B7D78FC2D4642859B84F9CEB4F94D555BD99C824ECF700168F73B00A0E", 4320, 0x6BA9, "i2d_RSA_OAEP_PARAMS"                       , null),
+              new("54B19948315E551C07FE59CFD75BCE27A4BE0A41552BCE30F4E898041D4D4EDD", 4321, 0x13A2, "i2d_RSA_PSS_PARAMS"                        , null),
+              new("2198244083BD8794094F170611314B9D0DB83FBEEBDCCA4921A02E9D57E1473D", 4322, 0x43BD, "i2d_RSA_PUBKEY"                            , null),
+              new("FC48A6751CF44994E4AC5E01AF86AEDDB414BD0D335FD294FD9FA0912FCFB0AB", 4323, 0x1366, "i2d_RSA_PUBKEY_bio"                        , null),
+              new("F621E1C55EDE191E41962C982B060D92F24F2DA8C57F8F882F19822ED36F5C5A", 4324, 0x6FFF, "i2d_RSA_PUBKEY_fp"                         , null),
+              new("D16462D21DAF73A704F01CF8EACE7CF6BA3CB94D3EDABC9CA66181D474285A84", 4325, 0x5B50, "i2d_SCRYPT_PARAMS"                         , null),
+              new("F9398E00CB3138CE405440FA7B55EE71B6B07E662B73E3AED942FB115FB7408F", 4326, 0x22C5, "i2d_SCT_LIST"                              , null),
+              new("90610EEE11E72C22AAA269039997D048BD8F3E480D05D8F00F6D586D681FD7D5", 4327, 0x6C2B, "i2d_SXNET"                                 , null),
+              new("4009C9C10638B36C98716BF9ED914D122654F4462F634E2EF08B307D5B7501E1", 4328, 0x1127, "i2d_SXNETID"                               , null),
+              new("8A5553F1FCB6279D215046D450E81B5C6C6D7572AFCBFC347515895E7ACBB862", 4329, 0x352B, "i2d_TS_ACCURACY"                           , null),
+              new("7D97AEB1DF9F05828576EF937ADB5BD6D88D8A75C3213F3D1BAF0ED7F521F6B7", 4330, 0x3A99, "i2d_TS_MSG_IMPRINT"                        , null),
+              new("E5915E7305DED3540E586011DCE877855237B78DFA417B99A642449073860ED5", 4331, 0x44E4, "i2d_TS_MSG_IMPRINT_bio"                    , null),
+              new("C55C708673CECAE15E782B6ABBA8D309DC62639066A8A7BBF6DD1C56D0D439C8", 4332, 0x10E6, "i2d_TS_MSG_IMPRINT_fp"                     , null),
+              new("4C5A3A8B2839356D26BFC6CFB842C830B528C9D591F807B64A52C45DF787FB0E", 4333, 0x4C8C, "i2d_TS_REQ"                                , null),
+              new("C10A4FCA620999C933AAF72A9571BF6AEF6323DB696C2EBF19E4D7591184464D", 4334, 0x41A6, "i2d_TS_REQ_bio"                            , null),
+              new("58CC5C2F3E0FB1B3C237CBB8D438B5B2B9AEAE4DA654FA6329B6227FD4E0ADBB", 4335, 0x68D9, "i2d_TS_REQ_fp"                             , null),
+              new("88E0364503DA64C97DD03CCF79ED753F1672EA812D970EDCB71D58205E3D5FB0", 4336, 0x176C, "i2d_TS_RESP"                               , null),
+              new("9D09F65FE293792E5F9782885722AB9E54A1D06CA9CD5DEF8C7C21F296DCBE96", 4337, 0x6500, "i2d_TS_RESP_bio"                           , null),
+              new("496A2F411F88527570909DD1CDE5F99CC9343D95CA3848A1B657531499B71E32", 4338, 0x44B2, "i2d_TS_RESP_fp"                            , null),
+              new("CFD72362A25854BC3BCCA76541E276106FD13640C6A57A4536633E101BF51240", 4339, 0x34C7, "i2d_TS_STATUS_INFO"                        , null),
+              new("52AEC0B49C3D23C5BCC8957F447B82AF733711E43B6AFA34D5F73F93C3DD1396", 4340, 0x434F, "i2d_TS_TST_INFO"                           , null),
+              new("7F8F77169ADF0C160477DB2E37A4E57938AF0702EDFD5B06C4D211DA813DC901", 4341, 0x1D4D, "i2d_TS_TST_INFO_bio"                       , null),
+              new("4F08830DE8D1D8A6CB4F8C867725BE0B5267B9A7650350A44F23857A439A2705", 4342, 0x5493, "i2d_TS_TST_INFO_fp"                        , null),
+              new("F824CDCD798C435045B5CC996D6A8B8DB1DDE04DF0C32E770D96BF28C8B9CF62", 4343, 0x5169, "i2d_USERNOTICE"                            , null),
+              new("4764C80BB0A9E92C61EB50D2812C4BB23B5838596D74082370D9313DF3E2C977", 4344, 0x5939, "i2d_X509"                                  , null),
+              new("495621229202B55DCDB852C545508D50BE85A1A24A2EC486161EA0534D074686", 4345, 0x583A, "i2d_X509_ALGOR"                            , null),
+              new("DA79B179B5AA88628D5E061749A07FCA3D5A4F417E215951E35778928763B82B", 4346, 0x1D93, "i2d_X509_ALGORS"                           , null),
+              new("F9635C48B6CEA408B07C025DA89E9577B9EDA3B69CBA15445AAB3500D7AA893B", 4347, 0x61F4, "i2d_X509_ATTRIBUTE"                        , null),
+              new("4936CFD403DC6F62CDE11EE69307BE05321E87CBFD06DF812DC191BB7CBC58C8", 4348, 0x46BF, "i2d_X509_AUX"                              , null),
+              new("141634B506355D7BEB5A94DFCD5E145E45373DA81B601BDA37975D96992A4ECD", 4349, 0x3283, "i2d_X509_CERT_AUX"                         , null),
+              new("5D6B1725FE052A53F7F8C396EA060AD8CAD455D13120FFC48B5DA2880806A124", 4350, 0x3977, "i2d_X509_CINF"                             , null),
+              new("598883089945D94656CC16291F6B23F53988F121008E75D9213919CE8CB01D7C", 4351, 0x470A, "i2d_X509_CRL"                              , null),
+              new("E22499D0ED74309FC980CD1E645734DD6E08BAD74A0AC64ED05D284BE5BB2F52", 4352, 0x1717, "i2d_X509_CRL_INFO"                         , null),
+              new("E5B47A340192E7B656C6B643756E3DD9FDA017FE6DBC05062B9A05E78368004B", 4353, 0x66A9, "i2d_X509_CRL_bio"                          , null),
+              new("421FC39EE82169FA5E3FBEC526F4C8133ADA8D7CA018F24AD10EAE8F48FC8556", 4354, 0x1DCF, "i2d_X509_CRL_fp"                           , null),
+              new("99975170811008A52E581D5FCC37C62767337CB5D78DE855DA8A433B775F879B", 4355, 0x5894, "i2d_X509_EXTENSION"                        , null),
+              new("76C78F83475FA3E3419B25111630C3EEF8E7AF55CC83CB2805A07D6BDE11D0BD", 4356, 0x4DE5, "i2d_X509_EXTENSIONS"                       , null),
+              new("0F3991CABEC3C7AFAFA52775CD4AA0C71494719CAE4B760D4A2BD1B82344688D", 4357, 0x3909, "i2d_X509_NAME"                             , null),
+              new("A19EF27074304935B2022D7A474B72F33A64380E4D84D8F8BFAEE9B05600383A", 4358, 0x5B7D, "i2d_X509_NAME_ENTRY"                       , null),
+              new("AE56966B699174841B800EDC7224C1F86623A195874AAE9EEAECFB141E8315F4", 4359, 0x6A41, "i2d_X509_PUBKEY"                           , null),
+              new("D8CC03B77C59B1A817C7DECDC131117B61972DC2AC67D25F6DAFE68E20E7E591", 4360, 0x46DD, "i2d_X509_REQ"                              , null),
+              new("A66000A31310C0A0848C2BCB3BF2D75AAD8CACD4D0E5F417C7B7372007E80F81", 4361, 0x5F97, "i2d_X509_REQ_INFO"                         , null),
+              new("3EA45A97087ACED55E056259A698F0799A61795FC6C600EAF31B327B4E15BEAC", 4362, 0x42A0, "i2d_X509_REQ_bio"                          , null),
+              new("ADEDC9BA3202DAF894263F70FF87745948CC65EFD4D9B8766407764A6B71CD1D", 4363, 0x7167, "i2d_X509_REQ_fp"                           , null),
+              new("8BE92AE827CB6BD8E85B5D8486E6E2855FEC8B661E500C9F16A34D333CE2E41E", 4364, 0x425F, "i2d_X509_REVOKED"                          , null),
+              new("23B3377B01BFB7CFB4A2D2D1270B5B5A29D84394D9ED700285B5A5BC006AD1B9", 4365, 0x46D8, "i2d_X509_SIG"                              , null),
+              new("3B860B8D41A68CEA1BF5CC50CB4B6DF3BAE9BDD5DB6799CDA517C3B1C195762D", 4366, 0x471E, "i2d_X509_VAL"                              , null),
+              new("8DE2180F19E194B388F41B8DBA380AA880A6075BAA1EBEC7CFA05A6096A10E09", 4367, 0x4BF1, "i2d_X509_bio"                              , null),
+              new("B5DDAA01C14FD74FA2246D0BF411EDEFE9297DBDCDE294642CD1F9A1827F82C1", 4368, 0x146A, "i2d_X509_fp"                               , null),
+              new("D44C93A341F7A34932CE815388EE147279403735F6A517D50D9F030D69A36288", 4369, 0x639D, "i2d_re_X509_CRL_tbs"                       , null),
+              new("4E1195031E7AAA7C1196B84B7A5525D85E2E2ED6F682538F1A23F1982B79E28E", 4370, 0x44C1, "i2d_re_X509_REQ_tbs"                       , null),
+              new("6713A3F6C60C4F9202EBE68A4EEE9B4AF4CCD1B28058958D5081AEFFAADFD8BF", 4371, 0x3CAB, "i2d_re_X509_tbs"                           , null),
+              new("14F3C54B71B9ADB10A41B4FB3D73E9F102E85304D42CA0BCF151980FCEFFD1ED", 4372, 0x6992, "i2o_ECPublicKey"                           , null),
+              new("A5D8757179ED99B10FCEA64094E8107FCC8BD5EA2BA00AD14384C5FB64A7B4DB", 4373, 0x3FD5, "i2o_SCT"                                   , null),
+              new("3C07B58C81B6BFE6E352AF5929B6E29396EB7BE0A3B933AEA05FE9235ABB837F", 4374, 0x6C3A, "i2o_SCT_LIST"                              , null),
+              new("A3CC26678C57F8B7DFCFED20AA24FEF7D3625C2F95F8C4440B7C9051A0DBA46D", 4375, 0x63A2, "i2s_ASN1_ENUMERATED"                       , null),
+              new("7D8B58AC9901B62784A8BA5C90DAFB0A2E470E1617D3B4923197A71C820E1179", 4376, 0x5489, "i2s_ASN1_ENUMERATED_TABLE"                 , null),
+              new("D42980F3C93E0928DB6091D2C14B379C3250FC41B0CEEF3FA582F278281D717F", 4377, 0x313E, "i2s_ASN1_IA5STRING"                        , null),
+              new("C0912AB9ABB71621FF7CFB73A83DF7FD28C8684BD675E07BE9558B1DCE410DBB", 4378, 0x1FA0, "i2s_ASN1_INTEGER"                          , null),
+              new("30D7137EBB3E387BFD8A85BBCFC6189BF2E22B5B9D06867D3FBE8B15741A634D", 4379, 0x2194, "i2s_ASN1_OCTET_STRING"                     , null),
+              new("A4FF582AD340413D823014A5BB5A06FA9C03A4E90B08B69A160AD70E6A132768", 4380, 0x4CD7, "i2t_ASN1_OBJECT"                           , null),
+              new("D29EE715AA7B9D38D682FAF83385CD39B03A68BE970E4A33752ADE886ABBD866", 4381, 0x3E4A, "i2v_ASN1_BIT_STRING"                       , null),
+              new("3079B113AB4DC2627C99CEBBA57AC6FD4A91F288881ADCEECA27E439DF814375", 4382, 0x340E, "i2v_GENERAL_NAME"                          , null),
+              new("55809413C07CCF0E1EE8F5DF5052777463EC40E345F08EB6D7DA15B40BF3F006", 4383, 0x57A9, "i2v_GENERAL_NAMES"                         , null),
+              new("541BF65FB01FDA269935FC32B8C11B1FC3F8204F6A3705C1CE749DC74EC28352", 4384, 0x462E, "o2i_ECPublicKey"                           , null),
+              new("7C00E52E204580B6EE79413C56C4C24E6EF49193093249D2839E6987CD3C3CDC", 4385, 0x3F44, "o2i_SCT"                                   , null),
+              new("1BF7A3664FEF8D45A9A69BA704DCFB39C2E44FC2D91588DBE59D45AD361BF53C", 4386, 0x5A1F, "o2i_SCT_LIST"                              , null),
+              new("00CE7FB1801706780A5E8675A70BEE5C34C14F1400BC6A069401089464C5AE07", 4387, 0x2928, "s2i_ASN1_IA5STRING"                        , null),
+              new("63C83C2A053CBB1B199554C4CA94CAC0EAA707FF35D179BA086448BF031B8088", 4388, 0x4C41, "s2i_ASN1_INTEGER"                          , null),
+              new("82DF348EFFE11FF6BC86085BA5E5D7BB6DCE1A8624BC10C52C350D2DDFD0C3E9", 4389, 0x1FF0, "s2i_ASN1_OCTET_STRING"                     , null),
+              new("0B0647ED7F9D6DAD7805AC40F2630176D893DCA61B274B236CDC9F9A1941AA37", 4390, 0x246E, "v2i_ASN1_BIT_STRING"                       , null),
+              new("FF380229781F1BF2847631FD3AF8A7CEFE95FC666CAFAD27B27DA797BE5910DD", 4391, 0x4354, "v2i_GENERAL_NAME"                          , null),
+              new("03CC492B65C9F0FAE67D021D466A66CEC3830AA66D7967758EE6439ECB1C6376", 4392, 0x310C, "v2i_GENERAL_NAMES"                         , null),
+              new("639F24AD09E97D8CDEB08B4BA450402460F3FEA59C207CF332687F90A0BA8F8E", 4393, 0x60FF, "v2i_GENERAL_NAME_ex"                       , null),
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeLibsslSources() => new object?[]
+      {
+        // @formatter:off
+        Make("libssl-1_1-x64.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "7BF27779F75B36FB25542EB7E8269CCDA7B592485457ECD236CB12323DC1EFA0B4106772C30FE43FDF5091DF1D9C761E", "[1A0:8]", "0;0;[0:150],[154:4C],[1A8:A0258]", 495, 0,
+          new Section[]
+            {
+              new("BC4F4113ED6AFC444891BCA48C344B57F4569A77440CF97F3DF11B05DAF25091",  0x1000, 438439, 438784, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("70A1C76C7F09FBCD852E4A3EAFA84643A886660624ACF80D01BAC69CEC005CD9", 0x6D000, 142750, 142848, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("04BE15AC49A71946AA380207DB1B503DFE5531B42D486A828A5297C6F67852C0", 0x90000,  19729,  17408, ".data" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("171A6D303C672C69C500E5D980F4A07E0848A5DAE8953D923F81BBE42C9922CE", 0x95000,  23052,  23552, ".pdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("ECC6D395AB94CC913DCADD80E81207565C3C908C539CBBB55102F47B33550A97", 0x9B000,  22249,  22528, ".idata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("D6EAAC8D37DE832781452773421842580C203782059D36871EC0AB7DC7458F96", 0xA1000,    288,    512, ".gfids", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("4E3E19C44C3BD1BFCCD87BC83D13DAB8D793EBF854359784C959BFCEFAD6B80C", 0xA2000,    283,    512, ".00cfg", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("3EA02D38158D158B2DAFD1330FB19537462ED2D1A6B83B46631B699FD7AB0251", 0xA3000,   1651,   2048, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("34EBDC11FEB2F98FFC42FDB85F9BBC042DBF70055CC967560C23539C636CC74F", 0xA4000,   6888,   7168, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+              new("29B6081AD7F96DF06741103F9FFACFC9322E286957EF8C89BC02E4569ADC935D",   1, 0x141F, "BIO_f_ssl"                              , null),
+              new("A25949A1C6946B2F619375FE01CE641933A2ACCDB3ED161F1D7EC80E29D82614",   2, 0x17A3, "BIO_new_buffer_ssl_connect"             , null),
+              new("154763F937B243DB49A0D144E95FE964F63E3FEF2047EDE4D2751AAA88541D01",   3, 0x21CB, "BIO_new_ssl"                            , null),
+              new("55E03C3B472C94EEF1F5BB6426F395D68E57F8B14B703DC636361E9E455F944D",   4, 0x18BB, "BIO_new_ssl_connect"                    , null),
+              new("59ACF03C2D11CEE9CDCA00DB90F6422B4E811EFB9A7E1E40FDC07FD7586C5043",   5, 0x20C7, "BIO_ssl_copy_session_id"                , null),
+              new("6F96D0BA6ED85FA64A2F9B43BE624B986910169D4A96E24493C11DF2C57435C9",   6, 0x16DB, "BIO_ssl_shutdown"                       , null),
+              new("0231FAAB5BD9876F5EAD359EC11A104DBE3E8EFFA4C77187AEC7EE84381874E6",   7, 0x213F, "DTLS_client_method"                     , null),
+              new("5B0B4F91FCE02E41986F35DCE8F97CAEDA72E7C174E0227F47DE85708B5ED5A8",   8, 0x15C3, "DTLS_get_data_mtu"                      , null),
+              new("303B5A4B62EDA5E34FAAC42D0089CEEB1C025667EC895E9AD088CFA50DDB79F6",   9, 0x1B59, "DTLS_method"                            , null),
+              new("05C3C7F29F9705673F49BE264C20D4636359107B6CB15DFD5B347F7E3FA082BC",  10, 0x1F46, "DTLS_server_method"                     , null),
+              new("6044ACA9BA63294F43225D3A77A8F92E3B88FC72E63E6027679443C167021A52",  11, 0x18AC, "DTLS_set_timer_cb"                      , null),
+              new("B995F3CB78926716154587F258AC683FDF8685674B8FF0870E541F7A5E84692F",  12, 0x175D, "DTLSv1_2_client_method"                 , null),
+              new("0EAE3A95A859366A0AD952721FB5005A263F0821D7FB7E17B6DD38E01CF48EE8",  13, 0x188E, "DTLSv1_2_method"                        , null),
+              new("B300BEFDDD9E56EBF64DDB23AE6E652A4843DC2F35A8753703128495B322FFAA",  14, 0x2059, "DTLSv1_2_server_method"                 , null),
+              new("05567E35B20F54EB25F4ED0EF834838D2F6892D89C1388778B6B790275D1B614",  15, 0x17AD, "DTLSv1_client_method"                   , null),
+              new("861126BAB3AF6026BF3F39D65180ADB986D72457C2C84D13F34A0CF489ED337B",  16, 0x1122, "DTLSv1_listen"                          , null),
+              new("BA03886DBF20477595148FFC5B1EF610A0C3A1CFBCFBEDE35972DF4FF3CF92DE",  17, 0x251D, "DTLSv1_method"                          , null),
+              new("5B4BDA024E16ED06BDD9039FCE96DE635C70F307A2C3A93363215CD35994EE64",  18, 0x176C, "DTLSv1_server_method"                   , null),
+              new("E68E0A6F177813F9236B3DD11E2E7DAFB2895D8B6CCA8AE3C2DFF4AB1904A37D",  19, 0x20CC, "ERR_load_SSL_strings"                   , null),
+              new("D2A55DC99072619101158DE368D582AB784C642A805042E80236BB6AD0E4FC09",  20, 0x16F9, "OPENSSL_cipher_name"                    , null),
+              new("B22DE105CE7E2061074EF6C60A44963EC5B853DE6E65F0CE320C4EB525C6D78A",  21, 0x2351, "OPENSSL_init_ssl"                       , null),
+              new("B7C6190B8A2B07D60C6756F7F5F21988CB69570F3648D869C63DC37542344770",  22, 0x2324, "PEM_read_SSL_SESSION"                   , null),
+              new("EDF519C623270F997345DDF58AE89FFDDB6DEFF35EF08CBE9244E36DD0A97B9D",  23, 0x18C5, "PEM_read_bio_SSL_SESSION"               , null),
+              new("D2A6F5AE5B16DA826A4AADC17CC0588CC8E7BA63A55252879BE06D52F768026A",  24, 0x24C8, "PEM_write_SSL_SESSION"                  , null),
+              new("00963C67D9A543E414D94E2BBA0ACFEA0D289A3933C74D8D7353F3298BED2A02",  25, 0x15C8, "PEM_write_bio_SSL_SESSION"              , null),
+              new("3A9EF63A532E07FD5BE032568E938CAD7329523945AB2D6E7BCA3311DF59A524",  26, 0x11E0, "SRP_Calc_A_param"                       , null),
+              new("93BF6E9B07896F68BCFAF012B97ED24C305B23C3177204AD5F5936A3FD0ED796",  27, 0x225C, "SSL_CIPHER_description"                 , null),
+              new("7B5E4D89FEFB405EBB2893005AEBD0714ADDC817293A449733A5E14143DEB0E1",  28, 0x1B2C, "SSL_CIPHER_find"                        , null),
+              new("143A32420FFC800B5490F0ABD70B7C2055388C2A12069E2FA31D32C7C48A2FD2",  29, 0x1168, "SSL_CIPHER_get_auth_nid"                , null),
+              new("7DD30EEFBF03A492CB7CDEDB864CDFA0ACE4C057451807AADD4320CD4A3E1F02",  30, 0x1528, "SSL_CIPHER_get_bits"                    , null),
+              new("69891FF5379AACB32A332C94CBDDCBCE468216B1535B91400970F7F28E3166D0",  31, 0x1843, "SSL_CIPHER_get_cipher_nid"              , null),
+              new("931A74E5E971F06D00FEDB31AD605173150C62DE97AF9AC060BF9E90CB45B05A",  32, 0x1AF5, "SSL_CIPHER_get_digest_nid"              , null),
+              new("4FD1DB5875D63AAF471BCC49EC561335509A2CE06101E61E6321A5CE1329E9D1",  33, 0x142E, "SSL_CIPHER_get_handshake_digest"        , null),
+              new("311BA7A2CC9305995C0D4BF80B90F4659514EBB078C65A04F6D46C81461A04BF",  34, 0x1997, "SSL_CIPHER_get_id"                      , null),
+              new("D230AF6E34FD453291717FF8428FB2B49A57D637CCA62CBE5CD614899EF4AC04",  35, 0x1B6D, "SSL_CIPHER_get_kx_nid"                  , null),
+              new("A227D88995BE6F48DD369D66F528CEC25A1AC5703EC0093154A19E20FE07C737",  36, 0x1406, "SSL_CIPHER_get_name"                    , null),
+              new("D9E729AA24D8A39C637B3194BA2C1215B2ECD99EA3D6A4CC76FD03D2DDE9D4FF",  37, 0x1D89, "SSL_CIPHER_get_protocol_id"             , null),
+              new("1CE8EC4012C1DA61C1206060D1C527A6D6EAA5D981B372F9C36A77284D8EE3E7",  38, 0x20FE, "SSL_CIPHER_get_version"                 , null),
+              new("DF112AA7D903F460D7D6FF61B152B101D5E9C1D9B3930993691A8B013A6201A1",  39, 0x160E, "SSL_CIPHER_is_aead"                     , null),
+              new("CD41B0FA26A9D3B2BD53168232A023DE2AC6A7CC018F5D3B92E4A326067B9A9A",  40, 0x1659, "SSL_CIPHER_standard_name"               , null),
+              new("B7CC3C55E32021E5700B526007D924296B5344CD50F1732305F13B6C15C4CB7B",  41, 0x135C, "SSL_COMP_add_compression_method"        , null),
+              new("363298B369256C39D97C14EB27F1A7421A588441DF0DF20837A0D4BFC22155B2",  42, 0x1B40, "SSL_COMP_get0_name"                     , null),
+              new("7915A4172443720BAE05ED6B53176080678673624D350346DFA826C91B79A4CA",  43, 0x2315, "SSL_COMP_get_compression_methods"       , null),
+              new("A8D4A5F1524D7AC0801D00A924D6534E4A399B13F799728D2091F25378575CAE",  44, 0x10AA, "SSL_COMP_get_id"                        , null),
+              new("D696A5E71B7B89AD0D603C14B329088FEE333358A08C99945774539F43225B69",  45, 0x11A4, "SSL_COMP_get_name"                      , null),
+              new("43ED986B1EC9FEAC1A41E5A5629E374CF9D84E2D6594C2501D8B32E195CF0872",  46, 0x232E, "SSL_COMP_set0_compression_methods"      , null),
+              new("8AEFEB9F8B41B2068CF8F9D62AADEEE9D79248DE1A96A3F8CE709BB0CD3B66F4",  47, 0x177B, "SSL_CONF_CTX_clear_flags"               , null),
+              new("D5D227646B5BA0F020D203D70F5DE3DB78973B3E86669888159EBEF539846391",  48, 0x16AE, "SSL_CONF_CTX_finish"                    , null),
+              new("725722D56F1613B8A7645EA055A79F277FF4700E80DB0E3C13C9CE2137A44000",  49, 0x253B, "SSL_CONF_CTX_free"                      , null),
+              new("19E84B7F2A4AC25E80CD1FE7B5BEDBDD55DB2A556B1A2445C91D12D5C05BC573",  50, 0x2121, "SSL_CONF_CTX_new"                       , null),
+              new("A135B60B4F0D968416146C115EF815815CF5B0C4518B1C73C1B82AE5F1E9DA40",  51, 0x1ED3, "SSL_CONF_CTX_set1_prefix"               , null),
+              new("F5C2C02DA1390D9DCFAF089FA84D492BBCE37DB6C8EFD7E5FA07F82025F3C99F",  52, 0x2202, "SSL_CONF_CTX_set_flags"                 , null),
+              new("841250D16DC01C48CC8A56639950C0C58A255C79D8A7148D43CFEF0EACB0EA52",  53, 0x16C7, "SSL_CONF_CTX_set_ssl"                   , null),
+              new("0EC8C13ACAE372904A26E4CA79983A9B9B60BDB140BBC9CA0621BC1E7C47DC49",  54, 0x1EEC, "SSL_CONF_CTX_set_ssl_ctx"               , null),
+              new("F9EB4AED8CE293A5C1F6051E3527041F8DBDAA945F2B964459C67CEADC8E3A1C",  55, 0x1D61, "SSL_CONF_cmd"                           , null),
+              new("1F67F39C54B5229C830AE5027B475E18DEB3559AD5364FEDE100FA790A256F08",  56, 0x1325, "SSL_CONF_cmd_argv"                      , null),
+              new("2C7439C00A279E84FF7C5EF67291A4E78EA4B98C16C14AFB7365725468EC390D",  57, 0x1023, "SSL_CONF_cmd_value_type"                , null),
+              new("000F652C68E12773369ABE318889C9674AB4787299CFB51AE760472783AD9D54",  58, 0x1064, "SSL_CTX_SRP_CTX_free"                   , null),
+              new("AEB5A2F7F18DAB63ABF40FF423CD17E5638D6A65B38F2599EFAF12290DE0F6C5",  59, 0x1087, "SSL_CTX_SRP_CTX_init"                   , null),
+              new("91B11DBEE41A8D1E4EA3FA264C9B7A25138F43D3E186F28290206521553A8440",  60, 0x1F78, "SSL_CTX_add1_to_CA_list"                , null),
+              new("1D7B258C1454F564CD6008598CBCF224CA590843D19733106F19821525BF4840",  61, 0x1E6A, "SSL_CTX_add_client_CA"                  , null),
+              new("07EBB04776DB71024C2928C00A463C16231E1E18E7A2F3CF226AB1FDDFF4FFA4",  62, 0x2527, "SSL_CTX_add_client_custom_ext"          , null),
+              new("A66FC4A03DBDE91E7E41485375DB86F411334D795993F0282678043F22B17A23",  63, 0x101E, "SSL_CTX_add_custom_ext"                 , null),
+              new("CAABEAD0324D9E26896850C313811E76548532613077EDFA867DB7BEDA6B2AC7",  64, 0x17BC, "SSL_CTX_add_server_custom_ext"          , null),
+              new("B6B018C1406FE541CEE96BD26140991AC343ACC85BD8D79E2DDECC7616606C43",  65, 0x1D43, "SSL_CTX_add_session"                    , null),
+              new("BC13063E79481BF7223913EDE84A586668340CAFC5F355BB30DC125981881CB5",  66, 0x1109, "SSL_CTX_callback_ctrl"                  , null),
+              new("09E56F44285030D7C14A82B58715E81942B1652D965A9F91902435619D8D8099",  67, 0x1069, "SSL_CTX_check_private_key"              , null),
+              new("E3B9DF9D2C9BE41EEC2955F845CAF2AE3CA24442498BD1FC15672400AE9D2016",  68, 0x1A32, "SSL_CTX_clear_options"                  , null),
+              new("F06E424D7B7D57E51B20CA040EB4421AFD81357F0CF7790FA20C7C1ECDEA751E",  69, 0x213A, "SSL_CTX_config"                         , null),
+              new("9EC0EA5269A08FAABC7F9695CEC84E924643D2EA044254BD2D1A482CDED64420",  70, 0x1776, "SSL_CTX_ct_is_enabled"                  , null),
+              new("2C46B66F9CC8E888CE47F6161F4C5E440138BD92E191430057EA52ED44230A9E",  71, 0x20D6, "SSL_CTX_ctrl"                           , null),
+              new("1EEB226CE48142E7ED3FC83107B26016C50D79E2CD723A44C3F2355954877CDB",  72, 0x1479, "SSL_CTX_dane_clear_flags"               , null),
+              new("1B2DDAA4BD90B43206BBB2655FF7EFFD53E893D6D9C612B7541955092AB575D0",  73, 0x1654, "SSL_CTX_dane_enable"                    , null),
+              new("EF6E0536664FFF82123ADCBDA7C068E65E3060A87DEF6DD7ACE5EF8E03BD93B0",  74, 0x13C5, "SSL_CTX_dane_mtype_set"                 , null),
+              new("279BB2171583F55D237B061D809CC563AA89EF1E720AD740566019A45812FFBA",  75, 0x13E3, "SSL_CTX_dane_set_flags"                 , null),
+              new("950B41D260C486DE1D0F14441768DD19FF4D4A11B98E19345338D5248636384A",  76, 0x1EBA, "SSL_CTX_enable_ct"                      , null),
+              new("0814289A14299FD1636830FE975E77F505A0198101A06DDB9195279EB8CA6500",  77, 0x1E29, "SSL_CTX_flush_sessions"                 , null),
+              new("3C6F5345EBA3EC07F4942896DBF5DC3B378F7A24D530375DD307ED700E1233C2",  78, 0x1D48, "SSL_CTX_free"                           , null),
+              new("E34070992D916682D20E03DD65E75388ABA890B69D6D21E32846B6FA5A332DCB",  79, 0x1D07, "SSL_CTX_get0_CA_list"                   , null),
+              new("80EEC2B3246E620FDB0C7E25ACE2FA2538F6E470324A68A68FB1094048FACCC0",  80, 0x1E8D, "SSL_CTX_get0_certificate"               , null),
+              new("859073148C14BE7DCB226CFC4DA4743212D6AA50A18B10E2E0FE66EC2FBE5A3A",  81, 0x1249, "SSL_CTX_get0_ctlog_store"               , null),
+              new("26ECD90AE2A3B45E2374CE13CF1F3A318B859B6A20E0C54825950C25BAF76D50",  82, 0x21DA, "SSL_CTX_get0_param"                     , null),
+              new("6D16BAD664A678CEA7A4D253BF3DB2A1D06BF81648E752BB2520EDFFE40E66A3",  83, 0x1D93, "SSL_CTX_get0_privatekey"                , null),
+              new("2672A507C6B56C8A9A6DAF5C9BAEC8AACC079FD2BA09D4F2B6243586F35B6354",  84, 0x15A5, "SSL_CTX_get0_security_ex_data"          , null),
+              new("978C9582D1E0F0DA39E0DE369C9D4F8FE599CE09F0DD269215E39F2E404B4AF3",  85, 0x1E15, "SSL_CTX_get_cert_store"                 , null),
+              new("5A2281C3ACF02E46B7257F854F27B6571D4A227CFE3373FE3A0703812F2E850D",  86, 0x197E, "SSL_CTX_get_ciphers"                    , null),
+              new("5543B9C702CADFECDEDC01A63AE5513CDE279CD32BA9950CDDC03E202B84F57A",  87, 0x1E65, "SSL_CTX_get_client_CA_list"             , null),
+              new("4922C3AC0BED3BB9A25F276AAD26790271349EDFC8A1D2CB2744A9CF5BE71BBC",  88, 0x2086, "SSL_CTX_get_client_cert_cb"             , null),
+              new("EEECA1A5EB95AFD2442266BAA8CFA50E43AB13A1E590DBCF9724D0248E904A35",  89, 0x2194, "SSL_CTX_get_default_passwd_cb"          , null),
+              new("EEA359699A8CEB180A5A13E20EBCE7AAB2EFDB97C1FB57B681E18F09F8561508",  90, 0x11CC, "SSL_CTX_get_default_passwd_cb_userdata" , null),
+              new("C602B65B2DC834088024397D8D5E38D1E359F826EC5C092B47F2233200779C8E",  91, 0x216C, "SSL_CTX_get_ex_data"                    , null),
+              new("FB9514426AAFF750502B803C095A5D04D86D88CBF9C9CE21BC51D63921AAF5A9",  92, 0x1BBD, "SSL_CTX_get_info_callback"              , null),
+              new("1903F9D61FE519E07674E4D0B090D266EE02B39BFC7ED30DF2AE18B88666CF7F",  93, 0x1DA7, "SSL_CTX_get_keylog_callback"            , null),
+              new("5C92F3E433438FDFA2517ECB10863126DD089C3EF91649B005284E13F0F938A3",  94, 0x10B9, "SSL_CTX_get_max_early_data"             , null),
+              new("F75333648068A4A742B7D712C43CA898EE48284F48119266E766538806C28E7E",  95, 0x1799, "SSL_CTX_get_num_tickets"                , null),
+              new("69D2B8D905507E5F092A7C44F48B630E854A0F18AF7BF53DF920E0567693D50D",  96, 0x1979, "SSL_CTX_get_options"                    , null),
+              new("A4AEAB918995329AEDA613D82B8AE5E20D5F2D5F9994B0E08826DBE59366E5D2",  97, 0x1AE6, "SSL_CTX_get_quiet_shutdown"             , null),
+              new("539DE91BB6D2B7549AF26240617F628A9425203F5A1374EC0C2CE9BC8BBFFDF8",  98, 0x2027, "SSL_CTX_get_record_padding_callback_arg", null),
+              new("4437FB52CE138484CC8CC3F1C133CD8B35B59B8BAE8CCD6DF9E7D040953B26A6",  99, 0x2397, "SSL_CTX_get_recv_max_early_data"        , null),
+              new("536F59834AD14CE3955180A3609C077027297C8A8007E9987C6205375B81764B", 100, 0x1578, "SSL_CTX_get_security_callback"          , null),
+              new("F37217CD5F18E0845F38206D3938957DB0CC6C0D31E26BD615762DFC89CA46B4", 396, 0x17B7, "SSL_set0_security_ex_data"              , null),
+              new("2E7178CA1B12A91D19C2B1288C97EC9D5CEA9BA43CFF30DBB4EA2B8A47EF81D4", 397, 0x196A, "SSL_set0_wbio"                          , null),
+              new("AA866F42C645C8856C276695235C757A4B44EA7301F3DC28863669E967980BFE", 398, 0x19BF, "SSL_set1_host"                          , null),
+              new("A39544CDAD95A5C87FD3265CCF62F167412B0A97800752197191B91E592A0BF8", 399, 0x206D, "SSL_set1_param"                         , null),
+              new("500CF18006F3BDD8DFFB1A23BC5CCF6633D291DF6E516F4D4F30E20AE474789B", 400, 0x172B, "SSL_set_SSL_CTX"                        , null),
+              new("1EED412C61304CCCE028A00FF7F2825EE77EC87762258E8952CDF232BFD4A5D1", 401, 0x12E4, "SSL_set_accept_state"                   , null),
+              new("68CA438DF522EAB90BA56D7E93CC7371986663E2326265E7E823A41C590F43AE", 402, 0x19C9, "SSL_set_allow_early_data_cb"            , null),
+              new("81EF7BE141480E4D5740938BD4BA42D80CFD9007F9AF68CA26B308A748BC6C54", 403, 0x187A, "SSL_set_alpn_protos"                    , null),
+              new("446986C6D7AB31689DB22129C4CBD165E8F89B7D46F9F9F52682EC464307259F", 404, 0x13F2, "SSL_set_bio"                            , null),
+              new("C9E2B57E4119438A8AD80592CEB9988A366695F0EF968476B7089C11F19B9726", 405, 0x1DC0, "SSL_set_block_padding"                  , null),
+              new("D2C15B9D519CFCFAB4CAFE681DFCCC30C95ABD4E54DB9623769AC152ED2A7C3E", 406, 0x1D11, "SSL_set_cert_cb"                        , null),
+              new("6DA1DF65817397D8FECA9DB500180502355EA2DC27F28F00D682620C38D5C2B6", 407, 0x149C, "SSL_set_cipher_list"                    , null),
+              new("92D72D41299DC2F0E8E74A8CB0DCAAD8A0F7DE2C6EB00124F9AB80A7F053B535", 408, 0x1F82, "SSL_set_ciphersuites"                   , null),
+              new("7D983EB670041F1A19EBBA792DF5BE31782F230D6555EE19096B9F7C31D33967", 409, 0x1316, "SSL_set_client_CA_list"                 , null),
+              new("F264C34FDF502A229A1CE8586E52AA02A8C6F1EA4A4B2EE39ECF46372860F3FF", 410, 0x1794, "SSL_set_connect_state"                  , null),
+              new("749AB4E270FA79BD190C686DAF86A5305F424B077D51543C1C750E3777692705", 411, 0x240F, "SSL_set_ct_validation_callback"         , null),
+              new("A39F1FFBE8C011B687A003B442880026D010055CBF679D5C03C307646AA5A4C5", 412, 0x10CD, "SSL_set_debug"                          , null),
+              new("C02E2ABC906821B1B6C18E000F5B9646DF30F5266CF27DD21DD18CD222788CC3", 413, 0x1CE4, "SSL_set_default_passwd_cb"              , null),
+              new("40AAF65A7628B9D7CFB5B4054A0AE0130B64C1E1E84722F2E2E02128C6BDC009", 414, 0x23B0, "SSL_set_default_passwd_cb_userdata"     , null),
+              new("78FCE4597DCA3634EA6FCB79DC168A4AAA3802EF1B3B9C55212158E43A4D1C3E", 415, 0x2545, "SSL_set_default_read_buffer_len"        , null),
+              new("C27416330BAE83FEAA1C04C4452062F3CC1CA340FBAB7D42C0871D367CA730FC", 416, 0x1BEF, "SSL_set_ex_data"                        , null),
+              new("49AEF3C9DEA20862787CB46C5558EACB78C1137983756EB3C9DA844FA8DBD26D", 417, 0x10FF, "SSL_set_fd"                             , null),
+              new("CCE28EA60265464F3F3C415D481B277530F341E56D469FEEE6AD4DA67E9CC0AB", 418, 0x242D, "SSL_set_generate_session_id"            , null),
+              new("90D49F9273499EA56068C32F648871F2B97A957B4B36AA202FB1A7C5D7ED364A", 419, 0x162C, "SSL_set_hostflags"                      , null),
+              new("3FB6CD653664A3F2D1B9AE5F8D3BAE4BBF29336527ED9FF450FC9573A00ED12B", 420, 0x1541, "SSL_set_info_callback"                  , null),
+              new("64A79E0A2EC384F85988778E428CF065B41B9B497C3F06B69FB7367D99D41213", 421, 0x1DFC, "SSL_set_max_early_data"                 , null),
+              new("F4E1C25846169B7409E9897FDC164885B5DB223F99BB2B880D877D9918B7E7B9", 422, 0x24D2, "SSL_set_msg_callback"                   , null),
+              new("3177643D4D418EB240B37D1D10E5902BCCC20D5D81A027524AB3B4E26A38F81F", 423, 0x215D, "SSL_set_not_resumable_session_callback" , null),
+              new("F2810FAAF2D9F5B87A7EDEE4E93080E212B9AC107EBB0BE91060D6685701DB1A", 424, 0x24A0, "SSL_set_num_tickets"                    , null),
+              new("071104D43FBE6D521BCA37AAA3A50130E987299B2E5090854261507655D75222", 425, 0x1CEE, "SSL_set_options"                        , null),
+              new("5EAA1A514B76FD3ED8820CDCA68C1CFA9E943934FA4194F069565E55FD1058F4", 426, 0x1370, "SSL_set_post_handshake_auth"            , null),
+              new("E2029E136CE88A979B9C707DB9447D904FBC64A6DDE5108746B70921CA4A1504", 427, 0x1B77, "SSL_set_psk_client_callback"            , null),
+              new("6C655ABD9604D7FD63C2DD135F2988A98CCAF76FC05AD59F1FD8CE2E187A5E33", 428, 0x13B6, "SSL_set_psk_find_session_callback"      , null),
+              new("238978464CCA793732225F59101C23F01A8A26EED9BAE124819C80BA7D5315D3", 429, 0x151E, "SSL_set_psk_server_callback"            , null),
+              new("B00A9926B852FC14EF59F2235227F13C3F47508C3CAC72FE114DC3EF8E4D6CA5", 430, 0x17CB, "SSL_set_psk_use_session_callback"       , null),
+              new("482F1207E85C7CCC9D83686C29B91EA04894C0F428B18FA1156E743E28151693", 431, 0x1BDB, "SSL_set_purpose"                        , null),
+              new("8A5E3D9B40A86C20CBB374FB540ADD233B5BDF9DA0586D337028347E0199B3E9", 432, 0x227A, "SSL_set_quiet_shutdown"                 , null),
+              new("147225556550BA6661B402FC7290CBAF350429E1A060B7B385136FF30147AB1A", 433, 0x1D0C, "SSL_set_read_ahead"                     , null),
+              new("A4C6FD97308FAE23567D93227E7A943B3CF4260CE80B5FB345B5B64012FC8660", 434, 0x18E8, "SSL_set_record_padding_callback"        , null),
+              new("417C1FAF1D448D94F57C0CC47ABC2E8E94362E7099A5315391B625C8C71FA694", 435, 0x1348, "SSL_set_record_padding_callback_arg"    , null),
+              new("915613022E095C87E41214750F04F7D6BE56BDA0A4DFE67054D09F6D39BB00D7", 436, 0x1839, "SSL_set_recv_max_early_data"            , null),
+              new("C775E4271A48AD369883D8940AA0093556323A36E6BAA25CE9FCBF7B0D47D101", 437, 0x13AC, "SSL_set_rfd"                            , null),
+              new("10BBFDB8667C7DF1E6176C5D8FF370F4F47AF52E059CD53473FDD81694AB4342", 438, 0x120D, "SSL_set_security_callback"              , null),
+              new("6CB5D1EE263CB2BE0C2F0502AA993877780C1A6D98271AF10C38BD5DFAC0C70B", 439, 0x1384, "SSL_set_security_level"                 , null),
+              new("2337C787DD8DF63B5D7BF8A75D0D8733B42128E7218E3747E5A20994F7D6FC1D", 440, 0x1EE7, "SSL_set_session"                        , null),
+              new("B15C15EEC8D1E665D18C1200E6A84697D2A2076914F17054157B6165CF8CF3A8", 441, 0x2310, "SSL_set_session_id_context"             , null),
+              new("8476056B57C4D0C5D3F9412F5F3212ECDE3635253D08EBE6B5015FF1EFC0E8B8", 442, 0x2347, "SSL_set_session_secret_cb"              , null),
+              new("9AA5BE26F2335DEB48A9BA5752EAB936808A3042998DD342D7211470BC489360", 443, 0x1CE9, "SSL_set_session_ticket_ext"             , null),
+              new("9DE79CEA83B2F205D784A1BA38BA9D3401C69F2D28DA58D50889AA28784837DE", 444, 0x1FB9, "SSL_set_session_ticket_ext_cb"          , null),
+              new("E868F72406D8190370CF9CA1874275CE8890BC823A26468C2B4F4B49072FF320", 445, 0x10FA, "SSL_set_shutdown"                       , null),
+              new("905DD04F2AD1B45706F29B55AE2E7C8E6964A032AE3A41E7DAA1A37C61B4AE18", 446, 0x1DDE, "SSL_set_srp_server_param"               , null),
+              new("4EE11F45D7B941A33068151B7022955A3734302CD2B9E3C19214370AE0FECF7C", 447, 0x2446, "SSL_set_srp_server_param_pw"            , null),
+              new("94EFBCFC4550F735D3FA172D75722C8A517927B112B24A2FAB66847BD958BD96", 448, 0x1938, "SSL_set_ssl_method"                     , null),
+              new("DC1AE531B506CB6EE76960775E49EAD00E4EA865C3F5736584AF3181AAC40182", 449, 0x1AD2, "SSL_set_tlsext_max_fragment_length"     , null),
+              new("9E46119F643B400FBD35D9BCA553EF9A46FFBDEFBD2D3C7B5DADF80B48BC4E79", 450, 0x10F5, "SSL_set_tlsext_use_srtp"                , null),
+              new("8B2D48A057D9EE36337048E599BF6F2ECA2416F0EDFAC8BCC86A4FF45AB3415B", 451, 0x119A, "SSL_set_tmp_dh_callback"                , null),
+              new("CE0F3362BD1573A732CF9A791D793A4AD686B344115C829903FD1E30288C2E40", 452, 0x1014, "SSL_set_trust"                          , null),
+              new("F03A4593DA21EF4B6F7E6BD0BE196C663BDD2F25D646A8D6A2C2E54EFAF325E4", 453, 0x123F, "SSL_set_verify"                         , null),
+              new("53B1FD70A4A403F042E399F91A1B8E4E2C0FA1855C260F27B2D7789693AEE619", 454, 0x20A4, "SSL_set_verify_depth"                   , null),
+              new("27762FAB4277A79EFEF48718E4ED14D993E43941DF39DA7F7EA478BF6D447492", 455, 0x198D, "SSL_set_verify_result"                  , null),
+              new("60D84EAB6AF4628D83F33640C21959C19218F627B09FA8047A6A9FD3B975FB18", 456, 0x13BB, "SSL_set_wfd"                            , null),
+              new("77482A2993C91CEE6B9EDE1C896B0BF8B45968A447785215A9561426CEA9AFD5", 457, 0x196F, "SSL_shutdown"                           , null),
+              new("2DB08EE3CF1FA3A2E92BE848039878E46E1DF1B9DF87ABCA44A25D16F01A9D9D", 458, 0x231A, "SSL_srp_server_param_with_username"     , null),
+              new("0E7E74EF214A99784B41F1ED1B6160999F8EBD287BFAAC30057544597F4B3B1D", 459, 0x1FD7, "SSL_state_string"                       , null),
+              new("9DA96E0D7C3A2A0D4A0355670E746BC6E037498F3C21AC0AAF32E6793C90E0D0", 460, 0x19CE, "SSL_state_string_long"                  , null),
+              new("7052B9AE9589B0E91AAB810831F2F8DEDFF26B9DB10E7E31241AC20630C2191F", 461, 0x1609, "SSL_stateless"                          , null),
+              new("D2DF24F73FC1D0D6C5F8FE89C376F391DFDFB43A5626378005D6835B329747C8", 462, 0x2234, "SSL_up_ref"                             , null),
+              new("3DCA9D1C2741559583BF550B5F303A65457C109407C975FB508D49C2810CF374", 463, 0x13E8, "SSL_use_PrivateKey"                     , null),
+              new("FAEC5E783D953BE72161526083F3DCB6329B712B9F3EF48B291C253882A70245", 464, 0x1677, "SSL_use_PrivateKey_ASN1"                , null),
+              new("F8BBABC5170F60EDA7AAC3C426AA570D97E02E62905ED36BC0C96BBC0FE6B039", 465, 0x1758, "SSL_use_PrivateKey_file"                , null),
+              new("A66ECDFB3FD93F7A1700F2F8EB5BE53866A1DE9D5D495AE83CA5054E26EF5A6B", 466, 0x1C6C, "SSL_use_RSAPrivateKey"                  , null),
+              new("58AE90550310390E1429599075B1ABFCAE70A3222E1B57DF33719628D536C401", 467, 0x1E60, "SSL_use_RSAPrivateKey_ASN1"             , null),
+              new("59E90F93C0A59813F6F73D3A07E589BD1CE44C9E8701AB518F76A83ADB0F04CC", 468, 0x2405, "SSL_use_RSAPrivateKey_file"             , null),
+              new("558576C7844DABD550FFEA15790310B03BCBA5F10C7E6953EA24BD9E6EA0A439", 469, 0x236A, "SSL_use_cert_and_key"                   , null),
+              new("3A38B5005DB67E1DBE0172698AF09CED02F053F27055E4FD521D320074FBE43D", 470, 0x14DD, "SSL_use_certificate"                    , null),
+              new("0DE1B07A93926BF135A203307C0554AF098510324A912342DC31ACB2929DC9F3", 471, 0x1D2F, "SSL_use_certificate_ASN1"               , null),
+              new("FFCFB80EDEF3673FBEAEBBC596B0D33EBDFDB60BD2C508A2AC0C154CE9D29794", 472, 0x1726, "SSL_use_certificate_chain_file"         , null),
+              new("AFCCA6E594B1A84217F4050AF89646A7D7B3F2556BD2FE9B560172B6229316ED", 473, 0x1BF4, "SSL_use_certificate_file"               , null),
+              new("C4D0D03D25DE7506D7D7224F6409F728C8AACC68E9D46912DB26E19483A7929F", 474, 0x10E1, "SSL_use_psk_identity_hint"              , null),
+              new("B415E342302BA05E37944F3C45DE247A5DB411330404AD84CC9F23E8FF93BFF3", 475, 0x1BB3, "SSL_verify_client_post_handshake"       , null),
+              new("2826E69712C8F1AD4906A0BF1B0EDA0698B31CDA8D3A210E64D9898F01A2D455", 476, 0x140B, "SSL_version"                            , null),
+              new("8945413B19E272011C31ABEE6FA812E569F1E633F7E74FB9434B3535DD02D609", 477, 0x15E1, "SSL_waiting_for_async"                  , null),
+              new("457F712414079EA8094216F84A9DF49DE8A768DFEA9C4EDBA0AFDD22A476C650", 478, 0x1492, "SSL_want"                               , null),
+              new("C6622A64684C2D822CC787185397DB47E1CCAD8C0E37854AF20092D0356561C9", 479, 0x16FE, "SSL_write"                              , null),
+              new("F52AE85FFBB5D3A522339D17C5771182F5A105715BF36BA39D795EA533E75BBA", 480, 0x1F37, "SSL_write_early_data"                   , null),
+              new("E576B62DE4BB8411FE9DAEFB5FB9C83165921B165DCA94C2ACFF36AD3EBF07D4", 481, 0x1A0A, "SSL_write_ex"                           , null),
+              new("6644C6765F16BE07071C43CB19D954C02F6C2FB40407F2481B787D010A6BD871", 482, 0x1451, "TLS_client_method"                      , null),
+              new("201C984983BA00DD6E2AC6464F43247D6462B649AB87D38053FE4E70586BFD35", 483, 0x1F8C, "TLS_method"                             , null),
+              new("3311E57D2FBD49F704E35B14CA4265A04725D9FAAED062EEC0648441659375E7", 484, 0x15EB, "TLS_server_method"                      , null),
+              new("03BFA39C02A35AAFC7B92AB9C74CD0412CB3B352A0998423A03D6A016B131942", 485, 0x1A5A, "TLSv1_1_client_method"                  , null),
+              new("F31DECBD7360C0264923EFBBFC10C682B68A45CF8A05F0B775DC6BC153D0D025", 486, 0x130C, "TLSv1_1_method"                         , null),
+              new("415D8A6A59AFFC4F1CE003399C82196DC407C98AE70319C1097DC8AAA94ED987", 487, 0x1262, "TLSv1_1_server_method"                  , null),
+              new("0BD3FB229F205C5AE176E837B658ABE3A5121343650A7E4B4C291E5E3BDAE4E2", 488, 0x19F6, "TLSv1_2_client_method"                  , null),
+              new("0738B4BD10DF081A99634B1A884DC9547487180F6D4BEA6658EC4EB57888A0B5", 489, 0x15A0, "TLSv1_2_method"                         , null),
+              new("DB8AB26CEA5648B8906969F7223A869BC04A2D26E50E90AC9FAF71828E2A875E", 490, 0x20EF, "TLSv1_2_server_method"                  , null),
+              new("245F1D9B9087ED1A3535967CFED06E1D406CB0A74C1950358DB5D8234769221C", 491, 0x1B7C, "TLSv1_client_method"                    , null),
+              new("07E3DEE27070E7814D26DA46B98A312B5384170045A5FBC7764AF7CBC4A50265", 492, 0x1F0A, "TLSv1_method"                           , null),
+              new("0D648D032A50E37380C5C772EA27F98AB394EC41980E546A271E40BFEC79EF91", 493, 0x1C8A, "TLSv1_server_method"                    , null),
+              new("46910D907166C0EDEE90E70B314B2E012B05832D83FAFF2C1FEFFEF73D8784CE", 494, 0x19B5, "d2i_SSL_SESSION"                        , null),
+              new("B6FF8663EF9FBB0624705C770ECE14E2DBB52946083196C90129E23DAEEE740F", 495, 0x1F4B, "i2d_SSL_SESSION"                        , null),
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeShell32Sources() => new object?[]
+      {
+        // @formatter:off
+        Make("shell32.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "DE053E2A73D93500D8AAA51DD6DF217C48CBA4BBDB8D3420F4A326C601A02D761C656C48B6130FBC9715BDA8EF6A76C3", "[1A8:8]", "0;0;[0:158],[15C:4C],[1B0:735650]", 833, 0,
+          new Section[]
+            {
+              new("E0288D63723B3C2CD60FAB6B26896D6CE778FCC4F74F5BF695D4A4916A205C97",   0x1000, 5791465, 5791744, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("61F75FE8B47DC227FF9A1307C803AC1AE1F137220D8F5B1064F561463507B735", 0x587000, 1342840, 1342976, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("D18FD4E58778E20AE113F9ABCC7FD61F82C1708BC4288F74E4BF1533401FEE54", 0x6CF000,   37128,   11776, ".data" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("C483AB3B226AAFAA8F958A9348630FF4B64FFC33FCC0488115E528AD27242CC4", 0x6D9000,  286704,  286720, ".pdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("C3A4C11E9DE5AC2359C57976F77895A3089D57342CF5771924CE56ACA3D6BF38", 0x71F000,   11984,   12288, ".didat", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("42C1A3AF8E863650AB1ACA20F05D81942F6BDD3A91A775DBBCC41D0C31FEA961", 0x722000,   34216,   34304, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("3EADFBC1F0378C94E60EF94FFD5A737454001656351182A2A7034DC4DF6CA2B1", 0x72B000,   78036,   78336, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+              new("390A666BFA2BC8EBCBFC27403C8EB5C96509916CD5F1E0E5BE18F880C9398317",  255, 0x220290, "AppCompat_RunDLLW"                                                          , null),
+              new("B6383CF7D595F323E4272B34656B1A93B3B25640F7BD42A6B372B813D42D1649",  263,  0x46890, "AssocCreateForClasses"                                                      , null),
+              new("5A1BE69C288A40B698628338239877643089CF48FA886D5DA4E02D9BC604F894",  267, 0x227B50, "AssocElemCreateForKey"                                                      , null),
+              new("96020216032A11F846E6F5956B751CCDA093B14F976A5CB0D58E6E01595D0E28",  268, 0x227DF0, "AssocGetDetailsOfPropKey"                                                   , null),
+              new("A3F0D451D89543156EA0261FF89087EDAEE3BBE49A04CE668385995B4FDA21B8",  701, 0x22EF70, "CDefFolderMenu_Create2"                                                     , null),
+              new("0F6D1720A61412C565CD51159AB415E937BC15750E5520EF7F6A4231204D0BCD",   83, 0x22FD70, "CIDLData_CreateFromIDArray"                                                 , null),
+              new("1A85B3A9B8E45681167909F8E962A129D7488234C6206E791D5534000CA60F12",  937, 0x1BF590, "CStorageItem_GetValidatedStorageItemObject"                                 , null),
+              new("90BF9D459E88B96922F1883AC4FCAF47FFB4B164134E2DF418CF4829CD29275A",  269, 0x11FFE0, "CallFileCopyHook"                                                           , null),
+              new("DFE1B8C60E1422815BC10D4A9DD047DBB59B7BF16142E2047C95712D9837D807",  272, 0x237070, "CheckEscapesW"                                                              , null),
+              new("535D197B13D37A005CD00EE43132175DA8A73DF1D76C3374BD226968E7F73482",  273,  0xA3CF0, "CommandLineToArgvW"                                                         , null),
+              new("77FF7FC4C0545C11DCA3BFD0FD0438523F469CBC8A60E99F991AF585DBBABD22",  274, 0x23A320, "Control_RunDLL"                                                             , null),
+              new("77FF7FC4C0545C11DCA3BFD0FD0438523F469CBC8A60E99F991AF585DBBABD22",  275, 0x23A320, "Control_RunDLLA"                                                            , null),
+              new("CBFFFEF49C9CC3C7A626811C34EEC47068EDF818A1F4113E75CC3C32D9CC6530",  276, 0x23A3A0, "Control_RunDLLAsUserW"                                                      , null),
+              new("B81FF61066BA6271C91C20EE24F164A8AAFA829E01A8F52C0646E202CF72AA8B",  277, 0x23A3E0, "Control_RunDLLW"                                                            , null),
+              new("E0ED2B6AEEFD67A6A56189C68EB1E55E707730801A13D0B78965AE1C7D29700B",  935, 0x1BF5D0, "CreateStorageItemFromPath_FullTrustCaller"                                  , null),
+              new("DC6E5004E836422D28D4CFFA57CEE81E3701A020B55D7F140CD77CFD18BE9D47",  936, 0x1BF5F0, "CreateStorageItemFromPath_FullTrustCaller_ForPackage"                       , null),
+              new("D13824C7ED5CFA3B04EC772FA6B3D3AA16EA93A0C637AC8C3B1999CDE16E6BF1",  920, 0x1BF610, "CreateStorageItemFromPath_PartialTrustCaller"                               , null),
+              new("53A89FC513109750F2E41A4087CBB0A3E17191A928B560030D25A4B923266B7B",  921, 0x1BF630, "CreateStorageItemFromShellItem_FullTrustCaller"                             , null),
+              new("70E97C0107146917D97006FF4F889F7A1655BC88D1F5AC1593C69F5255DF5A3E",  925,  0x25330, "CreateStorageItemFromShellItem_FullTrustCaller_ForPackage"                  , null),
+              new("2D681654ACF372B7585E7F410BFF4DACCC22005BAE61B0E612D21FC7572DC832",  929, 0x1BF650, "CreateStorageItemFromShellItem_FullTrustCaller_ForPackage_WithProcessHandle", null),
+              new("18AE1FF3C6A32B3580486E33ED908ADBD73C4A811FE67DCB9AB3EBBD666B2699",  931, 0x1BF670, "CreateStorageItemFromShellItem_FullTrustCaller_UseImplicitFlagsAndPackage"  , null),
+              new("A07AA3C207F1E51A35936ECFC94C394352622F7A1F7D19D57145E0A40210BE06",  129, 0x10E9A0, "DAD_AutoScroll"                                                             , null),
+              new("104065E5CA7CF7DCFEB75EB6C073E25E83A6CC84261B9CEBCA23A37857ED3580",  131,  0xBA3B0, "DAD_DragEnterEx"                                                            , null),
+              new("30453A366E8EA18887E2983948BBD8A2AE751D477C117B4FD759D3A155658B7E",   22, 0x251DF0, "DAD_DragEnterEx2"                                                           , null),
+              new("6AC4B035FAB6FBEBB55BF5D937CE4CFBAF915C43BB535A0850A12FE11E2D2F50",  132, 0x251EF0, "DAD_DragLeave"                                                              , null),
+              new("7EA13E29B077ED36ED0B6F827483D060E23C626DCD5597F3026AD9914F846326",  134, 0x251F30, "DAD_DragMove"                                                               , null),
+              new("104065E5CA7CF7DCFEB75EB6C073E25E83A6CC84261B9CEBCA23A37857ED3580",  136,  0xBA3B0, "DAD_SetDragImage"                                                           , null),
+              new("104065E5CA7CF7DCFEB75EB6C073E25E83A6CC84261B9CEBCA23A37857ED3580",  137,  0xBA3B0, "DAD_ShowDragImage"                                                          , null),
+              new("13561D59BD7CF63C8842188A853C9692E1448B9179DB11A32626F43C32920B13",  278,  0xA2430, "DllCanUnloadNow"                                                            , null),
+              new("5172B9C92D784B5F4F249771732B0D5387FB84BF429A3D1C1ED56505766A4E26",  279, 0x1B8D10, "DllGetActivationFactory"                                                    , null),
+              new("A2FFDB5BF3FABC05EEA89C4CF26489BA86152BCE088147A39B694690B13C95CB",  280,  0x6E4B0, "DllGetClassObject"                                                          , null),
+              new("1F18075780F7469511B865390FDFB2282DAE2C82F1A75F8C7E0226119207AEF6",  281, 0x255CE0, "DllGetVersion"                                                              , null),
+              new("0718F655783FB15C1A56F8D4803F89BB2C99FBD538BAC8F0A1BCC1B6D3FBA231",  282, 0x255DB0, "DllInstall"                                                                 , null),
+              new("A07AA3C207F1E51A35936ECFC94C394352622F7A1F7D19D57145E0A40210BE06",  283, 0x10E9A0, "DllRegisterServer"                                                          , null),
+              new("A07AA3C207F1E51A35936ECFC94C394352622F7A1F7D19D57145E0A40210BE06",  284, 0x10E9A0, "DllUnregisterServer"                                                        , null),
+              new("7495623AF97AEA7F8A121AEAF007460665E7BD8817480209E888EA2C77D3CB62",  285, 0x1AEEB0, "DoEnvironmentSubstA"                                                        , null),
+              new("9C1368ED5E1531FEECDD017349DAB692DF3367162EF9DBA902C6A94DCEB92BD3",  286, 0x1AEF60, "DoEnvironmentSubstW"                                                        , null),
+              new("1564BD807A36AC8141547C05B5479983AB5A2AC9AA35C9EED09057087AA03FD2",  287,  0xB9630, "DragAcceptFiles"                                                            , null),
+              new("A5331675001146DB667571936452721BC92E8C52073D6FC4383A0D5FEB2D9457",  288, 0x1B3750, "DragFinish"                                                                 , null),
+              new("3DD81C28B319D4B13C805E7FF8A536696CA3E6E9D25AC4230624A2EFD434B7BA",  289, 0x1B3770, "DragQueryFile"                                                              , null),
+              new("3DD81C28B319D4B13C805E7FF8A536696CA3E6E9D25AC4230624A2EFD434B7BA",  290, 0x1B3770, "DragQueryFileA"                                                             , null),
+              new("83AD53274786C8A701CEE89A2D82FE9E2D112ACCFFBF432CC32C23F927FC6EA3",  291, 0x1B37A0, "DragQueryFileAorW"                                                          , null),
+              new("6907B231DBF0DD242D178D87B85D02CA7B2B01E28C77502726DB52B7472CE7AC",  292, 0x1B3A70, "DragQueryFileW"                                                             , null),
+              new("8A8089C10AE407E360C2D3F39D4192A61E6E1D265CC1F1899794860E0D58D762",  293, 0x1B3C40, "DragQueryPoint"                                                             , null),
+              new("9511C11E9DD1E4F113D45AB553E30622F2760D3AB966F9B8806859549D4F03C5",   64, 0x256E10, "DriveType"                                                                  , null),
+              new("D3744136569FAEB82DBB415AD625E959FD9CC025EEC48F12EDBDC5E60D292263",  294,  0x9F600, "DuplicateIcon"                                                              , null),
+              new("54441929BC3B64C71DBEC51335102A39BFA8E9BF88282FD85523E9ABE6027ED2",  295, 0x1AF090, "ExtractAssociatedIconA"                                                     , null),
+              new("977F1D54E87BDDAB28B711711CF7AFADD811D7F7EA2FA07F54C0505C19BD6E83",  296, 0x1AF180, "ExtractAssociatedIconExA"                                                   , null),
+              new("85DD514ADE7A08EA0FA14AA8BAD44097374C8EF4EC8E9BA8E08A2ED993A87E66",  297, 0x1AF270, "ExtractAssociatedIconExW"                                                   , null),
+              new("013BC057C7C7781017C854E6E93D5FB7C43D314EB2E0E1DA67AC979999E7D347",  298, 0x1AF4E0, "ExtractAssociatedIconW"                                                     , null),
+              new("9FCBBC36BB0050DED15E08045F80685017FD3AD0AF8BC0F77F3A0EF352B928BE",  299, 0x1AF5B0, "ExtractIconA"                                                               , null),
+              new("E151BA7A1710D4D52BB5F0DF42E35999A27DF35D4AF018D8B2516EE23521CB84",  300, 0x1AF640, "ExtractIconEx"                                                              , null),
+              new("E151BA7A1710D4D52BB5F0DF42E35999A27DF35D4AF018D8B2516EE23521CB84",  301, 0x1AF640, "ExtractIconExA"                                                             , null),
+              new("5914EBB525DCF4274FC35C305E85442DEC7CB081D14FC802DEB57374A21025DF",  302,  0x937A0, "ExtractIconExW"                                                             , null),
+              new("97E45BA2070BB1F6B0978E5F5F891082E0E23B966953A8B7B16F2F90EE7CB97A",  303, 0x1AF6C0, "ExtractIconW"                                                               , null),
+              new("E9E82608A5F4E03BADC137AC2E2B3874762A8E2D1C6146C075BD0A161E1E4E27",  304, 0x265C00, "FindExecutableA"                                                            , null),
+              new("661C10CE6967EDCD3F4BF4379FFCA0D3C795D0B1BB76F0DF93FE89FB2F9307E0",  305, 0x265CE0, "FindExecutableW"                                                            , null),
+              new("943E5310CF6539978D101ED245484C6EA4E3D49B0025926FD036B6DACBF03575",  306,  0xDE780, "FreeIconList"                                                               , null),
+              new("C8BC59EACA174DB4D0AA4E0808EC09DDBCCBC9821D0F2BB3B916B5A805603C7A",  307, 0x2668C0, "GetCurrentProcessExplicitAppUserModelID"                                    , null),
+              new("66B88B2EB70CC348EA8A96F39C7DE268BEDFC35202CF1C4B369F365329BC9945",   63, 0x2697C0, "GetFileNameFromBrowse"                                                      , null),
+              new("73CAEFC383AD0A73569DD83EC64957102C60BE21EBC929C36DC1E354C6665904",  919, 0x1BF690, "GetSystemPersistedStorageItemList"                                          , null),
+              new("255FB49A2E5F2BB1FA2F0911DF288991E2D4E1363F2C7449A963308CC38CE94D",  154, 0x2711D0, "ILAppendID"                                                                 , null),
+              new("7933B43D6649D4F5B52234CB26106424A953ADA03CA082882A8919C3BD3300D9",   18,  0x673D0, "ILClone"                                                                    , null),
+              new("96D10AB3BCEF9324BAC389C2DFA2A81D98836A499C0E8C004598F02CF1529F42",   19,  0x95930, "ILCloneFirst"                                                               , null),
+              new("3CE929CC1FB8A7B43F2A51CCE3F90A1BD37F119E6C39998FCE4236E493D7F14D",   25,  0x674D0, "ILCombine"                                                                  , null),
+              new("DBEB365FA4546EB8F73353B71B5BD9A84AD93D391F44FECF3C2B3C9FF5B69BA9",  157, 0x2713F0, "ILCreateFromPath"                                                           , null),
+              new("B6156F0988E0A17BB7C1EE016C91FDEC00C4BB6953663C1CB52E78DACAD9E386",  189, 0x2712C0, "ILCreateFromPathA"                                                          , null),
+              new("DBEB365FA4546EB8F73353B71B5BD9A84AD93D391F44FECF3C2B3C9FF5B69BA9",  190, 0x2713F0, "ILCreateFromPathW"                                                          , null),
+              new("78B1661E2BDCA8564C650059D73F835FEBD51B9730DBA7A9F2F4806684FEFA4B",   24,  0xBA750, "ILFindChild"                                                                , null),
+              new("03289EB5F5CADCA5BF18DFC84031F5B9E4A0F95F3BB0D7F10ED8617A556595CD",   16,  0x673A0, "ILFindLastID"                                                               , null),
+              new("2B127C954D8FEB186F7E3008E378828FA27A5C666C4232237442DDA732ED6F40",  155,  0xA2730, "ILFree"                                                                     , null),
+              new("E750678A7847AFC870DD9D5F021BEF8E469FE6FEFD8E8E72C53439C257183E15",  153, 0x10B2F0, "ILGetNext"                                                                  , null),
+              new("F024C240F4A231FB412DDB9E5832E500483C82FDF9D599190F5E502E69BDB915",  152,  0x9BC70, "ILGetSize"                                                                  , null),
+              new("F99584AC6B83387610760A48422378809677E34A808AD2737F3D95AD16DB8E92",   21,  0x63EA0, "ILIsEqual"                                                                  , null),
+              new("0ABAF35E578284BEA27B9AE7A72958A3C4782AB97E48973CA26D9A9D57ECB81A",   23,  0xB8910, "ILIsParent"                                                                 , null),
+              new("A00944D282B1A8887651C8AA51F2ED451526B6CE85C4E96E074465A862BF24CC",  846, 0x271630, "ILLoadFromStreamEx"                                                         , null),
+              new("5A0FDEDFC4DFEF41B831A8EE70BD064F267A160846D1AE7B1856E704F79F6994",   17,  0xBE010, "ILRemoveLastID"                                                             , null),
+              new("04601E0F18D9A4ABD1751716C56F0D2D462DCE41BBD561D99D74CBA8A18D9EA7",   27, 0x271780, "ILSaveToStream"                                                             , null),
+              new("B458CB3EC74A4C4C39AB7C32B9046F65037580C2D3ED4824D88EDD6834BCBA0C",  308, 0x271CC0, "InitNetworkAddressControl"                                                  , null),
+              new("A07AA3C207F1E51A35936ECFC94C394352622F7A1F7D19D57145E0A40210BE06",  309, 0x10E9A0, "InternalExtractIconListA"                                                   , null),
+              new("A07AA3C207F1E51A35936ECFC94C394352622F7A1F7D19D57145E0A40210BE06",  310, 0x10E9A0, "InternalExtractIconListW"                                                   , null),
+              new("E3BFA8A38008DB963B66740E56F07FF5D9FAFB50B75BC9E8721C2984429365FA",  942,  0x3AA00, "IsDesktopExplorerProcess"                                                   , null),
+              new("104065E5CA7CF7DCFEB75EB6C073E25E83A6CC84261B9CEBCA23A37857ED3580",  119,  0xBA3B0, "IsLFNDrive"                                                                 , null),
+              new("104065E5CA7CF7DCFEB75EB6C073E25E83A6CC84261B9CEBCA23A37857ED3580",   41,  0xBA3B0, "IsLFNDriveA"                                                                , null),
+              new("104065E5CA7CF7DCFEB75EB6C073E25E83A6CC84261B9CEBCA23A37857ED3580",   42,  0xBA3B0, "IsLFNDriveW"                                                                , null),
+              new("F497BADE102646728CD2317468B697604ACB5FBF67ABFAF72CC138E36F95A636",   66, 0x256E30, "IsNetDrive"                                                                 , null),
+              new("9B6952E10A8CFD6E0B745B02ECD7B618364D4FD50679F8B6218F3DCB571D6828",  941,  0xA8000, "IsProcessAnExplorer"                                                        , null),
+              new("3BDBF13A4E720B33F8AC7957EBA7A33E622F9C33D3DF012BCEC9447307F50310",  680, 0x271F20, "IsUserAnAdmin"                                                              , null),
+              new("CC0E54C7FC10EAD9CB53C3378C977E594EF7EB20543CE80BE37E9FC2CF851843",  311, 0x1B8EC0, "LaunchMSHelp_RunDLLW"                                                       , null),
+              new("943E5310CF6539978D101ED245484C6EA4E3D49B0025926FD036B6DACBF03575",   81,  0xDE780, "OpenAs_RunDLL"                                                              , null),
+              new("943E5310CF6539978D101ED245484C6EA4E3D49B0025926FD036B6DACBF03575",  125,  0xDE780, "OpenAs_RunDLLA"                                                             , null),
+              new("5D7FA02BDA4ECCB3202A4AB23A1FB96B6FCFEF7632D8AD3E5FC28200B0981E43",  133, 0x1C3510, "OpenAs_RunDLLW"                                                             , null),
+              new("828B4F99B9E81F079490936643D41BB49F05C3F8A015EB25698C3379AC154ECF",   85,  0xBB750, "OpenRegStream"                                                              , null),
+              new("4A16D32F66A5B7230F8CA26B0C9356484B9F1B0DAC9EC39D95C66485C95BC38F",  312, 0x4B4EC0, "Options_RunDLL"                                                             , null),
+              new("4A16D32F66A5B7230F8CA26B0C9356484B9F1B0DAC9EC39D95C66485C95BC38F",  313, 0x4B4EC0, "Options_RunDLLA"                                                            , null),
+              new("24B6E135AF69C782DD9F36B59FA7F0F1C4E9CF511B466C7D7236C22AF4DAD477",  314, 0x4B4F20, "Options_RunDLLW"                                                            , null),
+              new("9D8040061484ED0059C5CEF7B9A0B676371FF2398B41AD5B855C44FFB855862D",  171,  0x93F80, "PathCleanupSpec"                                                            , null),
+              new("CA35A727351A5B58C8554C4D8989806377391419CE0558A580A55F4A66C7380A",   92, 0x237640, "PathGetShortPath"                                                           , null),
+              new("6703CD3BE66B4C258FFAD1CEAAE66115E5BB4320BFF4EF573A625392F7FE5D12",   43,  0x877B0, "PathIsExe"                                                                  , null),
+              new("AE8B2A8E34D79F2A9DD97542CDA02E221A943C7F3935C39178F454461C97610C",  240, 0x237930, "PathIsSlowA"                                                                , null),
+              new("586B6E8B19DA97B15FDF7B84770217D4F88D768E407109B53DD4276915CACA60",  833, 0x257140, null                                                                         , null),
+              new(null                                                              ,  834, 0x6C3504, null                                                                         , "SHUNIMPL.#254"),
+              new(null                                                              ,  835, 0x6C3520, null                                                                         , "SHUNIMPL.#255"),
+              new(null                                                              ,  836, 0x6C3512, null                                                                         , "SHUNIMPL.#256"),
+              new(null                                                              ,  837, 0x6C353C, null                                                                         , "SHUNIMPL.#257"),
+              new(null                                                              ,  838, 0x6C352E, null                                                                         , "SHUNIMPL.#258"),
+              new(null                                                              ,  839, 0x6C30E4, null                                                                         , "SHUNIMPL.#259"),
+              new("9C52BEB6D6F24F9FE48EDD8666DF57FA33FF6D9E944B7D912AE50D41AA7DBB3A",  840, 0x272150, null                                                                         , null),
+              new(null                                                              ,  841, 0x6C3590, null                                                                         , "SHUNIMPL.#424"),
+              new(null                                                              ,  842, 0x6C359E, null                                                                         , "SHUNIMPL.#425"),
+              new(null                                                              ,  843, 0x6C35EF, null                                                                         , "SHUNIMPL.#386"),
+              new("C90AFCBAEBFB1DFB3881C5BDA6F26C060B1B7EDD635BF7D247906D6B06C7E608",  844, 0x256090, null                                                                         , null),
+              new("B5D8096EDA21ACD68334ADFABD049106F68BFC34025CAEF9881ABFF1D8721FC7",  845, 0x1BAE10, null                                                                         , null),
+              new("F7FED7FC6DC09487320944A42DF7929463B2608157DE9849003CF70AD982BDC2",  847, 0x1BC660, null                                                                         , null),
+              new("C4044CF0FC1743E261E1A64A7BB2994E4C709F89636DBE9F615789173908DBDE",  848, 0x283F30, null                                                                         , null),
+              new("A60B1BD6812B3C9ABA34A0E17FA98D765BC2AD06FF83B35536768E69ACF1AC05",  849, 0x1BC7C0, null                                                                         , null),
+              new("8A6C2D9E7CE9DB2CAD0D99F23A9DF807DF927CFCDA096A3A15C496CE64DC8CA6",  850,  0x32E10, null                                                                         , null),
+              new("C7C617461BD1AAC6E980C72CDFD4DB7A83EE1CD78120DECD3F2C0F2FE9DD5454",  851, 0x20B210, null                                                                         , null),
+              new(null                                                              ,  852, 0x6C365B, null                                                                         , "SHUNIMPL.#391"),
+              new("88F984FA75B2EA81B4BD0421EB150B617BA707F24A7560C68E398AB4FDAC6A49",  853,  0x6CB50, null                                                                         , null),
+              new(null                                                              ,  854, 0x6C33A6, null                                                                         , "SHUNIMPL.#260"),
+              new(null                                                              ,  856, 0x6C30AE, null                                                                         , "SHUNIMPL.#423"),
+              new(null                                                              ,  857, 0x6C30A0, null                                                                         , "SHUNIMPL.#426"),
+              new(null                                                              ,  858, 0x6C3403, null                                                                         , "SHUNIMPL.#392"),
+              new("B29DB53EE63E91606C116561ABBC3C1BCE4E8D588586153DFDA577AA79FC8724",  859, 0x2CBA90, null                                                                         , null),
+              new("4C92ACA7883421974D1E5BAE2152C1B1F0307DE254FA87A92D4ADFB5C59CB45A",  860,  0x182A0, null                                                                         , null),
+              new(null                                                              ,  861, 0x6C3574, null                                                                         , "SHUNIMPL.#261"),
+              new("2BC6CAA5FCD4B14ABCE0F7DA284ABB4F7992646EAD0BEF5D5C56091B50621D96",  862, 0x271820, null                                                                         , null),
+              new(null                                                              ,  863, 0x6C3361, null                                                                         , "SHUNIMPL.#262"),
+              new("BDECE27E70A4E2F827DBE8BE805548AE61D87E9B512D7E1FA412D282871F01EF",  864, 0x26B130, null                                                                         , null),
+              new("760341F2F26F3A0B8A4F295A02E10A531268482028380ECB9592A0A5C795ECDC",  865, 0x217250, null                                                                         , null),
+              new("C59A2D9F9A88818FD806D2B4B1E001E6CE7A2389C83863B2618993FA2F430D70",  866, 0x289420, null                                                                         , null),
+              new(null                                                              ,  867, 0x6C30F2, null                                                                         , "SHUNIMPL.#263"),
+              new(null                                                              ,  868, 0x6C3100, null                                                                         , "SHUNIMPL.#264"),
+              new(null                                                              ,  869, 0x6C341F, null                                                                         , "SHUNIMPL.#384"),
+              new("104F46B0C97D7C774E5CFECC73DC29ADF1C0A2AADED7256BF25C3FE971DC560A",  870,  0xBC8A0, null                                                                         , null),
+              new("2609D371FDD39CB99AB40021D2AD313A97A8C1896E6B5AC6B5AB48FC8A4BDF79",  871, 0x1C02A0, null                                                                         , null),
+              new(null                                                              ,  872, 0x6C34E8, null                                                                         , "SHUNIMPL.#265"),
+              new("5B68ADCD00DD0693FFC5FA2E7834C3A51CC96300FE638E79FBD160C0727C53A3",  873,  0xD8230, null                                                                         , null),
+              new("DE2BC2C1BABB820853E6D9B8FB017BAED1267B3189E22F7A9F31E16410E94955",  874, 0x101270, null                                                                         , null),
+              new("E8E80DADB569CDE9B1C97ECDCE64879F788C1C97641CD8754DAEC84E7E9197D4",  875, 0x1011F0, null                                                                         , null),
+              new("F90A8BD662A6DD4DBC93591737BA3CCE4DE3FD4A60C528905BE0CCD9705750F1",  876, 0x264070, null                                                                         , null),
+              new("689473FDE6A3C7C72FC43ACC90DD703807300804897A7D91103F55C4212E00B7",  877, 0x264450, null                                                                         , null),
+              new("D5B2D7EB644DA60943463B109031287F4766E947FF8DC4BDC97562C0AF9C3181",  878, 0x2642D0, null                                                                         , null),
+              new("8BBB259EFE9E4BF17E403906380CD3D24BB7002A8184E22FF2F3D904FA3EA43D",  880, 0x2158C0, null                                                                         , null),
+              new("F5D7C07A3B36E0634175CD936075E9714DDF99F36925C02927FCB91A219A7623",  881, 0x2A83E0, null                                                                         , null),
+              new("E58B603F819592B967A4CBF2D6D5C17053D5716C99E1FC9431424CA5CCD6C70E",  882, 0x2A8540, null                                                                         , null),
+              new("5CD42130F620576B64DFD00AB58B15846A94F1BB9819DD5A0F0FABD455FACE23",  883, 0x507030, null                                                                         , null),
+              new("34776AF65BE531C1704C686A97FC0D21E614D69D7AD7AEF8DAAD24069AEEEB32",  884, 0x2521F0, null                                                                         , null),
+              new("3312E1ECB2CDD0C99CDD17A265E985920C3D1074D377F36997BEA9EBCA89A3FF",  885,  0x89E80, null                                                                         , null),
+              new("48D625707A211E8AE29528138BA36C44F8ED508F1C1D44FA27940AEA46C67704",  886, 0x219080, null                                                                         , null),
+              new("644097AB9F7FECB56A9339482B5474324D23F81A36E66C791E65C74C0287347B",  887, 0x289460, null                                                                         , null),
+              new("05875A2669B77E7B0660A00C58ACCCDA8DC01EF738363200EFE6DDD41620CC10",  888, 0x2B4D00, null                                                                         , null),
+              new(null                                                              ,  889, 0x6C338A, null                                                                         , "SHUNIMPL.#474"),
+              new(null                                                              ,  890, 0x6C30C9, null                                                                         , "SHUNIMPL.#475"),
+              new("20A81FA7A92C2C443937E6CE20ECEC1392F07D5EF07AD904660B513CDBBA0AE1",  891, 0x275690, null                                                                         , null),
+              new(null                                                              ,  892, 0x6C3345, null                                                                         , "SHUNIMPL.#476"),
+              new("2E819FDB0BDFA1BED0DD530B18298813F6B57807441F0143C247908E8F5948CA",  893,  0x4ABC0, null                                                                         , null),
+              new("F56BD654B00B551AACFCA18597D0143235244964843ADBB36F5DA723479F2439",  894, 0x1BF6B0, null                                                                         , null),
+              new("DC1BFE39507BCF571AEFA5A5409931828978B856BE2AAAE56FADCE8A545361DD",  895,  0xA8D00, null                                                                         , null),
+              new("49484040F3E10870666110B31256C1924705E0DEF52E5ED7A0D9791C4F561D12",  896, 0x1BF5B0, null                                                                         , null),
+              new("5960531C493CC8E52A8B77FDAD9B6F15310E93A5E348EADD529E4E4914FF5E3C",  897, 0x2BA7E0, null                                                                         , null),
+              new("F279611B03EBD1BB044F55CF5F2578EC6D0E9ADFD9CFC0F943D15EFF13B975A9",  898, 0x22A530, null                                                                         , null),
+              new("9AB52B6CB5183F310935D9376A90DF41CE65F875C29C656DFCF0029B3BB91E3D",  899,  0xBCB80, null                                                                         , null),
+              new("6C273634F6486537AAB41A18419455DF1E69098A06DF71C757E6ED60312F8B4C",  900,  0xB5E50, null                                                                         , null),
+              new("D89B20EBE3CE26ADE9ACDDB3E15B1FFDFD7126DDD8CC7452D740B0DD2B2D9A6A",  901, 0x4ABB90, null                                                                         , null),
+              new(null                                                              ,  902, 0x6C3398, null                                                                         , "SHUNIMPL.#473"),
+              new("F96002E0087D009461A3984BE212E1ADFC29401816CDF8860A2224E2497D8872",  903, 0x10DE50, null                                                                         , null),
+              new("58BB3604A9A356788248D8C5664F2F230C1BA5960A1455565D05F2875B0A7450",  904, 0x2572F0, null                                                                         , null),
+              new("0958B276BD68ECC532E813495F036C07FB59100B97AB5D4BFC2647B0D2426414",  905, 0x10E470, null                                                                         , null),
+              new("AEF9ABDDF611B1A646F240A140DA1D69E2F08FEC207FE3C9E7AF1D5F772BC6A1",  906,  0xBCE00, null                                                                         , null),
+              new("DC6A515F3A49D2266809DFDE2CFA508EDE8D8D3CC215E673AC4041DC481AD60D",  907, 0x26AAF0, null                                                                         , null),
+              new(null                                                              ,  909, 0x6C3353, null                                                                         , "SHUNIMPL.#477"),
+              new("78A2A072F804F5C3BFD5DC4E6129202832855A8C7AEF97F9BDA017968FA8B73A",  910, 0x241420, null                                                                         , null),
+              new("E5495F05C8BB6F16039A5A0D0602BA3723806130518D1B5EB8B7D551D74957BA",  911, 0x209DB0, null                                                                         , null),
+              new("47EDCE57E4411FA29DDB191DE103A6A11F356492B48EC4B2854536ACFDC2BC80",  912, 0x24B8C0, null                                                                         , null),
+              new("2365A4229EF434CF25AECA032DACDC5FC19022636E4BFB0A6B6C45289315F64D",  913, 0x24C130, null                                                                         , null),
+              new("774FFCB92C09D10E95682577A0AD2A6C292736562B8D7B282DD980266340C053",  914, 0x1BF570, null                                                                         , null),
+              new("9E7DB27EBC6465DFDFEB8803163CCA7E5F72A333FD6D28F455D8221372F31CC7",  915,  0x8BAD0, null                                                                         , null),
+              new("96FF5DDA91DADF2B595E4B16AFBC45BA4D4801336C84A7F06DB56CE04A495500",  916,  0x202E0, null                                                                         , null),
+              new("81022F6B28364A45895824A1C7B3AE7F14B3A95520638BA2C7A155AFFB8F337E",  922, 0x2B7750, null                                                                         , null),
+              new("2E0EE5FDE1AFA47DC0EC5B5F9EB2CF19F329111A7EB0484357A168C457329E1B",  923,  0x25590, null                                                                         , null),
+              new("164C9AD5F64F069F6A78EBC2F48455E2308EF421065DDCFB560070496E72C3C5",  924,  0x25350, null                                                                         , null),
+              new("CC358982F4810AA401C88FB95DA3C9ECA1899DA2010CB7EE519935C93260FEA8",  927, 0x292DE0, null                                                                         , null),
+              new("5EDADE196EB14DCD28FAEE98408AEC6D6F88F9ADB84EEAA2C535DDA7A0270F5A",  928, 0x2A6680, null                                                                         , null),
+              new("E1C4FD429FC7B173281058729DF50C3913638E23FF481804C02A1AC10D483793",  930, 0x237450, null                                                                         , null),
+              new("32A33E20328E9BA9799582AF9499C28030D410F6F8AF24609C2ACBA98A07BC3C",  932, 0x1BF7F0, null                                                                         , null),
+              new("ABB6F76F1C7D1115ACA223EEA6D97099096622841990BF33D3E8967C62E00492",  933, 0x1BF790, null                                                                         , null),
+              new("847B55DC5E9FC6982E3185F2E537B47DD18AA926B8B4AD07EF16FFDDED60BEE8",  938, 0x27DFF0, null                                                                         , null),
+              new("CDCB02F07064244D3AEFBF14A195BD6009A58B636E60AEE02547D28DD8FC17D7",  939,  0x4DC10, null                                                                         , null),
+              new("0BD117EBDE784C1FC8BDC8F95A176396B8F1CE48F227CE77864102703A1AEA80",  940, 0x1BF6D0, null                                                                         , null),
+              new("3E955DD6CD7A75E727A5E15185397B138273D8AE3C9A01BDB11A59D3CB1C80F0",  943, 0x4B3970, null                                                                         , null),
+              new("CC7A62B31E7F8A26F6422A80956CD0EEBCE568E81989A1E429D96AEB9AD3AB9D",  944, 0x22AF00, null                                                                         , null),
+              new("05807A916E2C312EC6253B7158A7A8D4DFF0DCF04A1207FC9C0CD9838422A688",  945, 0x279E00, null                                                                         , null),
+              new("6E890085543D6BC07E1E3163987BBC92254A73E43AD00C363A2B65A06A2D7B4D",  946, 0x22AA00, null                                                                         , null),
+              new("073888133296C9946852AD7BBE6F374326C8BC8E757D6D0B9BF927EF6B96070D",  970, 0x217C10, null                                                                         , null),
+              new("2FC44FD24B5AB4C5F3A4F934F92F10587AAF8D82A2EEF3C747DBE43C8C2631DB",  971, 0x229C20, null                                                                         , null),
+              new("2CB52222BCFAE1BC9E30041CD35275A7E40368AEE393403F22E111E49664A737",  972, 0x242D60, null                                                                         , null),
+              new("AFBBF93FE7EE1218FF5F0D8B2DBEF31B79A326F98E8EAB75CA100AB252A28754", 2000, 0x27A0F0, null                                                                         , null),
+              new("AF075A1844C82E267101B9A242DC17CB26CE26B637C105ABC0A45C209961A9ED", 2001, 0x2C7FF0, null                                                                         , null),
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeUninstSources() => new object?[]
+      {
+        // @formatter:off
+        Make("uninst.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_RELOCS_STRIPPED | IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LINE_NUMS_STRIPPED | IMAGE_FILE.IMAGE_FILE_LOCAL_SYMS_STRIPPED | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE, 0, null, "[170:8]", "0;0;[0:130],[134:3C],[178:F2AF]", 0, 0,
+          new Section[]
+            {
+              new("047C4927D9469032C8D4886F267FA626D6C62C7A0786BF8217A7537412C16684",  0x1000,  23628, 24064, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("576CDD5BC72421D008C86F056D0727C54CC8B3EC0961E5D0462AF48278543D51",  0x7000,   4764,  5120, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("994733A64D1C6EEFEBC7A7454FF989D03CD860DD08F30CDEF9219A2FF26B0F45",  0x9000, 298072,  1024, ".data" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new(null                                                              , 0x52000, 450560,     0, ".ndata", IMAGE_SCN.IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("B694314DA065AF267A2663626777BFEA9A44844EA693971F9DE0BCF55DB14711", 0xC0000,   4936,  5120, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeWinrsmgrSources() => new object?[]
+      {
+        // @formatter:off
+        Make("winrsmgr.arm.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARMNT, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:110],[114:3C],[158:2EA8]", 0, 0,
+          new Section[]
+            {
+              new("15ED8A949B5654395555576600FF0306F5B03D52571C56BDE0D725FFBCA31129", 0x1000,  176, 4096, ".text", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("FEDA58E961851B8320E24BEC8BD09077B203666EAEF06C2E3AFCDF2FACDF0305", 0x2000, 1016, 4096, ".rsrc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("winrsmgr.arm64.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARM64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:100],[104:4C],[158:6A8]", 0, 0,
+          new Section[]
+            {
+              new("8A6EEAB522694F3BD97D2391F3E8F80013A6361A24425BF685D8802616C42F90", 0x1000,  176,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("E0ED8BBEC587B37930298C642C904815629EDFFF1277D74A38DEDC7CC8D1E318", 0x2000, 1016, 1024, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("winrsmgr.x64.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:100],[104:4C],[158:6A8]", 0, 0,
+          new Section[]
+            {
+              new("279E52357C3EA6F61679AA70B99B26629CB50035AE906571A3D5D757BFFAB063", 0x1000,  176,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("AB9386AFE335241D0B7333732E74BAD20AB925910BEFC55DD7244CD729CE0EF2", 0x2000, 1016, 1024, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("winrsmgr.x86.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:110],[114:3C],[158:6A8]", 0, 0,
+          new Section[]
+            {
+              new("C3B51FA099FCFEEF0FC2B0CE491F50C2A795B323F4594904A8F5A52B220DB48E", 0x1000,  176,  512, ".text", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("AB9386AFE335241D0B7333732E74BAD20AB925910BEFC55DD7244CD729CE0EF2", 0x2000, 1016, 1024, ".rsrc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeWscadminuiSources() => new object?[]
+      {
+        // @formatter:off
+        Make("wscadminui.arm.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARMNT, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE, 0, null, "[180:8]", "0;0;[0:140],[144:3C],[188:6E78]", 0, 0,
+          new Section[]
+            {
+              new("23C1032DC806557D2234DF7E6709783AD235ED379600CE317DE42E7F25231CFD", 0x1000, 3028, 4096, ".text"  , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new(null                                                              , 0x2000,    4,    0, ".imrsiv", IMAGE_SCN.IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("2F39B7AC2C5C52A6D6931706855BAC755D13C3B1E2951A4AAE46C317015209E8", 0x3000,  672, 4096, ".data"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("48CD643C2693AA9719E0DAE53AE34AD926C043A7D3640BF73CD9CC831872EAF6", 0x4000,  160, 4096, ".pdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("35D53DBCE3E5C475EF5E4DB6918A583F84D2069E0B88F9901A32FD37DB2FBFDE", 0x5000,  764, 4096, ".idata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("1E4541BA03FEE2D04DEAF226C52354F60E12ABFA774EF15E1DBB13CA9EF15F7A", 0x6000, 1072, 4096, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("6CDDC6E918564521DAAB8ACD557B0CFC329358FBCF647AF3A647030D9020062A", 0x7000,  172, 4096, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("wscadminui.arm64.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARM64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE, 0, null, "[188:8]", "0;0;[0:138],[13C:4C],[190:2270]", 0, 0,
+          new Section[]
+            {
+              new("8A63AC4BFF9425361F8AEDB8F5CBE9DD5617D67C8E09D79483C78B073FDABA37", 0x1000, 2324, 2560, ".text"  , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new(null                                                              , 0x2000,    4,    0, ".imrsiv", IMAGE_SCN.IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("5535DE40E15F283C4415A23E09B38B94D3B8C7D858E63ED5B537D924F20C5489", 0x3000, 2110, 2560, ".rdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("58E023E468223A9B0FBEF6155A68A5C08061A298E805C0224A2FB5CBCF212CAA", 0x4000, 1344,  512, ".data"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("BE7C4E3C5434E83322D449D0FDA4D41D95A235137649E704206A8126D502E8AA", 0x5000,  128,  512, ".pdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("05EEC4806620EA1ABD3051623FC6EBA883CD0E2D45F2CEE9142BAE47B06EB9FA", 0x6000, 1072, 1536, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("1C25417A9028E192093D289802D626B670E3579A147C1D0ECCD3C694175F6644", 0x7000,   32,  512, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("wscadminui.x64.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE, 0, null, "[190:8]", "0;0;[0:140],[144:4C],[198:2268]", 0, 0,
+          new Section[]
+            {
+              new("20A9EF09C819380187F58E158D6F8E32A3B5846EECE116D311B530EE08C853BF", 0x1000, 2320, 2560, ".text"  , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new(null                                                              , 0x2000,    4,    0, ".imrsiv", IMAGE_SCN.IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("AB80A6A8B39C4C63B451646DCDBD71C0F1420D264D992AD3D6263C8AC25EFCB4", 0x3000, 2460, 2560, ".rdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("B7C89BB3A2C6CAA9696D245FC8EDCC1C7E6C05D72AA3D59032383639E4ADCE12", 0x4000, 1528,  512, ".data"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("061A366734F72201665E248F08F654F4898C8164EA6CA506387DF5D5EB5E9484", 0x5000,  204,  512, ".pdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("4BB271F571107645497DBED57688893265FF701652B5FC54B09A05C1E8A838EA", 0x6000, 1072, 1536, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("A6EBEC46E03F21845E3BEC456E576CFB61829DFC09C7ADCAB8A7D278B06D12CE", 0x7000,   32,  512, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        Make("wscadminui.x86.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE, 0, null, "[180:8]", "0;0;[0:140],[144:3C],[188:1E78]", 0, 0,
+          new Section[]
+            {
+              new("1AFC41739E69F86A0F64B811A2C1A2A22C3A63CDD0B5923B38210F9A3E4C703D", 0x1000, 3140, 3584, ".text"  , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new(null                                                              , 0x2000,    4,    0, ".imrsiv", IMAGE_SCN.IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("0DBF9D6D9A5CFADB391FFD8C236F9A20C6934E9966033D85A3F145420D6B661D", 0x3000,  880,  512, ".data"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("DACD69256BDE6CEE82AB24E44BE10E6E95F77673F6467007E25E32F998914D03", 0x4000,  854, 1024, ".idata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("C5BD4FB1BC714207826EDEA8A0167CC573232EC8EC05EB088A2F09A044FF5D99", 0x5000, 1072, 1536, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("A4C0780A6BEF1F03E6E8C63FECFDFA40260FEAB0132ADEE2A0AF5B58008C4231", 0x6000,  304,  512, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeUnityEditorSources() => new object?[]
+      {
+        // @formatter:off
+        MakeOptional("unity/win_arm64_editor_mono/Unity.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARM64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "20890D012546709BA97C083CDB96A7CCE2F480A5E669ED6178F78DF0F9D7A4010BC84292FD7974CE6A35F4234BF1C1B5", "[258:8]", "0;0;[0:208],[20C:4C],[260:D9757A0]", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 227, 0,
+          new Section[]
+            {
+              new("91692921DCC619AC4B6E8652C9DFE2B6A1B7D67B4FB8C546E24EDB3611D7BB35",    0x1000, 129079748, 129079808, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("79F9F87B55E9C34F901B9C878FA8E5F9D71C0CD634795DF389BEC948ADE10E1A", 0x7B1B000,  58860480,  58860544, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("B6629A3BF5D5DFF2F9C939009C77ECBECBA9DB60865030D4D53931BF08CC31CC", 0xB33E000,  46864780,  32847360, ".data" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("2749868406AB348721A98A8BA55EC8C347B7747B60340A939EA079CDA1E6F742", 0xDFF0000,   4059672,   4060160, ".pdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("3CBB1E0815FA7B7BCC57FD0402A713D93C7612DB471808FFB8D99E45B1D29707", 0xE3D0000,   2336344,   2336768, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("6C8C9DFD3FC8B10217393CC88C52A839B10AEE859C3F8D5B49985D1C95601907", 0xE60B000,    837100,    837120, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+              new("2639C6A6D667B867EC0D282040CF93C857286FF220B4D4DA063156452220D6BA",   1,  0x3BCA68, "OpenRLCreateContext"                  , null),
+              new("92FE1E656E5C3AF71C0B4C1FC58CE14F55482BF4FB1C8A1C6077E7C19909855A",   2,  0x3B8980, "OpenRLDestroyContext"                 , null),
+              new("2639C6A6D667B867EC0D282040CF93C857286FF220B4D4DA063156452220D6BA",   3,  0x3BCA68, "OpenRLGetCurrentContext"              , null),
+              new("92FE1E656E5C3AF71C0B4C1FC58CE14F55482BF4FB1C8A1C6077E7C19909855A",   4,  0x3B8980, "OpenRLGetHardwareAcceleratorCount"    , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",   5,  0x3998F0, "OpenRLLogMessagesToStderr"            , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",   6,  0x3998F0, "OpenRLLogMessagesToStdout"            , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",   7,  0x3998F0, "OpenRLSetContextDebugCallback"        , null),
+              new("92FE1E656E5C3AF71C0B4C1FC58CE14F55482BF4FB1C8A1C6077E7C19909855A",   8,  0x3B8980, "OpenRLSetCurrentContext"              , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",   9,  0x3998F0, "OpenRLStopContext"                    , null),
+              new("5B44FE7F7275A77C96357CF6009B0F3EBBED10F8F5D9BFFA516271EB010F3848",  10, 0x2054330, "UnityMain"                            , null),
+              new("491177D67520E54070456C9744061EB6916EAF290561F4EBFA098DCB4C87EC77",  11, 0x8BF6250, "UnityScriptingBackend"                , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  12,  0x3998F0, "rlAttachShader"                       , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  13,  0x3998F0, "rlBindBuffer"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  14,  0x3998F0, "rlBindFramebuffer"                    , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  15,  0x3998F0, "rlBindPrimitive"                      , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  16,  0x3998F0, "rlBindTexture"                        , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  17,  0x3998F0, "rlBufferData"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  18,  0x3998F0, "rlBufferParameterString"              , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  19,  0x3998F0, "rlBufferSubData"                      , null),
+              new("4445B56947B3B01CE8EB437397C0582343B73B629C3CF9CB790AC5E950098F81",  20,  0x814C38, "rlCheckFramebufferStatus"             , null),
+              new("4445B56947B3B01CE8EB437397C0582343B73B629C3CF9CB790AC5E950098F81",  21,  0x814C38, "rlCheckPrimitiveStatus"               , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  22,  0x3998F0, "rlClear"                              , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  23,  0x3998F0, "rlClearColor"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  24,  0x3998F0, "rlCompileShader"                      , null),
+              new("2639C6A6D667B867EC0D282040CF93C857286FF220B4D4DA063156452220D6BA",  25,  0x3BCA68, "rlCreateProgram"                      , null),
+              new("2639C6A6D667B867EC0D282040CF93C857286FF220B4D4DA063156452220D6BA",  26,  0x3BCA68, "rlCreateShader"                       , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  27,  0x3998F0, "rlDeleteBuffers"                      , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  28,  0x3998F0, "rlDeleteFramebuffers"                 , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  29,  0x3998F0, "rlDeletePrimitives"                   , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  30,  0x3998F0, "rlDeleteProgram"                      , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  31,  0x3998F0, "rlDeleteShader"                       , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  32,  0x3998F0, "rlDeleteTextures"                     , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  33,  0x3998F0, "rlDetachShader"                       , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  34,  0x3998F0, "rlDrawArrays"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  35,  0x3998F0, "rlDrawElements"                       , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  36,  0x3998F0, "rlDrawVertexAttribIndices"            , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  37,  0x3998F0, "rlFrameParameter1f"                   , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  38,  0x3998F0, "rlFrameParameter1i"                   , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  39,  0x3998F0, "rlFrameParameterfv"                   , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  40,  0x3998F0, "rlFramebufferAttachmentParameter1i"   , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  41,  0x3998F0, "rlFramebufferParameterString"         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  42,  0x3998F0, "rlFramebufferTexture2D"               , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  43,  0x3998F0, "rlFramebufferTexture3D"               , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  44,  0x3998F0, "rlFrontFace"                          , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  45,  0x3998F0, "rlGenBuffers"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  46,  0x3998F0, "rlGenFramebuffers"                    , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  47,  0x3998F0, "rlGenPrimitives"                      , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  48,  0x3998F0, "rlGenTextures"                        , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  49,  0x3998F0, "rlGenerateMipmap"                     , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  50,  0x3998F0, "rlGetActiveAttrib"                    , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  51,  0x3998F0, "rlGetActiveUniform"                   , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  52,  0x3998F0, "rlGetActiveUniformBlock"              , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  53,  0x3998F0, "rlGetActiveUniformBlockField"         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  54,  0x3998F0, "rlGetAttachedShaders"                 , null),
+              new("4445B56947B3B01CE8EB437397C0582343B73B629C3CF9CB790AC5E950098F81",  55,  0x814C38, "rlGetAttribLocation"                  , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  56,  0x3998F0, "rlGetBooleanv"                        , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  57,  0x3998F0, "rlGetBuffer"                          , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  58,  0x3998F0, "rlGetBufferParameterString"           , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  59,  0x3998F0, "rlGetBufferParameteriv"               , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  60,  0x3998F0, "rlGetBufferParametersv"               , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  61,  0x3998F0, "rlGetDoublev"                         , null),
+              new("4445B56947B3B01CE8EB437397C0582343B73B629C3CF9CB790AC5E950098F81",  62,  0x814C38, "rlGetError"                           , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  63,  0x3998F0, "rlGetFloatv"                          , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  64,  0x3998F0, "rlGetFrameParameterfv"                , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  65,  0x3998F0, "rlGetFrameParameteriv"                , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  66,  0x3998F0, "rlGetFramebuffer"                     , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  67,  0x3998F0, "rlGetFramebufferAttachmentParameteriv", null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  68,  0x3998F0, "rlGetFramebufferParameterString"      , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  69,  0x3998F0, "rlGetIntegerv"                        , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  70,  0x3998F0, "rlGetLongv"                           , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  71,  0x3998F0, "rlGetPrimitive"                       , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  72,  0x3998F0, "rlGetPrimitiveParameter1i"            , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  73,  0x3998F0, "rlGetPrimitiveParameter1s"            , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  74,  0x3998F0, "rlGetPrimitiveParameterMatrixf"       , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  75,  0x3998F0, "rlGetPrimitiveParameterString"        , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  76,  0x3998F0, "rlGetProgram"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  77,  0x3998F0, "rlGetProgramString"                   , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  78,  0x3998F0, "rlGetProgramiv"                       , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  79,  0x3998F0, "rlGetShaderString"                    , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  80,  0x3998F0, "rlGetShaderiv"                        , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  81,  0x3998F0, "rlGetSizev"                           , null),
+              new("2639C6A6D667B867EC0D282040CF93C857286FF220B4D4DA063156452220D6BA",  82,  0x3BCA68, "rlGetString"                          , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  83,  0x3998F0, "rlGetTexImage"                        , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  84,  0x3998F0, "rlGetTexLevelParameteriv"             , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  85,  0x3998F0, "rlGetTexParameterString"              , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  86,  0x3998F0, "rlGetTexParameteriv"                  , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  87,  0x3998F0, "rlGetTexture"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  88,  0x3998F0, "rlGetUniformBlockBuffer"              , null),
+              new("4445B56947B3B01CE8EB437397C0582343B73B629C3CF9CB790AC5E950098F81",  89,  0x814C38, "rlGetUniformBlockFieldOffset"         , null),
+              new("4445B56947B3B01CE8EB437397C0582343B73B629C3CF9CB790AC5E950098F81",  90,  0x814C38, "rlGetUniformBlockIndex"               , null),
+              new("4445B56947B3B01CE8EB437397C0582343B73B629C3CF9CB790AC5E950098F81",  91,  0x814C38, "rlGetUniformLocation"                 , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  92,  0x3998F0, "rlGetUniformfv"                       , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  93,  0x3998F0, "rlGetUniformiv"                       , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  94,  0x3998F0, "rlGetUniformpv"                       , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  95,  0x3998F0, "rlGetUniformtv"                       , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  96,  0x3998F0, "rlGetVertexAttribbv"                  , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  97,  0x3998F0, "rlGetVertexAttribfv"                  , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  98,  0x3998F0, "rlGetVertexAttribiv"                  , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A",  99,  0x3998F0, "rlGetVertexAttribsv"                  , null),
+              new("4445B56947B3B01CE8EB437397C0582343B73B629C3CF9CB790AC5E950098F81", 100,  0x814C38, "rlIsBuffer"                           , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 128,  0x3998F0, "rlUniform2iv"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 129,  0x3998F0, "rlUniform3f"                          , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 130,  0x3998F0, "rlUniform3fv"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 131,  0x3998F0, "rlUniform3i"                          , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 132,  0x3998F0, "rlUniform3iv"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 133,  0x3998F0, "rlUniform4f"                          , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 134,  0x3998F0, "rlUniform4fv"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 135,  0x3998F0, "rlUniform4i"                          , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 136,  0x3998F0, "rlUniform4iv"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 137,  0x3998F0, "rlUniformBlockBuffer"                 , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 138,  0x3998F0, "rlUniformMatrix2fv"                   , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 139,  0x3998F0, "rlUniformMatrix3fv"                   , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 140,  0x3998F0, "rlUniformMatrix4fv"                   , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 141,  0x3998F0, "rlUniformp"                           , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 142,  0x3998F0, "rlUniformpv"                          , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 143,  0x3998F0, "rlUniformt"                           , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 144,  0x3998F0, "rlUniformtv"                          , null),
+              new("4445B56947B3B01CE8EB437397C0582343B73B629C3CF9CB790AC5E950098F81", 145,  0x814C38, "rlUnmapBuffer"                        , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 146,  0x3998F0, "rlUseProgram"                         , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 147,  0x3998F0, "rlVertexAttrib1f"                     , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 148,  0x3998F0, "rlVertexAttrib1fv"                    , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 149,  0x3998F0, "rlVertexAttrib2f"                     , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 150,  0x3998F0, "rlVertexAttrib2fv"                    , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 151,  0x3998F0, "rlVertexAttrib3f"                     , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 152,  0x3998F0, "rlVertexAttrib3fv"                    , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 153,  0x3998F0, "rlVertexAttrib4f"                     , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 154,  0x3998F0, "rlVertexAttrib4fv"                    , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 155,  0x3998F0, "rlVertexAttribBuffer"                 , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 156,  0x3998F0, "rlVertexAttribIndicesBuffer"          , null),
+              new("5C9B65F1D9A57D5CD0797DA6EFB31BABB89CC89527FD77257589FA35EE08D98A", 157,  0x3998F0, "rlViewport"                           , null),
+              new("7C182AB86089164E5430319AFAF91B7A543CCCD7065AB0A13163F6D9A5BE93E3", 158, 0x152F560, "ucommand_buffer_close"                , null),
+              new("5137F555ACE49BFE416F63D5306D301C43B4F0458771373077271CD229EB231F", 159, 0x152F8D8, "ucommand_buffer_connect"              , null),
+              new("B76872292C084CCDCF158EB6C8C94CE73992396B0CFE37607272096CD2C72690", 160, 0x152FE18, "ucommand_buffer_init"                 , null),
+              new("1FD40D22A5B6493200CCCD59AF65E61969102F6F930DAB855202D74EE11037BB", 161, 0x1530360, "ucommand_buffer_release_command"      , null),
+              new("661C9B5D8B85BE98FC1C18C14C1EF43A12E4AF54391563542FFBEB2B684DA6AF", 162, 0x15303B8, "ucommand_buffer_send"                 , null),
+              new("2B481702DE51AF4C51DFEC19F036A199C6BE2F6DD629528BA46A80A1872F1666", 163, 0x15303D8, "ucommand_buffer_try_pop"              , null),
+              new("C725DD612EA4608554601279FC9605277E7381CC83BB8E9EC5AFCF669A2F525B", 164, 0x1530628, "udebug_get_console_logging_level"     , null),
+              new("D0C605C86F644FE94F2E6EAEB915DA5D4206F2B2E5116230A8F38C2A80A37DC4", 165, 0x1530638, "udebug_get_file_logging_level"        , null),
+              new("AF64CFBB73FA5451653A9112CB110831913CD9AF293587BC4E5B766D6362E1FF", 166, 0x1530648, "udebug_set_console_log_prefix"        , null),
+              new("E89F1076E4AA6D602F415002944704D4DC2300EA88489F4C1D607B1B602A716C", 167, 0x1530670, "udebug_set_console_logging_level"     , null),
+              new("817E6D16F6BFB13F94677E6F44342A34D82D5E8F352803D91669327AB54F6D5B", 168, 0x1530680, "udebug_set_debug_log_file"            , null),
+              new("DB80384A188C5311E6FD0ED0F3AC4917C3281869099DB2421932FDEB109D57DB", 169, 0x1530A60, "udebug_set_file_logging_level"        , null),
+              new("2A969B0D59C2562076881546D4E6AC6214F33795E95753BF478C5476BCAD404A", 170, 0x281D7F8, "udnCreateDenoiser"                    , null),
+              new("3CFBA85A49788948C3277599B257BA77605C9F67A7A1053789028FC87DE748F4", 171, 0x281D810, "udnDenoiseBuffer"                     , null),
+              new("C1814101C2578F429FD873C08D8E098DF1F826498BFCCBE8698005B6414B7C7D", 172, 0x281D828, "udnDisposeDenoiser"                   , null),
+              new("D340729E6A085C2EE664E170A6022E7FEB7821FB2BDC4C33542AB7681486A76C", 173, 0x281D840, "udnGetDenoiserTypeName"               , null),
+              new("0853A9D574DCB050D411EC94BCB7B6A874E662FE7C2FB3CC19260EB9A0C1C654", 174, 0x281D858, "udnGetNumberOfAvailableDenoiserTypes" , null),
+              new("286BF3B6FD3F66076EF692A44A22FAB269F6CCF15935858AB6139863223B347F", 175, 0x281D870, "udnGetResult"                         , null),
+              new("5FD053F8FB3A858D44CF37D151602C7741B27E7F1213C2943BA6C77717756DA3", 176, 0x281D888, "udnSetPath"                           , null),
+              new("E114FD01CA8987D55AD1939ABD23D63E5FD264EE898C4099AB1207E2A3D1443B", 177, 0x1530A70, "uds_access_content"                   , null),
+              new("7FDEF183F6155D538531D432E80F7A51F2F8F81215F270B72FA86B2B69D1D8CB", 178, 0x1530B48, "uds_access_header"                    , null),
+              new("BB88065B593C02CC9AB78290210411F464F9750384BA2C6AE8F64E465D7DF129", 179, 0x1530C20, "uds_access_references"                , null),
+              new("E8B736ECDDE9980B7E049759EDDDC488FD260AAA05AB51D5AAC569911A34C1C2", 180, 0x1530CF8, "uds_access_write_content"             , null),
+              new("6CFF67702642B093AA4C35533157713CA2478C04424259761A1864EFC914E4C7", 181, 0x1530DD0, "uds_access_write_header"              , null),
+              new("84E648DA0B1A88A8FCAED6D6E48E81E52160B972E5441B8EF1D37E06D818265E", 182, 0x1530EA8, "uds_acquire"                          , null),
+              new("6A8FF2DBC57918D88C5D376A78FE5BBFED2DAB6976584104CDC6BFA76A0092E2", 183, 0x1530F80, "uds_acquire_file"                     , null),
+              new("D906B37B414B13560E076FC7E9009CB3191CCABF9BBC315346DF487CDBFC6CDA", 184, 0x1531060, "uds_acquire_with_callback"            , null),
+              new("A6AC26CBA1BC6C66291F66ED51CA90DAF8120BE8802F2956B59335FEB163592A", 185, 0x1531140, "uds_add_references"                   , null),
+              new("EB06B099064E0EFC14D2DDB5EEC70FFE1C10661779940AC983043C81851C50EC", 186, 0x15200D8, "uds_cleanup"                          , null),
+              new("EC0872FDC2F60DC825B52F75CEB61736895AA624D7EDE402C0667C8DB17D124D", 187, 0x1531220, "uds_commit"                           , null),
+              new("0458DA5F11848A830840A0E5653404B5D08E27E50506D8421F654DE9915DF903", 188, 0x1531300, "uds_commit_data"                      , null),
+              new("A040191279F4FA7220433D1402AA9D9A7FCA9740FC82BFF02B0F1FE4BFDE4F93", 189, 0x15313F0, "uds_commit_file"                      , null),
+              new("8C08F3148B999B92CD8FABD1EF738F0757BC93704BD61E8C0930F5DF09AC1E79", 190, 0x15314C8, "uds_contains"                         , null),
+              new("B3709C792139A0FF26C92655A7BABCA4109A2F9185B144CE684A1368623DDE2C", 191, 0x15315A0, "uds_destroy_references"               , null),
+              new("F1B37656C4B20A40E68A352B04EAFA3B186F47F41319E5B6A6E15A74AA4C8E1E", 192, 0x1531668, "uds_finish"                           , null),
+              new("8F7A8BEB9C8986C757E9D7E5D34F6A823A5BCABBA0FD67BACC02BE2BD07845DD", 193, 0x1531748, "uds_free_system"                      , null),
+              new("F3A430D014C2E7EDEB49DB41659B4DEF35FC1B05066696E32CBB146AEF1AC703", 194, 0x1531810, "uds_get_acquisition_wait_handle"      , null),
+              new("9721E2B282703D7634A69DF916E970AA34C2ABFEA54857CDDC04EF34920DEFB8", 195, 0x15318E8, "uds_get_content_size"                 , null),
+              new("538F5E4C44029423A7FC66279718961BE8F7EE692E1A3330A478F5491E16B560", 196, 0x15319C0, "uds_get_data_system_acquire_function" , null),
+              new("78A4B7C14F4E51ACDFED8AB970F0D84F96C689179E781B365CD88034DAA272A5", 197, 0x1531A80, "uds_get_data_system_commit_function"  , null),
+              new("11A1BCD3138D84EE424739389425A9031968C69DD4B0CF075E0A26C8445A1CC5", 198, 0x1531B40, "uds_get_data_system_release_function" , null),
+              new("F45B077C93F47BF42E09BD9D129F8273BEE948F15566CDCD1BD63A411FC3B0B9", 199, 0x1531C00, "uds_get_roots"                        , null),
+              new("9018E627D8ED365BD209AAB2F4AC90A18C2470C8630AB2F31C83DEDAD20CD692", 200, 0x1531CF0, "uds_get_roots_count"                  , null),
+              new("F4F510243E2652332764804C8FE411CDADE07E71168F56C0B16D699B60659ABF", 201, 0x1531DC8, "uds_get_struct_size"                  , null),
+              new("BEA96A09F7C95A333F4CDE5ED3FF88BBF202EDD1A3EE697535F2511531648DA7", 202, 0x1531E90, "uds_hash_memory"                      , null),
+              new("9DC22FF4D96A66EA9460B0E596D0507897955BBFD920678753A844C28D95B5B1", 203, 0x1531F68, "uds_is_implementation"                , null),
+              new("109F60411AD4AC1E39707791303D971E13D2296B29056E9E5F3F1ABB87CF83DB", 204, 0x1531F80, "uds_is_loaded"                        , null),
+              new("FC9C919D522957DBBDDB24932E8EF9793AC7AC058B9B9B29DB6C4B5FAA38783B", 205, 0x1532058, "uds_is_read_handle_available"         , null),
+              new("338807BEB74464880B225B3860484F44F3EAB64D90D8C0AC60C558804E60191E", 206, 0x1532130, "uds_is_wait_handle_complete"          , null),
+              new("8F150A8FCCAD0F391091ED4753404A0DADA44775CB298276B0ED6346038C77CB", 207, 0x1532208, "uds_is_wait_handle_successful"        , null),
+              new("037040F55A92E65D551724A20661F4E5CF6FE44286F5D2C830A4E4EC5536390D", 208, 0x15322E0, "uds_partial_sync"                     , null),
+              new("30A5FA35949E79C14803D208ED48F18BFAC928E47CE91520C49FEF6E980A85E8", 209, 0x15323C0, "uds_release"                          , null),
+              new("821C036F879A86B8864495C8637E0CE0F32E2E4B54335F48E0C9CFEA2437E210", 210, 0x1532498, "uds_remove"                           , null),
+              new("391839CDEA056B33011067CB93844FD3CECB37F72A734BDAE7B2F15026AC659E", 211, 0x1532570, "uds_remove_multiple"                  , null),
+              new("62244656CD2738CA77EF6506894C433EEA988CBB83BDF04B5A4ECC0266687A4D", 212, 0x1532650, "uds_remove_root"                      , null),
+              new("EEE038B067586EFB584861D73E0FEE1DE1123E3FC4B8C610EE083B162BBD51FD", 213, 0x1532730, "uds_reserve"                          , null),
+              new("4CB9681B9E49C21D6EC3EF918CD84CA6171E04FA490F6E3ED0619333CE435C73", 214, 0x1532810, "uds_reserve_with_payload"             , null),
+              new("A85251EAEC6125B308A1683CF645D47AB3BF674326067BAE33773E2FEF578552", 215, 0x1532908, "uds_service_process_id"               , null),
+              new("F299B9B619E7E6F5480E744F29B5736941F7911324416923F52554B1934CFD08", 216, 0x15329D0, "uds_set_as_root"                      , null),
+              new("05C96286B34969F9C65AA68B8110F23356DAB8274C03F553E548B8DD386C661B", 217, 0x1532AB0, "uds_set_implementation"               , null),
+              new("BE875B0E49F2E9FCAF758471303BBF192B13EFB226A1BD884E6B3AFF909D1ADB", 218, 0x1532AC0, "uds_set_real_implementation"          , null),
+              new("596373A89D9F21D586F42B13ADFAB1A482D27B04A5B1DC6163BE6179F684C157", 219, 0x1558FA0, "uds_set_stub_implementation"          , null),
+              new("C58ED42AACDE268A442D6241FCAE8E62DDA2D589B0F14BB0A1576B1EEC4B7B10", 220, 0x1532AD8, "uds_set_working_directory"            , null),
+              new("DEFEF330F0711135B050CB9BC2F3F91F8A4FCE3C804F2592EB72C56193145BE3", 221, 0x1532BB0, "uds_sync"                             , null),
+              new("7C7E8518F211C088DC37C3A54ECB1B71F50557CE49B1A6A72675F573E8062812", 222, 0x1532C78, "uds_system_create"                    , null),
+              new("43E47358155042DAE08D0732AF8A279538C3E6978154722FC74226FC7815F747", 223, 0x1532D38, "uds_system_init_as_client"            , null),
+              new("8049A99659EC5BF623B91B82DFA623F47FF384A416F45D1015F12303D032538C", 224, 0x1532E18, "uds_system_init_as_service"           , null),
+              new("0AF002FBFF981D39DB1996BB234D8F08D64208B04164C9F98CD378595953BDAE", 225, 0x1532EF8, "uds_system_shutdown"                  , null),
+              new("A164B8565688F57B92546D3C832708C5F5A94F8A3B8D58D36C7D3F28DE5B90E1", 226, 0x1532FC0, "uds_system_shutdown_and_force_cleanup", null),
+              new("E76C88A162599F777D0370D83DC3C6DADEC7D6BDEC24A2AAB3BEBE52BE1D5758", 227, 0x1533088, "uds_wait_handle_complete"             , null),
+            },
+          new Symbol[]
+            {
+            }),
+        MakeOptional("unity/win_x64_editor_coreclr/Unity.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "1E47E9E40357F101A6C086DE4731298916986BD2C49388F8C7AD77420B0DD9CE348164EB10E3292AB6CE889F9F39B8DC", "[278:8]", "0;0;[0:228],[22C:4C],[280:C6E5980]", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 72, 0,
+          new Section[]
+            {
+              new("1AF7C92B4AB16F4A8180CDF4664B298C21E160BAB54461CA343C4BBDE05A28E8",    0x1000, 135412988, 135413248, ".text"  , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("C96788980E92E10D2F894ACB48A164188C9A4AFAC2BF0CD5D176ACA4152E02A0", 0x8125000,  33204234,  33204736, ".rdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("4D54BD089D34BFA6CB849F4B2F24BEF58D2F4AE5D64B71E3F4A666EFA7487253", 0xA0D0000,  46024556,  31993344, ".data"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("1651F29992AB6675A150061A30FA8DC592136E879099DC5EEE7CCAC56CC428F0", 0xCCB5000,   4735452,   4735488, ".pdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("08BC9BA17A0736CCDB8A6487FD2383DD01861EC198542D1B5F4B2CADECA96101", 0xD13A000,      2936,      3072, ".rodata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("654425852C0DBFD072FF3733718099D5EA71C12039227AE9947110BF684E1D4F", 0xD13B000,     68832,     69120, "_RDATA" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("91C374C27365B945BDEC8134C14C1D40E6D19EAF364E8E24CBB83F5F3DE004C2", 0xD14C000,   2336344,   2336768, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("3FAD4164C9DC8F5A1E73E98817DA4272F75610E68075A9863814D94910F58100", 0xD387000,    801652,    801792, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+              new("F67A1C4591EC76EBD4C2365D012F86645DC68E35DF7200B52FBA5A13129818C6",  1, 0x22D6BA0, "UnityMain"                            , null),
+              new("7844D42E25A14BCF90CFA72358673DDA1EBA1C7E54701447E88422ECC1239551",  2, 0x8B50D78, "UnityScriptingBackend"                , null),
+              new("752741E607EC6052A139BD2E6004ABF7D40063EEFDB15629D203FD5FD656C0D1",  3, 0x14D54F0, "ucommand_buffer_close"                , null),
+              new("60F38CFDC0B4144DAA9794C5658D8D4E77D7E59144684C177511547B9B59A707",  4, 0x14D5870, "ucommand_buffer_connect"              , null),
+              new("94D5DEF049180E451B62B8295688B3A760800C8326BD558D7A940B46C8CE7343",  5, 0x14D6000, "ucommand_buffer_init"                 , null),
+              new("33136A2182688C825DE23B27AE9EEC66645848800B1EA20C11F461A3802A29F6",  6, 0x14D6390, "ucommand_buffer_release_command"      , null),
+              new("2BC5294C4DC1C69282799544E178A1AD5A4E012241AFF95AE32B25825E500E85",  7, 0x14D6400, "ucommand_buffer_send"                 , null),
+              new("3021B580CC311CDEEAC6D856E932FA64B133B6D9E096FA53B9E827D53D5E61B6",  8, 0x14D6430, "ucommand_buffer_try_pop"              , null),
+              new("38E74C6EC7B26620B75B1F581D73BBE5B7AD351ED89E88DDDEA6D3F123DB31D0",  9, 0x14D6670, "udebug_get_console_logging_level"     , null),
+              new("CEDD8BFC19F44DA74304DFACD6AFEB58BB278C15638D2AAF6BC03361E48A3F14", 10, 0x14D6680, "udebug_get_file_logging_level"        , null),
+              new("0F42697C0B0DDD617A9966816B8FC19A8D1668861206EAF8A14B5E1456786D57", 11, 0x14D6690, "udebug_set_console_log_prefix"        , null),
+              new("A9B05098AFBB935609C530D6CA9B66C36FF3F8790FB0AB6B4BCB0D844FA0396F", 12, 0x14D66C0, "udebug_set_console_logging_level"     , null),
+              new("C5C4103880860DF370A040926B6639914F7AFFBCD7D54F792F00ACAD85794102", 13, 0x14D66D0, "udebug_set_debug_log_file"            , null),
+              new("EF616DED93957371732FBB9D32B4757F2255BC2B0BAFB456E2AFE2EBD87F8801", 14, 0x14D6B80, "udebug_set_file_logging_level"        , null),
+              new("624F93FA2EF86125B3B92C63C28D5CC6D77E57681D59C506C1E35923FFDE2CEE", 15, 0x2ACA570, "udnCreateDenoiser"                    , null),
+              new("1412CB09A8A482CD3EC61FDB0D6BC5AF22B0901A60977B09F81DF54F0CAF1BFF", 16, 0x2ACA590, "udnDenoiseBuffer"                     , null),
+              new("901EDE89BB36039955DFB070BEB935655E22C03C1EB2E18D110C5CA92F448C25", 17, 0x2ACA5B0, "udnDisposeDenoiser"                   , null),
+              new("31D4A867DD4E4555AFA3567F67A333FBC7E9A3AADA0F5A2CF7FB1F12ACB67A84", 18, 0x2ACA5C0, "udnGetDenoiserTypeName"               , null),
+              new("2A001B9B9E7E6A9BF87C4C55F436BE6F19D4CC506DFCF17FF471B09E65D6F498", 19, 0x2ACA5D0, "udnGetNumberOfAvailableDenoiserTypes" , null),
+              new("594C31D64B3E437EA7A52811AD6B8F3EB29C35A165413614CD5BF0A81354B77C", 20, 0x2ACA5F0, "udnGetResult"                         , null),
+              new("5EE0AB0DA87ECF9BDB27B5B2EFC19FECA3BFFE5BD3C382227FE8FADDCBBDAF94", 21, 0x2ACA610, "udnSetPath"                           , null),
+              new("A35A84F4DB91FB38E7432C964CD4B63D0FF6023B41157EA9A1A174C113EBD0AF", 22, 0x14D6B90, "uds_access_content"                   , null),
+              new("2F1D95DE2DC0C5AA94863D9726320DC9EBD06155CB59E9EFD00B8A1050373898", 23, 0x14D6CB0, "uds_access_header"                    , null),
+              new("E79D89D61D6BE84A683078BAF334311F75D50B1A59C91420305A126807971B54", 24, 0x14D6DC0, "uds_access_references"                , null),
+              new("F586F5C6358C7495FDA62C5D0B4FF6E70BF45C3A976CB7D7076E5F0A599CF990", 25, 0x14D6EF0, "uds_access_write_content"             , null),
+              new("BC160B1F74B6BB947D8994BD4A1C173815D12A0A3DF566D853B623B1D07142A5", 26, 0x14D7020, "uds_access_write_header"              , null),
+              new("9B6628729E2D5D8EF189380A7BE74323503F6974B4DA7D93DC593C7CE39C114E", 27, 0x14D7130, "uds_acquire"                          , null),
+              new("205E6D3482568FD828D0ED1E97599119A4C22D20E6D12E8086B588BADCB0444C", 28, 0x14D7240, "uds_acquire_file"                     , null),
+              new("3CBA37D46CFA435734F4BD1DFA277F4324E0EA79497A72969D098DB59871CDC7", 29, 0x14D7360, "uds_acquire_with_callback"            , null),
+              new("CC66756C9831F067BD82B573C5473A6D2D112E6C86EEF84980DFCBC5AFF154F3", 30, 0x14D7480, "uds_add_references"                   , null),
+              new("1CEBCBFF7CF7B36A18515A047B5F5F84804F50F79AE7304F11DAE913C22D5AB0", 31, 0x14C3DD0, "uds_cleanup"                          , null),
+              new("F8B2141811B213B62272060E6CE59102F8AEEDEC8D0B34BB23CB1303AD7BF02B", 32, 0x14D75A0, "uds_commit"                           , null),
+              new("DF9F77ACBF76C9684DF362F6C3D010E2E4863F562E55105DB57D85679A642809", 33, 0x14D76C0, "uds_commit_data"                      , null),
+              new("09B4ABFCA42B0C27AB20BF69C492EAE1CADC42A887F54317CCA0FD2DA2B87BFA", 34, 0x14D7810, "uds_commit_file"                      , null),
+              new("C486DC2D3D2697CC50286D476EE1A892B4DCE0B80ACBEED57B18C878E7EFF913", 35, 0x14D7940, "uds_contains"                         , null),
+              new("E958C8FD04A2083E5DE548C92648417FF7BC3FEA1E5D217B217F91578E09978E", 36, 0x14D7A50, "uds_destroy_references"               , null),
+              new("DDB1DBA5513829156B4B5A0FE63B57CA2258E880CA3AFE551A1189B1309F38D8", 37, 0x14D7B50, "uds_finish"                           , null),
+              new("CEEEEECB1FC4676D2CC8F426AAC3D6D56C6902CA7ED44F6CEC0ABAD956E79CD5", 38, 0x14D7C90, "uds_free_system"                      , null),
+              new("FC437FC624BC46D3525C31DB837AF1EEE7C49C1F9CF0142EE1A4CB69F2417035", 39, 0x14D7D90, "uds_get_acquisition_wait_handle"      , null),
+              new("DC5D899196836172A156012D4D36A096BDCF721A37B655E4AADBD1D8F7BBD104", 40, 0x14D7EA0, "uds_get_content_size"                 , null),
+              new("B5BDA83E903ECE6589670A9C4F3D19CA357B6F216BA63F3586370B8DAD0BE7FF", 41, 0x14D7FB0, "uds_get_data_system_acquire_function" , null),
+              new("8AA900C51CF6009A0D854F8D4A3D400FEF3FC2C0257FE9D48DA06A27B0331139", 42, 0x14D80A0, "uds_get_data_system_commit_function"  , null),
+              new("7EEE1FF254694DEDAA8653C8F197D73DFE43D8A8A4853EF95B448905C2C2A3A0", 43, 0x14D8190, "uds_get_data_system_release_function" , null),
+              new("82B9E7D2A74648B7AB0F0DE4AFDE26608C9C4C13DA30C03C33396B7B8A5346FE", 44, 0x14D8280, "uds_get_roots"                        , null),
+              new("3854FAEBB55E4B4C86EA99DAE821895B90D640D9786CA5596BC8723B68253381", 45, 0x14D83B0, "uds_get_roots_count"                  , null),
+              new("EE545B7DE31CC1AE4FEB4CA9795FF3925AEBDDFF6178B135981FCDD04546E0DA", 46, 0x14D84C0, "uds_get_struct_size"                  , null),
+              new("5879F7D148F81832FF6F9CB3B4A53916E9980A41637B25E38DD853D83AA6AA23", 47, 0x14D85C0, "uds_hash_memory"                      , null),
+              new("306ECA8E6BA1F59B83F0139B19193D94B78E551DA831189EF186FD9F6B0E565D", 48, 0x14D86F0, "uds_is_implementation"                , null),
+              new("C66D3DB82256202548EDE65634CE400E8205581065167C90D77D671247A16A48", 49, 0x14D8700, "uds_is_loaded"                        , null),
+              new("62E4B5F0BA1E195B1C3E5203CF1E82DF8F9C30566ED02676C622DEA504F8F16C", 50, 0x14D8810, "uds_is_read_handle_available"         , null),
+              new("2919C3544036DFDA77EF31967DE1DF0C2A1F1C8C3E8D1E7515951E817230C3CA", 51, 0x14D8920, "uds_is_wait_handle_complete"          , null),
+              new("09BC6C06E23B84C5AA74717BBE854BCEF509E657737D907D1755B2DEDCF89260", 52, 0x14D8A30, "uds_is_wait_handle_successful"        , null),
+              new("DC1FE094419B3249474135E9A4C93B9C2741EA25E2764FAB852853DC56DDDA11", 53, 0x14D8B40, "uds_partial_sync"                     , null),
+              new("293B402B0E6EEA8BE58A2120A12AD4DBCC9ED406F5C3473E3E4CB8423F8A7D9D", 54, 0x14D8C60, "uds_release"                          , null),
+              new("A6DC6A1D81FE4D0F2EC9D99C4699E290B48C64640EFA33F1727B93B06B493641", 55, 0x14D8D70, "uds_remove"                           , null),
+              new("E540832BC61BD2B387CA2D038508B54FB82D63C319FB02501F0E4C0522186CD5", 56, 0x14D8E80, "uds_remove_multiple"                  , null),
+              new("DB1A1C04FEBC45508E9A292AA7BAA7A45AB2CB0949D7D7F8E0B69C19D84DDB48", 57, 0x14D8FA0, "uds_remove_root"                      , null),
+              new("47DDC2D05128D8406B78B0607DD839FD8D74EFBF1B1A588220BD8FCE2C1626F3", 58, 0x14D90C0, "uds_reserve"                          , null),
+              new("B671670EA2031AE27D24F5A305D292AA7CB53CF52C5F4558FE255D017C653A83", 59, 0x14D91E0, "uds_reserve_with_payload"             , null),
+              new("5916054BD01B573AF4FA14F4555DB8529DCE19F4BC5050A2F135A1B35CA02A32", 60, 0x14D9310, "uds_service_process_id"               , null),
+              new("963964D17D6A2161C2E77E04892AFE6185AEAC709110504DEDEBF12429971803", 61, 0x14D9410, "uds_set_as_root"                      , null),
+              new("528EDE4087310E9D54BFE32B3531576685B9B2F168B79C6A7BE5946276035880", 62, 0x14D9550, "uds_set_implementation"               , null),
+              new("7855A55F5649CC26764C0E768F67316C4C9A43ADA2AD4BF2CFAB5717F5029E23", 63, 0x14D9560, "uds_set_real_implementation"          , null),
+              new("FAB1112C390387A99641EEAACC9B0CEBF6B1FA3A3C835302F8CAC59A658B5E3D", 64, 0x1500D10, "uds_set_stub_implementation"          , null),
+              new("8E236CCD6B3EE4FD13F8E539A600B8565385CB93F8E1C883BEA0F349193230B6", 65, 0x14D9570, "uds_set_working_directory"            , null),
+              new("A1DE8A60D4D541C7094B275712AF15BBB86649577B34425E12980F5B3BDA176D", 66, 0x14D9680, "uds_sync"                             , null),
+              new("683FA8E4979A2C113B368D38089ED7B31CA2283D1D83692EEA4172A9D0B32686", 67, 0x14D9780, "uds_system_create"                    , null),
+              new("FD49E34B20F1749416FB232702F205CFB5BB168942BF4D5EF7C692C7FFD3DAF0", 68, 0x14D9870, "uds_system_init_as_client"            , null),
+              new("A321A83782F60C3A26939B2AB3DC946C19ABCE0A8626249E87D9745972860F0F", 69, 0x14D9990, "uds_system_init_as_service"           , null),
+              new("01A53FFC83C6B0E1BE6AC03D3DE6CEF4F5512FFFD3F3C09AAF23FD5B715BFC8E", 70, 0x14D9AB0, "uds_system_shutdown"                  , null),
+              new("D89DBA95F52C5C4933C5EE9AA9F258162EC326257F5D32AAA7D06836322922EA", 71, 0x14D9BB0, "uds_system_shutdown_and_force_cleanup", null),
+              new("E82EF58AA6F66D239837266BD45705FB47DD712CDFF51E6B4AF956D0D36BC264", 72, 0x14D9CB0, "uds_wait_handle_complete"             , null),
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeUnityPlayerDevelopmentSources() => new object?[]
+      {
+        // @formatter:off
+        MakeOptional("unity/win_arm64_player_development_il2cpp/UnityPlayer.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARM64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "D28AFE07086283B549E00FAF40817750A2A0F16A9F772F07DFFCEF4BBFFA32F18F890E29D54F27314F55D7480AF0C468", "[200:8]", "0;0;[0:1B0],[1B4:4C],[208:50D55F8]", UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE, 3, 0,
+          new Section[]
+            {
+              new("8FB8F46E3C448F2D7DFEA57775CACE1A4A7CE6926A21715E218423740A5CFB68",    0x1000, 47523100, 47523328, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("C3E8351A2FC6143721979FB32D5039E8084E87739FD47663B4DE1F29EB94AEE9", 0x2D54000,  9176466,  9176576, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("A72CE7F50F5767B0CDFFE883D47B0D234A9F1C9BBB492F41F3D70F85811326AC", 0x3615000, 34153084, 26550784, ".data" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("C0C72D04F3D8E8FAB7876821D2F851BAD756C30A369CAE341B0B871A89712176", 0x56A8000,  1119928,  1120256, ".pdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("F850EBF7388C7048D39516938A14A98D162E02EC7370D3267AF251B628F6522F", 0x57BA000,     2528,     2560, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("99D9DF692C9E1F9707A3A25CCB18560B19B475D8E11AB0B0F4A00A61832D17E5", 0x57BB000,   385828,   386048, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+              new("F3A57D538435941EB95A0A923EBA0F305D931E5289D77526E218ACBCEE8894DF", 1, 0x1941B18, "UnityMain"            , null),
+              new("F3A57D538435941EB95A0A923EBA0F305D931E5289D77526E218ACBCEE8894DF", 2, 0x1941B18, "UnityMain2"           , null),
+              new("749F8A654CA0CDBE4D6A28F74EF49F30C10878728BD608A05DC1D18D3E6FE623", 3, 0x3136E9C, "UnityScriptingBackend", null),
+            },
+          new Symbol[]
+            {
+            }),
+        MakeOptional("unity/win_x64_player_development_mono/UnityPlayer.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "47761481B3F084645CCDCCCA66A2F56D20624D81CF76F193CCF300134C706C972FD23DD101BBC3F542D2F1C67D785739", "[208:8]", "0;0;[0:1B8],[1BC:4C],[210:55765F0]", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 3, 0,
+          new Section[]
+            {
+              new("7280E90F448A39C1E14C4FF9BC2E3E7A998CBAE8BDFDB75C09311B546EBAE0EC",    0x1000, 49829028, 49829376, ".text"  , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("9B525C96283CDC1B1583F0F2FEE562BC0F201811A0995EC89C42177C711EFEDF", 0x2F87000, 10502520, 10502656, ".rdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("5AA352A7408DDACA29E73C5D3D436CBE8444EFC30CC2F7635D952FE23D2BB179", 0x398C000, 34187932, 26569728, ".data"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("C01C57F9184536B53BEA051CB0C464A33FE2436892C1870AF66FB6E93E5D90E3", 0x5A27000,  2246892,  2247168, ".pdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("08BC9BA17A0736CCDB8A6487FD2383DD01861EC198542D1B5F4B2CADECA96101", 0x5C4C000,     2936,     3072, ".rodata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("B377961910FA67E0F4D0E42E5FC8EE305CB8366AA81258CFF4DE90A20EE19AB2", 0x5C4D000,    68832,    69120, "_RDATA" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("80462006A8226B36A46C015F5BC9FA1ABEB76F5E575FE8F8BAC269AC9ACBD51C", 0x5C5E000,     2528,     2560, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("EE986D768E1C6D0DF0E52B961ABB86324DC03BF61361267EBACC9BD6934553E2", 0x5C5F000,   389188,   389632, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+              new("BF8C25A5214AA8165917FB5A4594B03F727918DB9B8C2289F5780253B8EE60D0", 1, 0x1A8F6A0, "UnityMain"            , null),
+              new("BF8C25A5214AA8165917FB5A4594B03F727918DB9B8C2289F5780253B8EE60D0", 2, 0x1A8F6A0, "UnityMain2"           , null),
+              new("EB9FCD10C40F0369E45DDA441D1A8B24E39B565BAE0D0963B861601457DDC6DF", 3, 0x3370BD8, "UnityScriptingBackend", null),
+            },
+          new Symbol[]
+            {
+            }),
+        MakeOptional("unity/win_x86_player_development_coreclr/UnityPlayer.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "098A082B7FBC5E6A1955F87FDE077EF66D4C7966434F03F1C38ACBA2B981A6F59D4EDFB47FB43F1920047552F7DA0D99", "[1F0:8]", "0;0;[0:1B0],[1B4:3C],[1F8:4711208]", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 3, 0,
+          new Section[]
+            {
+              new("4EAB8FE010791D604B5CD3D5DF37366384D41FCEA068EED7B9FEABAA8D1D9E53",    0x1000, 40241852, 40242176, ".text"  , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("7347B73E6425E236894123A8640304F8D763B1C2461C0C3C19E8CE8B6E982F92", 0x2662000,  6029118,  6029312, ".rdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("DFC1584CF4807657F36ED338933B02B1F1859F8F06D02FAB3753A139A1136914", 0x2C22000, 33041104, 25924096, ".data"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("058D433350E84BFCD5E7244E91A7C0106B9C37DFD72216682FCCD398EA913EE1", 0x4BA5000,     2808,     3072, ".rodata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("216AE2D28EC9A45FA04C590CDF5D716B958DBE6A39CB90E1297F54AAAA41991B", 0x4BA6000,    69600,    69632, "_RDATA" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("7B10F5E13AA13DB51C74A6BA4C90AD1E18FADD1A0924F3A451D50322D30CF0EF", 0x4BB7000,     2528,     2560, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("6BF26A0AD7FC8EA01188B84A65F1A6B3F522DF151BC793F9E60BBF51B4B54B9C", 0x4BB8000,  2247208,  2247680, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+              new("805B7569101C06427E6F8596EAD31FC078E940FB4A80DA6FAE9A19BD13E4E1F2", 1, 0x1729AF0, "UnityMain"            , null),
+              new("805B7569101C06427E6F8596EAD31FC078E940FB4A80DA6FAE9A19BD13E4E1F2", 2, 0x1729AF0, "UnityMain2"           , null),
+              new("94CFCB8217A881EF0795325BE9F0F5A9489157257A107BDF612D603FFA8A755C", 3, 0x2934640, "UnityScriptingBackend", null),
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeUnityPlayerNondevelopmentSources() => new object?[]
+      {
+        // @formatter:off
+        MakeOptional("unity/win_arm64_player_nondevelopment_il2cpp/UnityPlayer.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARM64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "FA0AFC478909C7CE995A777ED1B48D0D1DBD57A7A0F9B28D2FEC516B38A047527FA4CF453165400F8FE4EF0D77BEA548", "[1F8:8]", "0;0;[0:1A8],[1AC:4C],[200:1D9CC00]", UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE, 3, 0,
+          new Section[]
+            {
+              new("E4A329D480B8E3B7D5806C040FAF878337E0FEF498187A2199E3B78E5D1A0557",    0x1000, 26071844, 26072064, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("1221928DD6E686CBA725ED0AB493B2564FED03CAFFE2B1B8799F6E233C9A284F", 0x18DF000,  3962024,  3962368, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("005943559F328FABC09204A05376CDD320C3F3BC86584C43E429B1A1DA54BB0F", 0x1CA7000,  1470200,   372736, ".data" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("959F789827CB5174167E4B5D536EA0889090C94BB238739A21333AB2997267F5", 0x1E0E000,   488064,   488448, ".pdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("D0D6728FAFB019278A55725B148B2FCFA8E36AC81735793BA131085F51234733", 0x1E86000,     2528,     2560, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("CA18E9DE11487632918E8715C7A7584BF582357300A4A842F41C8A91D9A5EEAE", 0x1E87000,   152060,   152064, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+              new("8649C0C53FAD9BAF97215B25B4522824455FD23B321E5515E0C26432DFF374F8", 1,  0xF85660, "UnityMain"            , null),
+              new("8649C0C53FAD9BAF97215B25B4522824455FD23B321E5515E0C26432DFF374F8", 2,  0xF85660, "UnityMain2"           , null),
+              new("95AA1342ABB4D0986DE0623B3F216ED51D8719E0C6EFEF38E1955DD9A95D6E38", 3, 0x1BCFA48, "UnityScriptingBackend", null),
+            },
+          new Symbol[]
+            {
+            }),
+        MakeOptional("unity/win_x64_player_nondevelopment_mono/UnityPlayer.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "ECBB9E197864CEF9945874E3128E56E10EE3F2E91EA77B4EC6D94B879FB6BC70207DC1DB2AA74E5B5A545780497511B3", "[200:8]", "0;0;[0:1B0],[1B4:4C],[208:247CDF8]", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 3, 0,
+          new Section[]
+            {
+              new("1D2647E3A4388171CCA5A98C40EE0842B33440D7AEF509477316DEFA21182C5B",    0x1000, 31043372, 31043584, ".text"  , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("1B01F673DB8C9A397A3451C884B7B3C16629A628F73EC0E71345784D78FADFB3", 0x1D9C000,  5240618,  5240832, ".rdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("48AEBCF763A68FC85A9012C72598B133BF801909164EC3AC8CDFA1119D337255", 0x229C000,  1481064,   375808, ".data"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("9C2713D204C0F717124985A3B8CDEBFC616F52E5B13D3A394CCE2F4AD92CFB81", 0x2406000,  1370880,  1371136, ".pdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("08BC9BA17A0736CCDB8A6487FD2383DD01861EC198542D1B5F4B2CADECA96101", 0x2555000,     2936,     3072, ".rodata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("B377961910FA67E0F4D0E42E5FC8EE305CB8366AA81258CFF4DE90A20EE19AB2", 0x2556000,    68832,    69120, "_RDATA" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("76DDCEA1437ACB17F47AF61F635B07B632F928BF71BDD7B1D15CC3FC45BA4399", 0x2567000,     2528,     2560, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("97C85E1453EE6BFB2217053DFDBCFA0CC6181AE8C6D1CC9784F68313458A5A19", 0x2568000,   153476,   153600, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+              new("169690B8258CA7D6C44DC65DE357AC75031DB0F472FE852EDC8A26873030A4A3", 1, 0x126EBE0, "UnityMain"            , null),
+              new("169690B8258CA7D6C44DC65DE357AC75031DB0F472FE852EDC8A26873030A4A3", 2, 0x126EBE0, "UnityMain2"           , null),
+              new("76279593AADAE108F13283550DFF4EB698E19D75CB760BF1BAE664DF624F4B9E", 3, 0x208DD80, "UnityScriptingBackend", null),
+            },
+          new Symbol[]
+            {
+            }),
+        MakeOptional("unity/win_x86_player_nondevelopment_coreclr/UnityPlayer.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "9EA45444C98C95B6A4EC01546A335A191EE093E24CAFDE9DD0A7655C18308C9E907434E2D307650C89C0E2EEA23DF9A2", "[1E8:8]", "0;0;[0:1A8],[1AC:3C],[1F0:1A87610]", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 3, 0,
+          new Section[]
+            {
+              new("4B647A588858828A48290DD0D63E98C85D99E55E076319FDBE15B1DC428C9EE1",    0x1000, 24119468, 24119808, ".text"  , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("A96B4478B953C67F40428A64F84D6D05C615FDE9B914EF6A748E3D00A380A98C", 0x1702000,  2436980,  2437120, ".rdata" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("9E78308D27F7715218C7BBA98D49BF32EC04E98151297609D627D238F406BA14", 0x1955000,  1041168,   299520, ".data"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("058D433350E84BFCD5E7244E91A7C0106B9C37DFD72216682FCCD398EA913EE1", 0x1A54000,     2808,     3072, ".rodata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("216AE2D28EC9A45FA04C590CDF5D716B958DBE6A39CB90E1297F54AAAA41991B", 0x1A55000,    69600,    69632, "_RDATA" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("107F891DB2557A8567B57326DCFAA3374C55028F9E0996030503C57FD44DBBB3", 0x1A66000,     2528,     2560, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("D412322C6FA7228AD37275AC8DDD7C0D968BF1152A7679572F0AA1BAE5E974CD", 0x1A67000,   885144,   885248, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+            },
+          new Export[]
+            {
+              new("FD260B2D17C57CE81B6E174056888006EDE0539B253A783DEAA509F1E877C239", 1,  0xE0AA60, "UnityMain"            , null),
+              new("FD260B2D17C57CE81B6E174056888006EDE0539B253A783DEAA509F1E877C239", 2,  0xE0AA60, "UnityMain2"           , null),
+              new("8FD9A5D2598D7A2C7925F3B6518FFD33A6E8A9177B2D94A6377588E8522A7DC4", 3, 0x18E255C, "UnityScriptingBackend", null),
+            },
+          new Symbol[]
+            {
+            }),
+        // @formatter:on
+      };
+  }
+}

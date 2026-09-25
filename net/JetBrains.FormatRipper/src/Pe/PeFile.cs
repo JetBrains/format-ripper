@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using JetBrains.FormatRipper.Impl;
 using JetBrains.FormatRipper.Pe.Impl;
 
@@ -8,6 +9,40 @@ namespace JetBrains.FormatRipper.Pe
 {
   public sealed class PeFile
   {
+    public delegate Stream CreateStreamDelegate();
+
+    public sealed class Section
+    {
+      public readonly string Name;
+      public readonly uint VirtualAddress;
+      public readonly uint VirtualSize;
+      public readonly uint SizeOfRawData;
+      public readonly IMAGE_SCN Characteristics;
+      public readonly CreateStreamDelegate? CreateStream;
+
+      internal Section(string name, uint virtualAddress, uint virtualSize, uint sizeOfRawData, IMAGE_SCN characteristics, CreateStreamDelegate? createStream)
+      {
+        Name = name;
+        VirtualAddress = virtualAddress;
+        VirtualSize = virtualSize;
+        SizeOfRawData = sizeOfRawData;
+        Characteristics = characteristics;
+        CreateStream = createStream;
+      }
+    }
+
+    public readonly struct DataDirectory
+    {
+      public readonly uint VirtualAddress;
+      public readonly uint Size;
+
+      internal DataDirectory(uint virtualAddress, uint size)
+      {
+        VirtualAddress = virtualAddress;
+        Size = size;
+      }
+    }
+
     public readonly IMAGE_FILE_MACHINE Machine;
     public readonly IMAGE_FILE Characteristics;
     public readonly IMAGE_SUBSYSTEM Subsystem;
@@ -18,6 +53,11 @@ namespace JetBrains.FormatRipper.Pe
     public readonly bool HasMetadata;
     public readonly StreamRange SecurityDataDirectoryRange;
     public readonly IPeSignatureTransferData? SignatureTransferData;
+    public readonly Section[] Sections;
+    public readonly DataDirectory ExportDirectory;
+    public readonly uint PointerToSymbolTable;
+    public readonly uint NumberOfSymbols;
+    public readonly CreateStreamDelegate CreateStream;
 
     private PeFile(
       IMAGE_FILE_MACHINE machine,
@@ -29,7 +69,12 @@ namespace JetBrains.FormatRipper.Pe
       bool hasMetadata,
       StreamRange securityDataDirectoryRange,
       ComputeHashInfo? computeHashInfo,
-      IPeSignatureTransferData? signatureTransferData)
+      IPeSignatureTransferData? signatureTransferData,
+      Section[] sections,
+      DataDirectory exportDirectory,
+      uint pointerToSymbolTable,
+      uint numberOfSymbols,
+      CreateStreamDelegate createStream)
     {
       Machine = machine;
       Characteristics = characteristics;
@@ -41,6 +86,11 @@ namespace JetBrains.FormatRipper.Pe
       SecurityDataDirectoryRange = securityDataDirectoryRange;
       ComputeHashInfo = computeHashInfo;
       SignatureTransferData = signatureTransferData;
+      Sections = sections;
+      ExportDirectory = exportDirectory;
+      PointerToSymbolTable = pointerToSymbolTable;
+      NumberOfSymbols = numberOfSymbols;
+      CreateStream = createStream;
     }
 
     public static unsafe bool Is(Stream stream)
@@ -135,6 +185,7 @@ namespace JetBrains.FormatRipper.Pe
         throw new FormatException("Unsupported PE image optional header");
       }
 
+      IMAGE_DATA_DIRECTORY exportIdd;
       IMAGE_DATA_DIRECTORY securityIdd;
       IMAGE_DATA_DIRECTORY corIdd;
       var securityIddRange = new StreamRange(
@@ -143,6 +194,7 @@ namespace JetBrains.FormatRipper.Pe
       fixed (IMAGE_DATA_DIRECTORY* iddsBuf = new IMAGE_DATA_DIRECTORY[numberOfRvaAndSizes])
       {
         StreamUtil.ReadBytes(stream, (byte*)iddsBuf, checked((int)numberOfRvaAndSizes * sizeof(IMAGE_DATA_DIRECTORY)));
+        exportIdd = iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_EXPORT];
         securityIdd = iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY];
         corIdd = iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR];
       }
@@ -152,6 +204,23 @@ namespace JetBrains.FormatRipper.Pe
       fixed (IMAGE_SECTION_HEADER* ishsBuf = ishs)
       {
         StreamUtil.ReadBytes(stream, (byte*)ishsBuf, checked(numberOfSections * sizeof(IMAGE_SECTION_HEADER)));
+      }
+
+      var sections = new Section[numberOfSections];
+      for (var n = 0; n < numberOfSections; ++n)
+      {
+        var ish = ishs[n];
+        var pointerToRawData = EndianUtil.GetLeU4(ish.PointerToRawData);
+        var sizeOfRawData = EndianUtil.GetLeU4(ish.SizeOfRawData);
+        sections[n] = new Section(
+          GetName(ish.Name, ImageSection.IMAGE_SIZEOF_SHORT_NAME),
+          EndianUtil.GetLeU4(ish.VirtualAddress),
+          EndianUtil.GetLeU4(ish.VirtualSize),
+          sizeOfRawData,
+          (IMAGE_SCN)EndianUtil.GetLeU4(ish.Characteristics),
+          pointerToRawData != 0 && sizeOfRawData != 0
+            ? new CreateStreamDelegate(() => new ReadOnlyNestedStream(stream, pointerToRawData, sizeOfRawData))
+            : null);
       }
 
       // Note(ww898): Taken from https://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/Authenticode_PE.docx
@@ -259,7 +328,18 @@ namespace JetBrains.FormatRipper.Pe
         (IMAGE_FILE)EndianUtil.GetLeU2(ifh.Characteristics),
         subsystem, dllCharacteristics, hasSignature, signatureData, hasMetadata, securityIddRange,
         computeHashInfo,
-        peSignatureTransferData);
+        peSignatureTransferData,
+        sections,
+        new DataDirectory(EndianUtil.GetLeU4(exportIdd.VirtualAddress), EndianUtil.GetLeU4(exportIdd.Size)),
+        EndianUtil.GetLeU4(ifh.PointerToSymbolTable),
+        EndianUtil.GetLeU4(ifh.NumberOfSymbols),
+        () => new ReadOnlyNestedStream(stream, 0, stream.Length));
+
+      static string GetName(byte* buf, int nameSize)
+      {
+        var blob = MemoryUtil.CopyBytes(buf, nameSize);
+        return new string(Encoding.UTF8.GetChars(blob, 0, MemoryUtil.GetAsciiStringZSize(blob)));
+      }
     }
 
     private static uint TranslateVirtualAddress(IMAGE_SECTION_HEADER[] ishs, ref IMAGE_DATA_DIRECTORY idd)

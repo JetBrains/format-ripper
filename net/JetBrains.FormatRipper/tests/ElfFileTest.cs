@@ -272,7 +272,7 @@ namespace JetBrains.FormatRipper.Tests
 
           string? unityScriptingBackend = null;
           foreach (var symbol in symbols)
-            if (symbol is { Type: STT.STT_OBJECT, Binding: STB.STB_GLOBAL, Name: UnityUtil.UNITY_SCRIPTING_BACKEND_ELF_SYMBOL })
+            if (symbol is { Type: STT.STT_OBJECT, Binding: STB.STB_GLOBAL, Name: UnityUtil.UNITY_SCRIPTING_BACKEND_ELF_PE_SYMBOL })
             {
               using var dataStream = symbol.CreateStream!();
               unityScriptingBackend = ElfUtil.ReadStringZ(dataStream);
