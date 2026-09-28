@@ -56,13 +56,15 @@ namespace JetBrains.FormatRipper.Elf
     public sealed class Program
     {
       public readonly ulong Size;
+      public readonly ulong VirtualAddress;
       public readonly PT Type;
       public readonly PF Flags;
       public readonly CreateStreamDelegate CreateStream;
 
-      internal Program(ulong size, PT type, PF flags, CreateStreamDelegate createStream)
+      internal Program(ulong size, ulong virtualAddress, PT type, PF flags, CreateStreamDelegate createStream)
       {
         Size = size;
+        VirtualAddress = virtualAddress;
         Type = type;
         Flags = flags;
         CreateStream = createStream;
@@ -153,6 +155,7 @@ namespace JetBrains.FormatRipper.Elf
               var phSize = GetU4(phdr.p_filesz);
               programs[n] = new Program(
                 phSize,
+                GetU4(phdr.p_vaddr),
                 (PT)GetU4(phdr.p_type),
                 (PF)GetU4(phdr.p_flags),
                 () => new ReadOnlyNestedStream(stream, phOffset, phSize));
@@ -252,6 +255,7 @@ namespace JetBrains.FormatRipper.Elf
               var phSize = GetU8(phdr.p_filesz);
               programs[n] = new Program(
                 phSize,
+                GetU8(phdr.p_vaddr),
                 (PT)GetU4(phdr.p_type),
                 (PF)GetU4(phdr.p_flags),
                 () => new ReadOnlyNestedStream(stream, checked((long)phOffset), checked((long)phSize)));

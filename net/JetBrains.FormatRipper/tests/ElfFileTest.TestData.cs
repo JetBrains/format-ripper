@@ -16,6 +16,7 @@ namespace JetBrains.FormatRipper.Tests
         .Concat(MakeCoreutilsNixosSources())
         .Concat(MakeGrepAndroidSources())
         .Concat(MakeLibpcprofileSources())
+        .Concat(MakeLibtlsSources())
         .Concat(MakeLibulockmgrSources())
         .Concat(MakeMktempFreebsdSources())
         .Concat(MakeMktempGentooSources())
@@ -36,7 +37,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeBusyboxStaticNixosSources() => new object?[]
       {
         // @formatter:off
-        Make("busybox-static.nixos-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_AARCH64, 0, null, 0,
+        Make("busybox-static.nixos-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_AARCH64, 0, null, 0, 0,
           new Program[]
             {
               new("7080B6194C8873FF9B5BCCAE6EEFBFF45BF336A6CBFB46BE5A49BF33F9B7E058", 178784, PT.PT_LOAD     , PF.PF_X | PF.PF_R),
@@ -60,8 +61,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   3320, 0x43D218,  0x8, 0, ".bss"        , SHT.SHT_NOBITS    , 0, 0, SHF.SHF_WRITE | SHF.SHF_ALLOC),
               new("409FABABD8B5C888E92C27045C5F1D7F79C6698650645568D4974870EF770B38",    100,      0x0,  0x1, 0, ".shstrtab"   , SHT.SHT_STRTAB    , 0, 0, 0),
             },
+          new Symbol[] {},
           new Symbol[] {}),
-        Make("busybox-static.nixos-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_X86_64, 0, null, 0,
+        Make("busybox-static.nixos-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_X86_64, 0, null, 0, 0,
           new Program[]
             {
               new("95845EC4B34D50498FE196F3E3A0D737C551F0664968ACBE36F0AC2A91D2D9EA",    400, PT.PT_LOAD     , PF.PF_R),
@@ -86,6 +88,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   3416, 0x427240, 0x20, 0, ".bss"        , SHT.SHT_NOBITS  , 0, 0, SHF.SHF_WRITE | SHF.SHF_ALLOC),
               new("301A17CBF802398053BBA550A0721E6B451FCFF9EC131953EF2461095BD0D1C1",     85,      0x0,  0x1, 0, ".shstrtab"   , SHT.SHT_STRTAB  , 0, 0, 0),
             },
+          new Symbol[] {},
           new Symbol[] {}),
         // @formatter:on
       };
@@ -95,7 +98,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeBusyboxAlpineSources() => new object?[]
       {
         // @formatter:off
-        Make("busybox.alpine-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_AARCH64, 0, "/lib/ld-musl-aarch64.so.1", 397,
+        Make("busybox.alpine-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_AARCH64, 0, "/lib/ld-musl-aarch64.so.1", 397, 0,
           new Program[]
             {
               new("E3234FC43E32FFCC8E9DC561DBE1D47DA4739A0A99D40A2E937BDA8205459C5B",    448, PT.PT_PHDR        , PF.PF_R),
@@ -334,8 +337,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "getsockname"            , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("F29FB5887E2EB991D4E7BE54D62D078B4C5D6A88D6E6E9463B5DABE5EB3B4AE5", 4,  0xBCC8,             7, "_init"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("F29FB5887E2EB991D4E7BE54D62D078B4C5D6A88D6E6E9463B5DABE5EB3B4AE5", 4, 0xB2100,            10, "_fini"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("busybox.alpine-armhf", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-musl-armhf.so.1", 397,
+            },
+          new Symbol[] {}),
+        Make("busybox.alpine-armhf", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-musl-armhf.so.1", 397, 0,
           new Program[]
             {
               new("4E636246A461F20D07050DD8F37469C1311CFEED4ED21D767A260CD38C14EA09",      8, PT.PT_ARM_UNWIND, PF.PF_R),
@@ -575,8 +579,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "getsockname"            , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("0E7C5AE564C088E61CD516A4758C8A2EC4148986D1B6EB5351B88AE719B8D1BD", 2,  0x5531,             7, "_init"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("0E7C5AE564C088E61CD516A4758C8A2EC4148986D1B6EB5351B88AE719B8D1BD", 2, 0x82EDD,            10, "_fini"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("busybox.alpine-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-musl-i386.so.1", 392,
+            },
+          new Symbol[] {}),
+        Make("busybox.alpine-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-musl-i386.so.1", 392, 0,
           new Program[]
             {
               new("65E607E9569C5EDA32AEC08E53C7C8CC664812CE9373D17914C4359612AE6EC6",    320, PT.PT_PHDR        , PF.PF_R),
@@ -818,8 +823,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "getsockname"            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("5EE0DD4D4840229FAB4A86438EFBCAF1B9571AF94F5ACE5ACC94DE19E98EA9AB", 1,  0x6000,             7, "_init"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("5EE0DD4D4840229FAB4A86438EFBCAF1B9571AF94F5ACE5ACC94DE19E98EA9AB", 1, 0x9D781,            11, "_fini"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("busybox.alpine-ppc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/lib/ld-musl-powerpc64le.so.1", 391,
+            },
+          new Symbol[] {}),
+        Make("busybox.alpine-ppc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/lib/ld-musl-powerpc64le.so.1", 391, 0,
           new Program[]
             {
               new("3658CF660205D4DA6712FB9C01B2BB2F44842D764C33B40B5D6B807572FB9472",     392, PT.PT_PHDR     , PF.PF_R),
@@ -1057,8 +1063,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  0,      0x0, SHN.SHN_UNDEF, "getsockname"            , STT.STT_FUNC   , STB.STB_GLOBAL, 0x60),
               new("73818FEE3A36F0F0E32C5B1AAC4F2B2963EC433A74BAA2A9CD3C4F6A206A40F6", 16,   0xD248,             7, "_init"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x60),
               new("D9D48B4AA77E2DE7A1AD639CB69CBE0DED340CBB5D70DF333F0DE6602AEDF079", 16,  0xD8090,             9, "_fini"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x60),
-            }),
-        Make("busybox.alpine-s390x", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_S390, 0, "/lib/ld-musl-s390x.so.1", 400,
+            },
+          new Symbol[] {}),
+        Make("busybox.alpine-s390x", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_S390, 0, "/lib/ld-musl-s390x.so.1", 400, 0,
           new Program[]
             {
               new("BD208FF843387556A084CF4F8084E0FE912968B71B170915BD6EA381D82B1528",    392, PT.PT_PHDR     , PF.PF_R),
@@ -1295,8 +1302,9 @@ namespace JetBrains.FormatRipper.Tests
               new("3D063EFDEF1D7C8438A863C7BE60EF5D22654B2B2E4FBAE78EB10E8FD536CE9A",    2,  0xBD18,             7, "_init"                      , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("0332EE119E2D18088987EA88D80D1EF170B88D4102379710572909E75F4915A9",  104,  0xF670,             9, "main"                       , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("3D063EFDEF1D7C8438A863C7BE60EF5D22654B2B2E4FBAE78EB10E8FD536CE9A",    2, 0xC88A0,            10, "_fini"                      , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("busybox.alpine-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/lib/ld-musl-x86_64.so.1", 392,
+            },
+          new Symbol[] {}),
+        Make("busybox.alpine-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/lib/ld-musl-x86_64.so.1", 392, 0,
           new Program[]
             {
               new("32EC73F72E4D751DB21535709C4A57E5F7BF4CFBCB414174AD42EC6C287E98B2",    504, PT.PT_PHDR     , PF.PF_R),
@@ -1536,7 +1544,8 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "__cxa_finalize"         , STT.STT_FUNC  , STB.STB_WEAK  , 0x0),
               new("AF5570F5A1810B7AF78CAF4BC70A660F0DF51E42BAF91D4DE5B2328DE0E83DFC", 8, 0xC9288,            16, "stdin"                  , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("AF5570F5A1810B7AF78CAF4BC70A660F0DF51E42BAF91D4DE5B2328DE0E83DFC", 8, 0xC9280,            16, "stdout"                 , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -1545,7 +1554,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeCatsaySources() => new object?[]
       {
         // @formatter:off
-        Make("catsay.ppc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER1, null, 3769,
+        Make("catsay.ppc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER1, null, 0, 3769,
           new Program[]
             {
               new("42E2EC97D657CD57E465670A2406A51B356C9CB22D5E95502091741F8286C274",    392, PT.PT_PHDR     , PF.PF_R),
@@ -1583,6 +1592,7 @@ namespace JetBrains.FormatRipper.Tests
               new("ED6A6794CDAC0BB4CDFDD425A2409396F27FD8C20ABA2E59E936D4A44AAB0786",  90456,      0x0,  0x8, 24, ".symtab"           , SHT.SHT_SYMTAB  , 23, 177, 0),
               new("6948E649707762DF0B0CDA631C7A806798327DD1C742EDFCE59BAAD18C5A4AF3",  90928,      0x0,  0x1,  0, ".strtab"           , SHT.SHT_STRTAB  ,  0,   0, 0),
             },
+          new Symbol[] {},
           new Symbol[]
             {
               new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, ""                                                                , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
@@ -1786,7 +1796,7 @@ namespace JetBrains.FormatRipper.Tests
               new("57F6122369FA5A2E5F891FC943674A0FF5901BD0AE470F28E9685B19D9EA2CE9",  144,  0xC8360,             1, "type..hash.main.Cat"                                             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("E96CED4CFDE00CF149677AFD796F3213738FD043D4636DF7887137A28082EB23",  240,  0xC83F0,             1, "type..eq.main.Cat"                                               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             }),
-        Make("catsay.x86", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_386, 0, null, 3762,
+        Make("catsay.x86", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_386, 0, null, 0, 3762,
           new Program[]
             {
               new("9DE8BE4B853B2395D298514C7A2BB367A035CCD9BBB14A446FBBB808234DDC64",    224, PT.PT_PHDR     , PF.PF_R),
@@ -1824,6 +1834,7 @@ namespace JetBrains.FormatRipper.Tests
               new("56C4D197FF6A1FAF3B050AB00ABD60A448E2F411469C57A42A2E86BAE9618C55",  60192,       0x0,  0x4, 16, ".symtab"           , SHT.SHT_SYMTAB  , 23, 119, 0),
               new("379C6FF2656234AAFE6313BE95C9FABD995CC44E3E812FE055FD623D121C9977",  90351,       0x0,  0x1,  0, ".strtab"           , SHT.SHT_STRTAB  ,  0,   0, 0),
             },
+          new Symbol[] {},
           new Symbol[]
             {
               new(null                                                              ,      0,       0x0, SHN.SHN_UNDEF, ""                                                                , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
@@ -2035,7 +2046,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeCoreutilsNixosSources() => new object?[]
       {
         // @formatter:off
-        Make("coreutils.nixos-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_AARCH64, 0, "/nix/store/c1nqsqwl9allxbxhqx3iqfxk363qrnzv-glibc-2.32-54/lib/ld-linux-aarch64.so.1", 354,
+        Make("coreutils.nixos-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_AARCH64, 0, "/nix/store/c1nqsqwl9allxbxhqx3iqfxk363qrnzv-glibc-2.32-54/lib/ld-linux-aarch64.so.1", 354, 5192,
           new Program[]
             {
               new("96486891F549E7545105AE1E49AE1A3CD71A12B9A17331B76211AC8E96F656A5",     504, PT.PT_PHDR        , PF.PF_R),
@@ -2282,8 +2293,211 @@ namespace JetBrains.FormatRipper.Tests
               new("F00F01BDD5B35A129BE7C2414FA898BF95CB91884AD7BA571EAF15C8DDB44A35",  40, 0x4C2CE8,            13, "_obstack_memory_used"         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0, 0x406E20, SHN.SHN_UNDEF, "free"                         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("2BE32BD0A212B5BA0DF6DAA97A2F792287566E3D549E77930D52327A93F0D10C", 140, 0x4C2C58,            13, "_obstack_free"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+            },
+          new Symbol[]
+            {
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, ""                                      , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x40028C,             2, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("C70FBCFEB5350DB4D207149D87960E2F23FB322C20552A9CAC4EB6B3E95E5E73",   32, 0x40028C,             2, "__abi_tag"                             , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x4078C0,            13, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x4078FC,            13, "__wrap_main"                           , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x53CBCC,            17, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x500BF0,            15, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x407904,            13, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("F30A16A8AC942F1BF4DE1C0966A2F48E0570E079D16E753B319F475412F884F8",   20, 0x407904,            13, "call_weak_fn"                          , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x406158,            11, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x500BD8,            14, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x406168,            11, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x500BE4,            14, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x500C08,            15, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x4079C0,            13, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("D2A054FAD4073FFC64FD13B4E033A881F361FEFAE9F97F81D9F418FE2A41B21B", 3504, 0x4079C0,            13, "launch_program"                        , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x407640,            13, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x570010,            23, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x5654D0,            20, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("FF3F6B7767F7F921DD1A3D736333D35AABEA3F8E6089586F7AAC7EEDAF48F340",   96, 0x5654D0,            20, "long_options"                          , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x53CC40,            17, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x407918,            13, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x407918,            13, "deregister_tm_clones"                  , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x407948,            13, "register_tm_clones"                    , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x570008,            23, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x407988,            13, "__do_global_dtors_aux"                 , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x573780,            24, "completed.8455"                        , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x5654C8,            19, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x5654C8,            19, "__do_global_dtors_aux_fini_array_entry", STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x4079B8,            13, "frame_dummy"                           , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x5654C0,            18, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x5654C0,            18, "__frame_dummy_init_array_entry"        , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x500BF8,            15, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x53CBE0,            17, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    0, 0x573780,            24, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x500C08,            15, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x408A90,            13, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("EB80B529DBE9B1287603BC2AE1EE6F27E1AC5451CC0806B237BAFDF0A2311298",  704, 0x408A90,            13, "parse_additional_groups"               , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x570080,            23, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x565530,            20, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("8C8BCB0CAB681BB6BC8F2E4A6D8CD220FFF51F065408794056803FB70CFE37B5",  192, 0x565530,            20, "long_opts"                             , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x53CCD8,            17, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x500C08,            15, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x4097E8,            13, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x5700F0,            23, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x53CDC0,            17, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x500C08,            15, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x409BD8,            13, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("110F46B5B35C069160560C6AD6786F647DD44E8760A52A46FC22DBBCD7630B91",    4, 0x409BD8,            13, "chld"                                  , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("DEB0BBE725811BC924FCDE2C32A2B936C3FEE311661BE772AAA0095FC956DA51",  372, 0x409BE0,            13, "settimeout"                            , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("48D716E69748AE85832FC7E4AC26E03E386F62A07B5D142D61BD9BFE5913AA3D",  176, 0x409D58,            13, "unblock_signal"                        , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("F9EAFE8F5217A42F78E35194512CC8D8560251B0B92CE254AC221C08DA55A705",  500, 0x409E08,            13, "cleanup"                               , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("5E94DCCD18FFBE5FE034A7B7EB4F71E26B4C36C59632CBB2F732A58D41863BD1",  300, 0x40A378,            13, "parse_duration"                        , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x570160,            23, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("972B8373B897C65C4F631C6BDF2443D0D817A88F224B54D8E593FDCF32488D60",    4, 0x570160,            23, "term_signal"                           , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    0, 0x573788,            24, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    4, 0x573788,            24, "timed_out"                             , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    4, 0x57378C,            24, "monitored_pid"                         , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    8, 0x573790,            24, "kill_after"                            , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x573798,            24, "verbose"                               , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    8, 0x5737A0,            24, "command"                               , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x5737A8,            24, "foreground"                            , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x5737A9,            24, "preserve_status"                       , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x5655F0,            20, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("2ABB4C8FEAB2561EFE726469697C072C9916788D178E8B95B584350BDC671C4A",  256, 0x5655F0,            20, "long_options"                          , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x53CE18,            17, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x502198,            15, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x40AB00,            13, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x53CF60,            17, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x500C08,            15, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x40ACF8,            13, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x5701D8,            23, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x5656F0,            20, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("A28D1AA436B852CAFFC0254A4D6EF48E08EA3EA319D375E0FB0A3617F83F7AA0",  128, 0x5656F0,            20, "longopts"                              , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x53CFB8,            17, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x500C08,            15, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x40B460,            13, "$x"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("790B37AD9B8AB912C60D7CA613EC5ED727564D30A42D0F36A37E7F8A214E0F7C",  580, 0x40B460,            13, "print_line"                            , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("6E40EC772CA4D795E47BFC3C9B201A850384FD1F0B620F487FC80C618BC2376F",  116, 0x40B6A8,            13, "make_id_equals_comment"                , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("9FBE1114CA3F903805E299E930BA9B4326484A381D25C35AF17587EB0D84DA23",  148, 0x40B720,            13, "time_string.isra.0"                    , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("D41E72528853AF2AE5A8F3D9A595EF2CA10F86EAF85904B240623DC951641283", 1288, 0x40B7B8,            13, "print_user"                            , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("6BD04B52832CDA6247BF0E264990E226222DD3A05C1C91C347A97E6DE7F51D90", 1876, 0x40BCC0,            13, "who"                                   , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x502B10,            15, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("4105D94EA1B3DD43A8EB05C111E474384A5888D4751D1BE9F797C45BE0411312",   12, 0x502B10,            15, "__PRETTY_FUNCTION__.9377"              , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x570248,            23, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("9737B88B32574B875041352D931823BF5D952DF8002CD56212D77F14ADFF41D3",    3, 0x570248,            23, "mesg.9396"                             , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("E6AD6C9A3A3B7658C35BACF6553FCB8FFE34387534A648FE18F875B8F7A86DDB",    8, 0x570250,            23, "now.9374"                              , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    0, 0x5737B0,            24, "$d"                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x5737B0,            24, "short_output"                          , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x5737B1,            24, "include_idle"                          , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x5737B2,            24, "include_exit"                          , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x5737B3,            24, "include_mesg"                          , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    4, 0x5737B4,            24, "time_format_width"                     , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,   33, 0x5737B8,            24, "buf.9381"                              , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    8, 0x5737E0,            24, "time_format"                           , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    6, 0x5737E8,            24, "idle_hhmm.9376"                        , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x5737EE,            24, "do_lookup"                             , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    8, 0x5737F0,            24, "hostlen.9418"                          , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    8, 0x5737F8,            24, "hoststr.9417"                          , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x573800,            24, "short_list"                            , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "getgrgid@@GLIBC_2.17"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "__memmove_chk@@GLIBC_2.17"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("E9EE2C16BF263FC118295D50CB70D01BBF392A0DDE6AADC860E186273633CD3E",  188, 0x4BAAF8,            13, "u8_uctomb_aux"                         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "alarm@@GLIBC_2.17"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "chown@@GLIBC_2.17"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("99CBB94FEE050241C168172A9710D74C6AF81EEBF5F9E19859AE1ECB0A1B175F",  120, 0x4A49F0,            13, "di_set_insert"                         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("6445AD369FF2DC9FBCB492BF329D7CCF8A829FD57A400AFA9407EEBE9797E4F8",  364, 0x4BC6D8,            13, "xnumtoimax"                            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("2D23992A27D591B1F9D1E00C08CAE997C887620D60462304B181D22725F3B275",  188, 0x4F37C0,            13, "__gmpn_sqr_diag_addlsh1"               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("A17A9AC850684AFCFC2FDE3B6F1E825BD9714B4FAEDC1F320DA465916C0481A5",   48, 0x4F7070,            13, "__gmpn_gcd_11"                         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "getutxent@@GLIBC_2.17"                 , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("066BC095BB58CC4F04B5040EC5DB3BC28FEE20F04035682D2926D5331843193B", 1668, 0x455F18,            13, "single_binary_main_mknod"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("F99863A1515F0F3107D3C97D4BDB650335CD604430DFE234E02E30CFE5CD9B4C",  352, 0x42A7B8,            13, "force_linkat"                          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("2F95E6B1DAE74B24B025D81FF4F93BF83C200854CD371B2EDCF5A9AAA95AEA97", 4192, 0x4EBA88,            13, "__gmpn_toom_interpolate_16pts"         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "pthread_mutex_lock@@GLIBC_2.17"        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("12A134E016288E43AF5531410ADCDA57F87014269AE97936C67AC353154DE2BF",   56, 0x4BBE40,            13, "verror"                                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "fchmodat@@GLIBC_2.17"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("103F98A677E369AD676D2C50C19B5D6DC5A4D872D61F8AB4EBB28EBF5D9FDBDC",  948, 0x4BBE78,            13, "version_etc_arn"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("0C175BB331571D4325DDC7C331A43837A9C8A84DD30EF92F5022E9C3750A51EF",  672, 0x466820,            13, "single_binary_main_printenv"           , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "__getdelim@@GLIBC_2.17"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("EA459456106D716222E7842AC108552F4AB3824E9D50E048840F6939AA6D5868",  272, 0x438FF0,            13, "add_tab_stop"                          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("A01B110862CD05A22ABF85D441C9B7DCBD8F970B8438DF82F89C1A9F297AA10E",  744, 0x42A420,            13, "extent_scan_read"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("A8033F8E6F44B82D3E4E5BAB77131DD490168CC0126C5F7A180AF9DE1F6A2F2A",  904, 0x4430C8,            13, "single_binary_main_groups"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("304BDA129118F97EB14CD8663B3905C1923E627DEEA710FF6B0CECA3B0856E79", 4212, 0x471F58,            13, "single_binary_main_sha224sum"          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("EEF4C36443EAA6917E4460A45E027BC82401CE9D68F51C9D50424A6AF298D0A6",  256, 0x49CB68,            13, "close_stdin"                           , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("C1712537132A786FA67508BC96529758ADAA9B4545C61F9D9F9369830DCBEB8E", 2952, 0x4D4AD0,            13, "printf_parse"                          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("648C46C036EEF08D29D5B01E3BF3A8420BBD4580A2FE70B716D690E61029B076",  980, 0x41F8D8,            13, "_usage_chgrp"                          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("5A8E3B777B629894A4617FCD666D517D1048D274D6ADB54843C8A0D747E37607",  824, 0x45A030,            13, "_usage_nohup"                          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("958A978A7EAF054D320415E53707DB70C635A34FDFA48937C86DB8A34D506F45",  740, 0x442DE0,            13, "_usage_groups"                         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("9738372E75A412B640B0226FDE28DBE9F7C67D0A0A0B0EBB8635DB6F2D8C6896",  100, 0x4BAA90,            13, "fd_safer"                              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("2140940F645FB54C9ECBDD4C61144E2E32818E24B6678842E99EA5DF29B64075",  100, 0x49C0B0,            13, "buffer_lcm"                            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("84BE2DCBCBDB608E22A231B64CE21C1FFB19AD0C1CF09AC9CEAB50BAE60910C0",  184, 0x4BC258,            13, "version_etc_va"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "timegm@@GLIBC_2.17"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("08A9341DE7F236413B1C9ECDF48DA1C0554E658C4B1AA49CC6FEE1991EFB6EF7",   16, 0x4F95C8,            13, "__gmpn_bdiv_q_itch"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x406158,            11, "_init"                                 , STT.STT_FUNC  , STB.STB_GLOBAL, 0x2),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "pthread_mutex_unlock@@GLIBC_2.17"      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("FF53E491C72E48D1BA4DD6C7B38620BC857EE6FA3CD8FF60A3C27CC6791768EC",   52, 0x4BC638,            13, "xcalloc"                               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("10552FDABCE9CBD3A9CBA153FCEECF85DAB95D11C57F4B5F2341BCA1B028E31A",  404, 0x497B60,            13, "single_binary_main_unlink"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "waitpid@@GLIBC_2.17"                   , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("CE70B5DB7D1BDCF582E043DCB8387F714C9DED18A6E99A25FE614B47307C1884",   48, 0x4BAA50,            13, "print_unicode_char"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("96E1588533A9F6BE1D48CE8DAD17FB700F62077AA76FDFEBFB3908BB8F2CFE26",   44, 0x4A1908,            13, "sha384_read_ctx"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "unlink@@GLIBC_2.17"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("6C4E744B4A09593CBAC20FBBC6A4E1CCA2B0A763B4D2C09D8E23437556CC567A",   28, 0x4D09C0,            13, "acl_default_nontrivial"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("71D5AD4C348FAC0C0443B7D845C7297B0AE37B18969DCFFBB6F90A269F1D3034",  368, 0x4999A0,            13, "single_binary_main_whoami"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("F15B0E9FC4DF33144FB3A3A3B1C1C40560C0DCA4D32F9058E6FB34DA486E6BB1",  348, 0x4AB6D0,            13, "parse_gnu_standard_options_only"       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "getlogin@@GLIBC_2.17"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("B993E17CE0A0A3BC74AB3407FE3B001C9E27E493266C3BFBFDC109ADA6651ED7", 1304, 0x4FD2F8,            13, "__gmpn_mu_bdiv_q"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("0B09B76AD2AA7D05FFB120A24D387E5423605CACB230487B4883CA9E7DB8DDF0", 4324, 0x49DCD0,            13, "sha1_process_block"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("C7C507630325B8D3FD1497FD6D6F13E94DDBE225225A0E9CA05C1C5E421287AD",   40, 0x4F42F0,            13, "__gmp_exception"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("FB8F4DE6E2656EAD63987FC573C150A3CA4A264CBA7953078F480B710175B7FC",  644, 0x4EF1C0,            13, "__gmpn_dcpi1_div_qr_n"                 , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("E25F95CF1FE61AA8DB099C63AA9AC7F100006A84610F6C5F5E69950D69E352B4",  524, 0x4D3228,            13, "dirchownmod"                           , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("8B60F421AD5A2E73F5351D56DCF1F4AA4F63A582F60D4D48C2194BBFA1E64539",  124, 0x4F3738,            13, "__gmpn_invert_limb"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "fchown@@GLIBC_2.17"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "mkdir@@GLIBC_2.17"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "inotify_add_watch@@GLIBC_2.17"         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("AEE8168172CF9489672A33F9C31BE80589BBC8B8A25225F98358F45B8D8EB42B",   68, 0x4268D0,            13, "dest_info_init"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "newlocale@@GLIBC_2.17"                 , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("4AD14D712CF4D3C3BD89ADF88E10CC8206EF36DB6BC4A2B27472F3C9B689F7C6",  264, 0x4F4680,            13, "__gmpn_addmul_1"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "error_at_line@@GLIBC_2.17"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "towlower@@GLIBC_2.17"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("8C8E0A34063991C5BA52DD8F15F45772184CC527923DB6A5BA048DCE78379F84",  432, 0x4DAC48,            13, "__gmpn_mod_1s_4p"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("EC4373749E7D86D72CDF7720669B1A4459237B7F09C2F764E3E571A6D5DD9D5D",   12, 0x4A8C38,            13, "gettime"                               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("AA10BD0FD1B99D0714818F26B5DE4CE3CD8A78A22D073A8747B887751C700190",  204, 0x4CF4B8,            13, "rpl_re_compile_fastmap"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("4E1DC1FBC8736FE9947A1B6D223C53DAAE352F152E7C85C158D2E386BCAADEE8",  300, 0x418788,            13, "blake2b_stream"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("9C7990FDE377D005CDCC1B240D760F5F3CA41E1F0C4DBF080AED5D6D761B717D",   72, 0x49DC88,            13, "sha1_read_ctx"                         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("359EF62DB5FC2E0638B49BAD4087241C6E134098C0C8384DB22FFB117B72FAC8",  124, 0x5004D8,            13, "__floatsitf"                           , STT.STT_FUNC  , STB.STB_GLOBAL, 0x2),
+              new("1AD3861D5DF06B8A60DEE33A65A0E9C6815363759E1B8EA7C2627724C016D3CF",  208, 0x4BCDF0,            13, "xnanosleep"                            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("6CA2CB24E9501F48A1BF90991441CF98CADAA3E1D295F123DB4E973F28D4A240",   56, 0x4B96A0,            13, "strnlen1"                              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("F5D9A429C19F5BD5978B9C855A67B53427EAF56F5592AEB810064412762EB7FB", 1000, 0x416FB0,            13, "_usage_b2sum"                          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("3BC398EF84C7B22C4303EC573E0EFB4E04C8DEE18A1BA73D65E9BACAAD418BC9",  132, 0x49F050,            13, "sha1_buffer"                           , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "__uflow@@GLIBC_2.17"                   , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("F289023BFC90BE5C90AA1A98A40C5B356AF639E69AF0399F5914B2202364955C",    8, 0x4A91A0,            13, "hash_get_n_entries"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("0110B28A4D6F5FDBF7152BD855F59EC0A55A48A7C96304118B6BBF295F03E0A1",  456, 0x49EE88,            13, "sha1_process_bytes"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("4986E06947446196E92AEA4C8991BAD8F671CC6B74EA2267BDDF0679D383935D", 2780, 0x4FF9F8,            13, "__subtf3"                              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x2),
+              new("B9D73A046D7F8A50CDDF6368CFA3175D823D6754A574B91CF25962068601A6DF",  184, 0x4E02E8,            13, "__gmpn_hgcd_mul_matrix1_vector"        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("5E6D8EC573C1334C5104CBEE0DFD8285A1EB7316EE61A506465749469E6459E7", 1480, 0x4E0A10,            13, "__gmpn_toom22_mul"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("32D7D8C51D7B8B57D296F1068DF3540DD80652D854522E00F68DBF623611AFAC",  932, 0x40C418,            13, "_usage_who"                            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("BB77BE0C9FDB8E97FBE12B7A87AAA84BF10F41ED05EC3457D64087B8B0511CA9",  972, 0x4703D0,            13, "_usage_sha1sum"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("0453F57246CDD248C6BE1BEC46243377B505C156E58D41D9B6BFD515EC9DEF2A",  908, 0x4936F0,            13, "_usage_truncate"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "__open_2@@GLIBC_2.17"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("9EB351294E054C9C3BF34E565F72612258161ECBC8FF63C24C57C46D0FDA03FF",  804, 0x4E5200,            13, "__gmpn_toom6_sqr"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("3ABBAA8D63C867AFC1533BED3B2B18231AADE02A71A8818BF18C51D05E97CF9B",   16, 0x49C350,            13, "canon_host"                            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("4E3224FD40A341D6C951EDED15D2E15AACBE7C777096CFBD555DDF6F428B5BA8",   44, 0x4A1338,            13, "sha224_finish_ctx"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("DC1D4E28D2C4CD9B1A1BD18108BCD1679D3604F5E2A96C665515068A20D8575D", 3204, 0x4926A8,            13, "single_binary_main_tr"                 , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("6B0205B4D539DA462B42E8E5442B5FC01F9924560400893910798CBFAA216AF4",    8, 0x4B95A8,            13, "setlocale_null"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("6229743BBDD1788064E9D2EC13341C6E9FA33BC87C424D671E0D2FAA5CAFA8FC",   40, 0x4BC4D0,            13, "xnmalloc"                              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("9E2A2533E6EA7422C1453E0259E5651021370EEEA333FAF206F62E29CC478D75", 2032, 0x4E18A0,            13, "__gmpn_toom42_mul"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "ioctl@@GLIBC_2.17"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "setlocale@@GLIBC_2.17"                 , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "acl_free@@ACL_1.0"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("0678112183B1A88BF183242193B1989A83CA0B68FD925F9582E62AF940BFA055",  900, 0x467290,            13, "_usage_printf"                         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "__fxstatat@@GLIBC_2.17"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("86DC5CD2E2A1E028D4A7B7717572D37B16D48E18750536E819ABC7E6763DA9D7",  252, 0x4D9788,            13, "__gmpn_mul_1"                          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "ferror@@GLIBC_2.17"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("2337D278706E8F04A94FB4B14379F91A6F6B8B546EF6C056F432F969AF36B13F", 1372, 0x4872C0,            13, "single_binary_main_stat"               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "wcrtomb@@GLIBC_2.17"                   , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("D943D2CD9BFFE34C9241241B4F7F3E69C5ED09B73C5B1A5AF9023BB8279E56F2", 3788, 0x4E6FA0,            13, "__gmpn_toom8_sqr"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("3552EB2A5E8D287DC47E99B60389CC7FFAC85CE5222C9883D3125C8631B1B053",   68, 0x4BCA78,            13, "xgetcwd"                               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("C4CA3F2669FC7AF122ECEA4A2089029A0B60D5BDAF40DD6A7C35CBCB59B8F311",   20, 0x4A1768,            13, "sha256_stream"                         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("25AD3E4EBF5E76ADEDB744098D965B3A48D048B2543F03C172DF0940812BCE0D",  336, 0x42A918,            13, "force_symlinkat"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("37B5D965FA952FD66A6D707E47A8076983EC76FBD9A89CC34A8366CC8E5C1EE3",  104, 0x49A6F8,            13, "argmatch_to_argument"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             }),
-        Make("coreutils.nixos-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_X86_64, 0, "/nix/store/jsp3h3wpzc842j0rz61m5ly71ak6qgdn-glibc-2.32-54/lib/ld-linux-x86-64.so.2", 351,
+        Make("coreutils.nixos-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_X86_64, 0, "/nix/store/jsp3h3wpzc842j0rz61m5ly71ak6qgdn-glibc-2.32-54/lib/ld-linux-x86-64.so.2", 351, 3787,
           new Program[]
             {
               new("65077EC8408E57BD29E9D7C7DC3DF1B9DCB19BA3787E179F45BCAAA63B525483",     616, PT.PT_PHDR        , PF.PF_R),
@@ -2533,6 +2747,209 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   0, 0x407C00, SHN.SHN_UNDEF, "malloc"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("249D35351F20387909AF6213913786626DE4B4CA9E710D8993E9A128C7C73B6F",  38, 0x4D4770,            14, "_obstack_memory_used"         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("8303A6542EA4E2EE84A8641B73B85E6714A71801AC1759E3B5A3D13908D6CE5D", 125, 0x4D46F0,            14, "_obstack_free"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+            },
+          new Symbol[]
+            {
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, ""                                    , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("C70FBCFEB5350DB4D207149D87960E2F23FB322C20552A9CAC4EB6B3E95E5E73",   32, 0x4002FC,             2, "__abi_tag"                           , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("7C07C19022657CC070550EA2FCF8545B248480354D12F666BD6F2219A4F77D65",  148, 0x410280,            14, "screen_columns"                      , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("5F124F44728AF78F5D4A033C3DBB35135D9DE342FACA5D8C8D1D241C36AB3BA1",  393, 0x410320,            14, "wrapf"                               , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    4, 0x597D9C,            25, "current_col"                         , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    4, 0x597DA0,            25, "max_col"                             , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("CF47554F5E878D80D56910081E412D87E808CF57F506B076563C68AFEE31A29E",  216, 0x4104B0,            14, "visible.part.0"                      , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new(null                                                              ,   10, 0x597CC0,            25, "buf.2"                               , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("6BB1CA6BE7DAA3BCD8476C265F6D014045B20EAA5DC27F396F376475A56098A3",  237, 0x410590,            14, "set_window_size"                     , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("049F04B9E69BEFA455D611907581477E27D5000366EB11B79110A823BCA1F49E",  256, 0x410680,            14, "display_window_size"                 , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("B4754C9E031A04BFCCBFD0417EBFDEC53C34517107CFAA91B751393F79274E48",  380, 0x410780,            14, "display_speed"                       , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("665CB15158BCF62D1D339380E58FEDCAFA3E68F4ED746EECC7015DA6B5D0954C",  840, 0x58CAE0,            21, "speeds"                              , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("67ABDD721024F0FF4E0B3F4C2FC13BC5BAD42D0B7851D456D88D203D15AAA450",    4, 0x59702C,            24, "tcsetattr_options"                   , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("5ADB3ABD8F363E32D0B5DFA893126BC8D28CD1E936ED85BDFC2DD287B382FB16", 4670, 0x411720,            14, "apply_settings"                      , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("079E9C5A509752525C8AC476215112152F9713EEA79194AAFFFBF56CFD296051", 2880, 0x58D0E0,            21, "mode_info"                           , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("BE5057A736C6FAD88BBF54D254AE58B4D7F05A14DADBD48FD651BD181208B906",  456, 0x58CF00,            21, "control_info"                        , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("3EADE8F0119AAEC65850A2771FCFB11B1A3DAF69670058DE0F6149609E45DB0F",   10, 0x538988,            16, "__PRETTY_FUNCTION__.0"               , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("03B511AA4768670DDE4E684047B7BD31ADED3A679AA89263523460496086FC92",    5, 0x4084C0,            14, "apply_settings.cold"                 , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("B5A24E2CC85338DBB4C22FB2A45FDBE69CE3624D6D3C74E83C4A75AAC7B20759",  192, 0x58CE40,            21, "longopts"                            , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,   60, 0x597D60,            25, "check_mode.6"                        , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,   60, 0x597D20,            25, "mode.5"                              , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,   60, 0x597CE0,            25, "new_mode.4"                          , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("353D05363EAD1DC6337DC0779C114D90CD82F46BAC01CF01742ED0A9A2F185F5",   12, 0x538998,            16, "__PRETTY_FUNCTION__.1"               , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("163F12951E92DF8F6FAAB8E2AD72F9C23E6259AC4037BBA1558A2684E0824225",   16, 0x5389B0,            16, "__PRETTY_FUNCTION__.3"               , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("8ACFB10B599E9471479C406A1DBC7A2FD25F635928922AF6452B267537AB1628",    5, 0x4084C5,            14, "single_binary_main_stty.cold"        , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("D8061BF080A8B4072AF7080FC813D4BDE3398F68F0A8F225BE256D473B3FCA2C",  399, 0x417280,            14, "binop"                               , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("0441A5DE121CC1AB25C8C3C94099F490067F690DEFAB1D40EB2426E58442AC3B",  173, 0x417410,            14, "test_syntax_error"                   , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("3C4BAF47263D07A051D090709AFB41EA6F634BBAD3D0DF4C7DB343E0EE7FCB48",  212, 0x4174C0,            14, "find_int"                            , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("3A40A49E9B645269334EAC76ADB886DA5C547DF36EA67683E32965AB8F766297",   63, 0x4175A0,            14, "beyond"                              , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    4, 0x597ED8,            25, "argc"                                , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    8, 0x597ED0,            25, "argv"                                , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("1C76AF94B11B804130F8584BE5B723BF07CFE09E3CAA45A02E4D40D04B865201", 1467, 0x4175E0,            14, "binary_operator"                     , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    4, 0x597EDC,            25, "pos"                                 , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("C2277F05E7D6B345B3321FBED71FB8047801C59AB4A46663E5F9566EDE956A2E",    5, 0x4084CA,            14, "binary_operator.cold"                , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("F7D169D680B6DF9F576B3626722F7E8EDA97238E890F0ED78E85C005E763F25F", 1936, 0x417BA0,            14, "unary_operator"                      , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("BDB8FB50730C8AB95C649416631E418B91FFE6165BC50B0756BD7CBD0DE69D9E",   92, 0x418330,            14, "two_arguments"                       , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("79F7096AFD8CF7A5403B3DD1C7EE633141F1354A9168CC509374A710C5412790",  869, 0x418390,            14, "or"                                  , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("D79141686A3194E4F782BB73B0A34012BDF925F8C881A37263DC2491664783D9",  298, 0x418840,            14, "posixtest"                           , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("8B8819D3CED28BD043BC88833695B066DC0A6A1FD35B5FFB0755555526DFCD68",  309, 0x418700,            14, "three_arguments"                     , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("56E9A0C8EEB4895514C05ABE3A72013E9680E27C44FFB9C18D2D4E5AC2DA4F43",    5, 0x4084CF,            14, "posixtest.cold"                      , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("8F51560C596F6517EACE19952D96D784FA8535C7BF12ED3A99E526E6E4D5CEAE",  117, 0x422B60,            14, "user_group_str"                      , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("2E27DC97B8BD9C89C7020656689F1645BA6949F2973C461608EE28238F290E52",    5, 0x4084D4,            14, "chown_files.cold"                    , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("1955EE988DCA4994FA26A033ED50DF2F0BBB274D53B7243111A1662F204249CE",  350, 0x426D80,            14, "decode_preserve_arg"                 , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("E1A613AA4B331588D97B5FEEF1FAABE8E8138D8C488EE9122B8533BFDDA3C189",   28, 0x53F370,            16, "preserve_vals.1"                     , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("CB2DC20D45F2D94D5BFBF2B5EB959215E81876461182C202E23F54ED6CAA747C",   64, 0x58EDA0,            21, "preserve_args.2"                     , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x598072,            25, "selinux_enabled"                     , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("66700D54E998BC1FAAAFA7EFFD8BF4C3272EE02DAD3F923547DBC4E87EADB74D",    5, 0x4084D9,            14, "decode_preserve_arg.cold"            , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("CB82EE78476041DD3E6BB1027CE07BB1B64EE28A033441DF00E92477167988DB", 1499, 0x426EE0,            14, "make_dir_parents_private"            , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("B68CDCBFA733D30A617F648A7094CA820FD5B5FC89BCC17DF7F45D60DBB8C8F2",  605, 0x4274C0,            14, "re_protect"                          , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("84AF00EDA4D923EF54467A7BE193A9D72B07AB7960399524C562861E50F6AD1A",  184, 0x427720,            14, "target_directory_operand.constprop.0", STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("4C05792B2C1E4089514F4A9CB8FDC82E4A4133CCCD9E93C4FDB371CFA1FD0862", 1372, 0x427D70,            14, "do_copy"                             , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x598071,            25, "parents_option"                      , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x598070,            25, "remove_trailing_slashes"             , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,   80, 0x598020,            25, "x_tmp.0"                             , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("540A1F63AEFDDC9BB99EF56D29202FAC4BDDB9F543AD3A79669FDD25EBCE19F3",  960, 0x58EDE0,            21, "long_opts"                           , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("4636993D3E1DA4E9D6B8F87B79E8F7C6D018580D52661950EABC3845C5897A4D",   12, 0x53F3A0,            16, "sparse_type"                         , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("D7340EE2BA56833603A7E7D997CB7AC165C583304DDA55D08E0108C853EA0349",   32, 0x58F1C0,            21, "sparse_type_string"                  , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("A7B5F185AEE1C8E29B7E2C2BC39F2F83216282354E7A0753FA1263FA399E6C4A",   12, 0x53F390,            16, "reflink_type"                        , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("D8C70FA07BEF9E296D4760012A63E5238BBC6DA59391035BF191A5BF4A0403CE",   32, 0x58F1A0,            21, "reflink_type_string"                 , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("90557A3692E5242841BE93CD6312C8F7B3A5810FD726B37E4BFD83DD3C8898BE",   74, 0x43DFA0,            14, "require_more_args"                   , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    8, 0x598BA8,            25, "args"                                , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("7769E6B00F87BD3C494D65B9E1588946C745BC6DF54CDDC148F29FD2A8B05C99",  367, 0x43DFF0,            14, "mbuiter_multi_next.part.0"           , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("B51B9C82BC085C363F728E91B2188C71040521A7577BA2AFA140D59B7350B21B",   19, 0x549860,            16, "__PRETTY_FUNCTION__.0"               , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("F7C5DFA2C362E444EEE4258416000E033E4C762F9BFF53A10922D53A952BE5EB",  107, 0x43E160,            14, "toarith.part.0"                      , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("FA8CA68753AAF558ECA38E441E708A6C3FD22DD600FDFF1E4DB4D2E981EB2308",  112, 0x43E630,            14, "null"                                , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("4799251869B86C33378B3B3FEF3CFC235507A27296B7CE3125479B1D1140706E",    5, 0x4084DE,            14, "null.cold"                           , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("09756B3DEE7D7EEBCC63EF0E9C54BBF76882382D1C59FE926998C26180AE454B",  889, 0x43E6A0,            14, "docolon"                             , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("33379E097E47027CB03BAD64B6F59FD72402A05C7A3E7C3A5E5EFD403001989E",    5, 0x4084E3,            14, "docolon.cold"                        , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("D4B843F5D07217A7B64C8492405B17F0D6C83F3BBD7F1256BB1106EF116AFC11", 2782, 0x43EA20,            14, "eval6"                               , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("F48E2623F7AD49B1457BB28D6097E8D10B47B2A0AF07E02D2F100CE7DA377C49",  347, 0x43FFD0,            14, "eval"                                , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("26D97283F962FC9013C085B90BC86B68E8BD20D3BB2278F85DC752F8A0B46B00",    5, 0x4084E8,            14, "eval6.cold"                          , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("61608A580EFE6E01B9E1C21149FE46DF1E1F35B7CBC1D7403FA280A564D08CC8",  220, 0x43F500,            14, "eval5"                               , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("90CD4B9C636D42B3D41F64DA8C0B1804770771630600502572BDB4A2AC5F929C",  686, 0x43F5E0,            14, "eval4"                               , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("FECEB25D842600C7E21509817A6EB45C8FC084D7B04D9A1550A84F1B9C40D7FC",    5, 0x4084ED,            14, "eval4.cold"                          , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("1AD22AA7901D54857F549522FDC2E77EFA7D1973D79B823E1678429FE1143CE4",  466, 0x43F890,            14, "eval3"                               , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("0653B7874396609E108221E112A3860EAAA87EE20C1C2341EF83F2519F861397",    5, 0x4084F2,            14, "eval3.cold"                          , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("78BB1E84121F1B293186A9D7D1D267F528CD0F66DD5534CE773C498C63483601", 1042, 0x43FA70,            14, "eval2"                               , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("A7DCC9C36161515DC8720A4FD2EBC2851C3A7FD9BB994DAC1756B81D59BCA71D",    5, 0x4084F7,            14, "eval2.cold"                          , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("9BD04840C64679E3A1A4039263714A1FE7EBAFC595C8D3BBFA0736B773DF6A41",  316, 0x43FE90,            14, "eval1"                               , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("714AEA9DEA0271CEA5D9E11D36BEB2E8A7AA12C5C6591D138D1A090C4B6DBEEB",    5, 0x4084FC,            14, "single_binary_main_expr.cold"        , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("780E3274EC0FD26160CD91A3FBEFFB2D0C20C3BC30468B0BEE405EAA2DA95AFD",  122, 0x448D30,            14, "diagnose_copy_fd_failure"            , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("F4469AC7ACD529A260A5AF14DDD56F70105B804FB3532B6D92FEAA208E6C1170",    5, 0x408501,            14, "diagnose_copy_fd_failure.cold"       , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("D6C7B46AD8904667685C495F0AB4A93B1996DDCEA438490996F1FEFB18F88620",  152, 0x448DB0,            14, "elseek.part.0"                       , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("8D38DD8E73384AA3E5014924BF11694C8EC90FED2D0EFDBC4076014034C7E3DE",  129, 0x448E50,            14, "xwrite_stdout.part.0"                , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("5C66C52840E396706C14690647D7CEF5B58B0DEA0F3C7987045920CABE0A7197",  204, 0x448EE0,            14, "copy_fd"                             , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("26FA2A7BFDBA030C50E2DB21B58E4E2B3F7CBB51ED03EFAC018C5B663845713B",  239, 0x448FB0,            14, "head_bytes"                          , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("09529906782CF522565829F0916289411F010A490F9DBC97E236FF5E25DF4C58",  407, 0x4490A0,            14, "head_lines"                          , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x5A5CA6,            25, "line_end"                            , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("1A16FA7D7723B8D92DB4630E83AFB03D614D345BD913F4500D8909DD4719B8A5",  703, 0x449240,            14, "elide_tail_lines_seekable"           , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x5A5CA5,            25, "have_read_stdin"                     , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x5A5CA7,            25, "print_headers"                       , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("0882230BC4F1C414263570657AC0F1820B3F1C79A3703C850F22E5850A6700F2",  320, 0x590600,            21, "long_options"                        , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    1, 0x5A5CA8,            25, "presume_input_pipe"                  , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("4BF5122F344554C53BDE2EBB8CD2B7E3D1600AD631C385A5D7CCE23C7785459A",    1, 0x597330,            24, "first_file.0"                        , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("3DABB9E60103DEB0E48E0100B26E0A862E6C79F260BB092ABFFD9BE08605ACF1",   16, 0x5905E0,            21, "default_file_list.1"                 , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("2AB740CBC3521310EE6AE7F739521D6585941C45F2950E0A9407EE0D72872090",   12, 0x450B70,            14, "dev_ino_hash"                        , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("98E6169E2C1610985086EC3DB75ADF62D5C91E267636017428812BD16D1F558E",   28, 0x450B80,            14, "dev_ino_compare"                     , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("720993272EE47BAA6106E51C2490EBCFC5163702C96B5191BD3F178C8ACFCF97",   17, 0x450BA0,            14, "sighandler"                          , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new(null                                                              ,    4, 0x5A6D38,            25, "interrupt_signal"                    , STT.STT_OBJECT, STB.STB_LOCAL , 0x0),
+              new("E487075C8DFDAF48FB1BD9A7FBD94EE1F037B496E4392400E88013EF2A7D045C",  541, 0x450BC0,            14, "get_funky_string"                    , STT.STT_FUNC  , STB.STB_LOCAL , 0x0),
+              new("C5D66BBFC8596D3F398B2C3820285138313BDBD9C3BADAB75A2C4860EA9B7116",  184, 0x4CC2C0,            14, "u8_uctomb_aux"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("9D169AE064426CF8CC5352CA485E584DDB67FFCD6DFC6997169FD47F18518B49",  125, 0x4B4B70,            14, "di_set_insert"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("34F517E9D436DD97DD119D1C5316965FCB2EEA8DB77011B1BABF7E938214AB4F",  274, 0x4CE240,            14, "xnumtoimax"                          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("D88D7C85D83CAEC307E5BE1ADCE65123651F9DBF269D96F10CF42E02E69E6091",   10, 0x4EE9F0,            14, "__gmpn_gcd_11"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("D42D3DC164D50B801210F18436045511390DE70C1E8F74A0BF71824193B0254A", 1724, 0x45C860,            14, "single_binary_main_mknod"            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("72608B87144DFED755D7635648D7A03272FA49EA4EDCB44397DFA95DDB8B1BC9",  337, 0x5181F0,            14, "__gmpn_lshiftc_pentium4"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("3D95742375BD37064A5BE7B7C0572D14094D265FC01A7B61CB993202CC4396A6",  367, 0x42E630,            14, "force_linkat"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("E583BF9A70B95EFAD553B44EBEB69062C2A030AF0B5C1C65AD20BC3BA5DAB474", 4494, 0x5034E0,            14, "__gmpn_toom_interpolate_16pts"       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("BA5E0FFCE5F7C5CD59CDB77E2B841E010E0FFC0AD0CD297BB458A66058239963",   15, 0x4CD900,            14, "verror"                              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("D763CDAAA38C7912DE2C1711FFBECE38B2D2D6381EC28F359F0FEBA6A21D843A",  464, 0x510160,            14, "__gmpn_mod_1_fat"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("C751BE6691760359F07EFA5619E642CFE9BA320CFC9BECAF5C8D77E9439DFEF0", 1169, 0x4CD910,            14, "version_etc_arn"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("AFDBC7C5E9BBBC4D2C6E6FBE3266A07DA8407557B956E4760EA0188CB96BA203",  608, 0x46D410,            14, "single_binary_main_printenv"         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("B6724A7990CFD2C717FBCFA2D58AF60AEBD5153EF62FACAC377921B886C31C9E",  271, 0x43D5F0,            14, "add_tab_stop"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("81EEA6678838234CB350F5D52A06687CF2F0DB7DC930EE084A4E068B1314F491",  761, 0x42E290,            14, "extent_scan_read"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("EA317B707FF6AD3D4D9F700A2A0ECE18AB9C1221CBF526109C835F2E8B574C32",  847, 0x448730,            14, "single_binary_main_groups"           , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("8B3563C6E412E66718B0A9CFE8A39DE4C4D5604CB068FB44CF1083AD1017CA9A",   29, 0x521200,            14, "__gmpn_add_nc_coreihwl"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("98285FC49E43ACD1FB0C43E45AF99F9CB1C98A119199532C5CD89D3B719BBEBA",  338, 0x517E23,            14, "__gmpn_add_nc_pentium4"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("E8DD36BCBA9FF4F5BEA105B0CA65C17EA450F38EE41C991B9F1903F610503284", 4731, 0x4799F0,            14, "single_binary_main_sha224sum"        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("644EC6C74A7BE45F818156DA6C59CE819A387565324BB88643CA6718337CD130",  251, 0x4AA900,            14, "close_stdin"                         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("718C061A1FAF0E47B9E0EFCC98A595D0683C2BEFCBB308D4E6E24C3E143691D2", 3432, 0x4E7140,            14, "printf_parse"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("A6EF999B62AE4F2351BEF2263873AF0AA475176DAC9F73F19449C7A50D648137", 1111, 0x4221F0,            14, "_usage_chgrp"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("DC4A4946B1569FD68102ADDCC3D7B625970C8325E6E41A7D9FBBF1F0A76A3D0A",  919, 0x460CD0,            14, "_usage_nohup"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("C40120BD03C960F554E1539F28B607931492D649580281106CFDC7D26BEB9B20",  823, 0x4483F0,            14, "_usage_groups"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("9B0850959CCD242F3AEACDFF7CFD072F79315DA2692A57164A3C5E32013FB5D6",   78, 0x4CC270,            14, "fd_safer"                            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("A26E0982F765D28D70D3C0CE344AF34A5DAF8BDA21AA4DE3436259048789F699",  112, 0x4A9DC0,            14, "buffer_lcm"                          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("B21260B9EC6C0EA72129ABB4918DBAC66C153381A47CC76410DE71F5D7198C92",  149, 0x4CDDD0,            14, "version_etc_va"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "pthread_mutex_init@@GLIBC_2.2.5"     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("9C22F4515B241868A9FDBD121CD307B6FF0AD5A7233BFF9B5F86F0172949042E",   20, 0x52EB00,            14, "__gmpn_bdiv_q_itch"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, 0x407000,            11, "_init"                               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x2),
+              new("57427A12C7A1EB23384B8064B05EE3A4F235275F8E65BED89756D53ABA3AF123",   46, 0x4CE1B0,            14, "xcalloc"                             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("DACFA281B00A1C3C7D20D0D3A0049409889966FB9B6F69BAABF3FB9B9A5A7432",  371, 0x4A56D0,            14, "single_binary_main_unlink"           , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("A3B2344F6A2649BE0243020759BBFEE6329FE073E7BC3A9B32D6055ADD6876A2",  288, 0x517F80,            14, "__gmpn_addmul_1_pentium4"            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "sigaddset@@GLIBC_2.2.5"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("79B37A765656C6471F21918986FB3FA4A58087D4CB54370A56AB64C405E611E8",   37, 0x4CC230,            14, "print_unicode_char"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("405FF26516F3506918EACE8DC9C24EAF5E7B7BEDCD554BF805ECCB8277AC0EE7",   33, 0x4B04A0,            14, "sha384_read_ctx"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("CC49C8EE703C5A664FF7CA920274D5A829D941B6A879D4A6BEC254FA6C41847C",   22, 0x4E3630,            14, "acl_default_nontrivial"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("024FCEA1456BC6EF71467CDF52A7DB0B0493C1CA1C81C49EF87608528E16D413",  314, 0x4A7750,            14, "single_binary_main_whoami"           , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("350770E74FABE9DFAD185940CD3F911F8A77FC819834FDB364AB4789E10EEDE5",  316, 0x4BC190,            14, "parse_gnu_standard_options_only"     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("3EA47B46D53EADF39D9EB54AAB61A31C9A76D1769FC9B18B9D16BB7FCF9452BB", 1776, 0x532D50,            14, "__gmpn_mu_bdiv_q"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "getdelim@@GLIBC_2.2.5"               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("299A544AE8AF44F2877793F45DD9491115EACCD14C30FEDFEBF35E00A4FAC3DD", 4856, 0x4AB8B0,            14, "sha1_process_block"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("6FC8FE5FE948591F21BF271D4C5D1331F8446CB0A874E8B1AADD5D5725008DD4",   28, 0x50E1E0,            14, "__gmp_exception"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("D42CB97D5621BC19C84660E6D0E3753EC89D6D57A045B31C459443FC41ED9057",  838, 0x507590,            14, "__gmpn_dcpi1_div_qr_n"               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("117F81EDB8B5180AEA0BB888A60F5930522270BB633FD09566433971F367F4EC",  604, 0x4E55D0,            14, "dirchownmod"                         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("CD8D13854382949B4B1811D819D42155D2E6F11556B689995D8255C586033FA4",  138, 0x50D7D0,            14, "__gmpn_invert_limb"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "fork@@GLIBC_2.2.5"                   , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "futimesat@@GLIBC_2.4"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("AB54FF2E0BDEA9C924255C4B8B0235EBE7E4DC8745CBD599C94DF009150CECB1",  478, 0x513F20,            14, "__gmpn_addmul_2_bd1"                 , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("A2CA51D5E2071F0E82489379BB66EA0E405B59FED623DDA45DB10921FD99924C",   43, 0x429A10,            14, "dest_info_init"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("F26B3ED3B66594F954880B70454B766A1D87AA7FC943E16CD3E7163E0DD44C8C",   10, 0x4EE950,            14, "__gmpn_addmul_1"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("2A55986E42E057C03AC3C6B2542C408E6374AF56210820E69257E60D3F2C244A",   13, 0x4EEA70,            14, "__gmpn_mod_1s_4p"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "strstr@@GLIBC_2.2.5"                 , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("5DB44B91896701D8B65B17A9C67BD974A8DB604977859ECEC6547D262B46E012",   10, 0x4B9210,            14, "gettime"                             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("0CD853F456E12776BCEF5BCE1D2BF317F7323CCEB5D2C6BF2C198E5D6862E376",  164, 0x4E21B0,            14, "rpl_re_compile_fastmap"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("CB15E729153F739B570E71BC046703E75E3DB6A20BB3AEC092F986E16B918A13",  432, 0x525FC0,            14, "__gmpn_addlsh1_n_atom"               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("72CAFD8C89AA1C5785B87EE4D3736EDA786D2C67C5EAE5FFA72EA210EEECE390",  290, 0x41AC40,            14, "blake2b_stream"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("692147A8C67D4507F960F34CDDE9C9C10A000D4B9FE7610B3990F5DDD06C6230",   42, 0x4AB880,            14, "sha1_read_ctx"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("489F8E5E9E8ABEDBF7F8F434EBE9FBA40EFC727C1B6F693CA283B1C7FCA496DA",  172, 0x4CE830,            14, "xnanosleep"                          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("DFFC76113A032C04A862716F12C2356A9D1CD0BDA76EDA429FACFA4F66FE8C4F",   46, 0x4CAE10,            14, "strnlen1"                            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "pthread_mutex_lock@@GLIBC_2.2.5"     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("D443A7FC3C37D391BD19BF5BCCC45EC687EDB325C80C3B213D5A70167E322AC1", 1119, 0x4191F0,            14, "_usage_b2sum"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("9AF907E0E45B51AA78AB97F94CD8F8C47342844CAD46B34375025364F278E17C",  117, 0x4ACFE0,            14, "sha1_buffer"                         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("EC3D108EEA1EDEEE5D361B7847990FC0A758F98B2EFA79D600AD647EC5A8A823",    5, 0x4B9770,            14, "hash_get_n_entries"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("3E08F25A60C5071A85A2C0BD2B19817C9D2764F2456B317E817FD882D41A273D",  768, 0x4ACCE0,            14, "sha1_process_bytes"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("EA93631B9EDC6A1142798E765C2461A7824DA687FDB7B05BE6253F04EB5DC159",  119, 0x4F4FD0,            14, "__gmpn_hgcd_mul_matrix1_vector"      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("9778786FC863FAEDFC1E8D33CE9D230CEF3F0753D66B192889FE4241DD6BACF8", 1770, 0x4F5720,            14, "__gmpn_toom22_mul"                   , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("C510E26787B20A0BAA13E9B5D58DCC4ABC5BE733B7F214456C7C2B0CE723BC72", 1039, 0x40D6D0,            14, "_usage_who"                          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("E1816317C20BB970ED0D025319EF4032B39B3699515A7623368D8C6EBA49D4DF", 1087, 0x477C10,            14, "_usage_sha1sum"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("30C2C43279DC973F60E852595C96A91063D4A74C72C0576A3A45E8F3FCB091D6", 1031, 0x49E170,            14, "_usage_truncate"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "opterr@@GLIBC_2.2.5"                 , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
+              new("149F2DD48D50D47CA28A9072A061DFC3953D892442B5703363D98BC61661CF48",  364, 0x5126C0,            14, "__gmpn_lshift_k10"                   , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("0AA6EE559718F598AE7FE06C8A5EAB50470628FB7D234DFDD6297B5F3952BFF4", 4770, 0x4FB9D0,            14, "__gmpn_toom6_sqr"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("F2A301A643BB44A01A6376789A296BCB7418004A796F090A431E26C9B3DFCB5A",   12, 0x4AA040,            14, "canon_host"                          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("E5BF1ED0C89F8B73EF89FBB601C0510656E969892B9820A0959605EA7F57D3F5",   36, 0x4AFDD0,            14, "sha224_finish_ctx"                   , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("CA2BDBD8E2A9575F7013FFBADEF6BBD6663CCA23C7F2A6B17394952C80C0C5C5", 4033, 0x49CD80,            14, "single_binary_main_tr"               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("E37001FFE2789276A572068A89E92C0AD3ABD5E616B4FC9EFC723C361CFE7666",    7, 0x4CAD30,            14, "setlocale_null"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "__ctype_tolower_loc@@GLIBC_2.3"      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("C12E1885BEE06AA66A12BAC1CC5224ADA497971B3704B8B69545899366EECF62",   36, 0x4CE020,            14, "xnmalloc"                            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "__ctype_b_loc@@GLIBC_2.3"            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("3584647758B30E87DFDEC076D1EB064D8685B84F0BD397CE03B79240AF051D8D", 2599, 0x4F6A60,            14, "__gmpn_toom42_mul"                   , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("A89702B1F28C1B3659952EAAC48B344CB15487C461449B21388A711151757E80",  233, 0x51B010,            14, "__gmpn_addmul_1_core2"               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "acl_free@@ACL_1.0"                   , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "iconv_open@@GLIBC_2.2.5"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("63B087B40AABBF3217CC880EC00C42790CAF65F168BAEEC45420A321A053F76F",   13, 0x517E0A,            14, "__gmpn_sublsh1_nc_zen"               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("867518F4A8CCBA530EC038AD8E60B57931767656D339B3D746373F9DC9C76F29",  999, 0x46DD50,            14, "_usage_printf"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "freeaddrinfo@@GLIBC_2.2.5"           , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("D1E65CBBFA3F249B7DA66879CC7C403FAA48D07A10B5B9093D5C4C6BE36964A4",   13, 0x4EEAB0,            14, "__gmpn_mul_1"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "stderr@@GLIBC_2.2.5"                 , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
+              new("3ED3A6801C12173F486EB3F9B4B95F50C3949200CB16B5603155ED2FEB8AB58A",  233, 0x50DD30,            14, "__gmpn_addlsh_n"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("1D92450160B9338760A97EB9E9ACA764C371AD36DFFEFB17BE740D6480DA9D20", 1321, 0x490C80,            14, "single_binary_main_stat"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("774A2AD6A10E63136B960788EB91771EEB2DAAE7878622DEF544A3EAC72B0F1F",    4, 0x4EEC00,            14, "__gmpn_sqr_basecase_init"            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "__sprintf_chk@@GLIBC_2.3.4"          , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("F3276CAB87D0D437A2D1159FB0FC2F91ABE4BA56B24D4417415F94B66A5DD8C9", 4412, 0x4FE940,            14, "__gmpn_toom8_sqr"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("9812A1FDD72C90E167B04155D39FA2294D4C48244DBD46ADE94DC583881DA221",  120, 0x514740,            14, "__gmpn_copyi_bt1"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("74A38F8AC4008AF85064787772DCEA6E8BEE399CC1EA8E575A1D549486D821C2",   47, 0x4CE540,            14, "xgetcwd"                             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("5F19CB5B957D4E63D9C5F7922A72A8E181F82EC8141FF85304872D8737B10899",   19, 0x4B0330,            14, "sha256_stream"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("3DD93DE4B41FDC5F0016239C59E1BE7AFD32276630C55CE1791B850177B39BBC",  315, 0x42E7A0,            14, "force_symlinkat"                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("DB3EA4DE86E22FD936825836A4E9A893FC13E8B49C1F42DEBAA363B6AB3B06F4",   77, 0x4A8430,            14, "argmatch_to_argument"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("0A954376AA6FD6AF6976C6647DADED7FE49D7B4C531EB815CF2F83109884BD81",  144, 0x50F8C0,            14, "__gmpn_modexact_1_odd_x86_64"        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("38079670A556F9E96EAF4D29EB2F0FA188C9E5EFC80DEA473D33804A9FCC70B3",   10, 0x4EE980,            14, "__gmpn_cnd_add_n"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             }),
         // @formatter:on
       };
@@ -2542,7 +2959,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeGrepAndroidSources() => new object?[]
       {
         // @formatter:off
-        Make("grep.android-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/system/bin/linker", 67,
+        Make("grep.android-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/system/bin/linker", 67, 0,
           new Program[]
             {
               new("820841CE8FF5EEC3E7776EA1BAC3FBC8B05422CD527785AC716DA9F6214D0C25",   288, PT.PT_PHDR        , PF.PF_R),
@@ -2654,8 +3071,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0, 0xE5E7, SHN.SHN_ABS  , "_end"             , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x632C, SHN.SHN_ABS  , "_edata"           , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x632C, SHN.SHN_ABS  , "__bss_start"      , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("grep.android-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/system/bin/linker64", 66,
+            },
+          new Symbol[] {}),
+        Make("grep.android-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/system/bin/linker64", 66, 0,
           new Program[]
             {
               new("33DE1890C9C30C67B5EC5BCE2721EA2CFBCDEBAC3BE93F9F986CFB307492A157",   504, PT.PT_PHDR        , PF.PF_R),
@@ -2766,7 +3184,8 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0, 0x1094B, SHN.SHN_ABS  , "_end"             , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
               new(null, 0,  0x8650, SHN.SHN_ABS  , "_edata"           , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
               new(null, 0,  0x8650, SHN.SHN_ABS  , "__bss_start"      , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -2775,7 +3194,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeLibpcprofileSources() => new object?[]
       {
         // @formatter:off
-        Make("libpcprofile.so", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, null, 25,
+        Make("libpcprofile.so", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, null, 25, 0,
           new Program[]
             {
               new("DC52330482CDA0D17524104FE748D20638456D096410797F4166825F87026AB1", 2304, PT.PT_LOAD     , PF.PF_X | PF.PF_R),
@@ -2841,6 +3260,123 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  0, 0x11044,            22, "__bss_start__"              , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
               new("7E3A46584EA20578A4613A97CBD5A075D88B0E8B91EF19B70EB2174E53C43C2A", 72,   0x7A5,            12, "__cyg_profile_func_exit"    , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  0, 0x11044,            22, "__bss_start"                , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
+            },
+          new Symbol[] {}),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeLibtlsSources() => new object?[]
+      {
+        // @formatter:off
+        Make("libtls.bfd-m68k", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_68K, 0, null, 5, 16,
+          new Program[]
+            {
+              new("EFA093CBEAC56AEDB61DB684C0D177869A6835584AFAFA93C3B1D22B214B68AC", 388, PT.PT_LOAD   , PF.PF_X | PF.PF_R),
+              new("C7B678767A2DEC68B083B78930493B43F01E7F6A172AEA733205B9DE28C47363", 120, PT.PT_LOAD   , PF.PF_W | PF.PF_R),
+              new("363D7A6253DC4CDB6EAB653CC1ECE0FC6646F7B872EEE06E3D9C1C517898B329",  96, PT.PT_DYNAMIC, PF.PF_W | PF.PF_R),
+              new("1EFFDAC32B0A36BF6CD88A3567EA912E83A624F3A819AEB095EF311441FDF13B",  12, PT.PT_TLS    , PF.PF_R),
+            },
+          new Section[]
+            {
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0,    0x0, 0x0,  0, ""         , SHT.SHT_NULL    ,  0,  0, 0),
+              new("3325FFAB5AD9A93CBC304ACC2BB31B2D0DFD5265588F9380EB39F37E538F890D",  40,   0xB4, 0x4,  4, ".hash"    , SHT.SHT_HASH    ,  3,  0, SHF.SHF_ALLOC),
+              new("09A78125A3F7870727976510643CB56315142AF914376942F11C5AB73B62D6EE",  48,   0xDC, 0x4,  4, ".gnu.hash", SHT.SHT_GNU_HASH,  3,  0, SHF.SHF_ALLOC),
+              new("F495F8D0A5467E7CD73213C9BF2231A1797166A4DCE2182C32286A725B36C8CE",  80,  0x10C, 0x4, 16, ".dynsym"  , SHT.SHT_DYNSYM  ,  4,  1, SHF.SHF_ALLOC),
+              new("7B05A83DC86AD78207E829B56E5AFAE05C34C206F1E9B05C76C8DFBBD5A9D4E9",  35,  0x15C, 0x1,  0, ".dynstr"  , SHT.SHT_STRTAB  ,  0,  0, SHF.SHF_ALLOC),
+              new("B20B9296C0AC3519C13AF1DCB9C5B580CB17F9BCE0698411A3E31B04F7E30437",   4,  0x180, 0x4,  0, ".text"    , SHT.SHT_PROGBITS,  0,  0, SHF.SHF_ALLOC | SHF.SHF_EXECINSTR),
+              new("1EFFDAC32B0A36BF6CD88A3567EA912E83A624F3A819AEB095EF311441FDF13B",  12, 0x2184, 0x4,  0, ".tdata"   , SHT.SHT_PROGBITS,  0,  0, SHF.SHF_WRITE | SHF.SHF_ALLOC | SHF.SHF_TLS),
+              new(null                                                              ,  24, 0x2190, 0x4,  0, ".tbss"    , SHT.SHT_NOBITS  ,  0,  0, SHF.SHF_WRITE | SHF.SHF_ALLOC | SHF.SHF_TLS),
+              new("363D7A6253DC4CDB6EAB653CC1ECE0FC6646F7B872EEE06E3D9C1C517898B329",  96, 0x2190, 0x4,  8, ".dynamic" , SHT.SHT_DYNAMIC ,  4,  0, SHF.SHF_WRITE | SHF.SHF_ALLOC),
+              new("6C40E4FD2473C4E87C996D9ACBE402A59197057227000D7149CB367BBE73CD01",  12, 0x21F0, 0x4,  4, ".got"     , SHT.SHT_PROGBITS,  0,  0, SHF.SHF_WRITE | SHF.SHF_ALLOC),
+              new("83B1AFF439EEE0BBB02DAF867D3270291CCF5AA8ECD89452805BAAAEB8DE2228", 256,    0x0, 0x4, 16, ".symtab"  , SHT.SHT_SYMTAB  , 11, 12, 0),
+              new("52169E22C48CA38E800EFCA6A148F9D9A6A1A54AEE21101EDFF9232564D8DF90",  66,    0x0, 0x1,  0, ".strtab"  , SHT.SHT_STRTAB  ,  0,  0, 0),
+              new("5B3AE367BDEE67E1C0C5E9993EDD47FD685F217FA54A12BD8300F34CD46ABEBA",  86,    0x0, 0x1,  0, ".shstrtab", SHT.SHT_STRTAB  ,  0,  0, 0),
+            },
+          new Symbol[]
+            {
+              new(null                                                              ,  0,   0x0, SHN.SHN_UNDEF, ""          , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new("F0748F45F5DEBC83A1660BF1379A41303D08551534971F2A2C5532B2A20C0A27",  8,   0x4,             6, "tdata_var2", STT.STT_TLS   , STB.STB_GLOBAL, 0x0),
+              new(null                                                              , 24,   0xC,             7, "tbss_var"  , STT.STT_TLS   , STB.STB_GLOBAL, 0x0),
+              new("1A835ED8734F86355CA5B835D824D486993AABF1913CD3A011B7446C0514B7C9",  4,   0x0,             6, "tdata_var" , STT.STT_TLS   , STB.STB_GLOBAL, 0x0),
+              new("B20B9296C0AC3519C13AF1DCB9C5B580CB17F9BCE0698411A3E31B04F7E30437",  4, 0x180,             5, "get"       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+            },
+          new Symbol[]
+            {
+              new(null                                                              ,  0,    0x0, SHN.SHN_UNDEF, ""                     , STT.STT_NOTYPE , STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0,   0xB4,             1, ""                     , STT.STT_SECTION, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0,   0xDC,             2, ""                     , STT.STT_SECTION, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0,  0x10C,             3, ""                     , STT.STT_SECTION, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0,  0x15C,             4, ""                     , STT.STT_SECTION, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0,  0x180,             5, ""                     , STT.STT_SECTION, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0, 0x2184,             6, ""                     , STT.STT_SECTION, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,  0, 0x2190,             7, ""                     , STT.STT_SECTION, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0, 0x2190,             8, ""                     , STT.STT_SECTION, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0, 0x21F0,             9, ""                     , STT.STT_SECTION, STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0, 0x2190,             8, "_DYNAMIC"             , STT.STT_OBJECT , STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0, 0x21F0,             9, "_GLOBAL_OFFSET_TABLE_", STT.STT_OBJECT , STB.STB_LOCAL , 0x0),
+              new("F0748F45F5DEBC83A1660BF1379A41303D08551534971F2A2C5532B2A20C0A27",  8,    0x4,             6, "tdata_var2"           , STT.STT_TLS    , STB.STB_GLOBAL, 0x0),
+              new("1A835ED8734F86355CA5B835D824D486993AABF1913CD3A011B7446C0514B7C9",  4,    0x0,             6, "tdata_var"            , STT.STT_TLS    , STB.STB_GLOBAL, 0x0),
+              new(null                                                              , 24,    0xC,             7, "tbss_var"             , STT.STT_TLS    , STB.STB_GLOBAL, 0x0),
+              new("B20B9296C0AC3519C13AF1DCB9C5B580CB17F9BCE0698411A3E31B04F7E30437",  4,  0x180,             5, "get"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
+            }),
+        Make("libtls.lld-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, null, 6, 8,
+          new Program[]
+            {
+              new("49DE965B5C0B25D4E1B8FA46DCCA9C11F245DFE56716B3E2BF54C071E1CD179F",  560, PT.PT_PHDR        , PF.PF_R),
+              new("806A6373A71882AC72314FAC1E7E072D2E8041FCFF1539C3566E98E938473345", 1172, PT.PT_LOAD        , PF.PF_R),
+              new("F47E44846125B209B645BF885B37E78691BC3F08E2EEB1A74B867F506E1102FF",   96, PT.PT_LOAD        , PF.PF_X | PF.PF_R),
+              new("BE2F017EA7068992E63635D834A1B0879D593F724571EE4267BB9B8D825820BE",  288, PT.PT_LOAD        , PF.PF_W | PF.PF_R),
+              new("6F551F8503C4B5AFADB47F69FC9F3942EE825FBFFCA098C77EBF870C6EC05506",   32, PT.PT_LOAD        , PF.PF_W | PF.PF_R),
+              new("483392FE17DEEBA664D782A0EBE38B3ECCBF24EDCE2263347129FA843E4F5525",   16, PT.PT_TLS         , PF.PF_R),
+              new("0D5C8D0639580ECF858CB7E27E47D4D62AD32830E13B49D88482607DB341764E",  224, PT.PT_DYNAMIC     , PF.PF_W | PF.PF_R),
+              new("BE2F017EA7068992E63635D834A1B0879D593F724571EE4267BB9B8D825820BE",  288, PT.PT_GNU_RELRO   , PF.PF_R),
+              new("2DB146CDA639A88339698153E56678DDD9E8D008170B137AC7B13E55E51952D7",   20, PT.PT_GNU_EH_FRAME, PF.PF_R),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",    0, PT.PT_GNU_STACK   , PF.PF_W | PF.PF_R),
+            },
+          new Section[]
+            {
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0,    0x0,  0x0,  0, ""             , SHT.SHT_NULL    ,  0,  0, 0),
+              new("6C1F38ED2DB76224C51F0528B6C4EEFFEED57B9774D0E51A7B7EC48A5543F289", 144,  0x270,  0x8, 24, ".dynsym"      , SHT.SHT_DYNSYM  ,  4,  1, SHF.SHF_ALLOC),
+              new("A38C82EEDDF21BE59785DEAE7EC775299B24D104FD844A622976D75C7D8DA835",  44,  0x300,  0x8,  0, ".gnu.hash"    , SHT.SHT_GNU_HASH,  1,  0, SHF.SHF_ALLOC),
+              new("A7322B195E509FCFE87C8AC52E3DEDA534C8273D425ED6DF4519E93A0A0E9FD9",  56,  0x32C,  0x4,  4, ".hash"        , SHT.SHT_HASH    ,  1,  0, SHF.SHF_ALLOC),
+              new("9C95F600230FD9DED57B62550D7FA848C77EBD9D104E3F75F014763F3592DCDE",  50,  0x364,  0x1,  0, ".dynstr"      , SHT.SHT_STRTAB  ,  0,  0, SHF.SHF_ALLOC),
+              new("0A64DDA918D4948A269D8A189C84C5491E9611DE41404C9414E7EAD73F8E0753", 144,  0x398,  0x8, 24, ".rela.dyn"    , SHT.SHT_RELA    ,  1,  0, SHF.SHF_ALLOC),
+              new("AAC4FC034576929C58414FCFA9B1B9394A55F06F5970C649275C44AA7D7C9FFA",  24,  0x428,  0x8, 24, ".rela.plt"    , SHT.SHT_RELA    ,  1, 15, SHF.SHF_ALLOC | SHF.SHF_INFO_LINK),
+              new("2DB146CDA639A88339698153E56678DDD9E8D008170B137AC7B13E55E51952D7",  20,  0x440,  0x4,  0, ".eh_frame_hdr", SHT.SHT_PROGBITS,  0,  0, SHF.SHF_ALLOC),
+              new("0CD02165700130972663B8E151AA562A62C5CCABCA775B693EB8ED9B5CFD1EFD",  60,  0x458,  0x8,  0, ".eh_frame"    , SHT.SHT_PROGBITS,  0,  0, SHF.SHF_ALLOC),
+              new("295E51E70A0F9F6404832F7F747B97C68D1CE901B587425523BD01D797A7B3A6",  61, 0x14A0, 0x10,  0, ".text"        , SHT.SHT_PROGBITS,  0,  0, SHF.SHF_ALLOC | SHF.SHF_EXECINSTR),
+              new("918BC83B7A4958B929092B7004EEAABCD3EBDFA116B95753FCDF3CFA28439768",  32, 0x14E0, 0x10,  0, ".plt"         , SHT.SHT_PROGBITS,  0,  0, SHF.SHF_ALLOC | SHF.SHF_EXECINSTR),
+              new("483392FE17DEEBA664D782A0EBE38B3ECCBF24EDCE2263347129FA843E4F5525",  16, 0x2500,  0x8,  0, ".tdata"       , SHT.SHT_PROGBITS,  0,  0, SHF.SHF_WRITE | SHF.SHF_ALLOC | SHF.SHF_TLS),
+              new(null                                                              ,  24, 0x2510, 0x10,  0, ".tbss"        , SHT.SHT_NOBITS  ,  0,  0, SHF.SHF_WRITE | SHF.SHF_ALLOC | SHF.SHF_TLS),
+              new("0D5C8D0639580ECF858CB7E27E47D4D62AD32830E13B49D88482607DB341764E", 224, 0x2510,  0x8, 16, ".dynamic"     , SHT.SHT_DYNAMIC ,  4,  0, SHF.SHF_WRITE | SHF.SHF_ALLOC),
+              new("17B0761F87B081D5CF10757CCC89F12BE355C70E2E29DF288B65B30710DCBCD1",  48, 0x25F0,  0x8,  0, ".got"         , SHT.SHT_PROGBITS,  0,  0, SHF.SHF_WRITE | SHF.SHF_ALLOC),
+              new("6F551F8503C4B5AFADB47F69FC9F3942EE825FBFFCA098C77EBF870C6EC05506",  32, 0x3620,  0x8,  0, ".got.plt"     , SHT.SHT_PROGBITS,  0,  0, SHF.SHF_WRITE | SHF.SHF_ALLOC),
+              new("361A133F8D1D597089416474CB73C7A6A3AED6F366D7DCBCD4FE1B0BE365714A",  41,    0x0,  0x1,  1, ".comment"     , SHT.SHT_PROGBITS,  0,  0, SHF.SHF_MERGE | SHF.SHF_STRINGS),
+              new("4E0114ADBA95B2833E62B88D4E22751EBB6FAE4A6EF6C36481349EC59794F6E4", 192,    0x0,  0x8, 24, ".symtab"      , SHT.SHT_SYMTAB  , 19,  3, 0),
+              new("5758E559191F30BAF6C4B9BB5F10E685E04F3064E2DFCE6402B019917C8C60FF", 159,    0x0,  0x1,  0, ".shstrtab"    , SHT.SHT_STRTAB  ,  0,  0, 0),
+              new("C0B61E2402CCFAB63AC7FEAEB3735B27C2F445AD24F529E91E091DAB44FDD8D3",  65,    0x0,  0x1,  0, ".strtab"      , SHT.SHT_STRTAB  ,  0,  0, 0),
+            },
+          new Symbol[]
+            {
+              new(null                                                              ,  0,    0x0, SHN.SHN_UNDEF, ""              , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,  0,    0x0, SHN.SHN_UNDEF, "__tls_get_addr", STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
+              new("295E51E70A0F9F6404832F7F747B97C68D1CE901B587425523BD01D797A7B3A6", 61, 0x14A0,             9, "get"           , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("C832FBE8A69C8694F85D3F3D6BDACE5B99C4C4153C4F5CA5E3D21E22EB218CE3",  4,    0x0,            11, "tdata_var"     , STT.STT_TLS   , STB.STB_GLOBAL, 0x0),
+              new("98CE95A0063827B2CE18558B9D02A54E094EAFAEC8B5B7D2427EB7EE149119A6",  8,    0x8,            11, "tdata_var2"    , STT.STT_TLS   , STB.STB_GLOBAL, 0x0),
+              new(null                                                              , 24,   0x10,            12, "tbss_var"      , STT.STT_TLS   , STB.STB_GLOBAL, 0x0),
+            },
+          new Symbol[]
+            {
+              new(null                                                              ,  0,    0x0, SHN.SHN_UNDEF, ""              , STT.STT_NOTYPE, STB.STB_LOCAL , 0x0),
+              new(null                                                              ,  0,    0x0, SHN.SHN_ABS  , "tls.c"         , STT.STT_FILE  , STB.STB_LOCAL , 0x0),
+              new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0, 0x2510,            13, "_DYNAMIC"      , STT.STT_NOTYPE, STB.STB_LOCAL , 0x2),
+              new("295E51E70A0F9F6404832F7F747B97C68D1CE901B587425523BD01D797A7B3A6", 61, 0x14A0,             9, "get"           , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
+              new("C832FBE8A69C8694F85D3F3D6BDACE5B99C4C4153C4F5CA5E3D21E22EB218CE3",  4,    0x0,            11, "tdata_var"     , STT.STT_TLS   , STB.STB_GLOBAL, 0x0),
+              new(null                                                              ,  0,    0x0, SHN.SHN_UNDEF, "__tls_get_addr", STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
+              new("98CE95A0063827B2CE18558B9D02A54E094EAFAEC8B5B7D2427EB7EE149119A6",  8,    0x8,            11, "tdata_var2"    , STT.STT_TLS   , STB.STB_GLOBAL, 0x0),
+              new(null                                                              , 24,   0x10,            12, "tbss_var"      , STT.STT_TLS   , STB.STB_GLOBAL, 0x0),
             }),
         // @formatter:on
       };
@@ -2850,7 +3386,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeLibulockmgrSources() => new object?[]
       {
         // @formatter:off
-        Make("libulockmgr.so.1.0.1.x64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0U, null, 31,
+        Make("libulockmgr.so.1.0.1.x64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0U, null, 31, 0,
           new Program[]
             {
               new("0AD0AB81DB199E22796A23EE01C71DEAD4FC6A17826837753177FDE2375BF909", 3000, PT.PT_LOAD        , PF.PF_R),
@@ -2928,7 +3464,8 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,    0,    0x0, SHN.SHN_UNDEF, "pthread_mutex_lock"         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,    0,    0x0, SHN.SHN_UNDEF, "stderr"                     , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("636E0F09534B20F5081C5D83CE4370E4CFAD61F6F3F139409237D36381B7BD1B", 2635, 0x1570,            14, "ulockmgr_op"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -2937,7 +3474,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeMktempFreebsdSources() => new object?[]
       {
         // @formatter:off
-        Make("mktemp.freebsd-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_AARCH64, 0, "/libexec/ld-elf.so.1", 26,
+        Make("mktemp.freebsd-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_AARCH64, 0, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
               new("43B9AD6F2CCBC7CEA5A947ECD04B773A64B753093E3933D97C1CE21C67E3AA3A",  616, PT.PT_PHDR        , PF.PF_R),
@@ -3011,8 +3548,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  8, 0x2315A0,            24, "__stderrp"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  8, 0x231590,            24, "optarg"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  4, 0x231598,            24, "optind"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.freebsd-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_386, 0, "/libexec/ld-elf.so.1", 26,
+            },
+          new Symbol[] {}),
+        Make("mktemp.freebsd-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_386, 0, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
               new("821834B1EC0C5CBFB151B9736E6D5477BAF6A893BA2E0CC454AB941DB365F3CF",  352, PT.PT_PHDR        , PF.PF_R),
@@ -3087,8 +3625,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  4, 0x404208,            25, "optind"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  0, 0x401FF0, SHN.SHN_UNDEF, "rmdir"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  0, 0x402000, SHN.SHN_UNDEF, "strdup"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.freebsd-powerpc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_PPC, 0, "/libexec/ld-elf.so.1", 26,
+            },
+          new Symbol[] {}),
+        Make("mktemp.freebsd-powerpc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_PPC, 0, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
               new("DCB050B5EC72AAA99184435A907607B99E943DB51498A1A129DCF5D693A3CF67",  352, PT.PT_PHDR        , PF.PF_R),
@@ -3163,8 +3702,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  4, 0x10031410,            25, "__stderrp"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  4, 0x100313E0,            25, "optarg"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  4, 0x10031408,            25, "optind"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.freebsd-powerpc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/libexec/ld-elf.so.1", 26,
+            },
+          new Symbol[] {}),
+        Make("mktemp.freebsd-powerpc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
               new("FB7E88D3E5DF04702B5DA9B78378D49C68D05356F397A98B06A07CEBD1A7A54B",  616, PT.PT_PHDR        , PF.PF_R),
@@ -3241,8 +3781,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,        0x0, SHN.SHN_UNDEF, "warn"               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x60),
               new("5E928D8B199C65BA326C7A24F79A851100E4EB6E5A95B4AE5F1379140256F0B5", 8, 0x10031A60,            24, "__progname"         , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              , 8, 0x10031A70,            26, "environ"            , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.freebsd-powerpc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/libexec/ld-elf.so.1", 26,
+            },
+          new Symbol[] {}),
+        Make("mktemp.freebsd-powerpc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
               new("337C35C6F8C664F502A3883EB405AC15A832F4D78309FE1D48A66FEE713F65D0",  616, PT.PT_PHDR        , PF.PF_R),
@@ -3319,8 +3860,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,        0x0, SHN.SHN_UNDEF, "warn"               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x60),
               new("89FBF58F09F5B44BFB534268D88E42122A668CFA182C4E937D4E280F618C88BD", 8, 0x10031B00,            24, "__progname"         , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              , 8, 0x10031B10,            26, "environ"            , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.freebsd-riscv64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_RISCV, EF.EF_RISCV_FLOAT_ABI_DOUBLE | EF.EF_RISCV_RVC, "/libexec/ld-elf.so.1", 26,
+            },
+          new Symbol[] {}),
+        Make("mktemp.freebsd-riscv64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_RISCV, EF.EF_RISCV_FLOAT_ABI_DOUBLE | EF.EF_RISCV_RVC, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
               new("BC3552D27A4044017E32932820C95532C8AEB1F1FDB3EEC65DE3FB89CE14116C",  616, PT.PT_PHDR        , PF.PF_R),
@@ -3397,8 +3939,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  8, 0x145A0,            26, "__stderrp"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  8, 0x14590,            26, "optarg"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  4, 0x14598,            26, "optind"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.freebsd-sparc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_SPARCV9, EF.EF_SPARCV9_RMO, "/libexec/ld-elf.so.1", 29,
+            },
+          new Symbol[] {}),
+        Make("mktemp.freebsd-sparc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_SPARCV9, EF.EF_SPARCV9_RMO, "/libexec/ld-elf.so.1", 29, 0,
           new Program[]
             {
               new("87AAA90A5A5F62B3039C34D1DE7E109CDF60142319AE637F0F397EBD923E112C",  336, PT.PT_PHDR   , PF.PF_X | PF.PF_R),
@@ -3469,8 +4012,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  132, 0x2014E0, SHN.SHN_UNDEF, "warn"               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   40, 0x2015E0, SHN.SHN_UNDEF, "mkdtemp"            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   64, 0x201718,            23, "__stack_chk_guard"  , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.freebsd-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_X86_64, 0, "/libexec/ld-elf.so.1", 26,
+            },
+          new Symbol[] {}),
+        Make("mktemp.freebsd-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_X86_64, 0, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
               new("8F82A9F7B1ED0A0939BD70C3C0E45C0C49A8DF1F467B416BCD4CBA704908007B",  616, PT.PT_PHDR        , PF.PF_R),
@@ -3545,7 +4089,8 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  8, 0x204690,            25, "__stderrp"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  8, 0x204680,            25, "optarg"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  4, 0x204688,            25, "optind"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -3554,7 +4099,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeMktempGentooSources() => new object?[]
       {
         // @formatter:off
-        Make("mktemp.gentoo-armv4tl", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_SOFT, "/lib/ld-linux.so.3", 80,
+        Make("mktemp.gentoo-armv4tl", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_SOFT, "/lib/ld-linux.so.3", 80, 0,
           new Program[]
             {
               new("1E2725BF4DB9BCEEBE5528667AF68CC41972639C177EF8F1738EE01A6506070F",     8, PT.PT_ARM_UNWIND, PF.PF_R),
@@ -3678,8 +4223,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "close"                        , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "strspn"                       , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "__assert_fail"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.gentoo-armv7a_hf-uclibc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-uClibc.so.0", 91,
+            },
+          new Symbol[] {}),
+        Make("mktemp.gentoo-armv7a_hf-uclibc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-uClibc.so.0", 91, 0,
           new Program[]
             {
               new("903B1C0C32F905D933DD4040ABA0518CF345F3395BC36CD008ACBA1C1A845D60",     8, PT.PT_ARM_UNWIND, PF.PF_R),
@@ -3810,8 +4356,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  0, 0x19208,            20, "__bss_start"                  , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  0, 0x19394,            20, "__bss_end__"                  , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  0, 0x19394,            20, "__end__"                      , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.gentoo-hppa2.0", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_LINUX, 0, ET.ET_DYN, EM.EM_PARISC, EF.EFA_PARISC_1_1, "/lib/ld.so.1", 77,
+            },
+          new Symbol[] {}),
+        Make("mktemp.gentoo-hppa2.0", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_LINUX, 0, ET.ET_DYN, EM.EM_PARISC, EF.EFA_PARISC_1_1, "/lib/ld.so.1", 77, 0,
           new Program[]
             {
               new("A8181DC67D63464863B0A581E5D0302A46E12514B81A9146B5AA9FBF84DC9C20",   288, PT.PT_PHDR        , PF.PF_R),
@@ -3934,8 +4481,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,    0x0, SHN.SHN_UNDEF, "__ctype_b_loc"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0,    0x0, SHN.SHN_UNDEF, "calloc"                       , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0, 0xC2FC, SHN.SHN_ABS  , "_GLOBAL_OFFSET_TABLE_"        , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.gentoo-ia64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_IA_64, EF.EF_IA_64_ABI64, "/lib/ld-linux-ia64.so.2", 68,
+            },
+          new Symbol[] {}),
+        Make("mktemp.gentoo-ia64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_IA_64, EF.EF_IA_64_ABI64, "/lib/ld-linux-ia64.so.2", 68, 0,
           new Program[]
             {
               new("21EC78239EB4DEB1C382F2F74D563C4112ED8436EEE5D0CF46D4D034D5F71272",   448, PT.PT_PHDR      , PF.PF_R),
@@ -4051,8 +4599,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   0,    0x0, SHN.SHN_UNDEF, "close"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0,    0x0, SHN.SHN_UNDEF, "__ctype_b_loc"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0,    0x0, SHN.SHN_UNDEF, "calloc"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.gentoo-m68k", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_68K, 0, "/lib/ld.so.1", 77,
+            },
+          new Symbol[] {}),
+        Make("mktemp.gentoo-m68k", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_68K, 0, "/lib/ld.so.1", 77, 0,
           new Program[]
             {
               new("74B318D10E78C82CA248A1C0443AF36385BA869FF429C9B38B898098A60EBB94",   256, PT.PT_PHDR     , PF.PF_R),
@@ -4170,8 +4719,9 @@ namespace JetBrains.FormatRipper.Tests
               new("B40711A88C7039756FB8A73827EABE2C0FE5A0346CA7E0A104ADC0FC764F528D",    4, 0xA300,            21, "exit_failure"                 , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
               new("1CEEABF0C6A5A30BAD12CDAC0E3AB015A7188A42E6AEBB556AAD00BB9CD693AD",    2, 0x607C,            12, "__libc_csu_fini"              , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("FECB66183685EBEFFA9A1F04D13E90481EE3C395030DF6BFF12846747A35A284",   80, 0x602C,            12, "__libc_csu_init"              , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.gentoo-mipsel3-uclibc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 1, ET.ET_EXEC, EM.EM_MIPS, EF.EF_MIPS_ARCH_3 | EF.EF_MIPS_ABI_O32 | EF.EF_MIPS_32BITMODE | EF.EF_MIPS_CPIC | EF.EF_MIPS_NOREORDER, "/lib/ld-uClibc.so.0", 90,
+            },
+          new Symbol[] {}),
+        Make("mktemp.gentoo-mipsel3-uclibc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 1, ET.ET_EXEC, EM.EM_MIPS, EF.EF_MIPS_ARCH_3 | EF.EF_MIPS_ABI_O32 | EF.EF_MIPS_32BITMODE | EF.EF_MIPS_CPIC | EF.EF_MIPS_NOREORDER, "/lib/ld-uClibc.so.0", 90, 0,
           new Program[]
             {
               new("030160B49C2E7977AB82BEB98EE8D354E92C67C40CA6A1DC5221E00653191557",   352, PT.PT_PHDR            , PF.PF_X | PF.PF_R),
@@ -4314,8 +4864,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,    0,      0x0, SHN.SHN_UNDEF, "fopen64"                      , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,    0, 0x407E10, SHN.SHN_UNDEF, "__uClibc_main"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,    0, 0x407E00, SHN.SHN_UNDEF, "__cxa_atexit"                 , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.gentoo-sparc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_SPARC32PLUS, EF.EF_SPARC_SUN_US3 | EF.EF_SPARC_SUN_US1 | EF.EF_SPARC_32PLUS, "/lib/ld-linux.so.2", 79,
+            },
+          new Symbol[] {}),
+        Make("mktemp.gentoo-sparc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_SPARC32PLUS, EF.EF_SPARC_SUN_US3 | EF.EF_SPARC_SUN_US1 | EF.EF_SPARC_32PLUS, "/lib/ld-linux.so.2", 79, 0,
           new Program[]
             {
               new("B62949758762EDDC087A42E8A765FA0F31D5228DA42601CA612EEC0A9E136C9F",   288, PT.PT_PHDR        , PF.PF_R),
@@ -4438,7 +4989,8 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "__ctype_b_loc"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "calloc"                       , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("209425336127279CD1B301B5A1A159FFD74AAA96DD64DAE5BA81C9F84F3E78C8", 4,  0x8A10,            13, "_IO_stdin_used"               , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -4447,7 +4999,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeMktempOpenbsdSources() => new object?[]
       {
         // @formatter:off
-        Make("mktemp.openbsd-alpha", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ALPHA, 0, "/usr/libexec/ld.so", 45,
+        Make("mktemp.openbsd-alpha", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ALPHA, 0, "/usr/libexec/ld.so", 45, 0,
           new Program[]
             {
               new("D4427F68577A057F3941775DC43BC4B87A49E8D76B22AEFB740588ADD2DA18E2",  560, PT.PT_PHDR             , PF.PF_X | PF.PF_R),
@@ -4537,8 +5089,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   0, 0x32080, SHN.SHN_ABS  , "_end"        , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0, 0x32028, SHN.SHN_ABS  , "__data_start", STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0, 0x32028, SHN.SHN_ABS  , "__bss_start" , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.openbsd-armv7", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_SOFT, "/usr/libexec/ld.so", 30,
+            },
+          new Symbol[] {}),
+        Make("mktemp.openbsd-armv7", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_SOFT, "/usr/libexec/ld.so", 30, 0,
           new Program[]
             {
               new("25DED2E0339BC394758F418740D99965443276F56D48C74E54A9BEAC6E144B2C",  416, PT.PT_PHDR             , PF.PF_R),
@@ -4618,8 +5171,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 4, 0x311FC,            24, "__progname"         , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null, 4, 0x311F8,            24, "environ"            , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x31231,            24, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.openbsd-hppa", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_HPUX, 0, ET.ET_DYN, EM.EM_PARISC, EF.EFA_PARISC_1_1, "/usr/libexec/ld.so", 55,
+            },
+          new Symbol[] {}),
+        Make("mktemp.openbsd-hppa", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_HPUX, 0, ET.ET_DYN, EM.EM_PARISC, EF.EFA_PARISC_1_1, "/usr/libexec/ld.so", 55, 0,
           new Program[]
             {
               new("B93AF1903749E8B0A09F455D9E8BB80A96C86FF3C57DBCF5B8AD946B3FD63E2E",  320, PT.PT_PHDR             , PF.PF_X | PF.PF_R),
@@ -4719,8 +5273,9 @@ namespace JetBrains.FormatRipper.Tests
               new("B91AAE7B8799A9E7D6862CB99C622B0F1F1D1FE73FF6B0D88AFB6A9BAE4EA344",  84,  0x788,             2, "fatal"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0,  0xB6C,             3, "__fini"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0, 0x3848, SHN.SHN_ABS  , "_GLOBAL_OFFSET_TABLE_", STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.openbsd-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/usr/libexec/ld.so", 29,
+            },
+          new Symbol[] {}),
+        Make("mktemp.openbsd-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/usr/libexec/ld.so", 29, 0,
           new Program[]
             {
               new("DBF4789700320776CE9DF13ABAEBE40183B1ED069F6D166B6FC9B425CBBDAC62",  384, PT.PT_PHDR             , PF.PF_R),
@@ -4796,8 +5351,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0,        0x0, SHN.SHN_UNDEF, "vwarn"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null, 0,        0x0, SHN.SHN_UNDEF, "vwarnx"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x20001159,            23, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.openbsd-landisk", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_SH, EF.EF_SH2E, "/usr/libexec/ld.so", 50,
+            },
+          new Symbol[] {}),
+        Make("mktemp.openbsd-landisk", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_SH, EF.EF_SH2E, "/usr/libexec/ld.so", 50, 0,
           new Program[]
             {
               new("6043C51D842BA61029DF65F33A682D851EF69AC6461D61438BD91204B877A0E8",  256, PT.PT_PHDR             , PF.PF_X | PF.PF_R),
@@ -4888,8 +5444,9 @@ namespace JetBrains.FormatRipper.Tests
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0, 0x11F74,            18, "___ctors_end"       , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0,   0xC8C,             4, "__fini"             , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0, 0x11F7C,            19, "___dtors_end"       , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.openbsd-luna88k", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_88K, 0, "/usr/libexec/ld.so", 32,
+            },
+          new Symbol[] {}),
+        Make("mktemp.openbsd-luna88k", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_88K, 0, "/usr/libexec/ld.so", 32, 0,
           new Program[]
             {
               new("7BBAEC89D71CF106B800FBF6E34C2860A065EF9E88B0E5CC76235BA0A34A08EC",  320, PT.PT_PHDR             , PF.PF_X | PF.PF_R),
@@ -4964,8 +5521,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 112, 0x22208, SHN.SHN_UNDEF, "_csu_finish" , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  76, 0x22220, SHN.SHN_UNDEF, "mkdtemp"     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 152, 0x22250, SHN.SHN_UNDEF, "vwarnx"      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.openbsd-macppc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC, 0, "/usr/libexec/ld.so", 29,
+            },
+          new Symbol[] {}),
+        Make("mktemp.openbsd-macppc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC, 0, "/usr/libexec/ld.so", 29, 0,
           new Program[]
             {
               new("EEC65CE41099B70B743017FF22F6E4AFEF5A254B73F915B70ECF393B54B0A5A9",  384, PT.PT_PHDR             , PF.PF_R),
@@ -5042,8 +5600,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0,     0x0, SHN.SHN_UNDEF, "vwarn"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null, 0,     0x0, SHN.SHN_UNDEF, "vwarnx"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x316D5,            24, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.openbsd-octeon", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_MIPS, EF.EF_MIPS_ARCH_3 | EF.EF_MIPS_CPIC | EF.EF_MIPS_PIC | EF.EF_MIPS_NOREORDER, "/usr/libexec/ld.so", 62,
+            },
+          new Symbol[] {}),
+        Make("mktemp.openbsd-octeon", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_MIPS, EF.EF_MIPS_ARCH_3 | EF.EF_MIPS_CPIC | EF.EF_MIPS_PIC | EF.EF_MIPS_NOREORDER, "/usr/libexec/ld.so", 62, 0,
           new Program[]
             {
               new("7B6BD34BB543CF54DC10EB2A18F0CD4267850AA18EAE387646455316866FFE52",  560, PT.PT_PHDR             , PF.PF_X | PF.PF_R),
@@ -5148,8 +5707,9 @@ namespace JetBrains.FormatRipper.Tests
               new("AC2BCB99CB476C64693F45243021E5D8E7B5DE15584684D9F2C0E67AE1229AED",  76,   0xC38,             2, "usage"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 400,   0xD70, SHN.SHN_UNDEF, "getenv"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("44BE8A44502F14CF3C91F17ED512334605E68DBB38E50680CF3A8676B363BA15", 108,   0xC88,             2, "fatalx"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.openbsd-powerpc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/usr/libexec/ld.so", 29,
+            },
+          new Symbol[] {}),
+        Make("mktemp.openbsd-powerpc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/usr/libexec/ld.so", 29, 0,
           new Program[]
             {
               new("5237E2079851DFB3ACC765CA7635ABC0CA4F71F1A59551DC0DF0E5252659AEF0",  672, PT.PT_PHDR             , PF.PF_R),
@@ -5227,8 +5787,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0,     0x0, SHN.SHN_UNDEF, "vwarn"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x60),
               new(null, 0,     0x0, SHN.SHN_UNDEF, "vwarnx"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x60),
               new(null, 0, 0x31A61,            25, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.openbsd-sparc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_SPARCV9, EF.EF_SPARCV9_RMO, "/usr/libexec/ld.so", 51,
+            },
+          new Symbol[] {}),
+        Make("mktemp.openbsd-sparc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_SPARCV9, EF.EF_SPARCV9_RMO, "/usr/libexec/ld.so", 51, 0,
           new Program[]
             {
               new("B41856043C43C70AB936DBFE87DFEF3BD028A37136A7A4485F413F76332FA640",  560, PT.PT_PHDR             , PF.PF_X | PF.PF_R),
@@ -5322,8 +5883,9 @@ namespace JetBrains.FormatRipper.Tests
               new("FFBE4DAFBE8707C1544A234750610CDFDDE751EE09B0FA3A1C6F48E2E2830E6D", 116,    0x780,             2, "fatalx"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("8559A4DC5DA6632A57FADF60AEBB7CE456CEA65940E1E3A480FBFEA6EC3B0D18", 116,    0x800,             2, "fatal"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0,    0xBE0,             3, "__fini"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("mktemp.openbsd-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/usr/libexec/ld.so", 29,
+            },
+          new Symbol[] {}),
+        Make("mktemp.openbsd-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/usr/libexec/ld.so", 29, 0,
           new Program[]
             {
               new("AC19C69BD164A3895E7F6F3E0FF207753A3D2AE97E686065669ACA71CA3E302E",  672, PT.PT_PHDR             , PF.PF_R),
@@ -5399,7 +5961,8 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0,    0x0, SHN.SHN_UNDEF, "vwarn"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null, 0,    0x0, SHN.SHN_UNDEF, "vwarnx"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x4A89,            23, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -5408,7 +5971,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeMktempUbuntuSources() => new object?[]
       {
         // @formatter:off
-        Make("mktemp.ubuntu-riscv64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_RISCV, EF.EF_RISCV_RVC | EF.EF_RISCV_FLOAT_ABI_DOUBLE, "/lib/ld-linux-riscv64-lp64d.so.1", 72,
+        Make("mktemp.ubuntu-riscv64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_RISCV, EF.EF_RISCV_RVC | EF.EF_RISCV_FLOAT_ABI_DOUBLE, "/lib/ld-linux-riscv64-lp64d.so.1", 72, 0,
           new Program[]
             {
               new("6CCCCF63D212A0D7FF4A556AD1B99771F0CEDB95EF8101BD09723B49290E3CF6",   560, PT.PT_PHDR         , PF.PF_R),
@@ -5527,7 +6090,8 @@ namespace JetBrains.FormatRipper.Tests
               new("AF5570F5A1810B7AF78CAF4BC70A660F0DF51E42BAF91D4DE5B2328DE0E83DFC",    8, 0x7078,            21, "Version"                      , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,    8, 0x7330,            23, "program_name"                 , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
               new("C8E1E8B9CDD4ED4C2964C3CE7B9FDACCDD814CF2E96AA281C3E5F9F6F736F492",   47, 0x5EA0,            13, "version_etc_copyright"        , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -5536,7 +6100,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeNologinOpenSuseSources() => new object?[]
       {
         // @formatter:off
-        Make("nologin.opensuse-i586", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-linux.so.2", 31,
+        Make("nologin.opensuse-i586", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-linux.so.2", 31, 0,
           new Program[]
             {
               new("A17E35BD8F6D755D08F6380AB904C63D446DD5F5960A02501228F37BE8AAC1F4",  384, PT.PT_PHDR        , PF.PF_R),
@@ -5618,8 +6182,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,    0x0, SHN.SHN_UNDEF, "fputs"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0,    0x0, SHN.SHN_UNDEF, "close"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("7B11C1133330CD161071BF23A0C9B6CE5320A8F3A0F83620035A72BE46DF4104", 4, 0x2004,            18, "_IO_stdin_used"               , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("nologin.opensuse-ppc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/lib64/ld64.so.2", 28,
+            },
+          new Symbol[] {}),
+        Make("nologin.opensuse-ppc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/lib64/ld64.so.2", 28, 0,
           new Program[]
             {
               new("CE2D98B084439F347E7B45AB66BC573F425DE691A0A9F94BE7E95C6CB897F239",  504, PT.PT_PHDR        , PF.PF_R),
@@ -5693,8 +6258,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "dcgettext"                    , STT.STT_FUNC   , STB.STB_GLOBAL, 0x60),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "_ITM_registerTMCloneTable"    , STT.STT_NOTYPE , STB.STB_WEAK  , 0x0),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "setlocale"                    , STT.STT_FUNC   , STB.STB_GLOBAL, 0x60),
-            }),
-        Make("nologin.opensuse-s390x", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_S390, 0, "/lib/ld64.so.1", 28,
+            },
+          new Symbol[] {}),
+        Make("nologin.opensuse-s390x", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_S390, 0, "/lib/ld64.so.1", 28, 0,
           new Program[]
             {
               new("201FE8C1D227170824FC8F1C6D50EFBA66EFFA9B24EDEFB0BD7713C7368BB9A4",  504, PT.PT_PHDR        , PF.PF_R),
@@ -5768,7 +6334,8 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   0,   0x0, SHN.SHN_UNDEF, "fputs"                        , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0,   0x0, SHN.SHN_UNDEF, "close"                        , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("7257276638A1A175B90122B60518982DBB387970D30F15CAD6756189608CE503", 908, 0xEE0,            14, "main"                         , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -5777,7 +6344,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeTempfileUbuntuSources() => new object?[]
       {
         // @formatter:off
-        Make("tempfile.ubuntu-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_AARCH64, 0, "/lib/ld-linux-aarch64.so.1", 33,
+        Make("tempfile.ubuntu-aarch64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_AARCH64, 0, "/lib/ld-linux-aarch64.so.1", 33, 0,
           new Program[]
             {
               new("7813EE839D108145E383C6E67BACB635E5848582301710BE4AD83D4902ADEEDF",  504, PT.PT_PHDR        , PF.PF_R),
@@ -5853,8 +6420,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "_ITM_registerTMCloneTable"  , STT.STT_NOTYPE , STB.STB_WEAK  , 0x0),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "__errno_location"           , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "getenv"                     , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("tempfile.ubuntu-armhf", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-linux-armhf.so.3", 34,
+            },
+          new Symbol[] {}),
+        Make("tempfile.ubuntu-armhf", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-linux-armhf.so.3", 34, 0,
           new Program[]
             {
               new("9E19C435892E8AAE9509B55B609A29696F3BA15F1C98AA9B152E6811B112AD94",    8, PT.PT_MIPS_RTPROC, PF.PF_R),
@@ -5932,8 +6500,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "fchmod"                     , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 4, 0x1208C,            23, "progname"                   , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
               new("7B11C1133330CD161071BF23A0C9B6CE5320A8F3A0F83620035A72BE46DF4104", 4,   0xD90,            15, "_IO_stdin_used"             , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
-            }),
-        Make("tempfile.ubuntu-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-linux.so.2", 29,
+            },
+          new Symbol[] {}),
+        Make("tempfile.ubuntu-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-linux.so.2", 29, 0,
           new Program[]
             {
               new("D0A7074974E546389DD2403D8FEDF50FA2C4D4CA3AB953A97095AB33BF60DB86",  384, PT.PT_PHDR        , PF.PF_R),
@@ -6011,8 +6580,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 4, 0x40A4,            26, "progname"                   , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("7B11C1133330CD161071BF23A0C9B6CE5320A8F3A0F83620035A72BE46DF4104", 4, 0x2004,            18, "_IO_stdin_used"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("9D9F290527A6BE626A8F5985B26E19B237B44872B03631811DF4416FC1713178", 4, 0x2000,            18, "_fp_hw"                     , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
-        Make("tempfile.ubuntu-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/lib64/ld-linux-x86-64.so.2", 28,
+            },
+          new Symbol[] {}),
+        Make("tempfile.ubuntu-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/lib64/ld-linux-x86-64.so.2", 28, 0,
           new Program[]
             {
               new("412CA733D4D13688FFA33DECCA017E5659CD0806E11B1895FDC30C9C4F91E70B",  728, PT.PT_PHDR        , PF.PF_R),
@@ -6090,7 +6660,8 @@ namespace JetBrains.FormatRipper.Tests
               new("7B11C1133330CD161071BF23A0C9B6CE5320A8F3A0F83620035A72BE46DF4104", 4, 0x2000,            18, "_IO_stdin_used"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              , 8, 0x4040,            26, "stderr"                     , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              , 8, 0x4020,            26, "optarg"                     , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -6099,7 +6670,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeVl805Sources() => new object?[]
       {
         // @formatter:off
-        Make("vl805", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_LINUX, 0, ET.ET_EXEC, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, null, 0,
+        Make("vl805", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_LINUX, 0, ET.ET_EXEC, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, null, 0, 0,
           new Program[]
             {
               new("C769728D58E8BD725E69F9CC58F16802A5BEB2B505D92ED175D19652F69FCA8B",   1744, PT.PT_MIPS_RTPROC, PF.PF_R),
@@ -6143,6 +6714,7 @@ namespace JetBrains.FormatRipper.Tests
               new("733E49305C12479AD66A36FC86961527E4994A10F00B9AF1C79762C981D822C4",     53,     0x0,  0x1, 0, ".ARM.attributes"         , SHT.SHT_ARM_ATTRIBUTES, 0, 0, 0),
               new("2E57D20D5A55BEE90F7D21D0B2C1C179307D07E45E4E928BC9FBA312843BC295",    333,     0x0,  0x1, 0, ".shstrtab"               , SHT.SHT_STRTAB        , 0, 0, 0),
             },
+          new Symbol[] {},
           new Symbol[] {}),
         // @formatter:on
       };
@@ -6152,7 +6724,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeObjectFileSources() => new object?[]
       {
         // @formatter:off
-        Make("32bit.o", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_REL, EM.EM_386, EF.EF_NONE, null, 7,
+        Make("32bit.o", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_REL, EM.EM_386, EF.EF_NONE, null, 0, 7,
           new Program[] {},
           new Section[]
             {
@@ -6171,6 +6743,7 @@ namespace JetBrains.FormatRipper.Tests
               new("ACBE94E8D2D17C8E69A49647A214B0D0F783D424C6A554295E7759BB35B84426",  54, 0x0, 0x1,  0, ".strtab"                    , SHT.SHT_STRTAB  ,  0, 0, 0),
               new("9A9BC22C095400F3248DCDFB1867E44CE1745F948A54A00C15A12F47747CA85E", 122, 0x0, 0x1,  0, ".shstrtab"                  , SHT.SHT_STRTAB  ,  0, 0, 0),
             },
+          new Symbol[] {},
           new Symbol[]
             {
               new(null                                                              ,  0, 0x0, SHN.SHN_UNDEF, ""                     , STT.STT_NOTYPE , STB.STB_LOCAL , 0x0),
@@ -6181,7 +6754,7 @@ namespace JetBrains.FormatRipper.Tests
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0, 0x0,             6, "__x86.get_pc_thunk.ax", STT.STT_FUNC   , STB.STB_GLOBAL, 0x2),
               new(null                                                              ,  0, 0x0, SHN.SHN_UNDEF, "_GLOBAL_OFFSET_TABLE_", STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
             }),
-        Make("64bit.o", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_REL, EM.EM_X86_64, EF.EF_NONE, null, 4,
+        Make("64bit.o", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_REL, EM.EM_X86_64, EF.EF_NONE, null, 0, 4,
           new Program[] {},
           new Section[]
             {
@@ -6198,6 +6771,7 @@ namespace JetBrains.FormatRipper.Tests
               new("AA332074EC8F5249245D2D2A690A43C5558BF0805480BEAB5F13EAEA46E6DE42",  10, 0x0, 0x1,  0, ".strtab"           , SHT.SHT_STRTAB  ,  0, 0, 0),
               new("C7DC21FF76A04F9C7EDFE588743C743ECF10AD421BB27BE68AA0C904EC38915F", 103, 0x0, 0x1,  0, ".shstrtab"         , SHT.SHT_STRTAB  ,  0, 0, 0),
             },
+          new Symbol[] {},
           new Symbol[]
             {
               new(null                                                              ,  0, 0x0, SHN.SHN_UNDEF, ""    , STT.STT_NOTYPE , STB.STB_LOCAL , 0x0),
@@ -6213,7 +6787,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeCoreDumpSources() => new object?[]
       {
         // @formatter:off
-        Make("core.2042", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_CORE, EM.EM_X86_64, EF.EF_NONE, null, 0,
+        Make("core.2042", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_CORE, EM.EM_X86_64, EF.EF_NONE, null, 0, 0,
           new Program[]
             {
               new("B11E50801F733B7D90CE26C394BCFFA6FB2AB1B5168D6A8C3196A905977E6492",   5084, PT.PT_NOTE, 0),
@@ -6242,6 +6816,7 @@ namespace JetBrains.FormatRipper.Tests
               new("AD7FACB2586FC6E966C004D7D1D16B024F5805FF7CB47C7A85DABD8B48892CA7",   4096, PT.PT_LOAD, PF.PF_X),
             },
           new Section[] {},
+          new Symbol[] {},
           new Symbol[] {}),
         // @formatter:on
       };
@@ -6251,7 +6826,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityEditorSources() => new object?[]
       {
         // @formatter:off
-        MakeOptional("unity/linux_x64_editor_coreclr/Unity", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, "/lib64/ld-linux-x86-64.so.2", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 1311,
+        MakeOptional("unity/linux_x64_editor_coreclr/Unity", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, "/lib64/ld-linux-x86-64.so.2", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 1311, 0,
           new Program[]
             {
               new("A461BCA804327E9F2037AC964C81DE7D88E9DD764959BCC8EFBDA53496C6CB67",       672, PT.PT_PHDR        , PF.PF_R),
@@ -6507,8 +7082,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,       0x0, SHN.SHN_UNDEF, "sendfile64"                                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0,       0x0, SHN.SHN_UNDEF, "__register_atfork"                              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("BBCB67510FDCE4BA0A6002D839F48FC8D37BE3C10726CD7375A4793A7639BA8E", 8, 0x2984A40,            12, "UnityScriptingBackend"                          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
-        MakeOptional("unity/linux_x64_editor_mono/Unity", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, "/lib64/ld-linux-x86-64.so.2", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 1313,
+            },
+          new Symbol[] {}),
+        MakeOptional("unity/linux_x64_editor_mono/Unity", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, "/lib64/ld-linux-x86-64.so.2", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 1313, 0,
           new Program[]
             {
               new("E0A460DACECA2A19F4E4D59FDBFA0780B9EAAADC7AAE554D5B7E79D2858C1489",       672, PT.PT_PHDR        , PF.PF_R),
@@ -6764,7 +7340,8 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,       0x0, SHN.SHN_UNDEF, "sendfile64"                                     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0,       0x0, SHN.SHN_UNDEF, "__register_atfork"                              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("F17EF01C994DEC67EDBD32608DE18F843B12A6949E14F86B684B5ABAEE07F000", 5, 0x29C2A3A,            12, "UnityScriptingBackend"                          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -6773,7 +7350,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityPlayerDevelopmentSources() => new object?[]
       {
         // @formatter:off
-        MakeOptional("unity/linux_x64_player_development_coreclr/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 412,
+        MakeOptional("unity/linux_x64_player_development_coreclr/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 412, 0,
           new Program[]
             {
               new("099A466433F5B0596E7D75D476BE84C68DBCB217134F52E0BB86C8AAE235EE7F",      616, PT.PT_PHDR        , PF.PF_R),
@@ -7025,8 +7602,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,    0,       0x0, SHN.SHN_UNDEF, "__wcsftime_l"                   , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("BBCB67510FDCE4BA0A6002D839F48FC8D37BE3C10726CD7375A4793A7639BA8E",    8,  0x8DA8FE,             9, "UnityScriptingBackend"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("C2B730552C27C9EDE0EA73FECCFC4BC8542634E8CFA7E3367F3A523DC9E2F02E", 6838, 0x3CAAE70,            15, "_Z10PlayerMainiPPc"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
-        MakeOptional("unity/linux_x64_player_development_il2cpp/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE, 412,
+            },
+          new Symbol[] {}),
+        MakeOptional("unity/linux_x64_player_development_il2cpp/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE, 412, 0,
           new Program[]
             {
               new("BD80B2FA97FBBEA7457933F63FD4730F7EFF213C24CAEE1BABE041E7895E023C",      616, PT.PT_PHDR        , PF.PF_R),
@@ -7278,8 +7856,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,    0,       0x0, SHN.SHN_UNDEF, "__wcsftime_l"                   , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("E56576919ADCE0615C24125D6DAE2291E8D5BD21FA852FBC37A22454E01E8375",    7,  0x983F84,             9, "UnityScriptingBackend"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("5EC0899D2B83B00AF3122DF382298110DB34E3F8FFBCB3DF0BA32E149758EC4A", 6854, 0x3B39780,            15, "_Z10PlayerMainiPPc"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
-        MakeOptional("unity/linux_x64_player_development_mono/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 412,
+            },
+          new Symbol[] {}),
+        MakeOptional("unity/linux_x64_player_development_mono/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 412, 0,
           new Program[]
             {
               new("4BCD293B436523EF740434DC832E5712B0B242BA1154D97BCD1F3F31C3D7876F",      616, PT.PT_PHDR        , PF.PF_R),
@@ -7531,7 +8110,8 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,    0,       0x0, SHN.SHN_UNDEF, "__wcsftime_l"                   , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("F17EF01C994DEC67EDBD32608DE18F843B12A6949E14F86B684B5ABAEE07F000",    5,  0x98661C,             9, "UnityScriptingBackend"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("DAE6D46A0B5DF7B88A60D75230D0C74132A2A79ACC7F4314B08B14E8358F34B3", 6838, 0x3B4F790,            15, "_Z10PlayerMainiPPc"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -7540,7 +8120,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityPlayerNondevelopmentSources() => new object?[]
       {
         // @formatter:off
-        MakeOptional("unity/linux_x64_player_nondevelopment_coreclr/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 391,
+        MakeOptional("unity/linux_x64_player_nondevelopment_coreclr/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 391, 0,
           new Program[]
             {
               new("AD66F5AC22F93CD982C61A4FFD788A46EEFAFEF74EED38117D157BDFEB5E8D07",      616, PT.PT_PHDR        , PF.PF_R),
@@ -7792,8 +8372,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,     0,       0x0, SHN.SHN_UNDEF, "__udivti3"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("BBCB67510FDCE4BA0A6002D839F48FC8D37BE3C10726CD7375A4793A7639BA8E",     8,  0x36BB9D,             9, "UnityScriptingBackend"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("6507CD93A060D6CC9278BC53D525249C8AAC4F2BCC282BCFC5F3A853CAB562D1", 89472, 0x26E6010,            15, "_Z10PlayerMainiPPc"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
-        MakeOptional("unity/linux_x64_player_nondevelopment_il2cpp/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE, 391,
+            },
+          new Symbol[] {}),
+        MakeOptional("unity/linux_x64_player_nondevelopment_il2cpp/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE, 391, 0,
           new Program[]
             {
               new("2014725EB8C7D17EE305CC19BFAE6FA6EB16BEC705E8AE9EC8692E622A1D3FE7",      616, PT.PT_PHDR        , PF.PF_R),
@@ -8045,8 +8626,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,     0,       0x0, SHN.SHN_UNDEF, "__udivti3"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("E56576919ADCE0615C24125D6DAE2291E8D5BD21FA852FBC37A22454E01E8375",     7,  0x44FAFD,             9, "UnityScriptingBackend"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("0A6DE737489E40CD80847B74EA48721EFC1C9EE01C1A927D79CB9DF7CE06630C", 88967, 0x2692370,            15, "_Z10PlayerMainiPPc"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
-        MakeOptional("unity/linux_x64_player_nondevelopment_mono/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 391,
+            },
+          new Symbol[] {}),
+        MakeOptional("unity/linux_x64_player_nondevelopment_mono/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 391, 0,
           new Program[]
             {
               new("FD124E3DA42D1BCCDFF6D1602DBE7C2621AC16EB282AEFCB0B60A4DB74C72FDD",      616, PT.PT_PHDR        , PF.PF_R),
@@ -8298,7 +8880,8 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,     0,       0x0, SHN.SHN_UNDEF, "__udivti3"                      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("F17EF01C994DEC67EDBD32608DE18F843B12A6949E14F86B684B5ABAEE07F000",     5,  0x4507A7,             9, "UnityScriptingBackend"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("E830AF3B9A077026C39539ED90E081081B8864DCBC159755A03D451BAA64FD99", 86768, 0x269F970,            15, "_Z10PlayerMainiPPc"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new Symbol[] {}),
         // @formatter:on
       };
   }

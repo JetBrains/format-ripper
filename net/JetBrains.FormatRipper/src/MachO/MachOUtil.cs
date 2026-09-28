@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using JetBrains.FormatRipper.Impl;
@@ -366,21 +367,7 @@ namespace JetBrains.FormatRipper.MachO
       uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
       ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
 
-      symtab_command? symtab = null;
-      foreach (var command in section.Commands)
-        if (command.Type == LC.LC_SYMTAB)
-        {
-          using var cmdStream = command.CreateStream();
-          symtab_command stc;
-          StreamUtil.ReadBytes(cmdStream, (byte*)&stc, sizeof(symtab_command));
-          if ((LC)GetU4(stc.cmd) != LC.LC_SYMTAB)
-            throw new FormatException($"Invalid {nameof(symtab_command)} type");
-          if (GetU4(stc.cmdsize) < sizeof(symtab_command))
-            throw new FormatException($"Invalid {nameof(symtab_command)} size");
-          symtab = stc;
-          break;
-        }
-
+      var symtab = ReadSymtabCommand(section);
       if (symtab == null)
         return true;
 
@@ -424,29 +411,176 @@ namespace JetBrains.FormatRipper.MachO
 
         if (nStrX > strSize)
           throw new FormatException("Invalid Mach-O symbol name index");
-        strStream.Position = nStrX;
-        var str = ReadStringZ(strStream);
 
-        MachOFile.CreateStreamDelegate? createStream = null;
-        if ((nType & NT.N_STAB) == 0 && (nType & NT.N_TYPE) == NT.N_SECT)
-        {
-          if (nSect == 0 || nSect >= dataSections.Count)
-            throw new FormatException("Invalid Mach-O symbol section number");
-
-          var data = dataSections[nSect];
-          var headerDataSection = dataSections[0];
-          if (!IsZeroFill(data.Flags))
-            if (nSect == 1 && headerDataSection.Address <= nValue && nValue < headerDataSection.Address + headerDataSection.Size)
-              createStream = MakeCreateStream(headerDataSection, nValue);
-            else
-              createStream = MakeCreateStream(data, nValue);
-        }
-
-        if (!symbolFilter(new Symbol(str, nType, nSect, nDesc, nValue, createStream)))
+        if (!symbolFilter(MakeSymbol(dataSections, ReadName(strStream, nStrX), nType, nSect, nDesc, nValue)))
           return false;
       }
 
       return true;
+    }
+
+    /// <summary>
+    /// Looks for the external symbol with the given name, the local symbols and the debugging entries are skipped and the
+    /// empty name is never found. The symbol definition is preferred to the undefined reference, then the lower symbol index
+    /// wins. The name-sorted groups of the external and undefined symbols from <see cref="LC.LC_DYSYMTAB"/> are binary
+    /// searched when it is present and the image is linked by Apple ld, otherwise the symbol table is scanned. The
+    /// <paramref name="dataSections"/> are the ones returned by <see cref="ReadDataSections"/> for the same
+    /// <paramref name="section"/>. The parsed stream should stay opened while the <see cref="Symbol.CreateStream"/> delegate
+    /// is in use.
+    /// </summary>
+    public static bool TryGetSymbol(MachOFile.Section section, List<DataSection> dataSections, string name, [NotNullWhen(true)] out Symbol? symbol)
+    {
+      if (TryGetSymbolByDySymTab(section, dataSections, name, out symbol) == null)
+        TryGetSymbolLinear(section, dataSections, name, out symbol);
+      return symbol != null;
+    }
+
+    internal static unsafe bool? TryGetSymbolByDySymTab(MachOFile.Section section, List<DataSection> dataSections, string name, out Symbol? symbol)
+    {
+      symbol = null;
+      var symtab = ReadSymtabCommand(section);
+      if (symtab == null)
+        return false;
+
+      var needSwap = NeedSwap(section.Endian);
+      uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+
+      dysymtab_command? dysymtab = null;
+      foreach (var command in section.Commands)
+        if (command.Type == LC.LC_DYSYMTAB)
+        {
+          using var cmdStream = command.CreateStream();
+          dysymtab_command dstc;
+          StreamUtil.ReadBytes(cmdStream, (byte*)&dstc, sizeof(dysymtab_command));
+          if ((LC)GetU4(dstc.cmd) != LC.LC_DYSYMTAB)
+            throw new FormatException($"Invalid {nameof(dysymtab_command)} type");
+          if (GetU4(dstc.cmdsize) < sizeof(dysymtab_command))
+            throw new FormatException($"Invalid {nameof(dysymtab_command)} size");
+          dysymtab = dstc;
+          break;
+        }
+
+      // Note: the external symbols are grouped by module instead of the sorting by name when the table of contents is present
+      if (dysymtab == null || GetU4(dysymtab.Value.tocoff) != 0)
+        return null;
+
+      // Note: only Apple ld sorts the symbol groups by name as loader.h describes, lld and Zig don't because the modern dyld
+      // looks the exported symbols up in the export trie
+      if (!IsLinkedByAppleLd(section))
+        return null;
+
+      using var table = new SymbolTable(section, dataSections, symtab.Value, name);
+      var iExtDefSym = GetU4(dysymtab.Value.iextdefsym);
+      var nExtDefSym = GetU4(dysymtab.Value.nextdefsym);
+      var iUndefSym = GetU4(dysymtab.Value.iundefsym);
+      var nUndefSym = GetU4(dysymtab.Value.nundefsym);
+      if ((ulong)iExtDefSym + nExtDefSym > table.Count || (ulong)iUndefSym + nUndefSym > table.Count)
+        throw new FormatException($"Invalid {nameof(dysymtab_command)} symbol groups");
+
+      // Note: the undefined symbols are in the order they were seen by the static linker when MH_BINDATLOAD is set
+      var entry = table.FindSorted(iExtDefSym, nExtDefSym, true) ??
+                  ((section.MhFlags & MH_Flags.MH_BINDATLOAD) == 0
+                    ? table.FindSorted(iUndefSym, nUndefSym, false)
+                    : table.FindLinear(iUndefSym, nUndefSym, false));
+      if (entry == null)
+        return false;
+
+      symbol = table.MakeSymbol(entry.Value);
+      return true;
+    }
+
+    internal static bool TryGetSymbolLinear(MachOFile.Section section, List<DataSection> dataSections, string name, out Symbol? symbol)
+    {
+      symbol = null;
+      var symtab = ReadSymtabCommand(section);
+      if (symtab == null)
+        return false;
+
+      using var table = new SymbolTable(section, dataSections, symtab.Value, name);
+      var entry = table.FindLinear(0, table.Count, true) ?? table.FindLinear(0, table.Count, false);
+      if (entry == null)
+        return false;
+
+      symbol = table.MakeSymbol(entry.Value);
+      return true;
+    }
+
+    private static unsafe symtab_command? ReadSymtabCommand(MachOFile.Section section)
+    {
+      var needSwap = NeedSwap(section.Endian);
+      uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+
+      foreach (var command in section.Commands)
+        if (command.Type == LC.LC_SYMTAB)
+        {
+          using var cmdStream = command.CreateStream();
+          symtab_command stc;
+          StreamUtil.ReadBytes(cmdStream, (byte*)&stc, sizeof(symtab_command));
+          if ((LC)GetU4(stc.cmd) != LC.LC_SYMTAB)
+            throw new FormatException($"Invalid {nameof(symtab_command)} type");
+          if (GetU4(stc.cmdsize) < sizeof(symtab_command))
+            throw new FormatException($"Invalid {nameof(symtab_command)} size");
+          return stc;
+        }
+
+      return null;
+    }
+
+    private static unsafe bool IsLinkedByAppleLd(MachOFile.Section section)
+    {
+      var needSwap = NeedSwap(section.Endian);
+      uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
+
+      foreach (var command in section.Commands)
+        if (command.Type == LC.LC_BUILD_VERSION)
+        {
+          using var cmdStream = command.CreateStream();
+          build_version_command bvc;
+          StreamUtil.ReadBytes(cmdStream, (byte*)&bvc, sizeof(build_version_command));
+          if ((LC)GetU4(bvc.cmd) != LC.LC_BUILD_VERSION)
+            throw new FormatException($"Invalid {nameof(build_version_command)} type");
+          var nTools = GetU4(bvc.ntools);
+          if (GetU4(bvc.cmdsize) < (uint)sizeof(build_version_command) + (ulong)nTools * (uint)sizeof(build_tool_version))
+            throw new FormatException($"Invalid {nameof(build_version_command)} size");
+          for (var n = 0u; n < nTools; ++n)
+          {
+            build_tool_version btv;
+            StreamUtil.ReadBytes(cmdStream, (byte*)&btv, sizeof(build_tool_version));
+            if ((TOOL)GetU4(btv.tool) == TOOL.TOOL_LD)
+              return true;
+          }
+        }
+
+      return false;
+    }
+
+    // Note: nlist.h defines the name of the zero string index as "" whatever the string table starts with
+    private static string ReadName(Stream strStream, uint nStrX)
+    {
+      if (nStrX == 0)
+        return "";
+      strStream.Position = nStrX;
+      return ReadStringZ(strStream);
+    }
+
+    private static Symbol MakeSymbol(List<DataSection> dataSections, string name, NT nType, byte nSect, ND nDesc, ulong nValue)
+    {
+      MachOFile.CreateStreamDelegate? createStream = null;
+      if ((nType & NT.N_STAB) == 0 && (nType & NT.N_TYPE) == NT.N_SECT)
+      {
+        if (nSect == 0 || nSect >= dataSections.Count)
+          throw new FormatException("Invalid Mach-O symbol section number");
+
+        var data = dataSections[nSect];
+        var headerDataSection = dataSections[0];
+        if (!IsZeroFill(data.Flags))
+          if (nSect == 1 && headerDataSection.Address <= nValue && nValue < headerDataSection.Address + headerDataSection.Size)
+            createStream = MakeCreateStream(headerDataSection, nValue);
+          else
+            createStream = MakeCreateStream(data, nValue);
+      }
+
+      return new Symbol(name, nType, nSect, nDesc, nValue, createStream);
 
       static MachOFile.CreateStreamDelegate MakeCreateStream(DataSection data, ulong nValue)
       {
@@ -454,6 +588,160 @@ namespace JetBrains.FormatRipper.MachO
         var size = checked((long)(data.Address + data.Size - nValue));
         return () => new ReadOnlyNestedStream(data.CreateSection!(), offset, size);
       }
+    }
+
+    private readonly struct Entry
+    {
+      internal readonly uint Index;
+      internal readonly uint Name;
+      internal readonly NT Type;
+      internal readonly byte Section;
+      internal readonly ND Desc;
+      internal readonly ulong Value;
+
+      internal Entry(uint index, uint name, NT type, byte section, ND desc, ulong value)
+      {
+        Index = index;
+        Name = name;
+        Type = type;
+        Section = section;
+        Desc = desc;
+        Value = value;
+      }
+
+      internal bool IsExternal => (Type & NT.N_STAB) == 0 && (Type & NT.N_EXT) != 0;
+      internal bool IsDefined => (Type & NT.N_TYPE) is NT.N_ABS or NT.N_SECT or NT.N_INDR;
+    }
+
+    private sealed class SymbolTable : IDisposable
+    {
+      private const int ChunkEntryCount = 1024;
+
+      private readonly List<DataSection> myDataSections;
+      private readonly bool myNeedSwap;
+      private readonly bool myIsAbi64;
+      private readonly int myEntrySize;
+      private readonly uint myStrSize;
+      private readonly Stream mySectionStream;
+      private readonly Stream mySymStream;
+      private readonly Stream myStrStream;
+      private readonly byte[] myEntryBuffer;
+      private readonly byte[] myName;
+      private readonly byte[] myNameBuffer;
+      internal readonly uint Count;
+
+      internal unsafe SymbolTable(MachOFile.Section section, List<DataSection> dataSections, symtab_command symtab, string name)
+      {
+        myDataSections = dataSections;
+        myNeedSwap = NeedSwap(section.Endian);
+        myIsAbi64 = (section.CpuType & CPU_TYPE.CPU_ARCH_ABI64) == CPU_TYPE.CPU_ARCH_ABI64;
+        myEntrySize = myIsAbi64 ? sizeof(nlist_64) : sizeof(nlist);
+        myStrSize = GetU4(symtab.strsize);
+        Count = GetU4(symtab.nsyms);
+
+        mySectionStream = section.CreateStream();
+        myStrStream = new ReadOnlyNestedStream(mySectionStream, GetU4(symtab.stroff), myStrSize);
+        mySymStream = new ReadOnlyNestedStream(mySectionStream, GetU4(symtab.symoff), checked((long)Count * myEntrySize));
+        myEntryBuffer = new byte[myEntrySize];
+        myName = Encoding.UTF8.GetBytes(name);
+        myNameBuffer = new byte[myName.Length + 1];
+      }
+
+      public void Dispose()
+      {
+        mySymStream.Dispose();
+        myStrStream.Dispose();
+        mySectionStream.Dispose();
+      }
+
+      internal Entry? FindSorted(uint start, uint count, bool isDefined)
+      {
+        var lo = start;
+        var hi = start + count;
+        while (lo < hi)
+        {
+          var mid = lo + (hi - lo) / 2;
+          if (Compare(Read(mid)) > 0)
+            lo = mid + 1;
+          else
+            hi = mid;
+        }
+
+        for (var index = lo; index < start + count; ++index)
+        {
+          var entry = Read(index);
+          if (!IsName(entry))
+            break;
+          if (entry.IsExternal && entry.IsDefined == isDefined)
+            return entry;
+        }
+
+        return null;
+      }
+
+      internal unsafe Entry? FindLinear(uint start, uint count, bool isDefined)
+      {
+        var buffer = new byte[ChunkEntryCount * myEntrySize];
+        mySymStream.Position = (long)start * myEntrySize;
+        for (var index = start; index < start + count;)
+        {
+          var chunkCount = (int)Math.Min(ChunkEntryCount, start + count - index);
+          StreamUtil.Read(mySymStream, buffer, 0, chunkCount * myEntrySize);
+          fixed (byte* ptr = buffer)
+            for (var n = 0; n < chunkCount; ++n, ++index)
+            {
+              var entry = Decode(index, ptr + n * myEntrySize);
+              if (entry.IsExternal && entry.IsDefined == isDefined && IsName(entry))
+                return entry;
+            }
+        }
+
+        return null;
+      }
+
+      internal Symbol MakeSymbol(in Entry entry) =>
+        MachOUtil.MakeSymbol(myDataSections, ReadName(myStrStream, CheckName(entry.Name)), entry.Type, entry.Section, entry.Desc, entry.Value);
+
+      private unsafe Entry Read(uint index)
+      {
+        mySymStream.Position = (long)index * myEntrySize;
+        StreamUtil.Read(mySymStream, myEntryBuffer, 0, myEntrySize);
+        fixed (byte* ptr = myEntryBuffer)
+          return Decode(index, ptr);
+      }
+
+      private unsafe Entry Decode(uint index, byte* ptr)
+      {
+        if (myIsAbi64)
+        {
+          nlist_64 nl;
+          MemoryUtil.CopyBytes(ptr, (byte*)&nl, sizeof(nlist_64));
+          return new Entry(index, GetU4(nl.n_strx), (NT)nl.n_type, nl.n_sect, (ND)GetU2(nl.n_desc), GetU8(nl.n_value));
+        }
+        else
+        {
+          nlist nl;
+          MemoryUtil.CopyBytes(ptr, (byte*)&nl, sizeof(nlist));
+          return new Entry(index, GetU4(nl.n_strx), (NT)nl.n_type, nl.n_sect, (ND)GetU2(nl.n_desc), GetU4(nl.n_value));
+        }
+      }
+
+      private bool IsName(in Entry entry) => myName.Length != 0 && Compare(entry) == 0;
+
+      private int Compare(in Entry entry)
+      {
+        var nStrX = CheckName(entry.Name);
+        if (nStrX == 0)
+          return myName.Length == 0 ? 0 : 1;
+        myStrStream.Position = nStrX;
+        return StreamUtil.CompareStringZ(myStrStream, myName, myNameBuffer);
+      }
+
+      private uint CheckName(uint nStrX) => nStrX <= myStrSize ? nStrX : throw new FormatException("Invalid Mach-O symbol name index");
+
+      private ushort GetU2(ushort v) => myNeedSwap ? EndianUtil.SwapU2(v) : v;
+      private uint GetU4(uint v) => myNeedSwap ? EndianUtil.SwapU4(v) : v;
+      private ulong GetU8(ulong v) => myNeedSwap ? EndianUtil.SwapU8(v) : v;
     }
 
     /// <summary>

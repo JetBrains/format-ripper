@@ -356,6 +356,8 @@ namespace JetBrains.FormatRipper.Tests
             else
               GenerateSymbolInfos(verifiedSymbols);
 
+            SymbolUtil.AssertLookups(CheckLookups(section, dataSections, symbols, SymbolUtil.MakeLookups(symbols, x => x.Name, IsExternal, IsDefined), symbols.Count <= SymbolUtil.MaxLinearLookupSymbolCount));
+
             if (unityScriptingBackend == null)
               foreach (var symbol in symbols)
                 if (symbol.Name == UnityUtil.UNITY_SCRIPTING_BACKEND_MACHO_SYMBOL &&
@@ -392,6 +394,55 @@ namespace JetBrains.FormatRipper.Tests
           Assert.IsFalse(MachOFile.Is(stream));
           Assert.That(() => MachOFile.Parse(stream), Throws.Exception);
         });
+    }
+
+    private static bool IsExternal(MachOUtil.Symbol symbol) => (symbol.Type & NT.N_STAB) == 0 && (symbol.Type & NT.N_EXT) != 0;
+
+    private static bool IsDefined(MachOUtil.Symbol symbol) => (symbol.Type & NT.N_TYPE) is NT.N_ABS or NT.N_SECT or NT.N_INDR;
+
+    private static List<string> CheckLookups(MachOFile.Section section, List<MachOUtil.DataSection> dataSections, IList<MachOUtil.Symbol> symbols, IEnumerable<Lookup> lookups, bool withLinear)
+    {
+      var errors = new List<string>();
+      foreach (var lookup in lookups)
+      {
+        var name = lookup.Name;
+        Check(nameof(MachOUtil.TryGetSymbol), MachOUtil.TryGetSymbol(section, dataSections, name, out var symbol), symbol);
+        Check(nameof(MachOUtil.TryGetSymbolByDySymTab), MachOUtil.TryGetSymbolByDySymTab(section, dataSections, name, out symbol), symbol);
+        if (withLinear)
+          Check(nameof(MachOUtil.TryGetSymbolLinear), MachOUtil.TryGetSymbolLinear(section, dataSections, name, out symbol), symbol);
+
+        void Check(string method, bool? isFound, MachOUtil.Symbol? found)
+        {
+          if (isFound != null && CheckLookup(lookup, symbols, method, isFound.Value, found) is { } error)
+            errors.Add(error);
+        }
+      }
+
+      return errors;
+    }
+
+    private static string? CheckLookup(Lookup lookup, IList<MachOUtil.Symbol> symbols, string method, bool isFound, MachOUtil.Symbol? symbol)
+    {
+      var expectedSymbol = lookup.Index == null ? null : symbols[lookup.Index.Value];
+      if (isFound != (expectedSymbol != null) || isFound != (symbol != null))
+        return $"{method}(\"{lookup.Name}\") returned {isFound}, but the expected symbol index is {lookup.Index?.ToString() ?? "null"}";
+      if (expectedSymbol == null || symbol == null)
+        return null;
+
+      var error = $"{method}(\"{lookup.Name}\") returned \"{symbol.Name}\" at 0x{symbol.Value:X}, but the expected symbol {lookup.Index} is \"{expectedSymbol.Name}\" at 0x{expectedSymbol.Value:X}";
+      if (symbol.Name != expectedSymbol.Name || symbol.Value != expectedSymbol.Value || symbol.SectionIndex != expectedSymbol.SectionIndex ||
+          symbol.Type != expectedSymbol.Type || symbol.Description != expectedSymbol.Description ||
+          (symbol.CreateStream == null) != (expectedSymbol.CreateStream == null))
+        return error;
+      if (symbol.CreateStream != null && expectedSymbol.CreateStream != null)
+      {
+        using var expectedStream = expectedSymbol.CreateStream();
+        using var stream = symbol.CreateStream();
+        if (expectedStream.Length != stream.Length)
+          return error;
+      }
+
+      return null;
     }
 
     private const int Sha256HashStringLength = 2 * 256 / 8;

@@ -102,10 +102,12 @@ namespace JetBrains.FormatRipper.Tests
       EM expectedEMachine,
       EF expectedEFlags,
       string? expectedInterpreter,
-      int expectedSymbolCount,
+      int expectedDynSymCount,
+      int expectedSymTabCount,
       Program[]? expectedPrograms,
       Section[]? expectedSections,
-      Symbol[]? expectedSymbols = null) => new object?[]
+      Symbol[]? expectedDynSymSymbols,
+      Symbol[]? expectedSymTabSymbols) => new object?[]
         {
           false,
           resourceName,
@@ -118,10 +120,12 @@ namespace JetBrains.FormatRipper.Tests
           expectedEFlags,
           expectedInterpreter,
           null,
-          expectedSymbolCount,
+          expectedDynSymCount,
+          expectedSymTabCount,
           expectedPrograms,
           expectedSections,
-          expectedSymbols
+          expectedDynSymSymbols,
+          expectedSymTabSymbols
         };
 
     private static object?[] MakeOptional(
@@ -135,10 +139,12 @@ namespace JetBrains.FormatRipper.Tests
       EF expectedEFlags,
       string? expectedInterpreter,
       string? expectedUnityScriptingBackend,
-      int expectedSymbolCount,
+      int expectedDynSymCount,
+      int expectedSymTabCount,
       Program[]? expectedPrograms,
       Section[]? expectedSections,
-      Symbol[]? expectedSymbols = null) => new object?[]
+      Symbol[]? expectedDynSymSymbols,
+      Symbol[]? expectedSymTabSymbols) => new object?[]
         {
           true,
           resourceName,
@@ -151,10 +157,12 @@ namespace JetBrains.FormatRipper.Tests
           expectedEFlags,
           expectedInterpreter,
           expectedUnityScriptingBackend,
-          expectedSymbolCount,
+          expectedDynSymCount,
+          expectedSymTabCount,
           expectedPrograms,
           expectedSections,
-          expectedSymbols
+          expectedDynSymSymbols,
+          expectedSymTabSymbols
         };
 
     [TestCaseSource(typeof(ElfFileTest), nameof(Sources))]
@@ -171,10 +179,12 @@ namespace JetBrains.FormatRipper.Tests
       EF expectedEFlags,
       string? expectedInterpreter,
       string? expectedUnityScriptingBackend,
-      int expectedSymbolCount,
+      int expectedDynSymCount,
+      int expectedSymTabCount,
       Program[]? expectedPrograms,
       Section[]? expectedSections,
-      Symbol[]? expectedSymbols)
+      Symbol[]? expectedDynSymSymbols,
+      Symbol[]? expectedSymTabSymbols)
     {
       TestDataUtil.OpenRead(ResourceCategory.Elf, resourceName, stream =>
         {
@@ -236,42 +246,11 @@ namespace JetBrains.FormatRipper.Tests
           else
             GenerateSectionStreamInfos(file);
 
-          var symSectionIndex = ElfUtil.Find(file.Sections, SHT.SHT_DYNSYM) ?? ElfUtil.Find(file.Sections, SHT.SHT_SYMTAB);
-          var symbols = new List<ElfUtil.Symbol>(expectedSymbolCount);
-          if (symSectionIndex != null)
-            Assert.IsTrue(ElfUtil.GetSymbols(file, symSectionIndex.Value, file.Sections[symSectionIndex.Value].Link, symbol =>
-              {
-                symbols.Add(symbol);
-                return true;
-              }));
-          Assert.AreEqual(expectedSymbolCount, symbols.Count, "Unexpected symbol count");
-
-          var verifiedSymbols = SymbolUtil.SelectEdges(symbols);
-          if (expectedSymbols != null)
-          {
-            Assert.AreEqual(expectedSymbols.Length, verifiedSymbols.Length);
-            for (var n = 0; n < expectedSymbols.Length; ++n)
-            {
-              var expectedSymbol = expectedSymbols[n];
-              var symbol = verifiedSymbols[n];
-
-              Assert.AreEqual(expectedSymbol.Name, symbol.Name);
-              Assert.AreEqual(expectedSymbol.Size, symbol.Size);
-              Assert.AreEqual(expectedSymbol.Value, symbol.Value, $"Expected 0x{expectedSymbol.Value:X}, but was 0x{symbol.Value:X}");
-              Assert.AreEqual(expectedSymbol.SectionIndex, symbol.SectionIndex, $"Expected {expectedSymbol.SectionIndex}, but was {symbol.SectionIndex}");
-              Assert.AreEqual(expectedSymbol.Type, symbol.Type);
-              Assert.AreEqual(expectedSymbol.Binding, symbol.Binding);
-              Assert.AreEqual(expectedSymbol.Other, symbol.Other);
-
-              var hash = symbol.CreateStream == null ? null : CalculateStreamHash(() => symbol.CreateStream());
-              Assert.AreEqual(expectedSymbol.Hash, hash);
-            }
-          }
-          else
-            GenerateSymbolStreamInfos(verifiedSymbols);
+          var dynSymSymbols = AssertSymbols(file, SHT.SHT_DYNSYM, expectedDynSymCount, expectedDynSymSymbols);
+          var symTabSymbols = AssertSymbols(file, SHT.SHT_SYMTAB, expectedSymTabCount, expectedSymTabSymbols);
 
           string? unityScriptingBackend = null;
-          foreach (var symbol in symbols)
+          foreach (var symbol in dynSymSymbols.Concat(symTabSymbols))
             if (symbol is { Type: STT.STT_OBJECT, Binding: STB.STB_GLOBAL, Name: UnityUtil.UNITY_SCRIPTING_BACKEND_ELF_PE_SYMBOL })
             {
               using var dataStream = symbol.CreateStream!();
@@ -284,6 +263,98 @@ namespace JetBrains.FormatRipper.Tests
           if (canIgnoreMissingResource)
             Assert.Ignore(str);
         });
+    }
+
+    private static List<ElfUtil.Symbol> AssertSymbols(ElfFile file, SHT symSectionType, int expectedSymbolCount, Symbol[]? expectedSymbols)
+    {
+      var symSectionIndex = ElfUtil.Find(file.Sections, symSectionType);
+      var symbols = new List<ElfUtil.Symbol>(expectedSymbolCount);
+      if (symSectionIndex != null)
+        Assert.IsTrue(ElfUtil.GetSymbols(file, symSectionIndex.Value, file.Sections[symSectionIndex.Value].Link, symbol =>
+          {
+            symbols.Add(symbol);
+            return true;
+          }));
+      Assert.AreEqual(expectedSymbolCount, symbols.Count, $"Unexpected {symSectionType} symbol count");
+
+      var verifiedSymbols = SymbolUtil.SelectEdges(symbols);
+      if (expectedSymbols != null)
+      {
+        Assert.AreEqual(expectedSymbols.Length, verifiedSymbols.Length);
+        for (var n = 0; n < expectedSymbols.Length; ++n)
+        {
+          var expectedSymbol = expectedSymbols[n];
+          var symbol = verifiedSymbols[n];
+
+          Assert.AreEqual(expectedSymbol.Name, symbol.Name);
+          Assert.AreEqual(expectedSymbol.Size, symbol.Size);
+          Assert.AreEqual(expectedSymbol.Value, symbol.Value, $"Expected 0x{expectedSymbol.Value:X}, but was 0x{symbol.Value:X}");
+          Assert.AreEqual(expectedSymbol.SectionIndex, symbol.SectionIndex, $"Expected {expectedSymbol.SectionIndex}, but was {symbol.SectionIndex}");
+          Assert.AreEqual(expectedSymbol.Type, symbol.Type);
+          Assert.AreEqual(expectedSymbol.Binding, symbol.Binding);
+          Assert.AreEqual(expectedSymbol.Other, symbol.Other);
+
+          var hash = symbol.CreateStream == null ? null : CalculateStreamHash(() => symbol.CreateStream());
+          Assert.AreEqual(expectedSymbol.Hash, hash);
+        }
+      }
+      else
+        GenerateSymbolStreamInfos(verifiedSymbols);
+
+      SymbolUtil.AssertLookups(CheckLookups(file, symSectionIndex, symbols, SymbolUtil.MakeLookups(symbols, x => x.Name, IsGlobal, IsDefined), symbols.Count <= SymbolUtil.MaxLinearLookupSymbolCount));
+      return symbols;
+    }
+
+    private static bool IsGlobal(ElfUtil.Symbol symbol) => symbol.Binding != STB.STB_LOCAL;
+
+    private static bool IsDefined(ElfUtil.Symbol symbol) => (SHN)symbol.SectionIndex != SHN.SHN_UNDEF;
+
+    private static List<string> CheckLookups(ElfFile file, ushort? symSectionIndex, IList<ElfUtil.Symbol> symbols, IEnumerable<Lookup> lookups, bool withLinear)
+    {
+      var errors = new List<string>();
+      foreach (var lookup in lookups)
+      {
+        var symIndex = symSectionIndex!.Value;
+        var strIndex = file.Sections[symIndex].Link;
+        var name = lookup.Name;
+        Check(nameof(ElfUtil.TryGetSymbol), ElfUtil.TryGetSymbol(file, symIndex, strIndex, name, out var symbol), symbol);
+        Check(nameof(ElfUtil.TryGetSymbolByGnuHash), ElfUtil.TryGetSymbolByGnuHash(file, symIndex, strIndex, name, out symbol), symbol);
+        Check(nameof(ElfUtil.TryGetSymbolBySysVHash), ElfUtil.TryGetSymbolBySysVHash(file, symIndex, strIndex, name, out symbol), symbol);
+        if (withLinear)
+          Check(nameof(ElfUtil.TryGetSymbolLinear), ElfUtil.TryGetSymbolLinear(file, symIndex, strIndex, name, out symbol), symbol);
+
+        void Check(string method, bool? isFound, ElfUtil.Symbol? found)
+        {
+          if (isFound != null && CheckLookup(lookup, symbols, method, isFound.Value, found) is { } error)
+            errors.Add(error);
+        }
+      }
+
+      return errors;
+    }
+
+    private static string? CheckLookup(Lookup lookup, IList<ElfUtil.Symbol> symbols, string method, bool isFound, ElfUtil.Symbol? symbol)
+    {
+      var expectedSymbol = lookup.Index == null ? null : symbols[lookup.Index.Value];
+      if (isFound != (expectedSymbol != null) || isFound != (symbol != null))
+        return $"{method}(\"{lookup.Name}\") returned {isFound}, but the expected symbol index is {lookup.Index?.ToString() ?? "null"}";
+      if (expectedSymbol == null || symbol == null)
+        return null;
+
+      var error = $"{method}(\"{lookup.Name}\") returned \"{symbol.Name}\" at 0x{symbol.Value:X}, but the expected symbol {lookup.Index} is \"{expectedSymbol.Name}\" at 0x{expectedSymbol.Value:X}";
+      if (symbol.Name != expectedSymbol.Name || symbol.Size != expectedSymbol.Size || symbol.Value != expectedSymbol.Value || symbol.SectionIndex != expectedSymbol.SectionIndex ||
+          symbol.Type != expectedSymbol.Type || symbol.Binding != expectedSymbol.Binding || symbol.Other != expectedSymbol.Other ||
+          (symbol.CreateStream == null) != (expectedSymbol.CreateStream == null))
+        return error;
+      if (symbol.CreateStream != null && expectedSymbol.CreateStream != null)
+      {
+        using var expectedStream = expectedSymbol.CreateStream();
+        using var stream = symbol.CreateStream();
+        if (expectedStream.Length != stream.Length)
+          return error;
+      }
+
+      return null;
     }
 
     private const int Sha256HashStringLength = 2 * 256 / 8;

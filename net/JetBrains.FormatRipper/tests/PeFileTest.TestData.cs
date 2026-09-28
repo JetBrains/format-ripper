@@ -10,6 +10,7 @@ namespace JetBrains.FormatRipper.Tests
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static readonly object?[] Sources =
       MakeArmatureInterfaceSources()
+        .Concat(MakeConfiguratorPicturesGeneralSources())
         .Concat(MakeHelloWorldSources())
         .Concat(MakeIntelAudioServiceSources())
         .Concat(MakeJetBrainsDotUltimateSources())
@@ -42,12 +43,26 @@ namespace JetBrains.FormatRipper.Tests
               new("0B19EF73B198F7A79544AF024FBD93DF00565A71B0AAF85AD51341F0F6BD8858", 0x4000, 1168, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("7997FCCB921BBBEC48AFFE39184E36CD9083112DE35C4C09D21058E992F193F9", 0x6000,   12,  512, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
+          new Export[] {},
+          new Symbol[] {}),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeConfiguratorPicturesGeneralSources() => new object?[]
+      {
+        // @formatter:off
+        Make("Configurator.Pictures.General.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LINE_NUMS_STRIPPED | IMAGE_FILE.IMAGE_FILE_LOCAL_SYMS_STRIPPED | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasMetadata, null, "[118:8]", "0;0;[0:D8],[DC:3C],[120:6ECE0]", 0, 0,
+          new Section[]
             {
+              new("314625E59C4508530C6470DC398418B899566AEE58796BFF58FA589AA5B73474",  0x2000, 450612, 451072, ".text" , IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("F4D0E733100AEC88217ADBA7D63D053594A503D3663CF92260F6DA2B345A1A74", 0x72000,    113,    512, ".sdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
+              new("ADE710B46EF792E98F409027F3810E141D4D2D95EB0F67736269F7C002B7D0E8", 0x74000,   1016,   1024, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
+              new("DCB0C22956642CDBD6CBAA1BA2C4161F4BEA3E6658E54DFCAFB99A0ECABB25C4", 0x76000,     12,    512, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -71,9 +86,7 @@ namespace JetBrains.FormatRipper.Tests
               new("515DCABC6686ACF9D3D2A7A54F8337460255A705AE8085291ACAA45844B71808", 0xB000, 1256, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
               new("6F568A123BA3D1ECDF918D9DDCA2729F1814BA8EF6B8EF382D37A24A2EF95076", 0xC000,  124,  512, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
+          new Export[] {},
           new Symbol[]
             {
               new(null                                                              ,     0x54, IMAGE_SYM.IMAGE_SYM_DEBUG    , ".file"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_FILE    , 1),
@@ -291,12 +304,8 @@ namespace JetBrains.FormatRipper.Tests
               new("CF8F62AA1D6B2A87CB849D980CA3C89A3C757C45B53A3ABD9F23D62B2C6AC96F",  0x2000, 381304, 381440, ".text", IMAGE_SCN.IMAGE_SCN_CNT_CODE | IMAGE_SCN.IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("C19EB59AEB29A23681AB1EAFF52029A13B7A832F4B01247B5BFF999D15E5DC45", 0x60000,   1604,   2048, ".rsrc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -313,12 +322,8 @@ namespace JetBrains.FormatRipper.Tests
               new("D77D6CBCC1A4C25ABFFC4726BDC1DDD48093A529522C39F314AE6F9C2C752130", 0x4C000,   9000,   5120, ".data" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
               new("8A71965FC1ED7610C33054DED573C96326F68AD1B9DA4CC97E149216042BDE0C", 0x4F000, 518536, 518656, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -334,12 +339,8 @@ namespace JetBrains.FormatRipper.Tests
               new("B6BB9FD44AEA8DA35C62FED33FFEDFEB5405BF6A05472FA4557E1C14E4DA3473", 0x4000, 1188, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("FBDA17B84E9D0ECEC21CC9A8756AA5E5721F6033445AA02802B478F5479DAC75", 0x6000,   12,  512, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -354,108 +355,72 @@ namespace JetBrains.FormatRipper.Tests
               new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("ServiceModelRegUI_broken_counter_sign.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "F84C34B0F4D2B5201D53EF92B4A437256B1D5130CA9A7C3A035DE1FEB23CC4DC5B461ED8AD82DDA15CA7DDE025DB37B3", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
           new Section[]
             {
               new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("ServiceModelRegUI_broken_hash.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "9A265A0C8B9955A18B4BCF6795B85F54DBDD0510BB0D9B336B33679C0C44B167154702A649B63E50198AA4507EA991BA", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
           new Section[]
             {
               new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("ServiceModelRegUI_broken_nested_sign.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "51213207ED1B0DC09F70B9879D42D269C83068E362D7B9855F71450C49B1CAAE321DA8773FFC738DCDA2FC35C67F1B48", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
           new Section[]
             {
               new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("ServiceModelRegUI_broken_nested_sign_timestamp.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "5BFAB068C6A7298B2947EE17914FB9FC6D849C78BD442B9E9CB56E04490F5FD647A58E0DEADDE3E68FE7F1068C4BC9BE", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
           new Section[]
             {
               new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("ServiceModelRegUI_broken_sign.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "23D9D4D67504B25A67D897743A4CFCC6DD7B810A12E50F0D834E3FBC05BB03FF92C78EF1536F53345E9DB87B6BF18857", "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
           new Section[]
             {
               new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("ServiceModelRegUI_empty_sign.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
           new Section[]
             {
               new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("ServiceModelRegUI_no_sign.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
           new Section[]
             {
               new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("ServiceModelRegUI_trimmed_sign.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:100],[104:4C],[158:8A8]", 0, 0,
           new Section[]
             {
               new("7B69B8D44FE8237399F1991A60381BEE63384E1A545E234E6182EB9A55B54CF7", 0x1000,  112,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("4B95CC52F1D0B3C10867D70E4FBD959105250F6BE80FDB994EDD4CC28617FDCD", 0x2000, 1424, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -471,12 +436,8 @@ namespace JetBrains.FormatRipper.Tests
               new("6269095F285B58584313231F8B7535C6166DA56623F09D7C5D48FC85609B5C1F", 0x4000, 1480, 1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("937DCC437937440C911BD1A77A5A2E820D9DB2185A6612482D16D1B9A06D30FE", 0x6000,   12,  512, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -500,9 +461,7 @@ namespace JetBrains.FormatRipper.Tests
               new("11A19C0FD0E0DE507DF1B17BFE171D3F845DC882F3A479FA667855347EBC1AEF", 0x12000,  1256,  1536, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
               new("61DFC96152854BD5CC0623CA81DDB57530257AAADDD3151BE0D4451834D46E0F", 0x13000,   136,   512, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
+          new Export[] {},
           new Symbol[]
             {
               new(null                                                              ,     0x54, IMAGE_SYM.IMAGE_SYM_DEBUG    , ".file"                                      , IMAGE_SYM_TYPE.IMAGE_SYM_TYPE_NULL, IMAGE_SYM_DTYPE.IMAGE_SYM_DTYPE_NULL    , IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_FILE    , 1),
@@ -726,9 +685,7 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 2, 0x11AF, "RtlCaptureStackBackTrace", "ntdll.RtlCaptureStackBackTrace"),
               new(null, 3, 0x11D8, "RtlUnwind"               , "ntdll.RtlUnwind"),
             },
-          new Symbol[]
-            {
-            }),
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -748,12 +705,8 @@ namespace JetBrains.FormatRipper.Tests
               new("9A10AA65728A04AE1E13FFE3F1D06F3E74FA02BD72AF973A83A0F2CAEDA82988", 0x20000,  2544,  2560, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("F20F1FB85654BB18F6A862B114DB9BFDD3ED18FEAD68A97F1A9FBB8CEDCA2E24", 0x21000,   784,  1024, ".reloc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -978,9 +931,7 @@ namespace JetBrains.FormatRipper.Tests
               new("03CC492B65C9F0FAE67D021D466A66CEC3830AA66D7967758EE6439ECB1C6376", 4392, 0x310C, "v2i_GENERAL_NAMES"                         , null),
               new("639F24AD09E97D8CDEB08B4BA450402460F3FEA59C207CF332687F90A0BA8F8E", 4393, 0x60FF, "v2i_GENERAL_NAME_ex"                       , null),
             },
-          new Symbol[]
-            {
-            }),
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -1205,9 +1156,7 @@ namespace JetBrains.FormatRipper.Tests
               new("46910D907166C0EDEE90E70B314B2E012B05832D83FAFF2C1FEFFEF73D8784CE", 494, 0x19B5, "d2i_SSL_SESSION"                        , null),
               new("B6FF8663EF9FBB0624705C770ECE14E2DBB52946083196C90129E23DAEEE740F", 495, 0x1F4B, "i2d_SSL_SESSION"                        , null),
             },
-          new Symbol[]
-            {
-            }),
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -1430,9 +1379,7 @@ namespace JetBrains.FormatRipper.Tests
               new("AFBBF93FE7EE1218FF5F0D8B2DBEF31B79A326F98E8EAB75CA100AB252A28754", 2000, 0x27A0F0, null                                                                         , null),
               new("AF075A1844C82E267101B9A242DC17CB26CE26B637C105ABC0A45C209961A9ED", 2001, 0x2C7FF0, null                                                                         , null),
             },
-          new Symbol[]
-            {
-            }),
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -1450,12 +1397,8 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0x52000, 450560,     0, ".ndata", IMAGE_SCN.IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ | IMAGE_SCN.IMAGE_SCN_MEM_WRITE),
               new("B694314DA065AF267A2663626777BFEA9A44844EA693971F9DE0BCF55DB14711", 0xC0000,   4936,  5120, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -1470,48 +1413,32 @@ namespace JetBrains.FormatRipper.Tests
               new("15ED8A949B5654395555576600FF0306F5B03D52571C56BDE0D725FFBCA31129", 0x1000,  176, 4096, ".text", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("FEDA58E961851B8320E24BEC8BD09077B203666EAEF06C2E3AFCDF2FACDF0305", 0x2000, 1016, 4096, ".rsrc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("winrsmgr.arm64.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARM64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:100],[104:4C],[158:6A8]", 0, 0,
           new Section[]
             {
               new("8A6EEAB522694F3BD97D2391F3E8F80013A6361A24425BF685D8802616C42F90", 0x1000,  176,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("E0ED8BBEC587B37930298C642C904815629EDFFF1277D74A38DEDC7CC8D1E318", 0x2000, 1016, 1024, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("winrsmgr.x64.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:100],[104:4C],[158:6A8]", 0, 0,
           new Section[]
             {
               new("279E52357C3EA6F61679AA70B99B26629CB50035AE906571A3D5D757BFFAB063", 0x1000,  176,  512, ".rdata", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("AB9386AFE335241D0B7333732E74BAD20AB925910BEFC55DD7244CD729CE0EF2", 0x2000, 1016, 1024, ".rsrc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("winrsmgr.x86.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE.IMAGE_FILE_DLL, 0, null, "[150:8]", "0;0;[0:110],[114:3C],[158:6A8]", 0, 0,
           new Section[]
             {
               new("C3B51FA099FCFEEF0FC2B0CE491F50C2A795B323F4594904A8F5A52B220DB48E", 0x1000,  176,  512, ".text", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("AB9386AFE335241D0B7333732E74BAD20AB925910BEFC55DD7244CD729CE0EF2", 0x2000, 1016, 1024, ".rsrc", IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -1531,12 +1458,8 @@ namespace JetBrains.FormatRipper.Tests
               new("1E4541BA03FEE2D04DEAF226C52354F60E12ABFA774EF15E1DBB13CA9EF15F7A", 0x6000, 1072, 4096, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("6CDDC6E918564521DAAB8ACD557B0CFC329358FBCF647AF3A647030D9020062A", 0x7000,  172, 4096, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("wscadminui.arm64.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARM64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE, 0, null, "[188:8]", "0;0;[0:138],[13C:4C],[190:2270]", 0, 0,
           new Section[]
             {
@@ -1548,12 +1471,8 @@ namespace JetBrains.FormatRipper.Tests
               new("05EEC4806620EA1ABD3051623FC6EBA883CD0E2D45F2CEE9142BAE47B06EB9FA", 0x6000, 1072, 1536, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("1C25417A9028E192093D289802D626B670E3579A147C1D0ECCD3C694175F6644", 0x7000,   32,  512, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("wscadminui.x64.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE, 0, null, "[190:8]", "0;0;[0:140],[144:4C],[198:2268]", 0, 0,
           new Section[]
             {
@@ -1565,12 +1484,8 @@ namespace JetBrains.FormatRipper.Tests
               new("4BB271F571107645497DBED57688893265FF701652B5FC54B09A05C1E8A838EA", 0x6000, 1072, 1536, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("A6EBEC46E03F21845E3BEC456E576CFB61829DFC09C7ADCAB8A7D278B06D12CE", 0x7000,   32,  512, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         Make("wscadminui.x86.exe", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_GUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE, 0, null, "[180:8]", "0;0;[0:140],[144:3C],[188:1E78]", 0, 0,
           new Section[]
             {
@@ -1581,12 +1496,8 @@ namespace JetBrains.FormatRipper.Tests
               new("C5BD4FB1BC714207826EDEA8A0167CC573232EC8EC05EB088A2F09A044FF5D99", 0x5000, 1072, 1536, ".rsrc"  , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_READ),
               new("A4C0780A6BEF1F03E6E8C63FECFDFA40260FEAB0132ADEE2A0AF5B58008C4231", 0x6000,  304,  512, ".reloc" , IMAGE_SCN.IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN.IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN.IMAGE_SCN_MEM_READ),
             },
-          new Export[]
-            {
-            },
-          new Symbol[]
-            {
-            }),
+          new Export[] {},
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -1808,9 +1719,7 @@ namespace JetBrains.FormatRipper.Tests
               new("A164B8565688F57B92546D3C832708C5F5A94F8A3B8D58D36C7D3F28DE5B90E1", 226, 0x1532FC0, "uds_system_shutdown_and_force_cleanup", null),
               new("E76C88A162599F777D0370D83DC3C6DADEC7D6BDEC24A2AAB3BEBE52BE1D5758", 227, 0x1533088, "uds_wait_handle_complete"             , null),
             },
-          new Symbol[]
-            {
-            }),
+          new Symbol[] {}),
         MakeOptional("unity/win_x64_editor_coreclr/Unity.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "1E47E9E40357F101A6C086DE4731298916986BD2C49388F8C7AD77420B0DD9CE348164EB10E3292AB6CE889F9F39B8DC", "[278:8]", "0;0;[0:228],[22C:4C],[280:C6E5980]", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 72, 0,
           new Section[]
             {
@@ -1898,9 +1807,7 @@ namespace JetBrains.FormatRipper.Tests
               new("D89DBA95F52C5C4933C5EE9AA9F258162EC326257F5D32AAA7D06836322922EA", 71, 0x14D9BB0, "uds_system_shutdown_and_force_cleanup", null),
               new("E82EF58AA6F66D239837266BD45705FB47DD712CDFF51E6B4AF956D0D36BC264", 72, 0x14D9CB0, "uds_wait_handle_complete"             , null),
             },
-          new Symbol[]
-            {
-            }),
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -1925,9 +1832,7 @@ namespace JetBrains.FormatRipper.Tests
               new("F3A57D538435941EB95A0A923EBA0F305D931E5289D77526E218ACBCEE8894DF", 2, 0x1941B18, "UnityMain2"           , null),
               new("749F8A654CA0CDBE4D6A28F74EF49F30C10878728BD608A05DC1D18D3E6FE623", 3, 0x3136E9C, "UnityScriptingBackend", null),
             },
-          new Symbol[]
-            {
-            }),
+          new Symbol[] {}),
         MakeOptional("unity/win_x64_player_development_mono/UnityPlayer.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "47761481B3F084645CCDCCCA66A2F56D20624D81CF76F193CCF300134C706C972FD23DD101BBC3F542D2F1C67D785739", "[208:8]", "0;0;[0:1B8],[1BC:4C],[210:55765F0]", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 3, 0,
           new Section[]
             {
@@ -1946,9 +1851,7 @@ namespace JetBrains.FormatRipper.Tests
               new("BF8C25A5214AA8165917FB5A4594B03F727918DB9B8C2289F5780253B8EE60D0", 2, 0x1A8F6A0, "UnityMain2"           , null),
               new("EB9FCD10C40F0369E45DDA441D1A8B24E39B565BAE0D0963B861601457DDC6DF", 3, 0x3370BD8, "UnityScriptingBackend", null),
             },
-          new Symbol[]
-            {
-            }),
+          new Symbol[] {}),
         MakeOptional("unity/win_x86_player_development_coreclr/UnityPlayer.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "098A082B7FBC5E6A1955F87FDE077EF66D4C7966434F03F1C38ACBA2B981A6F59D4EDFB47FB43F1920047552F7DA0D99", "[1F0:8]", "0;0;[0:1B0],[1B4:3C],[1F8:4711208]", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 3, 0,
           new Section[]
             {
@@ -1966,9 +1869,7 @@ namespace JetBrains.FormatRipper.Tests
               new("805B7569101C06427E6F8596EAD31FC078E940FB4A80DA6FAE9A19BD13E4E1F2", 2, 0x1729AF0, "UnityMain2"           , null),
               new("94CFCB8217A881EF0795325BE9F0F5A9489157257A107BDF612D603FFA8A755C", 3, 0x2934640, "UnityScriptingBackend", null),
             },
-          new Symbol[]
-            {
-            }),
+          new Symbol[] {}),
         // @formatter:on
       };
 
@@ -1993,9 +1894,7 @@ namespace JetBrains.FormatRipper.Tests
               new("8649C0C53FAD9BAF97215B25B4522824455FD23B321E5515E0C26432DFF374F8", 2,  0xF85660, "UnityMain2"           , null),
               new("95AA1342ABB4D0986DE0623B3F216ED51D8719E0C6EFEF38E1955DD9A95D6E38", 3, 0x1BCFA48, "UnityScriptingBackend", null),
             },
-          new Symbol[]
-            {
-            }),
+          new Symbol[] {}),
         MakeOptional("unity/win_x64_player_nondevelopment_mono/UnityPlayer.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "ECBB9E197864CEF9945874E3128E56E10EE3F2E91EA77B4EC6D94B879FB6BC70207DC1DB2AA74E5B5A545780497511B3", "[200:8]", "0;0;[0:1B0],[1B4:4C],[208:247CDF8]", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 3, 0,
           new Section[]
             {
@@ -2014,9 +1913,7 @@ namespace JetBrains.FormatRipper.Tests
               new("169690B8258CA7D6C44DC65DE357AC75031DB0F472FE852EDC8A26873030A4A3", 2, 0x126EBE0, "UnityMain2"           , null),
               new("76279593AADAE108F13283550DFF4EB698E19D75CB760BF1BAE664DF624F4B9E", 3, 0x208DD80, "UnityScriptingBackend", null),
             },
-          new Symbol[]
-            {
-            }),
+          new Symbol[] {}),
         MakeOptional("unity/win_x86_player_nondevelopment_coreclr/UnityPlayer.dll", IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386, IMAGE_SUBSYSTEM.IMAGE_SUBSYSTEM_WINDOWS_CUI, IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_LARGE_ADDRESS_AWARE | IMAGE_FILE.IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE.IMAGE_FILE_DLL, CodeOptions.HasCmsBlob, "9EA45444C98C95B6A4EC01546A335A191EE093E24CAFDE9DD0A7655C18308C9E907434E2D307650C89C0E2EEA23DF9A2", "[1E8:8]", "0;0;[0:1A8],[1AC:3C],[1F0:1A87610]", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 3, 0,
           new Section[]
             {
@@ -2034,9 +1931,7 @@ namespace JetBrains.FormatRipper.Tests
               new("FD260B2D17C57CE81B6E174056888006EDE0539B253A783DEAA509F1E877C239", 2,  0xE0AA60, "UnityMain2"           , null),
               new("8FD9A5D2598D7A2C7925F3B6518FFD33A6E8A9177B2D94A6377588E8522A7DC4", 3, 0x18E255C, "UnityScriptingBackend", null),
             },
-          new Symbol[]
-            {
-            }),
+          new Symbol[] {}),
         // @formatter:on
       };
   }

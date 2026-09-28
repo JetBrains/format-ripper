@@ -42,6 +42,7 @@ public class PeSignatureInjector
 
     IMAGE_FILE_HEADER ifh;
     StreamUtil.ReadBytes(sourceStream, (byte*)&ifh, sizeof(IMAGE_FILE_HEADER));
+    long sectionTablePosition = checked(sourceStream.Position + EndianUtil.GetLeU2(ifh.SizeOfOptionalHeader));
     ifh.TimeDateStamp = EndianUtil.GetLeU4(signatureTransferData.TimeDateStamp);
     StreamUtil.WriteBytes(outputStream, (byte*)&ifh, sizeof(IMAGE_FILE_HEADER));
 
@@ -53,23 +54,23 @@ public class PeSignatureInjector
       {
       case Magic.IMAGE_NT_OPTIONAL_HDR32_MAGIC:
         {
-          if (EndianUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER32))
-            throw new FormatException("Invalid 32-bit option header size");
+          if (EndianUtil.GetLeU2(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER32))
+            throw new FormatException("Invalid 32-bit optional header size");
 
           IMAGE_OPTIONAL_HEADER32 ioh;
           StreamUtil.ReadBytes(sourceStream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER32));
-          numberOfRvaAndSizes = Math.Max(EndianUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+          numberOfRvaAndSizes = EndianUtil.GetLeU4(ioh.NumberOfRvaAndSizes);
           ioh.CheckSum = EndianUtil.GetLeU4(signatureTransferData.CheckSum);
           StreamUtil.WriteBytes(outputStream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER32));
         }
         break;
       case Magic.IMAGE_NT_OPTIONAL_HDR64_MAGIC:
         {
-          if (EndianUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER64))
-            throw new FormatException("Invalid 64-bit option header size");
+          if (EndianUtil.GetLeU2(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER64))
+            throw new FormatException("Invalid 64-bit optional header size");
           IMAGE_OPTIONAL_HEADER64 ioh;
           StreamUtil.ReadBytes(sourceStream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER64));
-          numberOfRvaAndSizes = Math.Max(EndianUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+          numberOfRvaAndSizes = EndianUtil.GetLeU4(ioh.NumberOfRvaAndSizes);
           ioh.CheckSum = EndianUtil.GetLeU4(signatureTransferData.CheckSum);
           StreamUtil.WriteBytes(outputStream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER64));
         }
@@ -78,11 +79,21 @@ public class PeSignatureInjector
         throw new FormatException("Unsupported PE image optional header");
       }
 
+    long iddsSize = sectionTablePosition - sourceStream.Position;
+    if (iddsSize % sizeof(IMAGE_DATA_DIRECTORY) != 0)
+      throw new FormatException("Invalid optional header size");
+    uint iddsCount = (uint)(iddsSize / sizeof(IMAGE_DATA_DIRECTORY));
+    if (iddsCount < numberOfRvaAndSizes)
+      throw new FormatException("Invalid number of data directories");
+
+    if (iddsCount <= ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY)
+      throw new SignatureInjectionException("The optional header is too small to contain the security data directory");
+
     long existingSignatureOffset = 0;
 
-    int rvaSize = checked((int)numberOfRvaAndSizes * sizeof(IMAGE_DATA_DIRECTORY));
+    int rvaSize = checked((int)iddsCount * sizeof(IMAGE_DATA_DIRECTORY));
 
-    fixed (IMAGE_DATA_DIRECTORY* iddsBuf = new IMAGE_DATA_DIRECTORY[numberOfRvaAndSizes])
+    fixed (IMAGE_DATA_DIRECTORY* iddsBuf = new IMAGE_DATA_DIRECTORY[iddsCount])
     {
       StreamUtil.ReadBytes(sourceStream, (byte*)iddsBuf, rvaSize);
       existingSignatureOffset = EndianUtil.GetLeU4(iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY].VirtualAddress);

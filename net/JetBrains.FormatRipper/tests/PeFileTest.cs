@@ -264,6 +264,8 @@ namespace JetBrains.FormatRipper.Tests
           else
             GenerateExportInfos(verifiedExports);
 
+          SymbolUtil.AssertLookups(CheckExportLookups(file, exports, SymbolUtil.MakeLookups(exports, x => x.Name, IsNamed, _ => true), exports.Count <= SymbolUtil.MaxLinearLookupSymbolCount));
+
           var symbols = new List<PeUtil.Symbol>(expectedSymbolCount);
           Assert.IsTrue(PeUtil.GetSymbols(file, symbol =>
             {
@@ -295,6 +297,8 @@ namespace JetBrains.FormatRipper.Tests
           }
           else
             GenerateSymbolInfos(verifiedSymbols);
+
+          SymbolUtil.AssertLookups(CheckSymbolLookups(file, symbols, SymbolUtil.MakeLookups(symbols, x => x.Name, IsExternal, IsDefined)));
 
           string? unityScriptingBackend = null;
           foreach (var export in exports)
@@ -332,6 +336,78 @@ namespace JetBrains.FormatRipper.Tests
         });
     }
 
+    private static bool IsNamed(PeUtil.Export export) => export.Name != null;
+
+    private static bool IsExternal(PeUtil.Symbol symbol) => symbol.StorageClass is IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL or IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_WEAK_EXTERNAL;
+
+    private static bool IsDefined(PeUtil.Symbol symbol) => (IMAGE_SYM)symbol.SectionNumber != IMAGE_SYM.IMAGE_SYM_UNDEFINED;
+
+    private static List<string> CheckExportLookups(PeFile file, IList<PeUtil.Export> exports, IEnumerable<Lookup> lookups, bool withLinear)
+    {
+      var errors = new List<string>();
+      foreach (var lookup in lookups)
+      {
+        Check(nameof(PeUtil.TryGetExport), PeUtil.TryGetExport(file, lookup.Name, out var export), export);
+        if (withLinear)
+          Check(nameof(PeUtil.TryGetExportLinear), PeUtil.TryGetExportLinear(file, lookup.Name, out export), export);
+
+        void Check(string method, bool isFound, PeUtil.Export? found)
+        {
+          if (CheckExportLookup(lookup, exports, method, isFound, found) is { } error)
+            errors.Add(error);
+        }
+      }
+
+      return errors;
+    }
+
+    private static string? CheckExportLookup(Lookup lookup, IList<PeUtil.Export> exports, string method, bool isFound, PeUtil.Export? export)
+    {
+      var expectedExport = lookup.Index == null ? null : exports[lookup.Index.Value];
+      if (isFound != (expectedExport != null) || isFound != (export != null))
+        return $"{method}(\"{lookup.Name}\") returned {isFound}, but the expected export index is {lookup.Index?.ToString() ?? "null"}";
+      if (expectedExport == null || export == null)
+        return null;
+
+      if (export.Name != expectedExport.Name || export.Ordinal != expectedExport.Ordinal || export.VirtualAddress != expectedExport.VirtualAddress ||
+          export.Forwarder != expectedExport.Forwarder || !IsSameStream(expectedExport.CreateStream, export.CreateStream))
+        return $"{method}(\"{lookup.Name}\") returned \"{export.Name}\" with ordinal {export.Ordinal}, but the expected export {lookup.Index} is \"{expectedExport.Name}\" with ordinal {expectedExport.Ordinal}";
+      return null;
+    }
+
+    private static List<string> CheckSymbolLookups(PeFile file, IList<PeUtil.Symbol> symbols, IEnumerable<Lookup> lookups)
+    {
+      var errors = new List<string>();
+      foreach (var lookup in lookups)
+        if (CheckSymbolLookup(lookup, symbols, nameof(PeUtil.TryGetSymbol), PeUtil.TryGetSymbol(file, lookup.Name, out var symbol), symbol) is { } error)
+          errors.Add(error);
+      return errors;
+    }
+
+    private static string? CheckSymbolLookup(Lookup lookup, IList<PeUtil.Symbol> symbols, string method, bool isFound, PeUtil.Symbol? symbol)
+    {
+      var expectedSymbol = lookup.Index == null ? null : symbols[lookup.Index.Value];
+      if (isFound != (expectedSymbol != null) || isFound != (symbol != null))
+        return $"{method}(\"{lookup.Name}\") returned {isFound}, but the expected symbol index is {lookup.Index?.ToString() ?? "null"}";
+      if (expectedSymbol == null || symbol == null)
+        return null;
+
+      if (symbol.Name != expectedSymbol.Name || symbol.Value != expectedSymbol.Value || symbol.SectionNumber != expectedSymbol.SectionNumber ||
+          symbol.BaseType != expectedSymbol.BaseType || symbol.DerivedType != expectedSymbol.DerivedType || symbol.StorageClass != expectedSymbol.StorageClass ||
+          symbol.NumberOfAuxSymbols != expectedSymbol.NumberOfAuxSymbols || !IsSameStream(expectedSymbol.CreateStream, symbol.CreateStream))
+        return $"{method}(\"{lookup.Name}\") returned \"{symbol.Name}\" at 0x{symbol.Value:X}, but the expected symbol {lookup.Index} is \"{expectedSymbol.Name}\" at 0x{expectedSymbol.Value:X}";
+      return null;
+    }
+
+    private static bool IsSameStream(PeFile.CreateStreamDelegate? expectedCreateStream, PeFile.CreateStreamDelegate? createStream)
+    {
+      if (expectedCreateStream == null || createStream == null)
+        return expectedCreateStream == createStream;
+      using var expectedStream = expectedCreateStream();
+      using var stream = createStream();
+      return expectedStream.Length == stream.Length;
+    }
+
     private const int Sha256HashStringLength = 2 * 256 / 8;
     private const string @null = "null";
 
@@ -344,6 +420,12 @@ namespace JetBrains.FormatRipper.Tests
 
     private static void GenerateSectionInfos(PeFile.Section[] sections)
     {
+      if (sections.Length == 0)
+      {
+        Console.WriteLine("          new Section[] {},");
+        return;
+      }
+
       Console.WriteLine("          new Section[]");
       Console.WriteLine("            {");
 
@@ -408,6 +490,12 @@ namespace JetBrains.FormatRipper.Tests
 
     private static void GenerateExportInfos(ICollection<PeUtil.Export> exports)
     {
+      if (exports.Count == 0)
+      {
+        Console.WriteLine("          new Export[] {},");
+        return;
+      }
+
       Console.WriteLine("          new Export[]");
       Console.WriteLine("            {");
 
@@ -435,6 +523,12 @@ namespace JetBrains.FormatRipper.Tests
 
     private static void GenerateSymbolInfos(ICollection<PeUtil.Symbol> symbols)
     {
+      if (symbols.Count == 0)
+      {
+        Console.WriteLine("          new Symbol[] {},");
+        return;
+      }
+
       Console.WriteLine("          new Symbol[]");
       Console.WriteLine("            {");
 

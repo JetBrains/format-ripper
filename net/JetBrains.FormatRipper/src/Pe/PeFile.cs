@@ -139,6 +139,7 @@ namespace JetBrains.FormatRipper.Pe
 
       IMAGE_FILE_HEADER ifh;
       StreamUtil.ReadBytes(stream, (byte*)&ifh, sizeof(IMAGE_FILE_HEADER));
+      var sectionTablePosition = checked(stream.Position + EndianUtil.GetLeU2(ifh.SizeOfOptionalHeader));
 
       IPeSignatureTransferData? peSignatureTransferData = null;
       ushort iohMagic;
@@ -154,8 +155,8 @@ namespace JetBrains.FormatRipper.Pe
       {
       case Magic.IMAGE_NT_OPTIONAL_HDR32_MAGIC:
         {
-          if (EndianUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER32))
-            throw new FormatException("Invalid 32-bit option header size");
+          if (EndianUtil.GetLeU2(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER32))
+            throw new FormatException("Invalid 32-bit optional header size");
 
           IMAGE_OPTIONAL_HEADER32 ioh;
           checkSumRange = new StreamRange(checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)), sizeof(uint));
@@ -163,21 +164,21 @@ namespace JetBrains.FormatRipper.Pe
           sizeOfHeaders = EndianUtil.GetLeU4(ioh.SizeOfHeaders);
           subsystem = (IMAGE_SUBSYSTEM)EndianUtil.GetLeU2(ioh.Subsystem);
           dllCharacteristics = (IMAGE_DLLCHARACTERISTICS)EndianUtil.GetLeU2(ioh.DllCharacteristics);
-          numberOfRvaAndSizes = Math.Max(EndianUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+          numberOfRvaAndSizes = EndianUtil.GetLeU4(ioh.NumberOfRvaAndSizes);
           checkSum = EndianUtil.GetLeU4(ioh.CheckSum);
         }
         break;
       case Magic.IMAGE_NT_OPTIONAL_HDR64_MAGIC:
         {
-          if (EndianUtil.GetLeU4(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER64))
-            throw new FormatException("Invalid 64-bit option header size");
+          if (EndianUtil.GetLeU2(ifh.SizeOfOptionalHeader) < sizeof(IMAGE_OPTIONAL_HEADER64))
+            throw new FormatException("Invalid 64-bit optional header size");
           IMAGE_OPTIONAL_HEADER64 ioh;
           checkSumRange = new StreamRange(checked(stream.Position + ((byte*)&ioh.CheckSum - (byte*)&ioh)), sizeof(uint));
           StreamUtil.ReadBytes(stream, (byte*)&ioh, sizeof(IMAGE_OPTIONAL_HEADER64));
           sizeOfHeaders = EndianUtil.GetLeU4(ioh.SizeOfHeaders);
           subsystem = (IMAGE_SUBSYSTEM)EndianUtil.GetLeU2(ioh.Subsystem);
           dllCharacteristics = (IMAGE_DLLCHARACTERISTICS)EndianUtil.GetLeU2(ioh.DllCharacteristics);
-          numberOfRvaAndSizes = Math.Max(EndianUtil.GetLeU4(ioh.NumberOfRvaAndSizes), ImageDirectory.IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+          numberOfRvaAndSizes = EndianUtil.GetLeU4(ioh.NumberOfRvaAndSizes);
           checkSum = EndianUtil.GetLeU4(ioh.CheckSum);
         }
         break;
@@ -185,18 +186,29 @@ namespace JetBrains.FormatRipper.Pe
         throw new FormatException("Unsupported PE image optional header");
       }
 
+      // Note: the data directories take the rest of the optional header, CLR reads them regardless of NumberOfRvaAndSizes
+      var iddsSize = sectionTablePosition - stream.Position;
+      if (iddsSize % sizeof(IMAGE_DATA_DIRECTORY) != 0)
+        throw new FormatException("Invalid optional header size");
+      var iddsCount = (uint)(iddsSize / sizeof(IMAGE_DATA_DIRECTORY));
+      if (iddsCount < numberOfRvaAndSizes)
+        throw new FormatException("Invalid number of data directories");
+
       IMAGE_DATA_DIRECTORY exportIdd;
       IMAGE_DATA_DIRECTORY securityIdd;
       IMAGE_DATA_DIRECTORY corIdd;
-      var securityIddRange = new StreamRange(
-        checked(stream.Position + ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY * sizeof(IMAGE_DATA_DIRECTORY)),
-        sizeof(IMAGE_DATA_DIRECTORY));
-      fixed (IMAGE_DATA_DIRECTORY* iddsBuf = new IMAGE_DATA_DIRECTORY[numberOfRvaAndSizes])
+      var hasSecurityIdd = ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY < iddsCount;
+      var securityIddRange = hasSecurityIdd
+        ? new StreamRange(
+          checked(stream.Position + ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY * sizeof(IMAGE_DATA_DIRECTORY)),
+          sizeof(IMAGE_DATA_DIRECTORY))
+        : default;
+      fixed (IMAGE_DATA_DIRECTORY* iddsBuf = new IMAGE_DATA_DIRECTORY[iddsCount])
       {
-        StreamUtil.ReadBytes(stream, (byte*)iddsBuf, checked((int)numberOfRvaAndSizes * sizeof(IMAGE_DATA_DIRECTORY)));
-        exportIdd = iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_EXPORT];
-        securityIdd = iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY];
-        corIdd = iddsBuf[ImageDirectory.IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR];
+        StreamUtil.ReadBytes(stream, (byte*)iddsBuf, checked((int)iddsCount * sizeof(IMAGE_DATA_DIRECTORY)));
+        exportIdd = GetDataDirectory(iddsBuf, iddsCount, ImageDirectory.IMAGE_DIRECTORY_ENTRY_EXPORT);
+        securityIdd = GetDataDirectory(iddsBuf, iddsCount, ImageDirectory.IMAGE_DIRECTORY_ENTRY_SECURITY);
+        corIdd = GetDataDirectory(iddsBuf, iddsCount, ImageDirectory.IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
       }
 
       var numberOfSections = EndianUtil.GetLeU2(ifh.NumberOfSections);
@@ -249,11 +261,10 @@ namespace JetBrains.FormatRipper.Pe
 
       // See "AuthHashCalc" utility: https://github.com/hfiref0x/AuthHashCalc
 
-      var sortedHashIncludeRanges = StreamRangeUtil.Invert(sizeOfHeaders, new List<StreamRange>
-          {
-            checkSumRange,
-            securityIddRange
-          });
+      var sortedHashExcludeRanges = new List<StreamRange> { checkSumRange };
+      if (hasSecurityIdd)
+        sortedHashExcludeRanges.Add(securityIddRange);
+      var sortedHashIncludeRanges = StreamRangeUtil.Invert(sizeOfHeaders, sortedHashExcludeRanges);
 
       Array.Sort(ishs, (x, y) =>
         {
@@ -267,6 +278,8 @@ namespace JetBrains.FormatRipper.Pe
       var sizeOfSections = sortedHashIncludeRanges[sortedHashIncludeRanges.Count - 1].Position +
                            sortedHashIncludeRanges[sortedHashIncludeRanges.Count - 1].Size;
       var sizeOfFile = stream.Length;
+      if (sizeOfSections > sizeOfFile)
+        throw new FormatException("Invalid PE section data range");
 
       var hasSignature = false;
       var signatureData = new SignatureData();
@@ -274,6 +287,8 @@ namespace JetBrains.FormatRipper.Pe
       {
         if (EndianUtil.GetLeU4(securityIdd.VirtualAddress) < sizeOfFile)
         {
+          if (EndianUtil.GetLeU4(securityIdd.VirtualAddress) < sizeOfSections)
+            throw new FormatException("Invalid PE certificate table position");
           sortedHashIncludeRanges.Add(new StreamRange(sizeOfSections, EndianUtil.GetLeU4(securityIdd.VirtualAddress) - sizeOfSections));
           if (EndianUtil.GetLeU4(securityIdd.VirtualAddress) + EndianUtil.GetLeU4(securityIdd.Size) < sizeOfFile)
             sortedHashIncludeRanges.Add(new StreamRange(
@@ -335,6 +350,8 @@ namespace JetBrains.FormatRipper.Pe
         EndianUtil.GetLeU4(ifh.NumberOfSymbols),
         () => new ReadOnlyNestedStream(stream, 0, stream.Length));
 
+      static IMAGE_DATA_DIRECTORY GetDataDirectory(IMAGE_DATA_DIRECTORY* idds, uint count, uint index) => index < count ? idds[index] : default;
+
       static string GetName(byte* buf, int nameSize)
       {
         var blob = MemoryUtil.CopyBytes(buf, nameSize);
@@ -346,7 +363,7 @@ namespace JetBrains.FormatRipper.Pe
     {
       foreach (var ish in ishs)
         if (EndianUtil.GetLeU4(ish.VirtualAddress) <= EndianUtil.GetLeU4(idd.VirtualAddress) &&
-            EndianUtil.GetLeU4(idd.VirtualAddress) + EndianUtil.GetLeU4(idd.Size) < EndianUtil.GetLeU4(ish.VirtualAddress) + EndianUtil.GetLeU4(ish.VirtualSize))
+            (ulong)EndianUtil.GetLeU4(idd.VirtualAddress) + EndianUtil.GetLeU4(idd.Size) <= (ulong)EndianUtil.GetLeU4(ish.VirtualAddress) + EndianUtil.GetLeU4(ish.VirtualSize))
           return EndianUtil.GetLeU4(ish.PointerToRawData) + (EndianUtil.GetLeU4(idd.VirtualAddress) - EndianUtil.GetLeU4(ish.VirtualAddress));
 
       return 0;

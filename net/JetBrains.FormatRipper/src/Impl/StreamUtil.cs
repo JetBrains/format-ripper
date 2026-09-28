@@ -35,6 +35,27 @@ namespace JetBrains.FormatRipper.Impl
       return new string(Encoding.UTF8.GetChars(blob, 0, blob.Length));
     }
 
+    /// <summary>
+    /// Compares the name with the zero-terminated string at the current stream position like <c>strcmp()</c> does, the end
+    /// of the stream terminates the string too. The <paramref name="buffer"/> should be one byte longer than the name.
+    /// </summary>
+    internal static int CompareStringZ(Stream stream, byte[] name, byte[] buffer)
+    {
+      var size = 0;
+      for (int read; size <= name.Length && (read = stream.Read(buffer, size, name.Length + 1 - size)) > 0;)
+        size += read;
+      for (var n = 0; n < name.Length; ++n)
+      {
+        var b = n < size ? buffer[n] : 0;
+        if (b == 0)
+          return 1;
+        if (name[n] != b)
+          return name[n] < b ? -1 : 1;
+      }
+
+      return name.Length < size && buffer[name.Length] != 0 ? -1 : 0;
+    }
+
     internal static unsafe void ReadBytes(Stream stream, byte* dst, int size)
     {
       // Note(ww898): It is strongly required to avoid crashes because expression `v = *(V*)b` makes a cast for type which can require the bigger alignment then the alignment in the GC allocations.
