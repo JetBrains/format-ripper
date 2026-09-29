@@ -179,7 +179,6 @@ namespace JetBrains.FormatRipper.Tests
     {
       TestDataUtil.OpenRead(ResourceCategory.Pe, resourceName, stream =>
         {
-          Assert.IsTrue(PeFile.Is(stream));
           var file = PeFile.Parse(stream, PeFile.Mode.SignatureData | PeFile.Mode.ComputeHashInfo);
 
           Assert.AreEqual(expectedMachine, file.Machine);

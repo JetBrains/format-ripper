@@ -39,18 +39,6 @@ namespace JetBrains.FormatRipper.Elf
       Sections = sections;
     }
 
-    public static bool Is(Stream stream)
-    {
-      stream.Position = 0;
-      var eIdent = StreamUtil.ReadBytes(stream, EI.EI_NIDENT);
-      return
-        eIdent[EI.EI_MAG0] == ELFMAG.ELFMAG0 &&
-        eIdent[EI.EI_MAG1] == ELFMAG.ELFMAG1 &&
-        eIdent[EI.EI_MAG2] == ELFMAG.ELFMAG2 &&
-        eIdent[EI.EI_MAG3] == ELFMAG.ELFMAG3 &&
-        (EV)eIdent[EI.EI_VERSION] == EV.EV_CURRENT;
-    }
-
     public delegate Stream CreateStreamDelegate();
 
     public sealed class Program
@@ -166,6 +154,8 @@ namespace JetBrains.FormatRipper.Elf
         Section[] sections;
         {
           var eShNum = GetU2(ehdr.e_shnum);
+          if (eShNum == 0 && GetU4(ehdr.e_shoff) != 0)
+            throw new NotSupportedException("ELF extended section numbering is not supported");
           sections = new Section[eShNum];
           if (eShNum > 0)
           {
@@ -266,6 +256,8 @@ namespace JetBrains.FormatRipper.Elf
         Section[] sections;
         {
           var eShNum = GetU2(ehdr.e_shnum);
+          if (eShNum == 0 && GetU8(ehdr.e_shoff) != 0)
+            throw new NotSupportedException("ELF extended section numbering is not supported");
           sections = new Section[eShNum];
           if (eShNum > 0)
           {

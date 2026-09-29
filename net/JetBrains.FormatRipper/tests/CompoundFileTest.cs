@@ -148,7 +148,6 @@ namespace JetBrains.FormatRipper.Tests
     {
       TestDataUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
         {
-          Assert.IsTrue(CompoundFile.Is(stream));
           var file = CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData | CompoundFile.Mode.ComputeHashInfo, (_, _, _) => true);
 
         Assert.AreEqual(expectedType, file.Type);

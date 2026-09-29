@@ -16,7 +16,6 @@ public class DmgFileTest
   {
     TestDataUtil.OpenRead(ResourceCategory.Dmg, resourceName, stream =>
       {
-        Assert.IsTrue(DmgFile.Is(stream));
         var file = DmgFile.Parse(stream, DmgFile.Mode.SignatureData);
 
         Assert.AreEqual(hasSignature, file.HasSignature);
@@ -37,7 +36,7 @@ public class DmgFileTest
   {
     TestDataUtil.OpenRead(resourceCategory, resourceName, stream =>
       {
-        Assert.IsFalse(DmgFile.Is(stream));
+        Assert.That(() => DmgFile.Parse(stream), Throws.Exception);
       });
   }
 }

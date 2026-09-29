@@ -21,18 +21,14 @@ namespace JetBrains.SignatureVerifier.Tests
     [Test]
     public async Task VerifySignTest(VerifySignatureStatus expectedResult, string resourceName)
     {
-      var file = TestDataUtil.OpenRead(ResourceCategory.Msi, resourceName, stream =>
-        {
-          Assert.IsTrue(CompoundFile.Is(stream));
-          return CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData | CompoundFile.Mode.ComputeHashInfo);
-        });
+      using var stream = TestDataUtil.OpenRead(ResourceCategory.Msi, resourceName);
+      var file =  CompoundFile.Parse(stream, CompoundFile.Mode.SignatureData | CompoundFile.Mode.ComputeHashInfo);
 
       var verificationParams = new SignatureVerificationParams(null, null, false, false);
-
       var authenticodeSignatureVerifier = new AuthenticodeSignatureVerifier(ConsoleLogger.Instance);
 
-      var result = await TestDataUtil.OpenRead(ResourceCategory.Msi, resourceName,
-          async stream => await authenticodeSignatureVerifier.VerifyAsync(file, stream, verificationParams, FileIntegrityVerificationParams.Default));
+      using var resultStream = TestDataUtil.OpenRead(ResourceCategory.Msi, resourceName);
+      var result = await authenticodeSignatureVerifier.VerifyAsync(file, resultStream, verificationParams, FileIntegrityVerificationParams.Default);
 
       Assert.AreEqual(expectedResult, result.Status);
     }

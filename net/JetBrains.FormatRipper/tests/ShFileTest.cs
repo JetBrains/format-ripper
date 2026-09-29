@@ -14,7 +14,7 @@ namespace JetBrains.FormatRipper.Tests
     {
       TestDataUtil.OpenRead(ResourceCategory.Sh, resourceName, stream =>
         {
-          Assert.IsTrue(ShFile.Is(stream));
+          var file = ShFile.Parse(stream);
         });
     }
   }

@@ -85,65 +85,6 @@ namespace JetBrains.FormatRipper.MachO
       Sections = sections;
     }
 
-    public static unsafe bool Is(Stream stream)
-    {
-      stream.Position = 0;
-      return ReadMagic(stream) switch
-        {
-          MH.FAT_MAGIC => ReadFat32(Endian.Little, stream),
-          MH.FAT_CIGAM => ReadFat32(Endian.Big, stream),
-          MH.FAT_MAGIC_64 => ReadFat64(Endian.Little, stream),
-          MH.FAT_CIGAM_64 => ReadFat64(Endian.Big, stream),
-          MH.MH_MAGIC or MH.MH_CIGAM or MH.MH_MAGIC_64 or MH.MH_CIGAM_64 => true,
-          _ => false,
-        };
-
-      static bool ReadFat32(Endian fatEndian, Stream stream)
-      {
-        var needSwap = MachOUtil.NeedSwap(fatEndian);
-        uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
-
-        fat_header fh;
-        StreamUtil.ReadBytes(stream, (byte*)&fh, sizeof(fat_header));
-        var nFatArch = GetU4(fh.nfat_arch);
-
-        var fas = new fat_arch[nFatArch];
-        fixed (fat_arch* ptr = fas)
-          StreamUtil.ReadBytes(stream, (byte*)ptr, checked((int)nFatArch * sizeof(fat_arch)));
-        for (var n = 0u; n < nFatArch; ++n)
-        {
-          stream.Position = GetU4(fas[n].offset);
-          if (ReadMagic(stream) is not (MH.MH_MAGIC or MH.MH_MAGIC_64 or MH.MH_CIGAM or MH.MH_CIGAM_64))
-            return false;
-        }
-
-        return true;
-      }
-
-      static bool ReadFat64(Endian fatEndian, Stream stream)
-      {
-        var needSwap = MachOUtil.NeedSwap(fatEndian);
-        uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
-        ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
-
-        fat_header fh;
-        StreamUtil.ReadBytes(stream, (byte*)&fh, sizeof(fat_header));
-        var nFatArch = GetU4(fh.nfat_arch);
-
-        var fas = new fat_arch_64[nFatArch];
-        fixed (fat_arch_64* ptr = fas)
-          StreamUtil.ReadBytes(stream, (byte*)ptr, checked((int)nFatArch * sizeof(fat_arch_64)));
-        for (var n = 0u; n < nFatArch; ++n)
-        {
-          stream.Position = checked((long)GetU8(fas[n].offset));
-          if (ReadMagic(stream) is not (MH.MH_MAGIC or MH.MH_CIGAM or MH.MH_MAGIC_64 or MH.MH_CIGAM_64))
-            return false;
-        }
-
-        return true;
-      }
-    }
-
     public static unsafe MachOFile Parse(Stream stream)
     {
       stream.Position = 0;

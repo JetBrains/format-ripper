@@ -199,6 +199,8 @@ namespace JetBrains.FormatRipper.Elf
 
     private static Symbol MakeSymbol(ElfFile.Section[] sections, ulong? tlsAddress, string name, ushort stShNdx, ulong stValue, ulong stSize, byte stInfo, byte stOther)
     {
+      if ((SHN)stShNdx == SHN.SHN_XINDEX)
+        throw new NotSupportedException("ELF extended symbol section index is not supported");
       var stType = (STT)(stInfo & 0xF);
       var address = stType == STT.STT_TLS && tlsAddress != null ? tlsAddress.Value + stValue : stValue;
       ElfFile.CreateStreamDelegate? createStream = null;

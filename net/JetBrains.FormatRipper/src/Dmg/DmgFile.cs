@@ -36,36 +36,6 @@ namespace JetBrains.FormatRipper.Dmg
       CDHashes = cdHashes;
     }
 
-    public static unsafe bool Is(Stream stream)
-    {
-      if (stream.Length < sizeof(UDIF))
-        return false;
-
-      stream.Seek(-sizeof(UDIF), SeekOrigin.End);
-
-      UDIF udif;
-      StreamUtil.ReadBytes(stream, (byte*)&udif, sizeof(UDIF));
-
-      if ((DmgMagic)EndianUtil.GetBeU4(udif.Magic) != DmgMagic.KOLY)
-        return false;
-
-      if (EndianUtil.GetBeU4(udif.HeaderSize) != sizeof(UDIF))
-        return false;
-
-      ulong streamLength = checked((ulong)stream.Length);
-
-      if (udif.PlistOffset == 0 || udif.PlistLength == 0)
-        return false;
-
-      if (EndianUtil.GetBeU8(udif.PlistOffset) + EndianUtil.GetBeU8(udif.PlistLength) > streamLength)
-        return false;
-
-      if (EndianUtil.GetBeU8(udif.CodeSignatureOffset) + EndianUtil.GetBeU8(udif.CodeSignatureLength) > streamLength)
-        return false;
-
-      return true;
-    }
-
     public static unsafe DmgFile Parse(Stream stream, Mode mode = Mode.Default)
     {
       if (stream.Length < sizeof(UDIF))

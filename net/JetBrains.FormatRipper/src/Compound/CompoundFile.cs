@@ -56,14 +56,6 @@ namespace JetBrains.FormatRipper.Compound
       ComputeHashInfo = computeHashInfo;
     }
 
-    public static unsafe bool Is(Stream stream)
-    {
-      stream.Position = 0;
-      CompoundFileHeader cfh;
-      StreamUtil.ReadBytes(stream, (byte*)&cfh, sizeof(CompoundFileHeader));
-      return MemoryUtil.ArraysEqual(cfh.HeaderSignature, Declarations.HeaderSignatureSize, ourHeaderSignature);
-    }
-
     [Flags]
     public enum Mode : uint
     {

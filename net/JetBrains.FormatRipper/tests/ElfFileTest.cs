@@ -188,7 +188,6 @@ namespace JetBrains.FormatRipper.Tests
     {
       TestDataUtil.OpenRead(ResourceCategory.Elf, resourceName, stream =>
         {
-          Assert.IsTrue(ElfFile.Is(stream));
           var file = ElfFile.Parse(stream);
 
           Assert.AreEqual(expectedEiClass, file.EiClass);

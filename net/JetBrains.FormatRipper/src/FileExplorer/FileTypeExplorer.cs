@@ -49,23 +49,20 @@ namespace JetBrains.FormatRipper.FileExplorer
     {
       try
       {
-        if (PeFile.Is(stream))
-        {
-          var file = PeFile.Parse(stream);
-          properties = (file.Characteristics & (IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_DLL)) switch
-            {
-              IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_DLL => FileProperties.SharedLibraryType,
-              IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE => FileProperties.ExecutableType,
-              _ => FileProperties.UnknownType
-            };
-          if (file.HasSignature)
-            properties |= FileProperties.Signed;
-          if (file.HasMetadata)
-            properties |= FileProperties.Managed;
-          return true;
-        }
+        var file = PeFile.Parse(stream);
+        properties = (file.Characteristics & (IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_DLL)) switch
+          {
+            IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE.IMAGE_FILE_DLL => FileProperties.SharedLibraryType,
+            IMAGE_FILE.IMAGE_FILE_EXECUTABLE_IMAGE => FileProperties.ExecutableType,
+            _ => FileProperties.UnknownType
+          };
+        if (file.HasSignature)
+          properties |= FileProperties.Signed;
+        if (file.HasMetadata)
+          properties |= FileProperties.Managed;
+        return true;
       }
-      catch (IOException)
+      catch
       {
       }
 
@@ -77,21 +74,18 @@ namespace JetBrains.FormatRipper.FileExplorer
     {
       try
       {
-        if (ElfFile.Is(stream))
-        {
-          var file = ElfFile.Parse(stream);
-          properties = file.EType switch
-            {
-              ET.ET_EXEC => FileProperties.ExecutableType,
-              ET.ET_DYN => ElfUtil.HasInterp(file.Programs) ? FileProperties.ExecutableType : FileProperties.SharedLibraryType,
-              ET.ET_REL => FileProperties.RelocatableType,
-              ET.ET_CORE => FileProperties.CoreDumpType,
-              _ => FileProperties.UnknownType
-            };
-          return true;
-        }
+        var file = ElfFile.Parse(stream);
+        properties = file.EType switch
+          {
+            ET.ET_EXEC => FileProperties.ExecutableType,
+            ET.ET_DYN => ElfUtil.HasInterp(file.Programs) ? FileProperties.ExecutableType : FileProperties.SharedLibraryType,
+            ET.ET_REL => FileProperties.RelocatableType,
+            ET.ET_CORE => FileProperties.CoreDumpType,
+            _ => FileProperties.UnknownType
+          };
+        return true;
       }
-      catch (IOException)
+      catch
       {
       }
 
@@ -103,46 +97,43 @@ namespace JetBrains.FormatRipper.FileExplorer
     {
       try
       {
-        if (MachOFile.Is(stream))
+        static MH_FileType? GetAggregatedFileType(IEnumerable<MachOFile.Section> sections)
         {
-          static MH_FileType? GetAggregatedFileType(IEnumerable<MachOFile.Section> sections)
-          {
-            MH_FileType? fileType = null;
-            foreach (var section in sections)
-              if (fileType == null)
-                fileType = section.MhFileType;
-              else if (fileType != section.MhFileType)
-                return null;
+          MH_FileType? fileType = null;
+          foreach (var section in sections)
+            if (fileType == null)
+              fileType = section.MhFileType;
+            else if (fileType != section.MhFileType)
+              return null;
 
-            return fileType;
-          }
+          return fileType;
+        }
 
-          bool IsAllHasCodeSignature(IEnumerable<MachOFile.Section> sections)
-          {
-            foreach (var section in sections)
-              if (!MachOUtil.ReadLoadCommands(section).HasSignature)
-                return false;
-            return true;
-          }
-
-          var file = MachOFile.Parse(stream);
-          var fileSections = file.Sections;
-
-          properties = GetAggregatedFileType(fileSections) switch
-            {
-              MH_FileType.MH_EXECUTE => FileProperties.ExecutableType,
-              MH_FileType.MH_DYLIB => FileProperties.SharedLibraryType,
-              MH_FileType.MH_BUNDLE => FileProperties.BundleType,
-              _ => FileProperties.UnknownType
-            };
-          if (IsAllHasCodeSignature(fileSections))
-            properties |= FileProperties.Signed;
-          if (file.FatEndian != null)
-            properties |= FileProperties.MultiArch;
+        bool IsAllHasCodeSignature(IEnumerable<MachOFile.Section> sections)
+        {
+          foreach (var section in sections)
+            if (!MachOUtil.ReadLoadCommands(section).HasSignature)
+              return false;
           return true;
         }
+
+        var file = MachOFile.Parse(stream);
+        var fileSections = file.Sections;
+
+        properties = GetAggregatedFileType(fileSections) switch
+          {
+            MH_FileType.MH_EXECUTE => FileProperties.ExecutableType,
+            MH_FileType.MH_DYLIB => FileProperties.SharedLibraryType,
+            MH_FileType.MH_BUNDLE => FileProperties.BundleType,
+            _ => FileProperties.UnknownType
+          };
+        if (IsAllHasCodeSignature(fileSections))
+          properties |= FileProperties.Signed;
+        if (file.FatEndian != null)
+          properties |= FileProperties.MultiArch;
+        return true;
       }
-      catch (IOException)
+      catch
       {
       }
 
@@ -154,19 +145,16 @@ namespace JetBrains.FormatRipper.FileExplorer
     {
       try
       {
-        if (CompoundFile.Is(stream))
+        var file = CompoundFile.Parse(stream);
+        if (file.Type == CompoundFile.FileType.Msi)
         {
-          var file = CompoundFile.Parse(stream);
-          if (file.Type == CompoundFile.FileType.Msi)
-          {
-            properties = file.HasSignature
-              ? FileProperties.Signed
-              : FileProperties.UnknownType;
-            return true;
-          }
+          properties = file.HasSignature
+            ? FileProperties.Signed
+            : FileProperties.UnknownType;
+          return true;
         }
       }
-      catch (IOException)
+      catch
       {
       }
 
@@ -178,13 +166,11 @@ namespace JetBrains.FormatRipper.FileExplorer
     {
       try
       {
-        if (ShFile.Is(stream))
-        {
-          properties = FileProperties.ExecutableType;
-          return true;
-        }
+        var file = ShFile.Parse(stream);
+        properties = FileProperties.ExecutableType;
+        return true;
       }
-      catch (IOException)
+      catch
       {
       }
 
@@ -196,19 +182,13 @@ namespace JetBrains.FormatRipper.FileExplorer
     {
       try
       {
-        if (DmgFile.Is(stream))
-        {
-          var file = DmgFile.Parse(stream);
-
-          properties = FileProperties.BundleType;
-
-          if (file.HasSignature)
-            properties |= FileProperties.Signed;
-
-          return true;
-        }
+        var file = DmgFile.Parse(stream);
+        properties = FileProperties.BundleType;
+        if (file.HasSignature)
+          properties |= FileProperties.Signed;
+        return true;
       }
-      catch (IOException)
+      catch
       {
       }
 

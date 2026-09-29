@@ -205,7 +205,6 @@ namespace JetBrains.FormatRipper.Tests
     {
       TestDataUtil.OpenRead(ResourceCategory.MachO, resourceName, stream =>
         {
-          Assert.IsTrue(MachOFile.Is(stream));
           var file = MachOFile.Parse(stream);
 
           var sections = file.Sections;
@@ -391,7 +390,6 @@ namespace JetBrains.FormatRipper.Tests
     {
       TestDataUtil.OpenRead(ResourceCategory.MachO, resourceName, stream =>
         {
-          Assert.IsFalse(MachOFile.Is(stream));
           Assert.That(() => MachOFile.Parse(stream), Throws.Exception);
         });
     }
