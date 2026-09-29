@@ -133,11 +133,16 @@ namespace JetBrains.FormatRipper.MachO
               var csLength = EndianUtil.GetBeU4(cssb.length);
               if (csLength < sizeof(CS_SuperBlob))
                 throw new FormatException("Too small Mach-O code signature super blob");
+              if (csLength > GetU4(ldc.datasize))
+                throw new FormatException("Too big Mach-O code signature super blob");
 
               var csCount = EndianUtil.GetBeU4(cssb.count);
+              if (csCount > (csLength - sizeof(CS_SuperBlob)) / sizeof(CS_BlobIndex))
+                throw new FormatException("Too many Mach-O code signature super blob entries");
+
               fixed (byte* scBuf = StreamUtil.ReadBytes(sectionStream, checked((int)csLength - sizeof(CS_SuperBlob))))
               {
-                ComputeHashInfo[] specialSlotPositions = new ComputeHashInfo[(uint)CSSLOT.CSSLOT_HASHABLE_ENTRIES_MAX - 1];
+                ComputeHashInfo[] specialSlotPositions = new ComputeHashInfo[(uint)CSSLOT.CSSLOT_HASHABLE_ENTRIES_MAX];
 
                 for (int superBlobEntryIndex = 0; superBlobEntryIndex < csCount; superBlobEntryIndex++)
                 {
@@ -149,15 +154,12 @@ namespace JetBrains.FormatRipper.MachO
                   if (slotType >= CSSLOT.CSSLOT_INFOSLOT && slotType <= CSSLOT.CSSLOT_LIBRARY_CONSTRAINT)
                   {
                     uint offset = EndianUtil.GetBeU4(csbi.offset);
-                    var csOffsetPtr = scBuf + offset - sizeof(CS_SuperBlob);
-
-                    CS_Blob csb;
-                    MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
+                    var csbLength = GetBlobLength(scBuf, csLength, offset, sizeof(CS_Blob));
 
                     specialSlotPositions[(uint)slotType - 1] = new ComputeHashInfo(0,
                       new[]
                         {
-                          new StreamRange(checked(imageOffset + GetU4(ldc.dataoff) + offset), EndianUtil.GetBeU4(csb.length))
+                          new StreamRange(checked(imageOffset + GetU4(ldc.dataoff) + offset), csbLength)
                         },
                       0);
                   }
@@ -179,25 +181,33 @@ namespace JetBrains.FormatRipper.MachO
                   case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES3:
                   case CSSLOT.CSSLOT_ALTERNATE_CODEDIRECTORIES4:
                     {
+                      var cscdLength = GetBlobLength(scBuf, csLength, offset, sizeof(CS_CodeDirectory));
                       CS_CodeDirectory cscd;
                       MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&cscd, sizeof(CS_CodeDirectory));
                       if ((CSMAGIC)EndianUtil.GetBeU4(cscd.magic) != CSMAGIC.CSMAGIC_CODEDIRECTORY)
                         throw new FormatException("Invalid Mach-O code directory signature magic");
-                      var cscdLength = EndianUtil.GetBeU4(cscd.length);
 
-                      byte[] currentCodeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, checked((int)cscdLength));
+                      uint codeSlots = EndianUtil.GetBeU4(cscd.nCodeSlots);
+                      uint specialSlots = EndianUtil.GetBeU4(cscd.nSpecialSlots);
+                      uint zeroHashOffset = EndianUtil.GetBeU4(cscd.hashOffset);
+                      long codeLimit = EndianUtil.GetBeU4(cscd.codeLimit);
+                      if (cscd.hashSize == 0)
+                        throw new FormatException("Invalid Mach-O code directory hash size");
+                      if (zeroHashOffset > cscdLength || specialSlots > zeroHashOffset / cscd.hashSize || codeSlots > (cscdLength - zeroHashOffset) / cscd.hashSize)
+                        throw new FormatException("Invalid Mach-O code directory hash slots");
+                      if (cscd.pageSize > 30)
+                        throw new FormatException("Invalid Mach-O code directory page size");
+                      int pageSize = cscd.pageSize > 0 ? 1 << cscd.pageSize : 0;
+                      if (pageSize > 0 && codeSlots > 0 && (long)(codeSlots - 1) * pageSize > codeLimit)
+                        throw new FormatException("Invalid Mach-O code directory code limit");
+                      string hashName = CS_HASHTYPE.GetHashName(cscd.hashType);
+
+                      byte[] currentCodeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, (int)cscdLength);
                       if (signatureType == MachOFile.SignatureType.None)
                         signatureType = MachOFile.SignatureType.AdHoc;
 
                       if (slotType == CSSLOT.CSSLOT_CODEDIRECTORY)
                         codeDirectoryBlob = currentCodeDirectoryBlob;
-
-                      int codeSlots = checked((int)EndianUtil.GetBeU4(cscd.nCodeSlots));
-                      int specialSlots = checked((int)EndianUtil.GetBeU4(cscd.nSpecialSlots));
-                      uint zeroHashOffset = EndianUtil.GetBeU4(cscd.hashOffset);
-                      long codeLimit = EndianUtil.GetBeU4(cscd.codeLimit);
-                      int pageSize = cscd.pageSize > 0 ? 1 << cscd.pageSize : 0;
-                      string hashName = CS_HASHTYPE.GetHashName(cscd.hashType);
 
                       var cdHash = new CDHash(hashName,
                         new ComputeHashInfo(0,
@@ -209,12 +219,12 @@ namespace JetBrains.FormatRipper.MachO
 
                       cdHashes.Add(cdHash);
 
-                      for (int i = 0; i < codeSlots; i++)
+                      for (uint i = 0; i < codeSlots; i++)
                       {
                         byte[] hash = new byte[cscd.hashSize];
-                        Array.Copy(currentCodeDirectoryBlob, checked((int)zeroHashOffset + i * cscd.hashSize), hash, 0, cscd.hashSize);
+                        Array.Copy(currentCodeDirectoryBlob, (int)(zeroHashOffset + i * cscd.hashSize), hash, 0, cscd.hashSize);
 
-                        long pageStart = i * pageSize;
+                        long pageStart = (long)i * pageSize;
                         long currentPageSize;
                         if (pageSize > 0)
                           currentPageSize = pageStart + pageSize > codeLimit ? codeLimit - pageStart : pageSize;
@@ -234,28 +244,27 @@ namespace JetBrains.FormatRipper.MachO
                       for (uint i = 1; i <= specialSlots; i++)
                       {
                         byte[] hash = new byte[cscd.hashSize];
-                        Array.Copy(currentCodeDirectoryBlob, checked((int)(zeroHashOffset - i * cscd.hashSize)), hash, 0, cscd.hashSize);
+                        Array.Copy(currentCodeDirectoryBlob, (int)(zeroHashOffset - i * cscd.hashSize), hash, 0, cscd.hashSize);
 
-                        if (specialSlotPositions[i - 1] != null)
+                        if (i <= specialSlotPositions.Length && specialSlotPositions[i - 1] != null)
                           hashVerificationUnits.Add(new HashVerificationUnit(hashName, hash, specialSlotPositions[i - 1]));
                       }
                     }
                     break;
                   case CSSLOT.CSSLOT_CMS_SIGNATURE:
                     {
+                      var csbLength = GetBlobLength(scBuf, csLength, offset, sizeof(CS_Blob));
                       CS_Blob csb;
                       MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csb, sizeof(CS_Blob));
                       if ((CSMAGIC)EndianUtil.GetBeU4(csb.magic) != CSMAGIC.CSMAGIC_BLOBWRAPPER)
                         throw new FormatException("Invalid Mach-O blob wrapper signature magic");
-                      var csbLength = EndianUtil.GetBeU4(csb.length);
-                      if (csbLength < sizeof(CS_Blob))
-                        throw new FormatException("Too small Mach-O cms signature blob length");
-                      cmsSignatureBlob = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob), checked((int)csbLength - sizeof(CS_Blob)));
+                      cmsSignatureBlob = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob), (int)csbLength - sizeof(CS_Blob));
                       signatureType = MachOFile.SignatureType.Regular;
                     }
                     break;
                   case CSSLOT.CSSLOT_ENTITLEMENTS:
                     {
+                      var csentLength = GetBlobLength(scBuf, csLength, offset, sizeof(CS_Entitlements));
                       CS_Entitlements csent;
                       MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csent, sizeof(CS_Entitlements));
 
@@ -263,12 +272,12 @@ namespace JetBrains.FormatRipper.MachO
                       if (entitlementsMagic != CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS)
                         throw new FormatException($"Invalid Mach-O entitlements magic. Expected {CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS.ToString("X")} but got {entitlementsMagic.ToString("X")}");
 
-                      uint csentLength = EndianUtil.GetBeU4(csent.length);
-                      entitlements = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Entitlements), checked((int)csentLength - sizeof(CS_Entitlements)));
+                      entitlements = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Entitlements), (int)csentLength - sizeof(CS_Entitlements));
                     }
                     break;
                   case CSSLOT.CSSLOT_ENTITLEMENTS_DER:
                     {
+                      var csentLength = GetBlobLength(scBuf, csLength, offset, sizeof(CS_Entitlements));
                       CS_Entitlements csent;
                       MemoryUtil.CopyBytes(csOffsetPtr, (byte*)&csent, sizeof(CS_Entitlements));
 
@@ -276,8 +285,7 @@ namespace JetBrains.FormatRipper.MachO
                       if (entitlementsMagic != CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS_DER)
                         throw new FormatException($"Invalid Mach-O der-encoded entitlements magic. Expected {CSMAGIC.CSMAGIC_EMBEDDED_ENTITLEMENTS_DER.ToString("X")} but got {entitlementsMagic.ToString("X")}");
 
-                      uint csentLength = EndianUtil.GetBeU4(csent.length);
-                      entitlementsDer = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Entitlements), checked((int)csentLength - sizeof(CS_Entitlements)));
+                      entitlementsDer = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Entitlements), (int)csentLength - sizeof(CS_Entitlements));
                     }
                     break;
                   }
@@ -299,6 +307,18 @@ namespace JetBrains.FormatRipper.MachO
         (mode & MachOFile.Mode.SignatureData) == MachOFile.Mode.SignatureData && signatureType != MachOFile.SignatureType.None ? sectionSignatureTransferData : null,
         entitlements,
         entitlementsDer);
+    }
+
+    private static unsafe uint GetBlobLength(byte* scBuf, uint csLength, uint offset, int minLength)
+    {
+      if (offset < sizeof(CS_SuperBlob) || offset > csLength || csLength - offset < sizeof(CS_Blob))
+        throw new FormatException("Invalid Mach-O code signature blob offset");
+      CS_Blob csb;
+      MemoryUtil.CopyBytes(scBuf + offset - sizeof(CS_SuperBlob), (byte*)&csb, sizeof(CS_Blob));
+      var length = EndianUtil.GetBeU4(csb.length);
+      if (length < minLength || length > csLength - offset)
+        throw new FormatException("Invalid Mach-O code signature blob length");
+      return length;
     }
 
     public sealed class Symbol
@@ -374,8 +394,8 @@ namespace JetBrains.FormatRipper.MachO
       var symCount = checked((int)GetU4(symtab.Value.nsyms));
       var strSize = GetU4(symtab.Value.strsize);
 
-      var isAbi64 = (section.CpuType & CPU_TYPE.CPU_ARCH_ABI64) == CPU_TYPE.CPU_ARCH_ABI64;
-      var entrySize = isAbi64 ? sizeof(nlist_64) : sizeof(nlist);
+      var is64 = section.Is64;
+      var entrySize = is64 ? sizeof(nlist_64) : sizeof(nlist);
 
       using var sectionStream = section.CreateStream();
       using var strStream = new ReadOnlyNestedStream(sectionStream, GetU4(symtab.Value.stroff), strSize);
@@ -388,7 +408,7 @@ namespace JetBrains.FormatRipper.MachO
         byte nSect;
         ND nDesc;
         ulong nValue;
-        if (isAbi64)
+        if (is64)
         {
           nlist_64 nl;
           StreamUtil.ReadBytes(symStream, (byte*)&nl, sizeof(nlist_64));
@@ -571,13 +591,13 @@ namespace JetBrains.FormatRipper.MachO
         if (nSect == 0 || nSect >= dataSections.Count)
           throw new FormatException("Invalid Mach-O symbol section number");
 
-        var data = dataSections[nSect];
         var headerDataSection = dataSections[0];
-        if (!IsZeroFill(data.Flags))
-          if (nSect == 1 && headerDataSection.Address <= nValue && nValue < headerDataSection.Address + headerDataSection.Size)
-            createStream = MakeCreateStream(headerDataSection, nValue);
-          else
-            createStream = MakeCreateStream(data, nValue);
+        var data = nSect == 1 && headerDataSection.Address <= nValue && nValue < headerDataSection.Address + headerDataSection.Size
+          ? headerDataSection
+          : dataSections[nSect];
+        // Note: __mh_execute_header of MH_DSYM refers to the header which isn't recreated, so it is out of the section
+        if (data.CreateSection != null && data.Address <= nValue && nValue - data.Address <= data.Size)
+          createStream = MakeCreateStream(data, nValue);
       }
 
       return new Symbol(name, nType, nSect, nDesc, nValue, createStream);
@@ -619,7 +639,7 @@ namespace JetBrains.FormatRipper.MachO
 
       private readonly List<DataSection> myDataSections;
       private readonly bool myNeedSwap;
-      private readonly bool myIsAbi64;
+      private readonly bool myIs64;
       private readonly int myEntrySize;
       private readonly uint myStrSize;
       private readonly Stream mySectionStream;
@@ -634,8 +654,8 @@ namespace JetBrains.FormatRipper.MachO
       {
         myDataSections = dataSections;
         myNeedSwap = NeedSwap(section.Endian);
-        myIsAbi64 = (section.CpuType & CPU_TYPE.CPU_ARCH_ABI64) == CPU_TYPE.CPU_ARCH_ABI64;
-        myEntrySize = myIsAbi64 ? sizeof(nlist_64) : sizeof(nlist);
+        myIs64 = section.Is64;
+        myEntrySize = myIs64 ? sizeof(nlist_64) : sizeof(nlist);
         myStrSize = GetU4(symtab.strsize);
         Count = GetU4(symtab.nsyms);
 
@@ -712,7 +732,7 @@ namespace JetBrains.FormatRipper.MachO
 
       private unsafe Entry Decode(uint index, byte* ptr)
       {
-        if (myIsAbi64)
+        if (myIs64)
         {
           nlist_64 nl;
           MemoryUtil.CopyBytes(ptr, (byte*)&nl, sizeof(nlist_64));
@@ -748,7 +768,10 @@ namespace JetBrains.FormatRipper.MachO
     /// Reads the data sections of the Mach-O image. The declared sections are placed at their <c>n_sect</c> numbers, so
     /// the returned list starts with the recreated hidden __TEXT,__mach_header section. The mach header with the load commands
     /// is placed by the linker into the hidden __TEXT,__mach_header section, which is never emitted into the section table.
-    /// The __mh_execute_header symbol still refers to it through n_sect==1, so the section is recreated here.
+    /// The __mh_execute_header symbol still refers to it through n_sect==1, so the section is recreated here. The empty
+    /// section without the data takes its place when there is no segment with the header data, e.g. in MH_OBJECT and MH_DSYM.
+    /// The sections without the data in the file, like the zero-fill ones or the ones out of the segment file range, have no
+    /// <see cref="DataSection.CreateSection"/>.
     /// </summary>
     public static unsafe List<DataSection> ReadDataSections(MachOFile.Section machOSection)
     {
@@ -756,9 +779,7 @@ namespace JetBrains.FormatRipper.MachO
       uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
       ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
 
-      var headerSize = (ulong)(sizeof(uint) /* magic */ + ((machOSection.CpuType & CPU_TYPE.CPU_ARCH_ABI64) == CPU_TYPE.CPU_ARCH_ABI64
-        ? sizeof(mach_header_64)
-        : sizeof(mach_header))) + machOSection.SizeOfLoadCommands;
+      var headerSize = (ulong)(sizeof(uint) /* magic */ + (machOSection.Is64 ? sizeof(mach_header_64) : sizeof(mach_header))) + machOSection.SizeOfLoadCommands;
 
       DataSection? headerDataSection = null;
       var dataSections = new List<DataSection>();
@@ -793,7 +814,9 @@ namespace JetBrains.FormatRipper.MachO
                 GetU4(sec.addr),
                 GetU4(sec.size),
                 GetU4(sec.offset),
-                (SEC)GetU4(sec.flags)));
+                (SEC)GetU4(sec.flags),
+                GetU4(sc.fileoff),
+                GetU4(sc.filesize)));
             }
           }
           break;
@@ -825,27 +848,29 @@ namespace JetBrains.FormatRipper.MachO
                 GetU8(sec.addr),
                 GetU8(sec.size),
                 GetU4(sec.offset),
-                (SEC)GetU4(sec.flags)));
+                (SEC)GetU4(sec.flags),
+                GetU8(sc.fileoff),
+                GetU8(sc.filesize)));
             }
           }
           break;
         }
 
-      if (headerDataSection == null)
-        throw new FormatException("Missing the Mach-O header data section");
-      dataSections.Insert(0, headerDataSection);
+      dataSections.Insert(0, headerDataSection ?? new DataSection("__mach_header", "", 0, 0, SEC.S_REGULAR, null));
       return dataSections;
 
       static DataSection? MakeHeaderDataSection(MachOFile.Section machOSection, string segmentName, ulong address, ulong fileOffset, ulong fileSize, ulong headerSize)
       {
         if (fileOffset == 0 && fileSize >= headerSize)
-          return MakeDataSection(machOSection, "__mach_header", segmentName, address, headerSize, 0, SEC.S_REGULAR);
+          return MakeDataSection(machOSection, "__mach_header", segmentName, address, headerSize, 0, SEC.S_REGULAR, fileOffset, fileSize);
         return null;
       }
 
-      static DataSection MakeDataSection(MachOFile.Section machOSection, string sectionName, string segmentName, ulong address, ulong size, ulong fileOffset, SEC flags)
+      static DataSection MakeDataSection(MachOFile.Section machOSection, string sectionName, string segmentName, ulong address, ulong size, ulong fileOffset, SEC flags, ulong segmentFileOffset, ulong segmentFileSize)
       {
-        return new DataSection(sectionName, segmentName, address, size, flags, !IsZeroFill(flags)
+        // Note: MH_DSYM keeps the sections of __TEXT and __DATA without the data, their segments have no file size
+        var hasData = !IsZeroFill(flags) && segmentFileOffset <= fileOffset && size <= segmentFileSize && fileOffset - segmentFileOffset <= segmentFileSize - size;
+        return new DataSection(sectionName, segmentName, address, size, flags, hasData
           ? new MachOFile.CreateStreamDelegate(() => new ReadOnlyNestedStream(machOSection.CreateStream(), checked((long)fileOffset), checked((long)size)))
           : null);
       }

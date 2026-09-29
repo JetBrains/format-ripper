@@ -79,12 +79,12 @@ namespace JetBrains.FormatRipper.Elf
       var tlsAddress = GetTlsAddress(file);
       return file.EiClass switch
         {
-          ELFCLASS.ELFCLASS32 => Read32(file.EiData, file.Sections, tlsAddress, symSectionIndex, strSectionIndex, symbolFilter),
-          ELFCLASS.ELFCLASS64 => Read64(file.EiData, file.Sections, tlsAddress, symSectionIndex, strSectionIndex, symbolFilter),
+          ELFCLASS.ELFCLASS32 => Read32(file.EiData, file.EMachine, file.Sections, tlsAddress, symSectionIndex, strSectionIndex, symbolFilter),
+          ELFCLASS.ELFCLASS64 => Read64(file.EiData, file.EMachine, file.Sections, tlsAddress, symSectionIndex, strSectionIndex, symbolFilter),
           _ => throw new FormatException("Invalid ELF class encoding")
         };
 
-      static unsafe bool Read32(ELFDATA eiData, ElfFile.Section[] sections, ulong? tlsAddress, ushort symSectionIndex, ushort strSectionIndex, SymbolFilterDelegate symbolFilter)
+      static unsafe bool Read32(ELFDATA eiData, EM eMachine, ElfFile.Section[] sections, ulong? tlsAddress, ushort symSectionIndex, ushort strSectionIndex, SymbolFilterDelegate symbolFilter)
       {
         var symSection = sections[symSectionIndex];
         var strSection = sections[strSectionIndex];
@@ -108,14 +108,14 @@ namespace JetBrains.FormatRipper.Elf
           strStream.Position = GetU4(shdr.st_name);
           var str = ReadStringZ(strStream);
 
-          if (!symbolFilter(MakeSymbol(sections, tlsAddress, str, GetU2(shdr.st_shndx), GetU4(shdr.st_value), GetU4(shdr.st_size), shdr.st_info, shdr.st_other)))
+          if (!symbolFilter(MakeSymbol(sections, eMachine, tlsAddress, str, GetU2(shdr.st_shndx), GetU4(shdr.st_value), GetU4(shdr.st_size), shdr.st_info, shdr.st_other)))
             return false;
         }
 
         return true;
       }
 
-      static unsafe bool Read64(ELFDATA eiData, ElfFile.Section[] sections, ulong? tlsAddress, ushort symSectionIndex, ushort strSectionIndex, SymbolFilterDelegate symbolFilter)
+      static unsafe bool Read64(ELFDATA eiData, EM eMachine, ElfFile.Section[] sections, ulong? tlsAddress, ushort symSectionIndex, ushort strSectionIndex, SymbolFilterDelegate symbolFilter)
       {
         var symSection = sections[symSectionIndex];
         var strSection = sections[strSectionIndex];
@@ -141,7 +141,7 @@ namespace JetBrains.FormatRipper.Elf
           strStream.Position = GetU4(shdr.st_name);
           var str = ReadStringZ(strStream);
 
-          if (!symbolFilter(MakeSymbol(sections, tlsAddress, str, GetU2(shdr.st_shndx), GetU8(shdr.st_value), GetU8(shdr.st_size), shdr.st_info, shdr.st_other)))
+          if (!symbolFilter(MakeSymbol(sections, eMachine, tlsAddress, str, GetU2(shdr.st_shndx), GetU8(shdr.st_value), GetU8(shdr.st_size), shdr.st_info, shdr.st_other)))
             return false;
         }
 
@@ -197,12 +197,15 @@ namespace JetBrains.FormatRipper.Elf
     private static ulong? GetTlsAddress(ElfFile file) =>
       file.EType != ET.ET_REL && Find(file.Programs, PT.PT_TLS) is { } tls ? file.Programs[tls].VirtualAddress : null;
 
-    private static Symbol MakeSymbol(ElfFile.Section[] sections, ulong? tlsAddress, string name, ushort stShNdx, ulong stValue, ulong stSize, byte stInfo, byte stOther)
+    private static Symbol MakeSymbol(ElfFile.Section[] sections, EM eMachine, ulong? tlsAddress, string name, ushort stShNdx, ulong stValue, ulong stSize, byte stInfo, byte stOther)
     {
       if ((SHN)stShNdx == SHN.SHN_XINDEX)
         throw new NotSupportedException("ELF extended symbol section index is not supported");
       var stType = (STT)(stInfo & 0xF);
       var address = stType == STT.STT_TLS && tlsAddress != null ? tlsAddress.Value + stValue : stValue;
+      // Note: the bit 0 of the ARM function symbol value marks the Thumb code, the first instruction is at the even address
+      if (eMachine == EM.EM_ARM && stType is STT.STT_FUNC or STT.STT_GNU_IFUNC)
+        address &= ~1ul;
       ElfFile.CreateStreamDelegate? createStream = null;
       if (SHN.SHN_UNDEF < (SHN)stShNdx && (SHN)stShNdx < SHN.SHN_LORESERVE)
       {
@@ -315,6 +318,7 @@ namespace JetBrains.FormatRipper.Elf
       private const int ChunkEntryCount = 1024;
 
       private readonly ElfFile.Section[] mySections;
+      private readonly EM myEMachine;
       private readonly ulong? myTlsAddress;
       private readonly ushort mySymSectionIndex;
       private readonly ELFCLASS myEiClass;
@@ -330,6 +334,7 @@ namespace JetBrains.FormatRipper.Elf
       internal unsafe SymbolTable(ElfFile file, ushort symSectionIndex, ushort strSectionIndex, string name)
       {
         mySections = file.Sections;
+        myEMachine = file.EMachine;
         myTlsAddress = GetTlsAddress(file);
         mySymSectionIndex = symSectionIndex;
         myEiClass = file.EiClass;
@@ -555,7 +560,7 @@ namespace JetBrains.FormatRipper.Elf
       private Symbol MakeSymbol(in Entry entry)
       {
         myStrStream.Position = entry.Name;
-        return ElfUtil.MakeSymbol(mySections, myTlsAddress, ReadStringZ(myStrStream), entry.SectionIndex, entry.Value, entry.Size, entry.Info, entry.Other);
+        return ElfUtil.MakeSymbol(mySections, myEMachine, myTlsAddress, ReadStringZ(myStrStream), entry.SectionIndex, entry.Value, entry.Size, entry.Info, entry.Other);
       }
 
       private unsafe uint ReadU4(Stream stream)

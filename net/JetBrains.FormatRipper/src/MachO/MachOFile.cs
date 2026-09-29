@@ -26,6 +26,7 @@ namespace JetBrains.FormatRipper.MachO
     public sealed class Section
     {
       public readonly Endian Endian;
+      public readonly bool Is64;
       public readonly CPU_TYPE CpuType;
       public readonly CPU_SUBTYPE CpuSubType;
       public readonly MH_FileType MhFileType;
@@ -41,6 +42,7 @@ namespace JetBrains.FormatRipper.MachO
         long imageOffset)
       {
         Endian = baseSection.Endian;
+        Is64 = baseSection.Is64;
         CpuType = baseSection.CpuType;
         CpuSubType = baseSection.CpuSubType;
         MhFileType = baseSection.MhFileType;
@@ -203,6 +205,7 @@ namespace JetBrains.FormatRipper.MachO
 
         return new BaseSection(
           endian,
+          false,
           (CPU_TYPE)GetU4(mh.cputype),
           (CPU_SUBTYPE)GetU4(mh.cpusubtype),
           (MH_FileType)GetU4(mh.filetype),
@@ -229,6 +232,7 @@ namespace JetBrains.FormatRipper.MachO
 
         return new BaseSection(
           endian,
+          true,
           (CPU_TYPE)GetU4(mh.cputype),
           (CPU_SUBTYPE)GetU4(mh.cpusubtype),
           (MH_FileType)GetU4(mh.filetype),
@@ -273,6 +277,7 @@ namespace JetBrains.FormatRipper.MachO
     internal sealed class BaseSection
     {
       public readonly Endian Endian;
+      public readonly bool Is64;
       public readonly CPU_TYPE CpuType;
       public readonly CPU_SUBTYPE CpuSubType;
       public readonly MH_FileType MhFileType;
@@ -281,6 +286,7 @@ namespace JetBrains.FormatRipper.MachO
       public readonly uint SizeOfCmds;
 
       internal BaseSection(Endian endian,
+        bool is64,
         CPU_TYPE cpuType,
         CPU_SUBTYPE cpuSubType,
         MH_FileType mhFileType,
@@ -289,6 +295,7 @@ namespace JetBrains.FormatRipper.MachO
         uint sizeOfCmds)
       {
         Endian = endian;
+        Is64 = is64;
         CpuType = cpuType;
         CpuSubType = cpuSubType;
         MhFileType = mhFileType;

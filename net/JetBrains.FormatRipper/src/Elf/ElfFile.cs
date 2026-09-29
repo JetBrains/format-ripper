@@ -118,7 +118,7 @@ namespace JetBrains.FormatRipper.Elf
         Elf32_Ehdr ehdr;
         StreamUtil.ReadBytes(stream, (byte*)&ehdr, sizeof(Elf32_Ehdr));
 
-        if (ehdr.e_ehsize < EI.EI_NIDENT + sizeof(Elf32_Ehdr))
+        if (GetU2(ehdr.e_ehsize) < EI.EI_NIDENT + sizeof(Elf32_Ehdr))
           throw new FormatException("Invalid ELF header size");
         if (GetU4(ehdr.e_version) != 1u)
           throw new FormatException("Invalid ELF object file version");
@@ -126,6 +126,8 @@ namespace JetBrains.FormatRipper.Elf
         Program[] programs;
         {
           var ePhNum = GetU2(ehdr.e_phnum);
+          if (ePhNum == PN.PN_XNUM)
+            throw new NotSupportedException("ELF extended program header numbering is not supported");
           programs = new Program[ePhNum];
           if (ePhNum > 0)
           {
@@ -220,7 +222,7 @@ namespace JetBrains.FormatRipper.Elf
         Elf64_Ehdr ehdr;
         StreamUtil.ReadBytes(stream, (byte*)&ehdr, sizeof(Elf64_Ehdr));
 
-        if (ehdr.e_ehsize < EI.EI_NIDENT + sizeof(Elf64_Ehdr))
+        if (GetU2(ehdr.e_ehsize) < EI.EI_NIDENT + sizeof(Elf64_Ehdr))
           throw new FormatException("Invalid ELF header size");
         if (GetU4(ehdr.e_version) != 1u)
           throw new FormatException("Invalid ELF object file version");
@@ -228,6 +230,8 @@ namespace JetBrains.FormatRipper.Elf
         Program[] programs;
         {
           var ePhNum = GetU2(ehdr.e_phnum);
+          if (ePhNum == PN.PN_XNUM)
+            throw new NotSupportedException("ELF extended program header numbering is not supported");
           programs = new Program[ePhNum];
           if (ePhNum > 0)
           {

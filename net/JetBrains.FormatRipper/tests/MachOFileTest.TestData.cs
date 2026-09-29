@@ -29,6 +29,7 @@ namespace JetBrains.FormatRipper.Tests
         .Concat(MakeEnvWrapperSources())
         .Concat(MakeBundleSources())
         .Concat(MakeDylibSources())
+        .Concat(MakeObjectSources())
         .Concat(MakeFsnotifierSources())
         .Concat(MakePdbServerSources())
         .Concat(MakeLibhostfxrSources())
@@ -632,6 +633,110 @@ namespace JetBrains.FormatRipper.Tests
               {
                 new("E2E936F5D47B065FE1CF011E3655F5074A02602717980FA54483223554B97391", 0xF90, 1, "_add"            , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,   0x0, 0, "dyld_stub_binder", NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
+              })),
+        // @formatter:on
+      };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private static object?[] MakeObjectSources() => new object?[]
+      {
+        // @formatter:off
+        MakeSource("fat.o", MachOFile.Endian.Big,
+          new Section("4BC53DB4247CA34655C9585CFAC3B3CE6C4F5CC72BCF8BD915194F048328DE5E0A58EFF047463C07FEA368CBBBE6F5EB", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_OBJECT, MH_Flags.MH_SUBSECTIONS_VIA_SYMBOLS, 0, null, null, null, null, 7,
+            new Command[]
+              {
+                new("9A0795FC7BD58237B463C66DB7B0C882EDDF994E39FF91EB9BB3D31CB7EC309F", 632, LC.LC_SEGMENT_64),
+                new("3A430AE944B7A0876DAD7774B45F630E74F52A85BE0DE8C70097C9C2526C48BA",  16, LC.LC_VERSION_MIN_MACOSX),
+                new("ADEF75F1F3481C1D6932563E3D8EDED15DF3A44CD4AA24BD84EB01EFDB82A7A8",  24, LC.LC_SYMTAB),
+                new("17D7F2563C280A35C0DB0D64D694250C270250179B6B117F17A000C32820F849",  80, LC.LC_DYSYMTAB)
+              },
+            new DataSection[]
+              {
+                new(null                                                              ,   0x0,   0, "__mach_header"   , ""      , SEC.S_REGULAR),
+                new("C1AE95F80498B3C3C33138CE6FD2F54F9DC31036620E6E14547C4D5272675C76",   0x0,  84, "__text"          , "__TEXT", SEC.S_REGULAR | SEC.S_ATTR_PURE_INSTRUCTIONS | SEC.S_ATTR_SOME_INSTRUCTIONS),
+                new("E8A4B2EE7EDE79A3AFB332B5B6CC3D952A65FD8CFFB897F5D18016577C33D7CC",  0x54,   4, "__data"          , "__DATA", SEC.S_REGULAR),
+                new("E6145E4EE7E941F0FE24A2FF00C403B84E96C6CA37BB0992BD412BEDA9A85FE8",  0x58,   6, "__const"         , "__TEXT", SEC.S_REGULAR),
+                new("03FEBFE612C53924803C4E9C4D6C84A0BAAC6E260B7495B7D2AF2AF82F83D580",  0x5E,   8, "__cstring"       , "__TEXT", SEC.S_CSTRING_LITERALS),
+                new(null                                                              , 0x160,  64, "__bss"           , "__DATA", SEC.S_ZEROFILL),
+                new("E7FC7D1950BC9F29C8676ADAF5A32DFA5E8C1FEB11BD32309847F622D62175F1",  0x68,  96, "__compact_unwind", "__LD"  , SEC.S_REGULAR | SEC.S_ATTR_DEBUG),
+                new("6017712EEE10DE8F1FA7E280C1489B40AF2EECCA029E58A83111DCECD2A88BBE",  0xC8, 144, "__eh_frame"      , "__TEXT", SEC.S_COALESCED | SEC.S_ATTR_NO_TOC | SEC.S_ATTR_STRIP_STATIC_SYMS | SEC.S_ATTR_LIVE_SUPPORT),
+              },
+            new Symbol[]
+              {
+                new(null                                                              , 0x160, 5, "_zero_values"  , NT.N_SECT           , 0),
+                new("16FD0AF05D984934200AB8E9762EA016C9093A983794E5E49FEED11ED67CAB6F",  0x30, 1, "_add"          , NT.N_SECT | NT.N_EXT, 0),
+                new("E6145E4EE7E941F0FE24A2FF00C403B84E96C6CA37BB0992BD412BEDA9A85FE8",  0x58, 3, "_const_message", NT.N_SECT | NT.N_EXT, 0),
+                new("E8A4B2EE7EDE79A3AFB332B5B6CC3D952A65FD8CFFB897F5D18016577C33D7CC",  0x54, 2, "_data_value"   , NT.N_SECT | NT.N_EXT, 0),
+                new("C1AE95F80498B3C3C33138CE6FD2F54F9DC31036620E6E14547C4D5272675C76",   0x0, 1, "_get_message"  , NT.N_SECT | NT.N_EXT, 0),
+                new("E829932F9A3221A89CD9568CB61621CBC1C1F8271DF208BB243FE9D4E731C9FE",  0x10, 1, "_set_value"    , NT.N_SECT | NT.N_EXT, 0),
+                new(null                                                              ,   0x4, 0, "_common_value" , NT.N_UNDF | NT.N_EXT, NDUtil.SetCommAlign(2)),
+              }),
+          new Section("9D8B567011234359DE1676B85F7B2E11B2918CB67F9769934D488D7E60BCA78C969C79D8442CE2E6E6957A08DE2C2E6E", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_I386, CPU_SUBTYPE.CPU_SUBTYPE_I386_ALL, MH_FileType.MH_OBJECT, MH_Flags.MH_SUBSECTIONS_VIA_SYMBOLS, 0, null, null, null, null, 7,
+            new Command[]
+              {
+                new("2DEE1CCF1CDC7B3FEFBB38430ED17455A878A2B46558E43DC4D2B105C5240347", 600, LC.LC_SEGMENT),
+                new("3A430AE944B7A0876DAD7774B45F630E74F52A85BE0DE8C70097C9C2526C48BA",  16, LC.LC_VERSION_MIN_MACOSX),
+                new("CF8F7DC460C08253758F8CE5D22F15C2C2F8A3CFFF684D69CE407580528F4D6B",  24, LC.LC_SYMTAB),
+                new("D65394C0384D47D99D7CC7CFA2C41F432A6A9D957EC9BC1A943A81AB4EC6B54E",  80, LC.LC_DYSYMTAB)
+              },
+            new DataSection[]
+              {
+                new(null                                                              ,   0x0,   0, "__mach_header"   , ""        , SEC.S_REGULAR),
+                new("D57DD0FED5DCACECE44508571D9440B10A60ACFBFCBC5C725CFE64718FF8E717",   0x0, 104, "__text"          , "__TEXT"  , SEC.S_REGULAR | SEC.S_ATTR_PURE_INSTRUCTIONS | SEC.S_ATTR_SOME_INSTRUCTIONS),
+                new("E8A4B2EE7EDE79A3AFB332B5B6CC3D952A65FD8CFFB897F5D18016577C33D7CC",  0x68,   4, "__data"          , "__DATA"  , SEC.S_REGULAR),
+                new("E6145E4EE7E941F0FE24A2FF00C403B84E96C6CA37BB0992BD412BEDA9A85FE8",  0x6C,   6, "__const"         , "__TEXT"  , SEC.S_REGULAR),
+                new("03FEBFE612C53924803C4E9C4D6C84A0BAAC6E260B7495B7D2AF2AF82F83D580",  0x72,   8, "__cstring"       , "__TEXT"  , SEC.S_CSTRING_LITERALS),
+                new(null                                                              , 0x128,  64, "__bss"           , "__DATA"  , SEC.S_ZEROFILL),
+                new("DF3F619804A92FDB4057192DC43DD748EA778ADC52BC498CE80524C014B81119",  0x7A,   4, "__pointers"      , "__IMPORT", SEC.S_NON_LAZY_SYMBOL_POINTERS),
+                new("9AB1617137322F768775D571D9C4A7C30E6ECE86798DDEAB4CA23E5C993902F2",  0x80,  60, "__compact_unwind", "__LD"    , SEC.S_REGULAR | SEC.S_ATTR_DEBUG),
+                new("57902EB1C97B359572407A5802FBE51A9C7DD73BC484077E5A4E09CC2AC5F886",  0xBC, 108, "__eh_frame"      , "__TEXT"  , SEC.S_COALESCED | SEC.S_ATTR_NO_TOC | SEC.S_ATTR_STRIP_STATIC_SYMS | SEC.S_ATTR_LIVE_SUPPORT),
+              },
+            new Symbol[]
+              {
+                new(null                                                              , 0x128, 5, "_zero_values"  , NT.N_SECT           , 0),
+                new("6DE0045EE53FF4C3A713F09DA344BDBEB0D16264E5EFF8F13426D882DBFBEEFB",  0x40, 1, "_add"          , NT.N_SECT | NT.N_EXT, 0),
+                new("E6145E4EE7E941F0FE24A2FF00C403B84E96C6CA37BB0992BD412BEDA9A85FE8",  0x6C, 3, "_const_message", NT.N_SECT | NT.N_EXT, 0),
+                new("E8A4B2EE7EDE79A3AFB332B5B6CC3D952A65FD8CFFB897F5D18016577C33D7CC",  0x68, 2, "_data_value"   , NT.N_SECT | NT.N_EXT, 0),
+                new("D57DD0FED5DCACECE44508571D9440B10A60ACFBFCBC5C725CFE64718FF8E717",   0x0, 1, "_get_message"  , NT.N_SECT | NT.N_EXT, 0),
+                new("6137C5671D868DE3899CA0A7CCC6593584094DC501A7F6B793195A0C3F210F80",  0x20, 1, "_set_value"    , NT.N_SECT | NT.N_EXT, 0),
+                new(null                                                              ,   0x4, 0, "_common_value" , NT.N_UNDF | NT.N_EXT, NDUtil.SetCommAlign(2)),
+              }),
+          new Section("D3840A6186A48DA333F4A9AEF08A44C12D29F87D322E45261AC4864880B0D505DC8ECED3444863F4B081CCEEA2646BE0", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_OBJECT, MH_Flags.MH_SUBSECTIONS_VIA_SYMBOLS, 0, null, null, null, null, 14,
+            new Command[]
+              {
+                new("19A9B075B7019BBE076122B413BBFEA2CB1F369158EEC08D22FA525FFF591171", 552, LC.LC_SEGMENT_64),
+                new("C64776D5BCF5462C3D4FB5EC2F742CE26D5FFC4E4AB8AB2A428179054D4251E4",  24, LC.LC_BUILD_VERSION),
+                new("9326CC7DE9A439F248A628323DD6EF113D19ADA0B2B23C740EDDFA8734B56B4B",  16, LC.LC_LINKER_OPTIMIZATION_HINT),
+                new("D7229576518F31E89FC6BD08A508D7E4CE7CBED2CDB10A0B8939A1428B2F8554",  24, LC.LC_SYMTAB),
+                new("7BC85B337F5B4982A7A1C56E02D3D5C95372FD04F7D938EDAD768D8B178B9E41",  80, LC.LC_DYSYMTAB)
+              },
+            new DataSection[]
+              {
+                new(null                                                              ,  0x0,  0, "__mach_header"   , ""      , SEC.S_REGULAR),
+                new("F4B540B6BFDC88EE0CC6F75D75831DD0925A3F1BE3016A2DF51E2D0FA4E285F9",  0x0, 84, "__text"          , "__TEXT", SEC.S_REGULAR | SEC.S_ATTR_PURE_INSTRUCTIONS | SEC.S_ATTR_SOME_INSTRUCTIONS),
+                new("E8A4B2EE7EDE79A3AFB332B5B6CC3D952A65FD8CFFB897F5D18016577C33D7CC", 0x54,  4, "__data"          , "__DATA", SEC.S_REGULAR),
+                new("E6145E4EE7E941F0FE24A2FF00C403B84E96C6CA37BB0992BD412BEDA9A85FE8", 0x58,  6, "__const"         , "__TEXT", SEC.S_REGULAR),
+                new("03FEBFE612C53924803C4E9C4D6C84A0BAAC6E260B7495B7D2AF2AF82F83D580", 0x5E,  8, "__cstring"       , "__TEXT", SEC.S_CSTRING_LITERALS),
+                new(null                                                              , 0xC8, 64, "__bss"           , "__DATA", SEC.S_ZEROFILL),
+                new("20B584B0C1D3167E2A26E1FE21861F6F96EC186B83D184ECEB03AB0BD2E7893D", 0x68, 96, "__compact_unwind", "__LD"  , SEC.S_REGULAR | SEC.S_ATTR_DEBUG),
+              },
+            new Symbol[]
+              {
+                new("F4B540B6BFDC88EE0CC6F75D75831DD0925A3F1BE3016A2DF51E2D0FA4E285F9",  0x0, 1, "ltmp0"         , NT.N_SECT           , 0),
+                new("03FEBFE612C53924803C4E9C4D6C84A0BAAC6E260B7495B7D2AF2AF82F83D580", 0x5E, 4, "l_.str"        , NT.N_SECT           , 0),
+                new(null                                                              , 0xC8, 5, "_zero_values"  , NT.N_SECT           , 0),
+                new("E8A4B2EE7EDE79A3AFB332B5B6CC3D952A65FD8CFFB897F5D18016577C33D7CC", 0x54, 2, "ltmp1"         , NT.N_SECT           , 0),
+                new("E6145E4EE7E941F0FE24A2FF00C403B84E96C6CA37BB0992BD412BEDA9A85FE8", 0x58, 3, "ltmp2"         , NT.N_SECT           , 0),
+                new("03FEBFE612C53924803C4E9C4D6C84A0BAAC6E260B7495B7D2AF2AF82F83D580", 0x5E, 4, "ltmp3"         , NT.N_SECT           , 0),
+                new(null                                                              , 0xC8, 5, "ltmp4"         , NT.N_SECT           , 0),
+                new("20B584B0C1D3167E2A26E1FE21861F6F96EC186B83D184ECEB03AB0BD2E7893D", 0x68, 6, "ltmp5"         , NT.N_SECT           , 0),
+                new("50D558D9877EEB6B225B02678603E8885FFE1FFE500963B4BA7E28193A1BBAD5", 0x20, 1, "_add"          , NT.N_SECT | NT.N_EXT, 0),
+                new("E6145E4EE7E941F0FE24A2FF00C403B84E96C6CA37BB0992BD412BEDA9A85FE8", 0x58, 3, "_const_message", NT.N_SECT | NT.N_EXT, 0),
+                new("E8A4B2EE7EDE79A3AFB332B5B6CC3D952A65FD8CFFB897F5D18016577C33D7CC", 0x54, 2, "_data_value"   , NT.N_SECT | NT.N_EXT, 0),
+                new("F4B540B6BFDC88EE0CC6F75D75831DD0925A3F1BE3016A2DF51E2D0FA4E285F9",  0x0, 1, "_get_message"  , NT.N_SECT | NT.N_EXT, 0),
+                new("92BC95A4886E6CA3110542A8C89CFE55E2E7C184FCAE924C8AF80B4E6584D555",  0xC, 1, "_set_value"    , NT.N_SECT | NT.N_EXT, 0),
+                new(null                                                              ,  0x4, 0, "_common_value" , NT.N_UNDF | NT.N_EXT, NDUtil.SetCommAlign(2)),
               })),
         // @formatter:on
       };

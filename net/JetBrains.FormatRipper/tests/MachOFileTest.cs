@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using JetBrains.FormatRipper.MachO;
+using JetBrains.FormatRipper.MachO.Impl;
 using JetBrains.Tests;
 using NUnit.Framework;
 
@@ -219,6 +220,7 @@ namespace JetBrains.FormatRipper.Tests
 
             Assert.AreEqual(expectedSection.Hash, CalculateStreamHash384(() => section.CreateStream()));
             Assert.AreEqual(expectedSection.Endian, section.Endian);
+            Assert.AreEqual(ReadMagic(section) is MH.MH_MAGIC_64 or MH.MH_CIGAM_64, section.Is64);
             Assert.AreEqual(expectedSection.CpuType, section.CpuType);
             Assert.AreEqual(expectedSection.CpuSubType, section.CpuSubType);
             Assert.AreEqual(expectedSection.MhFileType, section.MhFileType);
@@ -458,6 +460,14 @@ namespace JetBrains.FormatRipper.Tests
       using var itemStream = createStream();
       using var hashAlgorithm = SHA384.Create();
       return HexUtil.ConvertToHexString(hashAlgorithm.ComputeHash(itemStream));
+    }
+
+    private static MH ReadMagic(MachOFile.Section section)
+    {
+      using var stream = section.CreateStream();
+      var magic = new byte[sizeof(uint)];
+      Assert.AreEqual(magic.Length, stream.Read(magic, 0, magic.Length));
+      return (MH)(magic[0] | (uint)magic[1] << 8 | (uint)magic[2] << 16 | (uint)magic[3] << 24);
     }
 
     private static void AssertDataSection(DataSection expectedDataSection, MachOUtil.DataSection dataSection)
