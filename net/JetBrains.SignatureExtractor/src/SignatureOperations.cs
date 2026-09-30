@@ -46,7 +46,7 @@ public static class SignatureOperations
   {
     MachOFile parsedFile = MachOFile.Parse(stream);
 
-    var signature = MachOUtil.ReadSignatureTransferData(parsedFile, MachOFile.Mode.SignatureData);
+    var signature = MachOUtil.ReadSignatureTransferData(parsedFile);
 
     if (signature == null || signature.SectionSignatures.Length == 0)
       throw new SignatureExtractionException("No signature found");
@@ -87,7 +87,7 @@ public static class SignatureOperations
       ContractResolver = new SignatureContainerContractResolver()
     };
 
-    SignatureContainer? signatureContainer = null;
+    SignatureContainer? signatureContainer;
     using (StreamReader reader = new StreamReader(signatureFile))
     using (JsonTextReader jsonReader = new JsonTextReader(reader))
     {

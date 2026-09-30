@@ -22,7 +22,7 @@ namespace JetBrains.FormatRipper.MachO
     public sealed class LoadCommandsInfo
     {
       public readonly bool HasSignature;
-      public readonly MachOFile.SignatureType SignatureType;
+      public readonly MachOUtil.SignatureType SignatureType;
       public readonly SignatureData SignatureData;
       public readonly IEnumerable<HashVerificationUnit> HashVerificationUnits;
       public readonly IEnumerable<CDHash> CDHashes;
@@ -30,7 +30,7 @@ namespace JetBrains.FormatRipper.MachO
       public readonly byte[]? Entitlements;
       public readonly byte[]? EntitlementsDer;
 
-      public LoadCommandsInfo(bool hasSignature, MachOFile.SignatureType signatureType, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes, IMachOSectionSignatureTransferData? sectionSignatureTransferData, byte[]? entitlements, byte[]? entitlementsDer)
+      public LoadCommandsInfo(bool hasSignature, MachOUtil.SignatureType signatureType, SignatureData signatureData, IEnumerable<HashVerificationUnit> hashVerificationUnits, IEnumerable<CDHash> cdHashes, IMachOSectionSignatureTransferData? sectionSignatureTransferData, byte[]? entitlements, byte[]? entitlementsDer)
       {
         HasSignature = hasSignature;
         SignatureType = signatureType;
@@ -43,7 +43,7 @@ namespace JetBrains.FormatRipper.MachO
       }
     }
 
-    public static unsafe LoadCommandsInfo ReadLoadCommands(MachOFile.Section section, MachOFile.Mode mode = MachOFile.Mode.Default)
+    public static unsafe LoadCommandsInfo ReadLoadCommands(MachOFile.Section section, MachOUtil.Mode mode = MachOUtil.Mode.Default)
     {
       var endian = section.Endian;
       var commands = section.Commands;
@@ -57,7 +57,7 @@ namespace JetBrains.FormatRipper.MachO
       var nCmds = (uint)commands.Length;
 
       var hasSignature = false;
-      MachOFile.SignatureType signatureType = MachOFile.SignatureType.None;
+      MachOUtil.SignatureType signatureType = MachOUtil.SignatureType.None;
       byte[]? codeDirectoryBlob = null;
       byte[]? cmsSignatureBlob = null;
       byte[]? entitlements = null;
@@ -119,7 +119,7 @@ namespace JetBrains.FormatRipper.MachO
             sectionSignatureTransferData.LinkEditDataOffset = GetU4(ldc.dataoff);
             sectionSignatureTransferData.LinkEditDataSize = GetU4(ldc.datasize);
 
-            if ((mode & MachOFile.Mode.SignatureData) == MachOFile.Mode.SignatureData)
+            if ((mode & MachOUtil.Mode.SignatureData) == MachOUtil.Mode.SignatureData)
             {
               using var sectionStream = section.CreateStream();
               sectionStream.Position = GetU4(ldc.dataoff);
@@ -203,8 +203,8 @@ namespace JetBrains.FormatRipper.MachO
                       string hashName = CS_HASHTYPE.GetHashName(cscd.hashType);
 
                       byte[] currentCodeDirectoryBlob = MemoryUtil.CopyBytes(csOffsetPtr, (int)cscdLength);
-                      if (signatureType == MachOFile.SignatureType.None)
-                        signatureType = MachOFile.SignatureType.AdHoc;
+                      if (signatureType == MachOUtil.SignatureType.None)
+                        signatureType = MachOUtil.SignatureType.AdHoc;
 
                       if (slotType == CSSLOT.CSSLOT_CODEDIRECTORY)
                         codeDirectoryBlob = currentCodeDirectoryBlob;
@@ -259,7 +259,7 @@ namespace JetBrains.FormatRipper.MachO
                       if ((CSMAGIC)EndianUtil.GetBeU4(csb.magic) != CSMAGIC.CSMAGIC_BLOBWRAPPER)
                         throw new FormatException("Invalid Mach-O blob wrapper signature magic");
                       cmsSignatureBlob = MemoryUtil.CopyBytes(csOffsetPtr + sizeof(CS_Blob), (int)csbLength - sizeof(CS_Blob));
-                      signatureType = MachOFile.SignatureType.Regular;
+                      signatureType = MachOUtil.SignatureType.Regular;
                     }
                     break;
                   case CSSLOT.CSSLOT_ENTITLEMENTS:
@@ -304,7 +304,7 @@ namespace JetBrains.FormatRipper.MachO
         new SignatureData(codeDirectoryBlob, cmsSignatureBlob),
         hashVerificationUnits,
         cdHashes,
-        (mode & MachOFile.Mode.SignatureData) == MachOFile.Mode.SignatureData && signatureType != MachOFile.SignatureType.None ? sectionSignatureTransferData : null,
+        (mode & MachOUtil.Mode.SignatureData) == MachOUtil.Mode.SignatureData && signatureType != MachOUtil.SignatureType.None ? sectionSignatureTransferData : null,
         entitlements,
         entitlementsDer);
     }
@@ -884,7 +884,7 @@ namespace JetBrains.FormatRipper.MachO
 
     public static bool IsZeroFill(SEC flags) => (flags & SEC.SECTION_TYPE) is SEC.S_ZEROFILL or SEC.S_GB_ZEROFILL or SEC.S_THREAD_LOCAL_ZEROFILL;
 
-    public static IMachOSignatureTransferData? ReadSignatureTransferData(MachOFile machOFile, MachOFile.Mode mode = MachOFile.Mode.SignatureData)
+    public static IMachOSignatureTransferData? ReadSignatureTransferData(MachOFile machOFile, Mode mode = Mode.SignatureData)
     {
       var sections = machOFile.Sections;
       var sectionSignatures = new IMachOSectionSignatureTransferData?[sections.Length];
@@ -898,6 +898,20 @@ namespace JetBrains.FormatRipper.MachO
       }
 
       return hasSignature ? new MachOSignatureTransferData(sectionSignatures) : null;
+    }
+
+    [Flags]
+    public enum Mode : uint
+    {
+      Default = 0x0,
+      SignatureData = 0x1
+    }
+
+    public enum SignatureType
+    {
+      None,
+      AdHoc,
+      Regular,
     }
   }
 }

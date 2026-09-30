@@ -28,7 +28,7 @@ public class MachOSignatureTransferTests
     var signature = TestDataUtil.OpenRead(ResourceCategory.MachO, donor, stream =>
     {
       var file = MachOFile.Parse(stream);
-      return MachOUtil.ReadSignatureTransferData(file, MachOFile.Mode.SignatureData);
+      return MachOUtil.ReadSignatureTransferData(file, MachOUtil.Mode.SignatureData);
     });
 
     Assert.NotNull(signature);
@@ -75,7 +75,7 @@ public class MachOSignatureTransferTests
     var signature = TestDataUtil.OpenRead(ResourceCategory.MachO, donor, stream =>
     {
       var file = MachOFile.Parse(stream);
-      return MachOUtil.ReadSignatureTransferData(file, MachOFile.Mode.SignatureData);
+      return MachOUtil.ReadSignatureTransferData(file);
     });
 
     Assert.NotNull(signature);

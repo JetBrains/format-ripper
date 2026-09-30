@@ -73,12 +73,12 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
     SignatureVerificationParams signatureVerificationParams,
     FileIntegrityVerificationParams fileIntegrityVerificationParams)
   {
-    var loadCommandsInfo = MachOUtil.ReadLoadCommands(section, MachOFile.Mode.SignatureData);
+    var loadCommandsInfo = MachOUtil.ReadLoadCommands(section, MachOUtil.Mode.SignatureData);
 
     if (!loadCommandsInfo.HashVerificationUnits.Any() || !loadCommandsInfo.CDHashes.Any())
-      throw new ArgumentException($"Mach-o file was parsed without {nameof(MachOFile.Mode.SignatureData)} flag", nameof(section));
+      throw new ArgumentException($"Mach-o file was parsed without {nameof(MachOUtil.Mode.SignatureData)} flag", nameof(section));
 
-    if (loadCommandsInfo.SignatureType == MachOFile.SignatureType.AdHoc && !signatureVerificationParams.AllowAdhocSignatures)
+    if (loadCommandsInfo.SignatureType == MachOUtil.SignatureType.AdHoc && !signatureVerificationParams.AllowAdhocSignatures)
     {
       _logger?.Warning($"Mach-O file has adhoc signature which is not allowed. Set {nameof(SignatureVerificationParams.AllowAdhocSignatures)} to true is you want to check adhoc signatures.");
       return new VerifySignatureResult(VerifySignatureStatus.InvalidSignature);
@@ -86,7 +86,7 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
 
     SignedMessage signedMessage = null;
 
-    bool skipSignedMessageVerification = loadCommandsInfo.SignatureType == MachOFile.SignatureType.AdHoc & signatureVerificationParams.AllowAdhocSignatures;
+    bool skipSignedMessageVerification = loadCommandsInfo.SignatureType == MachOUtil.SignatureType.AdHoc & signatureVerificationParams.AllowAdhocSignatures;
 
     if (!skipSignedMessageVerification)
     {

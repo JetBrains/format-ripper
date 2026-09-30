@@ -246,7 +246,7 @@ namespace JetBrains.FormatRipper.Tests
             var hasEntitlements = (expectedSection.Options & Options.HasEntitlements) == Options.HasEntitlements;
             var hasEntitlementsDer = (expectedSection.Options & Options.HasEntitlementsDer) == Options.HasEntitlementsDer;
 
-            var loadCommandsInfo = MachOUtil.ReadLoadCommands(section, MachOFile.Mode.SignatureData);
+            var loadCommandsInfo = MachOUtil.ReadLoadCommands(section, MachOUtil.Mode.SignatureData);
             var signedBlob = loadCommandsInfo.SignatureData.SignedBlob;
             var cmsBlob = loadCommandsInfo.SignatureData.CmsBlob;
             var entitlements = loadCommandsInfo.Entitlements;

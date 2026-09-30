@@ -63,20 +63,6 @@ namespace JetBrains.FormatRipper.MachO
       Little
     }
 
-    [Flags]
-    public enum Mode : uint
-    {
-      Default = 0x0,
-      SignatureData = 0x1
-    }
-
-    public enum SignatureType
-    {
-      None,
-      AdHoc,
-      Regular,
-    }
-
     private MachOFile(Section section) : this(null, new[] { section })
     {
     }

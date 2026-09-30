@@ -68,7 +68,7 @@ namespace JetBrains.SignatureVerifier.Tests
       {
         foreach (var section in MachOFile.Parse(stream).Sections)
         {
-          var loadCommandsInfo = MachOUtil.ReadLoadCommands(section, MachOFile.Mode.SignatureData);
+          var loadCommandsInfo = MachOUtil.ReadLoadCommands(section, MachOUtil.Mode.SignatureData);
           Assert.That(() => SignedMessage.CreateInstance(loadCommandsInfo.SignatureData), Throws.Exception, "Invalid signature format");
         }
         return 0;
