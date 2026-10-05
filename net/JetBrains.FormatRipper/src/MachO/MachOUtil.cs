@@ -328,7 +328,7 @@ namespace JetBrains.FormatRipper.MachO
       public readonly byte SectionIndex;
       public readonly ND Description;
       public readonly ulong Value;
-      public readonly MachOFile.CreateStreamDelegate? CreateStream;
+      public readonly DelegateUtil.CreateStreamDelegate? CreateStream;
 
       internal Symbol(
         string name,
@@ -336,7 +336,7 @@ namespace JetBrains.FormatRipper.MachO
         byte sectionIndex,
         ND description,
         ulong value,
-        MachOFile.CreateStreamDelegate? createStream)
+        DelegateUtil.CreateStreamDelegate? createStream)
       {
         Name = name;
         Type = type;
@@ -354,7 +354,7 @@ namespace JetBrains.FormatRipper.MachO
       public readonly ulong Address;
       public readonly ulong Size;
       public readonly SEC Flags;
-      public readonly MachOFile.CreateStreamDelegate? CreateSection;
+      public readonly DelegateUtil.CreateStreamDelegate? CreateSection;
 
       internal DataSection(
         string sectionName,
@@ -362,7 +362,7 @@ namespace JetBrains.FormatRipper.MachO
         ulong address,
         ulong size,
         SEC flags,
-        MachOFile.CreateStreamDelegate? createSection)
+        DelegateUtil.CreateStreamDelegate? createSection)
       {
         SectionName = sectionName;
         SegmentName = segmentName;
@@ -585,7 +585,7 @@ namespace JetBrains.FormatRipper.MachO
 
     private static Symbol MakeSymbol(List<DataSection> dataSections, string name, NT nType, byte nSect, ND nDesc, ulong nValue)
     {
-      MachOFile.CreateStreamDelegate? createStream = null;
+      DelegateUtil.CreateStreamDelegate? createStream = null;
       if ((nType & NT.N_STAB) == 0 && (nType & NT.N_TYPE) == NT.N_SECT)
       {
         if (nSect == 0 || nSect >= dataSections.Count)
@@ -602,7 +602,7 @@ namespace JetBrains.FormatRipper.MachO
 
       return new Symbol(name, nType, nSect, nDesc, nValue, createStream);
 
-      static MachOFile.CreateStreamDelegate MakeCreateStream(DataSection data, ulong nValue)
+      static DelegateUtil.CreateStreamDelegate MakeCreateStream(DataSection data, ulong nValue)
       {
         var offset = checked((long)(nValue - data.Address));
         var size = checked((long)(data.Address + data.Size - nValue));
@@ -871,7 +871,7 @@ namespace JetBrains.FormatRipper.MachO
         // Note: MH_DSYM keeps the sections of __TEXT and __DATA without the data, their segments have no file size
         var hasData = !IsZeroFill(flags) && segmentFileOffset <= fileOffset && size <= segmentFileSize && fileOffset - segmentFileOffset <= segmentFileSize - size;
         return new DataSection(sectionName, segmentName, address, size, flags, hasData
-          ? new MachOFile.CreateStreamDelegate(() => new ReadOnlyNestedStream(machOSection.CreateStream(), checked((long)fileOffset), checked((long)size)))
+          ? new DelegateUtil.CreateStreamDelegate(() => new ReadOnlyNestedStream(machOSection.CreateStream(), checked((long)fileOffset), checked((long)size)))
           : null);
       }
 

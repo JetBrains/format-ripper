@@ -17,9 +17,9 @@ namespace JetBrains.FormatRipper.Pe
       public readonly uint Ordinal;
       public readonly uint VirtualAddress;
       public readonly string? Forwarder;
-      public readonly PeFile.CreateStreamDelegate? CreateStream;
+      public readonly DelegateUtil.CreateStreamDelegate? CreateStream;
 
-      internal Export(string? name, uint ordinal, uint virtualAddress, string? forwarder, PeFile.CreateStreamDelegate? createStream)
+      internal Export(string? name, uint ordinal, uint virtualAddress, string? forwarder, DelegateUtil.CreateStreamDelegate? createStream)
       {
         Name = name;
         Ordinal = ordinal;
@@ -205,7 +205,7 @@ namespace JetBrains.FormatRipper.Pe
       return stream;
     }
 
-    private static PeFile.CreateStreamDelegate? MakeCreateStream(PeFile.Section[] sections, uint virtualAddress)
+    private static DelegateUtil.CreateStreamDelegate? MakeCreateStream(PeFile.Section[] sections, uint virtualAddress)
     {
       foreach (var section in sections)
         if (section.VirtualAddress <= virtualAddress && virtualAddress - section.VirtualAddress < Math.Max(section.VirtualSize, section.SizeOfRawData))
@@ -222,9 +222,9 @@ namespace JetBrains.FormatRipper.Pe
       public readonly IMAGE_SYM_DTYPE DerivedType;
       public readonly IMAGE_SYM_CLASS StorageClass;
       public readonly byte NumberOfAuxSymbols;
-      public readonly PeFile.CreateStreamDelegate? CreateStream;
+      public readonly DelegateUtil.CreateStreamDelegate? CreateStream;
 
-      internal Symbol(string name, uint value, ushort sectionNumber, IMAGE_SYM_TYPE baseType, IMAGE_SYM_DTYPE derivedType, IMAGE_SYM_CLASS storageClass, byte numberOfAuxSymbols, PeFile.CreateStreamDelegate? createStream)
+      internal Symbol(string name, uint value, ushort sectionNumber, IMAGE_SYM_TYPE baseType, IMAGE_SYM_DTYPE derivedType, IMAGE_SYM_CLASS storageClass, byte numberOfAuxSymbols, DelegateUtil.CreateStreamDelegate? createStream)
       {
         Name = name;
         Value = value;
@@ -305,7 +305,7 @@ namespace JetBrains.FormatRipper.Pe
       return true;
     }
 
-    private static PeFile.CreateStreamDelegate? MakeSectionCreateStream(PeFile.Section section, uint offset)
+    private static DelegateUtil.CreateStreamDelegate? MakeSectionCreateStream(PeFile.Section section, uint offset)
     {
       // Note: the section tail beyond the raw data is zero-filled by the loader, so there is no file data for it
       var createSectionStream = section.CreateStream;
@@ -450,7 +450,7 @@ namespace JetBrains.FormatRipper.Pe
         var storageClass = (IMAGE_SYM_CLASS)isym.StorageClass;
 
         // Note: the value is the offset in the section only for these storage classes
-        PeFile.CreateStreamDelegate? createStream = null;
+        DelegateUtil.CreateStreamDelegate? createStream = null;
         if (IMAGE_SYM.IMAGE_SYM_UNDEFINED < (IMAGE_SYM)sectionNumber && (IMAGE_SYM)sectionNumber <= IMAGE_SYM.IMAGE_SYM_SECTION_MAX &&
             storageClass is IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_EXTERNAL or IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_STATIC or IMAGE_SYM_CLASS.IMAGE_SYM_CLASS_LABEL)
         {

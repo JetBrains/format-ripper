@@ -398,7 +398,7 @@ namespace JetBrains.FormatRipper.Tests
       return null;
     }
 
-    private static bool IsSameStream(PeFile.CreateStreamDelegate? expectedCreateStream, PeFile.CreateStreamDelegate? createStream)
+    private static bool IsSameStream(DelegateUtil.CreateStreamDelegate? expectedCreateStream, DelegateUtil.CreateStreamDelegate? createStream)
     {
       if (expectedCreateStream == null || createStream == null)
         return expectedCreateStream == createStream;

@@ -56,9 +56,9 @@ namespace JetBrains.FormatRipper.Elf
       public readonly STT Type;
       public readonly STB Binding;
       public readonly byte Other;
-      public readonly ElfFile.CreateStreamDelegate? CreateStream;
+      public readonly DelegateUtil.CreateStreamDelegate? CreateStream;
 
-      internal Symbol(string name, ushort sectionIndex, ulong value, ulong size, STT type, STB binding, byte other, ElfFile.CreateStreamDelegate? createStream)
+      internal Symbol(string name, ushort sectionIndex, ulong value, ulong size, STT type, STB binding, byte other, DelegateUtil.CreateStreamDelegate? createStream)
       {
         Name = name;
         Size = size;
@@ -206,7 +206,7 @@ namespace JetBrains.FormatRipper.Elf
       // Note: the bit 0 of the ARM function symbol value marks the Thumb code, the first instruction is at the even address
       if (eMachine == EM.EM_ARM && stType is STT.STT_FUNC or STT.STT_GNU_IFUNC)
         address &= ~1ul;
-      ElfFile.CreateStreamDelegate? createStream = null;
+      DelegateUtil.CreateStreamDelegate? createStream = null;
       if (SHN.SHN_UNDEF < (SHN)stShNdx && (SHN)stShNdx < SHN.SHN_LORESERVE)
       {
         if (stShNdx >= sections.Length)
@@ -250,15 +250,15 @@ namespace JetBrains.FormatRipper.Elf
         return false;
       }
 
-      static ElfFile.CreateStreamDelegate[] CreateStreamDelegates(ElfFile.Section[] sectionItems, ushort startIndex, ushort endIndex)
+      static DelegateUtil.CreateStreamDelegate[] CreateStreamDelegates(ElfFile.Section[] sectionItems, ushort startIndex, ushort endIndex)
       {
-        var createStreams = new ElfFile.CreateStreamDelegate[endIndex - startIndex];
+        var createStreams = new DelegateUtil.CreateStreamDelegate[endIndex - startIndex];
         for (var index = startIndex; index < endIndex; index++)
           createStreams[index - startIndex] = sectionItems[index].CreateStream;
         return createStreams;
       }
 
-      static Stream[] CreateStreams(ElfFile.CreateStreamDelegate[] createStreams)
+      static Stream[] CreateStreams(DelegateUtil.CreateStreamDelegate[] createStreams)
       {
         var streams = new Stream[createStreams.Length];
         for (var n = 0; n < createStreams.Length; n++)

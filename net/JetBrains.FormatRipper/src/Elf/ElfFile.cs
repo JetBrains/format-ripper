@@ -39,17 +39,15 @@ namespace JetBrains.FormatRipper.Elf
       Sections = sections;
     }
 
-    public delegate Stream CreateStreamDelegate();
-
     public sealed class Program
     {
       public readonly ulong Size;
       public readonly ulong VirtualAddress;
       public readonly PT Type;
       public readonly PF Flags;
-      public readonly CreateStreamDelegate CreateStream;
+      public readonly DelegateUtil.CreateStreamDelegate CreateStream;
 
-      internal Program(ulong size, ulong virtualAddress, PT type, PF flags, CreateStreamDelegate createStream)
+      internal Program(ulong size, ulong virtualAddress, PT type, PF flags, DelegateUtil.CreateStreamDelegate createStream)
       {
         Size = size;
         VirtualAddress = virtualAddress;
@@ -70,9 +68,9 @@ namespace JetBrains.FormatRipper.Elf
       public readonly ushort Link;
       public readonly uint Info;
       public readonly ulong EntSize;
-      public readonly CreateStreamDelegate CreateStream;
+      public readonly DelegateUtil.CreateStreamDelegate CreateStream;
 
-      internal Section(string name, ulong size, ulong address, ulong addressAlign, SHT type, SHF flags, ushort link, uint info, ulong entSize, CreateStreamDelegate createStream)
+      internal Section(string name, ulong size, ulong address, ulong addressAlign, SHT type, SHF flags, ushort link, uint info, ulong entSize, DelegateUtil.CreateStreamDelegate createStream)
       {
         Name = name;
         Size = size;

@@ -7,15 +7,13 @@ namespace JetBrains.FormatRipper.MachO
 {
   public sealed class MachOFile
   {
-    public delegate Stream CreateStreamDelegate();
-
     public sealed class Command
     {
       public readonly LC Type;
       public readonly uint Size;
-      public readonly CreateStreamDelegate CreateStream;
+      public readonly DelegateUtil.CreateStreamDelegate CreateStream;
 
-      internal Command(LC type, uint size, CreateStreamDelegate createStream)
+      internal Command(LC type, uint size, DelegateUtil.CreateStreamDelegate createStream)
       {
         Type = type;
         Size = size;
@@ -32,13 +30,13 @@ namespace JetBrains.FormatRipper.MachO
       public readonly MH_FileType MhFileType;
       public readonly MH_Flags MhFlags;
       public readonly Command[] Commands;
-      public readonly CreateStreamDelegate CreateStream;
+      public readonly DelegateUtil.CreateStreamDelegate CreateStream;
       public readonly long ImageOffset;
       public readonly uint SizeOfLoadCommands;
 
       internal Section(
         BaseSection baseSection,
-        CreateStreamDelegate createStream,
+        DelegateUtil.CreateStreamDelegate createStream,
         long imageOffset)
       {
         Endian = baseSection.Endian;

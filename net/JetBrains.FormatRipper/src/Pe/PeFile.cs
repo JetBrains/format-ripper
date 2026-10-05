@@ -9,8 +9,6 @@ namespace JetBrains.FormatRipper.Pe
 {
   public sealed class PeFile
   {
-    public delegate Stream CreateStreamDelegate();
-
     public sealed class Section
     {
       public readonly string Name;
@@ -18,9 +16,9 @@ namespace JetBrains.FormatRipper.Pe
       public readonly uint VirtualSize;
       public readonly uint SizeOfRawData;
       public readonly IMAGE_SCN Characteristics;
-      public readonly CreateStreamDelegate? CreateStream;
+      public readonly DelegateUtil.CreateStreamDelegate? CreateStream;
 
-      internal Section(string name, uint virtualAddress, uint virtualSize, uint sizeOfRawData, IMAGE_SCN characteristics, CreateStreamDelegate? createStream)
+      internal Section(string name, uint virtualAddress, uint virtualSize, uint sizeOfRawData, IMAGE_SCN characteristics, DelegateUtil.CreateStreamDelegate? createStream)
       {
         Name = name;
         VirtualAddress = virtualAddress;
@@ -57,7 +55,7 @@ namespace JetBrains.FormatRipper.Pe
     public readonly DataDirectory ExportDirectory;
     public readonly uint PointerToSymbolTable;
     public readonly uint NumberOfSymbols;
-    public readonly CreateStreamDelegate CreateStream;
+    public readonly DelegateUtil.CreateStreamDelegate CreateStream;
 
     private PeFile(
       IMAGE_FILE_MACHINE machine,
@@ -74,7 +72,7 @@ namespace JetBrains.FormatRipper.Pe
       DataDirectory exportDirectory,
       uint pointerToSymbolTable,
       uint numberOfSymbols,
-      CreateStreamDelegate createStream)
+      DelegateUtil.CreateStreamDelegate createStream)
     {
       Machine = machine;
       Characteristics = characteristics;
@@ -209,7 +207,7 @@ namespace JetBrains.FormatRipper.Pe
           sizeOfRawData,
           (IMAGE_SCN)EndianUtil.GetLeU4(ish.Characteristics),
           pointerToRawData != 0 && sizeOfRawData != 0
-            ? new CreateStreamDelegate(() => new ReadOnlyNestedStream(stream, pointerToRawData, sizeOfRawData))
+            ? new DelegateUtil.CreateStreamDelegate(() => new ReadOnlyNestedStream(stream, pointerToRawData, sizeOfRawData))
             : null);
       }
 
