@@ -81,7 +81,7 @@ namespace JetBrains.FormatRipper.Tests
       public override string ToString() => $"{Hash}, 0x{Address:X}, {Size}, \"{SectionName}\", \"{SegmentName}\", 0x{(uint)Flags:X}";
     }
 
-    public sealed class Section
+    public sealed class Image
     {
       public readonly string Hash;
       public readonly MachOFile.Endian Endian;
@@ -99,7 +99,7 @@ namespace JetBrains.FormatRipper.Tests
       public readonly DataSection[]? DataSections;
       public readonly Symbol[]? Symbols;
 
-      internal Section(
+      internal Image(
         string hash,
         MachOFile.Endian endian,
         CPU_TYPE cpuType,
@@ -136,63 +136,63 @@ namespace JetBrains.FormatRipper.Tests
 
     private static object?[] MakeSource(
       string filename,
-      Section section) => new object?[]
+      Image image) => new object?[]
       {
         false,
         filename,
         null,
         null,
-        new[] { section }
+        new[] { image }
       };
 
     private static object?[] MakeSource(
       string filename,
       MachOFile.Endian fatEndian,
-      params Section[] sections) => new object?[]
+      params Image[] images) => new object?[]
       {
         false,
         filename,
         fatEndian,
         null,
-        sections
+        images
       };
 
     private static object?[] MakeSource(
       string filename,
       string? expectedUnityScriptingBackend,
       MachOFile.Endian fatEndian,
-      params Section[] sections) => new object?[]
+      params Image[] images) => new object?[]
       {
         false,
         filename,
         fatEndian,
         expectedUnityScriptingBackend,
-        sections
+        images
       };
 
     private static object?[] MakeOptionalSource(
       string filename,
       string? expectedUnityScriptingBackend,
-      Section section) => new object?[]
+      Image image) => new object?[]
       {
         true,
         filename,
         null,
         expectedUnityScriptingBackend,
-        new[] { section }
+        new[] { image }
       };
 
     private static object?[] MakeOptionalSource(
       string filename,
       string? expectedUnityScriptingBackend,
       MachOFile.Endian fatEndian,
-      params Section[] sections) => new object?[]
+      params Image[] images) => new object?[]
       {
         true,
         filename,
         fatEndian,
         expectedUnityScriptingBackend,
-        sections
+        images
       };
 
     [TestCaseSource(typeof(MachOFileTest), nameof(Sources))]
@@ -202,32 +202,32 @@ namespace JetBrains.FormatRipper.Tests
       string resourceName,
       MachOFile.Endian? expectedFatEndian,
       string? expectedUnityScriptingBackend,
-      Section[] expectedSections)
+      Image[] expectedImages)
     {
       TestDataUtil.OpenRead(ResourceCategory.MachO, resourceName, stream =>
         {
           var file = MachOFile.Parse(stream);
 
-          var sections = file.Sections;
+          var images = file.Images;
           Assert.AreEqual(expectedFatEndian, file.FatEndian);
-          Assert.AreEqual(expectedSections.Length, sections.Length);
+          Assert.AreEqual(expectedImages.Length, images.Length);
 
           string? unityScriptingBackend = null;
-          for (var n = 0; n < sections.Length; n++)
+          for (var n = 0; n < images.Length; n++)
           {
-            var section = sections[n];
-            var expectedSection = expectedSections[n];
+            var image = images[n];
+            var expectedImage = expectedImages[n];
 
-            Assert.AreEqual(expectedSection.Hash, CalculateStreamHash384(() => section.CreateStream()));
-            Assert.AreEqual(expectedSection.Endian, section.Endian);
-            Assert.AreEqual(ReadMagic(section) is MH.MH_MAGIC_64 or MH.MH_CIGAM_64, section.Is64);
-            Assert.AreEqual(expectedSection.CpuType, section.CpuType);
-            Assert.AreEqual(expectedSection.CpuSubType, section.CpuSubType);
-            Assert.AreEqual(expectedSection.MhFileType, section.MhFileType);
-            Assert.AreEqual(expectedSection.MhFlags, section.MhFlags);
+            Assert.AreEqual(expectedImage.Hash, CalculateStreamHash384(() => image.CreateStream()));
+            Assert.AreEqual(expectedImage.Endian, image.Endian);
+            Assert.AreEqual(ReadMagic(image) is MH.MH_MAGIC_64 or MH.MH_CIGAM_64, image.Is64);
+            Assert.AreEqual(expectedImage.CpuType, image.CpuType);
+            Assert.AreEqual(expectedImage.CpuSubType, image.CpuSubType);
+            Assert.AreEqual(expectedImage.MhFileType, image.MhFileType);
+            Assert.AreEqual(expectedImage.MhFlags, image.MhFlags);
 
-            var expectedCommands = expectedSection.Commands;
-            var commands = section.Commands;
+            var expectedCommands = expectedImage.Commands;
+            var commands = image.Commands;
             Assert.AreEqual(expectedCommands.Length, commands.Length);
             for (var k = 0; k < expectedCommands.Length; k++)
             {
@@ -241,12 +241,12 @@ namespace JetBrains.FormatRipper.Tests
               Assert.AreEqual(expectedCommand.Hash, hash);
             }
 
-            var hasSignedBlob = (expectedSection.Options & Options.HasSignedBlob) == Options.HasSignedBlob;
-            var hasCmsBlob = (expectedSection.Options & Options.HasCmsBlob) == Options.HasCmsBlob;
-            var hasEntitlements = (expectedSection.Options & Options.HasEntitlements) == Options.HasEntitlements;
-            var hasEntitlementsDer = (expectedSection.Options & Options.HasEntitlementsDer) == Options.HasEntitlementsDer;
+            var hasSignedBlob = (expectedImage.Options & Options.HasSignedBlob) == Options.HasSignedBlob;
+            var hasCmsBlob = (expectedImage.Options & Options.HasCmsBlob) == Options.HasCmsBlob;
+            var hasEntitlements = (expectedImage.Options & Options.HasEntitlements) == Options.HasEntitlements;
+            var hasEntitlementsDer = (expectedImage.Options & Options.HasEntitlementsDer) == Options.HasEntitlementsDer;
 
-            var loadCommandsInfo = MachOUtil.ReadLoadCommands(section, MachOUtil.Mode.SignatureData);
+            var loadCommandsInfo = MachOUtil.ReadLoadCommands(image, MachOUtil.Mode.SignatureData);
             var signedBlob = loadCommandsInfo.SignatureData.SignedBlob;
             var cmsBlob = loadCommandsInfo.SignatureData.CmsBlob;
             var entitlements = loadCommandsInfo.Entitlements;
@@ -275,12 +275,12 @@ namespace JetBrains.FormatRipper.Tests
               byte[] hash;
               using (var hashAlgorithm = SHA384.Create())
                 hash = hashAlgorithm.ComputeHash(signedBlob);
-              Assert.AreEqual(expectedSection.CodeDirectoryBlobHash, HexUtil.ConvertToHexString(hash));
+              Assert.AreEqual(expectedImage.CodeDirectoryBlobHash, HexUtil.ConvertToHexString(hash));
             }
             else
             {
               Assert.IsFalse(hasCmsBlob);
-              Assert.IsNull(expectedSection.CodeDirectoryBlobHash);
+              Assert.IsNull(expectedImage.CodeDirectoryBlobHash);
             }
 
             if (cmsBlob != null)
@@ -288,10 +288,10 @@ namespace JetBrains.FormatRipper.Tests
               byte[] hash;
               using (var hashAlgorithm = SHA384.Create())
                 hash = hashAlgorithm.ComputeHash(cmsBlob);
-              Assert.AreEqual(expectedSection.CmsDataHash, HexUtil.ConvertToHexString(hash));
+              Assert.AreEqual(expectedImage.CmsDataHash, HexUtil.ConvertToHexString(hash));
             }
             else
-              Assert.IsNull(expectedSection.CmsDataHash);
+              Assert.IsNull(expectedImage.CmsDataHash);
 
             if (entitlements != null)
             {
@@ -299,10 +299,10 @@ namespace JetBrains.FormatRipper.Tests
               using (var hashAlgorithm = SHA384.Create())
                 hash = hashAlgorithm.ComputeHash(entitlements);
 
-              Assert.AreEqual(expectedSection.EntitlementsHash, HexUtil.ConvertToHexString(hash));
+              Assert.AreEqual(expectedImage.EntitlementsHash, HexUtil.ConvertToHexString(hash));
             }
             else
-              Assert.Null(expectedSection.EntitlementsHash);
+              Assert.Null(expectedImage.EntitlementsHash);
 
             if (entitlementsDer != null)
             {
@@ -310,38 +310,38 @@ namespace JetBrains.FormatRipper.Tests
               using (var hashAlgorithm = SHA384.Create())
                 hash = hashAlgorithm.ComputeHash(entitlementsDer);
 
-              Assert.AreEqual(expectedSection.EntitlementsDerHash, HexUtil.ConvertToHexString(hash));
+              Assert.AreEqual(expectedImage.EntitlementsDerHash, HexUtil.ConvertToHexString(hash));
             }
             else
-              Assert.Null(expectedSection.EntitlementsDerHash);
+              Assert.Null(expectedImage.EntitlementsDerHash);
 
-            var dataSections = MachOUtil.ReadDataSections(section);
-            if (expectedSection.DataSections != null)
+            var dataSections = MachOUtil.ReadDataSections(image);
+            if (expectedImage.DataSections != null)
             {
-              var expectedDataSections = expectedSection.DataSections;
-              Assert.AreEqual(expectedDataSections.Length, dataSections.Count, $"Unexpected data section count in the section {n}");
+              var expectedDataSections = expectedImage.DataSections;
+              Assert.AreEqual(expectedDataSections.Length, dataSections.Count, $"Unexpected data image count in the image {n}");
               for (var k = 0; k < expectedDataSections.Length; ++k)
                 AssertDataSection(expectedDataSections[k], dataSections[k]);
             }
             else
               GenerateDataSectionInfos(dataSections);
 
-            var symbols = new List<MachOUtil.Symbol>(expectedSection.SymbolCount);
-            Assert.IsTrue(MachOUtil.GetSymbols(section, dataSections, symbol =>
+            var symbols = new List<MachOUtil.Symbol>(expectedImage.SymbolCount);
+            Assert.IsTrue(MachOUtil.GetSymbols(image, dataSections, symbol =>
               {
                 symbols.Add(symbol);
                 return true;
               }));
-            Assert.AreEqual(expectedSection.SymbolCount, symbols.Count, $"Unexpected symbol count in the section {n}");
+            Assert.AreEqual(expectedImage.SymbolCount, symbols.Count, $"Unexpected symbol count in the image {n}");
 
             var verifiedSymbols = SymbolUtil.SelectEdges(symbols);
-            if (expectedSection.Symbols != null)
+            if (expectedImage.Symbols != null)
             {
-              var expectedSectionSymbols = expectedSection.Symbols;
-              Assert.AreEqual(expectedSectionSymbols.Length, verifiedSymbols.Length);
-              for (var k = 0; k < expectedSectionSymbols.Length; ++k)
+              var expectedImageSymbols = expectedImage.Symbols;
+              Assert.AreEqual(expectedImageSymbols.Length, verifiedSymbols.Length);
+              for (var k = 0; k < expectedImageSymbols.Length; ++k)
               {
-                var expectedSymbol = expectedSectionSymbols[k];
+                var expectedSymbol = expectedImageSymbols[k];
                 var symbol = verifiedSymbols[k];
 
                 Assert.AreEqual(expectedSymbol.Name, symbol.Name);
@@ -357,7 +357,7 @@ namespace JetBrains.FormatRipper.Tests
             else
               GenerateSymbolInfos(verifiedSymbols);
 
-            SymbolUtil.AssertLookups(CheckLookups(section, dataSections, symbols, SymbolUtil.MakeLookups(symbols, x => x.Name, IsExternal, IsDefined), symbols.Count <= SymbolUtil.MaxLinearLookupSymbolCount));
+            SymbolUtil.AssertLookups(CheckLookups(image, dataSections, symbols, SymbolUtil.MakeLookups(symbols, x => x.Name, IsExternal, IsDefined), symbols.Count <= SymbolUtil.MaxLinearLookupSymbolCount));
 
             if (unityScriptingBackend == null)
               foreach (var symbol in symbols)
@@ -400,16 +400,16 @@ namespace JetBrains.FormatRipper.Tests
 
     private static bool IsDefined(MachOUtil.Symbol symbol) => (symbol.Type & NT.N_TYPE) is NT.N_ABS or NT.N_SECT or NT.N_INDR;
 
-    private static List<string> CheckLookups(MachOFile.Section section, List<MachOUtil.DataSection> dataSections, IList<MachOUtil.Symbol> symbols, IEnumerable<Lookup> lookups, bool withLinear)
+    private static List<string> CheckLookups(MachOFile.Image image, List<MachOUtil.DataSection> dataSections, IList<MachOUtil.Symbol> symbols, IEnumerable<Lookup> lookups, bool withLinear)
     {
       var errors = new List<string>();
       foreach (var lookup in lookups)
       {
         var name = lookup.Name;
-        Check(nameof(MachOUtil.TryGetSymbol), MachOUtil.TryGetSymbol(section, dataSections, name, out var symbol), symbol);
-        Check(nameof(MachOUtil.TryGetSymbolByDySymTab), MachOUtil.TryGetSymbolByDySymTab(section, dataSections, name, out symbol), symbol);
+        Check(nameof(MachOUtil.TryGetSymbol), MachOUtil.TryGetSymbol(image, dataSections, name, out var symbol), symbol);
+        Check(nameof(MachOUtil.TryGetSymbolByDySymTab), MachOUtil.TryGetSymbolByDySymTab(image, dataSections, name, out symbol), symbol);
         if (withLinear)
-          Check(nameof(MachOUtil.TryGetSymbolLinear), MachOUtil.TryGetSymbolLinear(section, dataSections, name, out symbol), symbol);
+          Check(nameof(MachOUtil.TryGetSymbolLinear), MachOUtil.TryGetSymbolLinear(image, dataSections, name, out symbol), symbol);
 
         void Check(string method, bool? isFound, MachOUtil.Symbol? found)
         {
@@ -462,9 +462,9 @@ namespace JetBrains.FormatRipper.Tests
       return HexUtil.ConvertToHexString(hashAlgorithm.ComputeHash(itemStream));
     }
 
-    private static MH ReadMagic(MachOFile.Section section)
+    private static MH ReadMagic(MachOFile.Image image)
     {
-      using var stream = section.CreateStream();
+      using var stream = image.CreateStream();
       var magic = new byte[sizeof(uint)];
       Assert.AreEqual(magic.Length, stream.Read(magic, 0, magic.Length));
       return (MH)(magic[0] | (uint)magic[1] << 8 | (uint)magic[2] << 16 | (uint)magic[3] << 24);

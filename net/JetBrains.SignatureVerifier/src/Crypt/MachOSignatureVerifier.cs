@@ -46,12 +46,12 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
     if (machOFile == null) throw new ArgumentNullException(nameof(machOFile));
     if (stream == null) throw new ArgumentNullException(nameof(stream));
 
-    foreach (var section in machOFile.Sections)
+    foreach (var image in machOFile.Images)
     {
-      var sectionVerificationResult = await VerifyAsync(section, stream, signatureVerificationParams, fileIntegrityVerificationParams);
+      var imageVerificationResult = await VerifyAsync(image, stream, signatureVerificationParams, fileIntegrityVerificationParams);
 
-      if (!sectionVerificationResult.IsValid)
-        return sectionVerificationResult;
+      if (!imageVerificationResult.IsValid)
+        return imageVerificationResult;
     }
 
     _logger?.Info("Mach-O file signature verification successfully passed");
@@ -60,23 +60,23 @@ public class MachOSignatureVerifier: AppleSignatureVerifier
   }
 
   /// <summary>
-  /// Verify digital signature and file integrity of a single Mach-o file section
+  /// Verify digital signature and file integrity of a single Mach-o file image
   /// </summary>
-  /// <param name="section">Mach-o file section</param>
+  /// <param name="image">Mach-o file image</param>
   /// <param name="stream">Mach-o file raw stream. A stream of the entire file is expected.</param>
   /// <param name="signatureVerificationParams">Verification params</param>
   /// <param name="fileIntegrityVerificationParams">File integrity verification params</param>
   /// <returns>Verification result</returns>
   public async Task<VerifySignatureResult> VerifyAsync(
-    MachOFile.Section section,
+    MachOFile.Image image,
     Stream stream,
     SignatureVerificationParams signatureVerificationParams,
     FileIntegrityVerificationParams fileIntegrityVerificationParams)
   {
-    var loadCommandsInfo = MachOUtil.ReadLoadCommands(section, MachOUtil.Mode.SignatureData);
+    var loadCommandsInfo = MachOUtil.ReadLoadCommands(image, MachOUtil.Mode.SignatureData);
 
     if (!loadCommandsInfo.HashVerificationUnits.Any() || !loadCommandsInfo.CDHashes.Any())
-      throw new ArgumentException($"Mach-o file was parsed without {nameof(MachOUtil.Mode.SignatureData)} flag", nameof(section));
+      throw new ArgumentException($"Mach-o file was parsed without {nameof(MachOUtil.Mode.SignatureData)} flag", nameof(image));
 
     if (loadCommandsInfo.SignatureType == MachOUtil.SignatureType.AdHoc && !signatureVerificationParams.AllowAdhocSignatures)
     {

@@ -43,12 +43,12 @@ namespace JetBrains.FormatRipper.MachO
       }
     }
 
-    public static unsafe LoadCommandsInfo ReadLoadCommands(MachOFile.Section section, MachOUtil.Mode mode = MachOUtil.Mode.Default)
+    public static unsafe LoadCommandsInfo ReadLoadCommands(MachOFile.Image image, MachOUtil.Mode mode = MachOUtil.Mode.Default)
     {
-      var endian = section.Endian;
-      var commands = section.Commands;
-      var imageOffset = section.ImageOffset;
-      var sizeOfCmds = section.SizeOfLoadCommands;
+      var endian = image.Endian;
+      var commands = image.Commands;
+      var imageOffset = image.ImageOffset;
+      var sizeOfCmds = image.SizeOfLoadCommands;
 
       var needSwap = NeedSwap(endian);
       uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
@@ -121,13 +121,13 @@ namespace JetBrains.FormatRipper.MachO
 
             if ((mode & MachOUtil.Mode.SignatureData) == MachOUtil.Mode.SignatureData)
             {
-              using var sectionStream = section.CreateStream();
-              sectionStream.Position = GetU4(ldc.dataoff);
-              sectionSignatureTransferData.SignatureBlob = StreamUtil.ReadBytes(sectionStream, checked((int)GetU4(ldc.datasize)));
-              sectionStream.Position = GetU4(ldc.dataoff);
+              using var imageStream = image.CreateStream();
+              imageStream.Position = GetU4(ldc.dataoff);
+              sectionSignatureTransferData.SignatureBlob = StreamUtil.ReadBytes(imageStream, checked((int)GetU4(ldc.datasize)));
+              imageStream.Position = GetU4(ldc.dataoff);
 
               CS_SuperBlob cssb;
-              StreamUtil.ReadBytes(sectionStream, (byte*)&cssb, sizeof(CS_SuperBlob));
+              StreamUtil.ReadBytes(imageStream, (byte*)&cssb, sizeof(CS_SuperBlob));
               if ((CSMAGIC)EndianUtil.GetBeU4(cssb.magic) != CSMAGIC.CSMAGIC_EMBEDDED_SIGNATURE)
                 throw new FormatException("Invalid Mach-O code embedded signature magic");
               var csLength = EndianUtil.GetBeU4(cssb.length);
@@ -140,7 +140,7 @@ namespace JetBrains.FormatRipper.MachO
               if (csCount > (csLength - sizeof(CS_SuperBlob)) / sizeof(CS_BlobIndex))
                 throw new FormatException("Too many Mach-O code signature super blob entries");
 
-              fixed (byte* scBuf = StreamUtil.ReadBytes(sectionStream, checked((int)csLength - sizeof(CS_SuperBlob))))
+              fixed (byte* scBuf = StreamUtil.ReadBytes(imageStream, checked((int)csLength - sizeof(CS_SuperBlob))))
               {
                 ComputeHashInfo[] specialSlotPositions = new ComputeHashInfo[(uint)CSSLOT.CSSLOT_HASHABLE_ENTRIES_MAX];
 
@@ -377,29 +377,29 @@ namespace JetBrains.FormatRipper.MachO
 
     /// <summary>
     /// Reads the <see cref="LC.LC_SYMTAB"/> symbol table of the Mach-O image. The <paramref name="dataSections"/> are
-    /// the ones returned by <see cref="ReadDataSections"/> for the same <paramref name="section"/>. The parsed stream
+    /// the ones returned by <see cref="ReadDataSections"/> for the same <paramref name="image"/>. The parsed stream
     /// should stay opened while the <see cref="Symbol.CreateStream"/> delegates are in use.
     /// </summary>
-    public static unsafe bool GetSymbols(MachOFile.Section section, List<DataSection> dataSections, SymbolFilterDelegate symbolFilter)
+    public static unsafe bool GetSymbols(MachOFile.Image image, List<DataSection> dataSections, SymbolFilterDelegate symbolFilter)
     {
-      var needSwap = NeedSwap(section.Endian);
+      var needSwap = NeedSwap(image.Endian);
       ushort GetU2(ushort v) => needSwap ? EndianUtil.SwapU2(v) : v;
       uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
       ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
 
-      var symtab = ReadSymtabCommand(section);
+      var symtab = ReadSymtabCommand(image);
       if (symtab == null)
         return true;
 
       var symCount = checked((int)GetU4(symtab.Value.nsyms));
       var strSize = GetU4(symtab.Value.strsize);
 
-      var is64 = section.Is64;
+      var is64 = image.Is64;
       var entrySize = is64 ? sizeof(nlist_64) : sizeof(nlist);
 
-      using var sectionStream = section.CreateStream();
-      using var strStream = new ReadOnlyNestedStream(sectionStream, GetU4(symtab.Value.stroff), strSize);
-      using var symStream = new ReadOnlyNestedStream(sectionStream, GetU4(symtab.Value.symoff), checked((long)symCount * entrySize));
+      using var imageStream = image.CreateStream();
+      using var strStream = new ReadOnlyNestedStream(imageStream, GetU4(symtab.Value.stroff), strSize);
+      using var symStream = new ReadOnlyNestedStream(imageStream, GetU4(symtab.Value.symoff), checked((long)symCount * entrySize));
 
       for (var n = 0; n < symCount; ++n)
       {
@@ -445,28 +445,28 @@ namespace JetBrains.FormatRipper.MachO
     /// wins. The name-sorted groups of the external and undefined symbols from <see cref="LC.LC_DYSYMTAB"/> are binary
     /// searched when it is present and the image is linked by Apple ld, otherwise the symbol table is scanned. The
     /// <paramref name="dataSections"/> are the ones returned by <see cref="ReadDataSections"/> for the same
-    /// <paramref name="section"/>. The parsed stream should stay opened while the <see cref="Symbol.CreateStream"/> delegate
+    /// <paramref name="image"/>. The parsed stream should stay opened while the <see cref="Symbol.CreateStream"/> delegate
     /// is in use.
     /// </summary>
-    public static bool TryGetSymbol(MachOFile.Section section, List<DataSection> dataSections, string name, [NotNullWhen(true)] out Symbol? symbol)
+    public static bool TryGetSymbol(MachOFile.Image image, List<DataSection> dataSections, string name, [NotNullWhen(true)] out Symbol? symbol)
     {
-      if (TryGetSymbolByDySymTab(section, dataSections, name, out symbol) == null)
-        TryGetSymbolLinear(section, dataSections, name, out symbol);
+      if (TryGetSymbolByDySymTab(image, dataSections, name, out symbol) == null)
+        TryGetSymbolLinear(image, dataSections, name, out symbol);
       return symbol != null;
     }
 
-    internal static unsafe bool? TryGetSymbolByDySymTab(MachOFile.Section section, List<DataSection> dataSections, string name, out Symbol? symbol)
+    internal static unsafe bool? TryGetSymbolByDySymTab(MachOFile.Image image, List<DataSection> dataSections, string name, out Symbol? symbol)
     {
       symbol = null;
-      var symtab = ReadSymtabCommand(section);
+      var symtab = ReadSymtabCommand(image);
       if (symtab == null)
         return false;
 
-      var needSwap = NeedSwap(section.Endian);
+      var needSwap = NeedSwap(image.Endian);
       uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
 
       dysymtab_command? dysymtab = null;
-      foreach (var command in section.Commands)
+      foreach (var command in image.Commands)
         if (command.Type == LC.LC_DYSYMTAB)
         {
           using var cmdStream = command.CreateStream();
@@ -486,10 +486,10 @@ namespace JetBrains.FormatRipper.MachO
 
       // Note: only Apple ld sorts the symbol groups by name as loader.h describes, lld and Zig don't because the modern dyld
       // looks the exported symbols up in the export trie
-      if (!IsLinkedByAppleLd(section))
+      if (!IsLinkedByAppleLd(image))
         return null;
 
-      using var table = new SymbolTable(section, dataSections, symtab.Value, name);
+      using var table = new SymbolTable(image, dataSections, symtab.Value, name);
       var iExtDefSym = GetU4(dysymtab.Value.iextdefsym);
       var nExtDefSym = GetU4(dysymtab.Value.nextdefsym);
       var iUndefSym = GetU4(dysymtab.Value.iundefsym);
@@ -499,7 +499,7 @@ namespace JetBrains.FormatRipper.MachO
 
       // Note: the undefined symbols are in the order they were seen by the static linker when MH_BINDATLOAD is set
       var entry = table.FindSorted(iExtDefSym, nExtDefSym, true) ??
-                  ((section.MhFlags & MH_Flags.MH_BINDATLOAD) == 0
+                  ((image.MhFlags & MH_Flags.MH_BINDATLOAD) == 0
                     ? table.FindSorted(iUndefSym, nUndefSym, false)
                     : table.FindLinear(iUndefSym, nUndefSym, false));
       if (entry == null)
@@ -509,14 +509,14 @@ namespace JetBrains.FormatRipper.MachO
       return true;
     }
 
-    internal static bool TryGetSymbolLinear(MachOFile.Section section, List<DataSection> dataSections, string name, out Symbol? symbol)
+    internal static bool TryGetSymbolLinear(MachOFile.Image image, List<DataSection> dataSections, string name, out Symbol? symbol)
     {
       symbol = null;
-      var symtab = ReadSymtabCommand(section);
+      var symtab = ReadSymtabCommand(image);
       if (symtab == null)
         return false;
 
-      using var table = new SymbolTable(section, dataSections, symtab.Value, name);
+      using var table = new SymbolTable(image, dataSections, symtab.Value, name);
       var entry = table.FindLinear(0, table.Count, true) ?? table.FindLinear(0, table.Count, false);
       if (entry == null)
         return false;
@@ -525,12 +525,12 @@ namespace JetBrains.FormatRipper.MachO
       return true;
     }
 
-    private static unsafe symtab_command? ReadSymtabCommand(MachOFile.Section section)
+    private static unsafe symtab_command? ReadSymtabCommand(MachOFile.Image image)
     {
-      var needSwap = NeedSwap(section.Endian);
+      var needSwap = NeedSwap(image.Endian);
       uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
 
-      foreach (var command in section.Commands)
+      foreach (var command in image.Commands)
         if (command.Type == LC.LC_SYMTAB)
         {
           using var cmdStream = command.CreateStream();
@@ -546,12 +546,12 @@ namespace JetBrains.FormatRipper.MachO
       return null;
     }
 
-    private static unsafe bool IsLinkedByAppleLd(MachOFile.Section section)
+    private static unsafe bool IsLinkedByAppleLd(MachOFile.Image image)
     {
-      var needSwap = NeedSwap(section.Endian);
+      var needSwap = NeedSwap(image.Endian);
       uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
 
-      foreach (var command in section.Commands)
+      foreach (var command in image.Commands)
         if (command.Type == LC.LC_BUILD_VERSION)
         {
           using var cmdStream = command.CreateStream();
@@ -642,7 +642,7 @@ namespace JetBrains.FormatRipper.MachO
       private readonly bool myIs64;
       private readonly int myEntrySize;
       private readonly uint myStrSize;
-      private readonly Stream mySectionStream;
+      private readonly Stream myImageStream;
       private readonly Stream mySymStream;
       private readonly Stream myStrStream;
       private readonly byte[] myEntryBuffer;
@@ -650,18 +650,18 @@ namespace JetBrains.FormatRipper.MachO
       private readonly byte[] myNameBuffer;
       internal readonly uint Count;
 
-      internal unsafe SymbolTable(MachOFile.Section section, List<DataSection> dataSections, symtab_command symtab, string name)
+      internal unsafe SymbolTable(MachOFile.Image image, List<DataSection> dataSections, symtab_command symtab, string name)
       {
         myDataSections = dataSections;
-        myNeedSwap = NeedSwap(section.Endian);
-        myIs64 = section.Is64;
+        myNeedSwap = NeedSwap(image.Endian);
+        myIs64 = image.Is64;
         myEntrySize = myIs64 ? sizeof(nlist_64) : sizeof(nlist);
         myStrSize = GetU4(symtab.strsize);
         Count = GetU4(symtab.nsyms);
 
-        mySectionStream = section.CreateStream();
-        myStrStream = new ReadOnlyNestedStream(mySectionStream, GetU4(symtab.stroff), myStrSize);
-        mySymStream = new ReadOnlyNestedStream(mySectionStream, GetU4(symtab.symoff), checked((long)Count * myEntrySize));
+        myImageStream = image.CreateStream();
+        myStrStream = new ReadOnlyNestedStream(myImageStream, GetU4(symtab.stroff), myStrSize);
+        mySymStream = new ReadOnlyNestedStream(myImageStream, GetU4(symtab.symoff), checked((long)Count * myEntrySize));
         myEntryBuffer = new byte[myEntrySize];
         myName = Encoding.UTF8.GetBytes(name);
         myNameBuffer = new byte[myName.Length + 1];
@@ -671,7 +671,7 @@ namespace JetBrains.FormatRipper.MachO
       {
         mySymStream.Dispose();
         myStrStream.Dispose();
-        mySectionStream.Dispose();
+        myImageStream.Dispose();
       }
 
       internal Entry? FindSorted(uint start, uint count, bool isDefined)
@@ -773,17 +773,17 @@ namespace JetBrains.FormatRipper.MachO
     /// The sections without the data in the file, like the zero-fill ones or the ones out of the segment file range, have no
     /// <see cref="DataSection.CreateSection"/>.
     /// </summary>
-    public static unsafe List<DataSection> ReadDataSections(MachOFile.Section machOSection)
+    public static unsafe List<DataSection> ReadDataSections(MachOFile.Image machOImage)
     {
-      var needSwap = NeedSwap(machOSection.Endian);
+      var needSwap = NeedSwap(machOImage.Endian);
       uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
       ulong GetU8(ulong v) => needSwap ? EndianUtil.SwapU8(v) : v;
 
-      var headerSize = (ulong)(sizeof(uint) /* magic */ + (machOSection.Is64 ? sizeof(mach_header_64) : sizeof(mach_header))) + machOSection.SizeOfLoadCommands;
+      var headerSize = (ulong)(sizeof(uint) /* magic */ + (machOImage.Is64 ? sizeof(mach_header_64) : sizeof(mach_header))) + machOImage.SizeOfLoadCommands;
 
       DataSection? headerDataSection = null;
       var dataSections = new List<DataSection>();
-      foreach (var command in machOSection.Commands)
+      foreach (var command in machOImage.Commands)
         switch (command.Type)
         {
         case LC.LC_SEGMENT:
@@ -797,7 +797,7 @@ namespace JetBrains.FormatRipper.MachO
             if (GetU4(sc.cmdsize) < checked(sizeof(segment_command) + nSects * sizeof(section)))
               throw new FormatException($"Invalid {nameof(segment_command)} size");
             headerDataSection ??= MakeHeaderDataSection(
-              machOSection,
+              machOImage,
               GetName(sc.segname, 16),
               GetU4(sc.vmaddr),
               GetU4(sc.fileoff),
@@ -808,7 +808,7 @@ namespace JetBrains.FormatRipper.MachO
               section sec;
               StreamUtil.ReadBytes(cmdStream, (byte*)&sec, sizeof(section));
               dataSections.Add(MakeDataSection(
-                machOSection,
+                machOImage,
                 GetName(sec.sectname, 16),
                 GetName(sec.segname, 16),
                 GetU4(sec.addr),
@@ -831,7 +831,7 @@ namespace JetBrains.FormatRipper.MachO
             if (GetU4(sc.cmdsize) < checked(sizeof(segment_command_64) + nSects * sizeof(section_64)))
               throw new FormatException($"Invalid {nameof(segment_command_64)} size");
             headerDataSection ??= MakeHeaderDataSection(
-              machOSection,
+              machOImage,
               GetName(sc.segname, 16),
               GetU8(sc.vmaddr),
               GetU8(sc.fileoff),
@@ -842,7 +842,7 @@ namespace JetBrains.FormatRipper.MachO
               section_64 sec;
               StreamUtil.ReadBytes(cmdStream, (byte*)&sec, sizeof(section_64));
               dataSections.Add(MakeDataSection(
-                machOSection,
+                machOImage,
                 GetName(sec.sectname, 16),
                 GetName(sec.segname, 16),
                 GetU8(sec.addr),
@@ -859,19 +859,19 @@ namespace JetBrains.FormatRipper.MachO
       dataSections.Insert(0, headerDataSection ?? new DataSection("__mach_header", "", 0, 0, SEC.S_REGULAR, null));
       return dataSections;
 
-      static DataSection? MakeHeaderDataSection(MachOFile.Section machOSection, string segmentName, ulong address, ulong fileOffset, ulong fileSize, ulong headerSize)
+      static DataSection? MakeHeaderDataSection(MachOFile.Image machOImage, string segmentName, ulong address, ulong fileOffset, ulong fileSize, ulong headerSize)
       {
         if (fileOffset == 0 && fileSize >= headerSize)
-          return MakeDataSection(machOSection, "__mach_header", segmentName, address, headerSize, 0, SEC.S_REGULAR, fileOffset, fileSize);
+          return MakeDataSection(machOImage, "__mach_header", segmentName, address, headerSize, 0, SEC.S_REGULAR, fileOffset, fileSize);
         return null;
       }
 
-      static DataSection MakeDataSection(MachOFile.Section machOSection, string sectionName, string segmentName, ulong address, ulong size, ulong fileOffset, SEC flags, ulong segmentFileOffset, ulong segmentFileSize)
+      static DataSection MakeDataSection(MachOFile.Image machOImage, string sectionName, string segmentName, ulong address, ulong size, ulong fileOffset, SEC flags, ulong segmentFileOffset, ulong segmentFileSize)
       {
         // Note: MH_DSYM keeps the sections of __TEXT and __DATA without the data, their segments have no file size
         var hasData = !IsZeroFill(flags) && segmentFileOffset <= fileOffset && size <= segmentFileSize && fileOffset - segmentFileOffset <= segmentFileSize - size;
         return new DataSection(sectionName, segmentName, address, size, flags, hasData
-          ? new DelegateUtil.CreateStreamDelegate(() => new ReadOnlyNestedStream(machOSection.CreateStream(), checked((long)fileOffset), checked((long)size)))
+          ? new DelegateUtil.CreateStreamDelegate(() => new ReadOnlyNestedStream(machOImage.CreateStream(), checked((long)fileOffset), checked((long)size)))
           : null);
       }
 
@@ -886,13 +886,13 @@ namespace JetBrains.FormatRipper.MachO
 
     public static IMachOSignatureTransferData? ReadSignatureTransferData(MachOFile machOFile, Mode mode = Mode.SignatureData)
     {
-      var sections = machOFile.Sections;
-      var sectionSignatures = new IMachOSectionSignatureTransferData?[sections.Length];
+      var images = machOFile.Images;
+      var sectionSignatures = new IMachOSectionSignatureTransferData?[images.Length];
 
       var hasSignature = false;
-      for (var i = 0; i < sections.Length; i++)
+      for (var i = 0; i < images.Length; i++)
       {
-        var loadCommandsInfo = ReadLoadCommands(sections[i], mode);
+        var loadCommandsInfo = ReadLoadCommands(images[i], mode);
         hasSignature |= loadCommandsInfo.HasSignature;
         sectionSignatures[i] = loadCommandsInfo.SectionSignatureTransferData;
       }

@@ -21,7 +21,7 @@ namespace JetBrains.FormatRipper.MachO
       }
     }
 
-    public sealed class Section
+    public sealed class Image
     {
       public readonly Endian Endian;
       public readonly bool Is64;
@@ -34,7 +34,7 @@ namespace JetBrains.FormatRipper.MachO
       public readonly long ImageOffset;
       public readonly uint SizeOfLoadCommands;
 
-      internal Section(
+      internal Image(
         BaseSection baseSection,
         DelegateUtil.CreateStreamDelegate createStream,
         long imageOffset)
@@ -53,7 +53,7 @@ namespace JetBrains.FormatRipper.MachO
     }
 
     public readonly Endian? FatEndian;
-    public readonly Section[] Sections;
+    public readonly Image[] Images;
 
     public enum Endian
     {
@@ -61,30 +61,30 @@ namespace JetBrains.FormatRipper.MachO
       Little
     }
 
-    private MachOFile(Section section) : this(null, new[] { section })
+    private MachOFile(Image image) : this(null, new[] { image })
     {
     }
 
-    private MachOFile(Endian? fatEndian, Section[] sections)
+    private MachOFile(Endian? fatEndian, Image[] images)
     {
       FatEndian = fatEndian;
-      Sections = sections;
+      Images = images;
     }
 
     public static unsafe MachOFile Parse(Stream stream)
     {
       stream.Position = 0;
-      ReadOnlyNestedStream CreateSectionStream() => new(stream, 0, stream.Length);
+      ReadOnlyNestedStream CreateImageStream() => new(stream, 0, stream.Length);
       return ReadMagic(stream) switch
         {
           MH.FAT_MAGIC => ReadFat32(Endian.Little, stream),
           MH.FAT_CIGAM => ReadFat32(Endian.Big, stream),
           MH.FAT_MAGIC_64 => ReadFat64(Endian.Little, stream),
           MH.FAT_CIGAM_64 => ReadFat64(Endian.Big, stream),
-          MH.MH_MAGIC => new(new Section(Read32(Endian.Little, stream), CreateSectionStream, 0)),
-          MH.MH_CIGAM => new(new Section(Read32(Endian.Big, stream), CreateSectionStream, 0)),
-          MH.MH_MAGIC_64 => new(new Section(Read64(Endian.Little, stream), CreateSectionStream, 0)),
-          MH.MH_CIGAM_64 => new(new Section(Read64(Endian.Big, stream), CreateSectionStream, 0)),
+          MH.MH_MAGIC => new(new Image(Read32(Endian.Little, stream), CreateImageStream, 0)),
+          MH.MH_CIGAM => new(new Image(Read32(Endian.Big, stream), CreateImageStream, 0)),
+          MH.MH_MAGIC_64 => new(new Image(Read64(Endian.Little, stream), CreateImageStream, 0)),
+          MH.MH_CIGAM_64 => new(new Image(Read64(Endian.Big, stream), CreateImageStream, 0)),
           _ => throw new FormatException("Unknown Mach-O magic numbers")
         };
 
@@ -97,7 +97,7 @@ namespace JetBrains.FormatRipper.MachO
         StreamUtil.ReadBytes(stream, (byte*)&fh, sizeof(fat_header));
         var nFatArch = GetU4(fh.nfat_arch);
 
-        var sections = new Section[nFatArch];
+        var images = new Image[nFatArch];
         using (var fasStream = new ReadOnlyNestedStream(stream, stream.Position, nFatArch * sizeof(fat_arch)))
           for (var n = 0u; n < nFatArch; ++n)
           {
@@ -108,25 +108,25 @@ namespace JetBrains.FormatRipper.MachO
             var offset = GetU4(fa.offset);
             var size = GetU4(fa.size);
 
-            Section section;
-            ReadOnlyNestedStream CreateSectionStream() => new(stream, offset, size);
-            using (var sectionStream = CreateSectionStream())
-              section = new Section(ReadMagic(sectionStream) switch
+            Image image;
+            ReadOnlyNestedStream CreateImageStream() => new(stream, offset, size);
+            using (var imageStream = CreateImageStream())
+              image = new Image(ReadMagic(imageStream) switch
                 {
-                  MH.MH_MAGIC => Read32(Endian.Little, sectionStream),
-                  MH.MH_CIGAM => Read32(Endian.Big, sectionStream),
-                  MH.MH_MAGIC_64 => Read64(Endian.Little, sectionStream),
-                  MH.MH_CIGAM_64 => Read64(Endian.Big, sectionStream),
+                  MH.MH_MAGIC => Read32(Endian.Little, imageStream),
+                  MH.MH_CIGAM => Read32(Endian.Big, imageStream),
+                  MH.MH_MAGIC_64 => Read64(Endian.Little, imageStream),
+                  MH.MH_CIGAM_64 => Read64(Endian.Big, imageStream),
                   _ => throw new FormatException("Unknown Mach-O magic numbers")
-                }, CreateSectionStream, offset);
-            if (section.CpuType != cpuType)
+                }, CreateImageStream, offset);
+            if (image.CpuType != cpuType)
               throw new FormatException("Inconsistent cpu type in fat header");
-            if (section.CpuSubType != cpuSubType)
+            if (image.CpuSubType != cpuSubType)
               throw new FormatException("Inconsistent cpu subtype in fat header");
-            sections[n] = section;
+            images[n] = image;
           }
 
-        return new(fatEndian, sections);
+        return new(fatEndian, images);
       }
 
       static MachOFile ReadFat64(Endian fatEndian, Stream stream)
@@ -139,7 +139,7 @@ namespace JetBrains.FormatRipper.MachO
         StreamUtil.ReadBytes(stream, (byte*)&fh, sizeof(fat_header));
         var nFatArch = GetU4(fh.nfat_arch);
 
-        var sections = new Section[nFatArch];
+        var images = new Image[nFatArch];
         using (var fasStream = new ReadOnlyNestedStream(stream, stream.Position, nFatArch * sizeof(fat_arch_64)))
           for (var n = 0u; n < nFatArch; ++n)
           {
@@ -150,41 +150,41 @@ namespace JetBrains.FormatRipper.MachO
             var offset = GetU8(fa.offset);
             var size = GetU8(fa.size);
 
-            Section section;
-            ReadOnlyNestedStream CreateSectionStream() => new(stream, checked((long)offset), checked((long)size));
-            using (var sectionStream = CreateSectionStream())
-              section = new Section(ReadMagic(sectionStream) switch
+            Image image;
+            ReadOnlyNestedStream CreateImageStream() => new(stream, checked((long)offset), checked((long)size));
+            using (var imageStream = CreateImageStream())
+              image = new Image(ReadMagic(imageStream) switch
                 {
-                  MH.MH_MAGIC => Read32(Endian.Little, sectionStream),
-                  MH.MH_CIGAM => Read32(Endian.Big, sectionStream),
-                  MH.MH_MAGIC_64 => Read64(Endian.Little, sectionStream),
-                  MH.MH_CIGAM_64 => Read64(Endian.Big, sectionStream),
+                  MH.MH_MAGIC => Read32(Endian.Little, imageStream),
+                  MH.MH_CIGAM => Read32(Endian.Big, imageStream),
+                  MH.MH_MAGIC_64 => Read64(Endian.Little, imageStream),
+                  MH.MH_CIGAM_64 => Read64(Endian.Big, imageStream),
                   _ => throw new FormatException("Unknown Mach-O magic numbers")
-                }, CreateSectionStream, checked((long)offset));
-            if (section.CpuType != cpuType)
+                }, CreateImageStream, checked((long)offset));
+            if (image.CpuType != cpuType)
               throw new FormatException("Inconsistent cpu type in fat header");
-            if (section.CpuSubType != cpuSubType)
+            if (image.CpuSubType != cpuSubType)
               throw new FormatException("Inconsistent cpu subtype in fat header");
-            sections[n] = section;
+            images[n] = image;
           }
 
-        return new(fatEndian, sections);
+        return new(fatEndian, images);
       }
 
-      static BaseSection Read32(Endian endian, Stream sectionStream)
+      static BaseSection Read32(Endian endian, Stream imageStream)
       {
         var needSwap = MachOUtil.NeedSwap(endian);
         uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
 
         mach_header mh;
-        StreamUtil.ReadBytes(sectionStream, (byte*)&mh, sizeof(mach_header));
+        StreamUtil.ReadBytes(imageStream, (byte*)&mh, sizeof(mach_header));
         var nCmds = GetU4(mh.ncmds);
         var sizeOfCmds = GetU4(mh.sizeofcmds);
 
-        var offset = sectionStream.Position;
+        var offset = imageStream.Position;
 
         Command[] commands;
-        using (var commandsStream = new ReadOnlyNestedStream(sectionStream, offset, sizeOfCmds))
+        using (var commandsStream = new ReadOnlyNestedStream(imageStream, offset, sizeOfCmds))
           commands = ReadCommands(endian, nCmds, commandsStream);
 
         return new BaseSection(
@@ -198,20 +198,20 @@ namespace JetBrains.FormatRipper.MachO
           sizeOfCmds);
       }
 
-      static BaseSection Read64(Endian endian, Stream sectionStream)
+      static BaseSection Read64(Endian endian, Stream imageStream)
       {
         var needSwap = MachOUtil.NeedSwap(endian);
         uint GetU4(uint v) => needSwap ? EndianUtil.SwapU4(v) : v;
 
         mach_header_64 mh;
-        StreamUtil.ReadBytes(sectionStream, (byte*)&mh, sizeof(mach_header_64));
+        StreamUtil.ReadBytes(imageStream, (byte*)&mh, sizeof(mach_header_64));
         var nCmds = GetU4(mh.ncmds);
         var sizeOfCmds = GetU4(mh.sizeofcmds);
 
-        var offset = sectionStream.Position;
+        var offset = imageStream.Position;
 
         Command[] commands;
-        using (var commandsStream = new ReadOnlyNestedStream(sectionStream, offset, sizeOfCmds))
+        using (var commandsStream = new ReadOnlyNestedStream(imageStream, offset, sizeOfCmds))
           commands = ReadCommands(endian, nCmds, commandsStream);
 
         return new BaseSection(

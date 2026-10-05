@@ -97,37 +97,37 @@ namespace JetBrains.FormatRipper.FileExplorer
     {
       try
       {
-        static MH_FileType? GetAggregatedFileType(IEnumerable<MachOFile.Section> sections)
+        static MH_FileType? GetAggregatedFileType(IEnumerable<MachOFile.Image> images)
         {
           MH_FileType? fileType = null;
-          foreach (var section in sections)
+          foreach (var image in images)
             if (fileType == null)
-              fileType = section.MhFileType;
-            else if (fileType != section.MhFileType)
+              fileType = image.MhFileType;
+            else if (fileType != image.MhFileType)
               return null;
 
           return fileType;
         }
 
-        bool IsAllHasCodeSignature(IEnumerable<MachOFile.Section> sections)
+        bool IsAllHasCodeSignature(IEnumerable<MachOFile.Image> images)
         {
-          foreach (var section in sections)
-            if (!MachOUtil.ReadLoadCommands(section).HasSignature)
+          foreach (var image in images)
+            if (!MachOUtil.ReadLoadCommands(image).HasSignature)
               return false;
           return true;
         }
 
         var file = MachOFile.Parse(stream);
-        var fileSections = file.Sections;
+        var fileImages = file.Images;
 
-        properties = GetAggregatedFileType(fileSections) switch
+        properties = GetAggregatedFileType(fileImages) switch
           {
             MH_FileType.MH_EXECUTE => FileProperties.ExecutableType,
             MH_FileType.MH_DYLIB => FileProperties.SharedLibraryType,
             MH_FileType.MH_BUNDLE => FileProperties.BundleType,
             _ => FileProperties.UnknownType
           };
-        if (IsAllHasCodeSignature(fileSections))
+        if (IsAllHasCodeSignature(fileImages))
           properties |= FileProperties.Signed;
         if (file.FatEndian != null)
           properties |= FileProperties.MultiArch;

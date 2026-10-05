@@ -66,9 +66,9 @@ namespace JetBrains.SignatureVerifier.Tests
     {
       TestDataUtil.OpenRead(ResourceCategory.MachO, machoResourceName, stream =>
       {
-        foreach (var section in MachOFile.Parse(stream).Sections)
+        foreach (var image in MachOFile.Parse(stream).Images)
         {
-          var loadCommandsInfo = MachOUtil.ReadLoadCommands(section, MachOUtil.Mode.SignatureData);
+          var loadCommandsInfo = MachOUtil.ReadLoadCommands(image, MachOUtil.Mode.SignatureData);
           Assert.That(() => SignedMessage.CreateInstance(loadCommandsInfo.SignatureData), Throws.Exception, "Invalid signature format");
         }
         return 0;
@@ -97,10 +97,10 @@ namespace JetBrains.SignatureVerifier.Tests
           {
             MachOSignatureVerifier signatureVerifier = new MachOSignatureVerifier(ConsoleLogger.Instance);
 
-            return MachOFile.Parse(stream).Sections
-              .Select(async section =>
+            return MachOFile.Parse(stream).Images
+              .Select(async image =>
               {
-                return await signatureVerifier.VerifyAsync(section, stream, verificationParams, FileIntegrityVerificationParams.Default);
+                return await signatureVerifier.VerifyAsync(image, stream, verificationParams, FileIntegrityVerificationParams.Default);
               })
               .Select(_ => _.Result)
               .ToList();
@@ -132,10 +132,10 @@ namespace JetBrains.SignatureVerifier.Tests
           {
             MachOSignatureVerifier signatureVerifier = new MachOSignatureVerifier(ConsoleLogger.Instance);
 
-            return MachOFile.Parse(stream).Sections
-              .Select(async section =>
+            return MachOFile.Parse(stream).Images
+              .Select(async image =>
               {
-                return await signatureVerifier.VerifyAsync(section, stream, verificationParams, FileIntegrityVerificationParams.Default);
+                return await signatureVerifier.VerifyAsync(image, stream, verificationParams, FileIntegrityVerificationParams.Default);
               })
               .Select(_ => _.Result)
               .ToList();
