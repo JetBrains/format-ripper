@@ -155,13 +155,38 @@ namespace JetBrains.FormatRipper.Elf
     /// table linked to the symbol table is used when it is present, otherwise the symbol table is scanned. The parsed stream
     /// should stay opened while the <see cref="Symbol.CreateStream"/> delegate is in use.
     /// </summary>
-    public static bool TryGetSymbol(ElfFile file, ushort symSectionIndex, ushort strSectionIndex, string name, [NotNullWhen(true)] out Symbol? symbol)
+    internal static bool TryGetSymbolBySectionIndexes(ElfFile file, ushort symSectionIndex, ushort strSectionIndex, string name, [NotNullWhen(true)] out Symbol? symbol)
     {
       ValidateSymbolSectionIndexes(file, symSectionIndex, strSectionIndex);
       using var table = new SymbolTable(file, symSectionIndex, strSectionIndex, name);
-      if (table.FindByGnuHash(out symbol) == null && table.FindBySysVHash(out symbol) == null)
-        table.FindLinear(false, out symbol);
-      return symbol != null;
+      return table.FindByGnuHash(out symbol) ??
+             table.FindBySysVHash(out symbol) ??
+             table.FindLinear(false, out symbol);
+    }
+
+    /// <summary>
+    /// Looks for the global symbol with the given name in the dynamic symbol table (<see cref="SHT.SHT_DYNSYM"/>) using the
+    /// rules of <see cref="TryGetSymbolBySectionIndexes"/>. Returns false when the file has no dynamic symbol table.
+    /// </summary>
+    public static bool TryGetDynamicSymbol(ElfFile file, string name, [NotNullWhen(true)] out Symbol? symbol) =>
+      TryGetSymbolBySectionType(file, SHT.SHT_DYNSYM, name, out symbol);
+
+    /// <summary>
+    /// Looks for the global symbol with the given name in the static symbol table (<see cref="SHT.SHT_SYMTAB"/>) using the
+    /// rules of <see cref="TryGetSymbolBySectionIndexes"/>. Returns false when the file has no static symbol table.
+    /// </summary>
+    public static bool TryGetStaticSymbol(ElfFile file, string name, [NotNullWhen(true)] out Symbol? symbol) =>
+      TryGetSymbolBySectionType(file, SHT.SHT_SYMTAB, name, out symbol);
+
+    private static bool TryGetSymbolBySectionType(ElfFile file, SHT symSectionType, string name, [NotNullWhen(true)] out Symbol? symbol)
+    {
+      if (Find(file.Sections, symSectionType) is not { } symSectionIndex)
+      {
+        symbol = null;
+        return false;
+      }
+
+      return TryGetSymbolBySectionIndexes(file, symSectionIndex, file.Sections[symSectionIndex].Link, name, out symbol);
     }
 
     internal static bool? TryGetSymbolByGnuHash(ElfFile file, ushort symSectionIndex, ushort strSectionIndex, string name, out Symbol? symbol)
@@ -365,7 +390,7 @@ namespace JetBrains.FormatRipper.Elf
         myStrStream.Dispose();
       }
 
-      internal unsafe bool? FindByGnuHash(out Symbol? symbol)
+      internal bool? FindByGnuHash(out Symbol? symbol)
       {
         var hashSectionIndex = FindLinkedSection(SHT.SHT_GNU_HASH);
         if (hashSectionIndex == null)

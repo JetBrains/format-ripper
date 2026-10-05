@@ -268,7 +268,9 @@ namespace JetBrains.FormatRipper.Tests
     {
       var symSectionIndex = ElfUtil.Find(file.Sections, symSectionType);
       var symbols = new List<ElfUtil.Symbol>(expectedSymbolCount);
-      if (symSectionIndex != null)
+      if (symSectionIndex == null)
+        Assert.IsFalse(TryGetSymbol(file, symSectionType, "any", out _));
+      else
         Assert.IsTrue(ElfUtil.GetSymbols(file, symSectionIndex.Value, file.Sections[symSectionIndex.Value].Link, symbol =>
           {
             symbols.Add(symbol);
@@ -300,23 +302,38 @@ namespace JetBrains.FormatRipper.Tests
       else
         GenerateSymbolStreamInfos(verifiedSymbols);
 
-      SymbolUtil.AssertLookups(CheckLookups(file, symSectionIndex, symbols, SymbolUtil.MakeLookups(symbols, x => x.Name, IsGlobal, IsDefined), symbols.Count <= SymbolUtil.MaxLinearLookupSymbolCount));
+      SymbolUtil.AssertLookups(CheckLookups(file, symSectionType, symSectionIndex, symbols, SymbolUtil.MakeLookups(symbols, x => x.Name, IsGlobal, IsDefined), symbols.Count <= SymbolUtil.MaxLinearLookupSymbolCount));
       return symbols;
     }
+
+    private static bool TryGetSymbol(ElfFile file, SHT symSectionType, string name, out ElfUtil.Symbol? symbol) =>
+      symSectionType switch
+        {
+          SHT.SHT_DYNSYM => ElfUtil.TryGetDynamicSymbol(file, name, out symbol),
+          SHT.SHT_SYMTAB => ElfUtil.TryGetStaticSymbol(file, name, out symbol),
+          _ => throw new ArgumentOutOfRangeException(nameof(symSectionType), symSectionType, null)
+        };
 
     private static bool IsGlobal(ElfUtil.Symbol symbol) => symbol.Binding != STB.STB_LOCAL;
 
     private static bool IsDefined(ElfUtil.Symbol symbol) => (SHN)symbol.SectionIndex != SHN.SHN_UNDEF;
 
-    private static List<string> CheckLookups(ElfFile file, ushort? symSectionIndex, IList<ElfUtil.Symbol> symbols, IEnumerable<Lookup> lookups, bool withLinear)
+    private static List<string> CheckLookups(ElfFile file, SHT symSectionType, ushort? symSectionIndex, IList<ElfUtil.Symbol> symbols, IEnumerable<Lookup> lookups, bool withLinear)
     {
       var errors = new List<string>();
+      var tryGetSymbolBySectionType = symSectionType switch
+        {
+          SHT.SHT_DYNSYM => nameof(ElfUtil.TryGetDynamicSymbol),
+          SHT.SHT_SYMTAB => nameof(ElfUtil.TryGetStaticSymbol),
+          _ => throw new ArgumentOutOfRangeException(nameof(symSectionType), symSectionType, null)
+        };
       foreach (var lookup in lookups)
       {
         var symIndex = symSectionIndex!.Value;
         var strIndex = file.Sections[symIndex].Link;
         var name = lookup.Name;
-        Check(nameof(ElfUtil.TryGetSymbol), ElfUtil.TryGetSymbol(file, symIndex, strIndex, name, out var symbol), symbol);
+        Check(nameof(ElfUtil.TryGetSymbolBySectionIndexes), ElfUtil.TryGetSymbolBySectionIndexes(file, symIndex, strIndex, name, out var symbol), symbol);
+        Check(tryGetSymbolBySectionType, TryGetSymbol(file, symSectionType, name, out symbol), symbol);
         Check(nameof(ElfUtil.TryGetSymbolByGnuHash), ElfUtil.TryGetSymbolByGnuHash(file, symIndex, strIndex, name, out symbol), symbol);
         Check(nameof(ElfUtil.TryGetSymbolBySysVHash), ElfUtil.TryGetSymbolBySysVHash(file, symIndex, strIndex, name, out symbol), symbol);
         if (withLinear)
