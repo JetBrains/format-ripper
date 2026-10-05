@@ -455,6 +455,14 @@ namespace JetBrains.FormatRipper.MachO
       return symbol != null;
     }
 
+    /// <summary>
+    /// Looks for the external symbol with the given name in the same way as the overload with the data sections, which are
+    /// read from the <paramref name="image"/> here. Prefer that overload when several symbols are looked up, so the data
+    /// sections are read once.
+    /// </summary>
+    public static bool TryGetSymbol(MachOFile.Image image, string name, [NotNullWhen(true)] out Symbol? symbol) =>
+      TryGetSymbol(image, ReadDataSections(image), name, out symbol);
+
     internal static unsafe bool? TryGetSymbolByDySymTab(MachOFile.Image image, List<DataSection> dataSections, string name, out Symbol? symbol)
     {
       symbol = null;
