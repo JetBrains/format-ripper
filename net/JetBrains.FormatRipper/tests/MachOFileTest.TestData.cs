@@ -98,7 +98,8 @@ namespace JetBrains.FormatRipper.Tests
                 new("631F727FF994DC24A76C842AF11819564D14A27EA7834725ED905FD8E509DBBD", 0x100003F48, 1, "_main"              , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,         0x0, 0, "_printf"            , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,         0x0, 0, "dyld_stub_binder"   , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -185,7 +186,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,         0x0, 0, "_warn"              , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,         0x0, 0, "_write"             , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,         0x0, 0, "dyld_stub_binder"   , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              }),
+              },
+            new()),
           new Image("5A85AD40620A5F573F31792C5B12919C9B37BACABC8F675FACE93720856AEBF46439CD3AA3C9442007249DDF1086F435", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_E | CPU_SUBTYPE.CPU_SUBTYPE_LIB64, MH_FileType.MH_EXECUTE, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_PIE, Options.HasSignedBlob | Options.HasCmsBlob, "2E4DCB03B2CEB5FB1349DBD8432750C33E6718CED1F60D9833BCF06B76105379CCE849CCE52DD45EE32D10EEF90EB9D1", "E614F32D5B5D1DAA208BFB3D9C1931ACEE72CC3EBE0AB29F0058CA45781539C60DAFFB6AA2EE3455A235FE158721F64E", null, null, 38,
             new Command[]
               {
@@ -260,7 +262,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,         0x0, 0, "_strcmp"            , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,         0x0, 0, "_warn"              , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,         0x0, 0, "_write"             , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -356,7 +359,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              , 0x9000C120,  0, "_strtol"                                , NT.N_PBUD | NT.N_EXT, SetLibraryOrdinal1UndefinedLazy),
                 new(null                                                              , 0x90074380,  0, "_warn"                                  , NT.N_PBUD | NT.N_EXT, SetLibraryOrdinal1UndefinedLazy),
                 new(null                                                              , 0x900548A0,  0, "_warnx"                                 , NT.N_PBUD | NT.N_EXT, SetLibraryOrdinal1UndefinedLazy),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -411,7 +415,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,         0x0, 0, "_strchr"            , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,         0x0, 0, "_strcmp"            , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,         0x0, 0, "dyld_stub_binder"   , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -444,7 +449,8 @@ namespace JetBrains.FormatRipper.Tests
               {
                 new("03E412735A1CC664FE36BCD2E69BCAFAE4E92A7536C02336C02E09A5BFB04D1B", 0xFA0, 1, "_main"           , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,   0x0, 0, "dyld_stub_binder", NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              }),
+              },
+            new()),
           new Image("4F43B498D66AF208DA7B8BEE83FAEE0A83E5AD9919A4D10672576DB60FE8EF435655D17F9526A9D2048ADDA5FB25E532", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_BUNDLE, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL, 0, null, null, null, null, 2,
             new Command[]
               {
@@ -469,7 +475,8 @@ namespace JetBrains.FormatRipper.Tests
               {
                 new("82363DB37FF94FA2498B0B955CFED9A3F309DDB6F1DAFA054C3306A5DC983C1E", 0xF60, 1, "_main"           , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,   0x0, 0, "dyld_stub_binder", NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              })),
+              },
+            new())),
         MakeSource("x64.bundle",
           new Image("4F43B498D66AF208DA7B8BEE83FAEE0A83E5AD9919A4D10672576DB60FE8EF435655D17F9526A9D2048ADDA5FB25E532", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_BUNDLE, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL, 0, null, null, null, null, 2,
             new Command[]
@@ -495,7 +502,8 @@ namespace JetBrains.FormatRipper.Tests
               {
                 new("82363DB37FF94FA2498B0B955CFED9A3F309DDB6F1DAFA054C3306A5DC983C1E", 0xF60, 1, "_main"           , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,   0x0, 0, "dyld_stub_binder", NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              })),
+              },
+            new())),
         MakeSource("x86.bundle",
           new Image("5B3FFE68CFF6B97FE76182F9C3B005CF91FC0CA89E50F869A83C9BA6FBEB891899D8AE86A191531584C61A620E1FF639", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_I386, CPU_SUBTYPE.CPU_SUBTYPE_I386_ALL, MH_FileType.MH_BUNDLE, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL, 0, null, null, null, null, 2,
             new Command[]
@@ -520,7 +528,8 @@ namespace JetBrains.FormatRipper.Tests
               {
                 new("03E412735A1CC664FE36BCD2E69BCAFAE4E92A7536C02336C02E09A5BFB04D1B", 0xFA0, 1, "_main"           , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,   0x0, 0, "dyld_stub_binder", NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -555,7 +564,8 @@ namespace JetBrains.FormatRipper.Tests
               {
                 new("6F22AA2BEC6E79174D6684F285E53E7AEC71C5614CC4591A0C52583920BEA5AC", 0xF60, 1, "_add"            , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,   0x0, 0, "dyld_stub_binder", NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              }),
+              },
+            new()),
           new Image("A10BBDBE5A2FEEE781690DF79F5673DEEC966E23E121B948E543C58BAA862806154ACF3F381DCADB49271C266F18EC44", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_I386, CPU_SUBTYPE.CPU_SUBTYPE_I386_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_NO_REEXPORTED_DYLIBS, 0, null, null, null, null, 2,
             new Command[]
               {
@@ -580,7 +590,8 @@ namespace JetBrains.FormatRipper.Tests
               {
                 new("E2E936F5D47B065FE1CF011E3655F5074A02602717980FA54483223554B97391", 0xF90, 1, "_add"            , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,   0x0, 0, "dyld_stub_binder", NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              })),
+              },
+            new())),
         MakeSource("x64.dylib",
           new Image("CE49B3CF98953BF972DAA73E5D303EA1D37E15D818D01E5D78FF4AC00CD25775C0DC9090C7C88E2FAE247EBD0B2368EE", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_NO_REEXPORTED_DYLIBS, 0, null, null, null, null, 2,
             new Command[]
@@ -607,7 +618,8 @@ namespace JetBrains.FormatRipper.Tests
               {
                 new("6F22AA2BEC6E79174D6684F285E53E7AEC71C5614CC4591A0C52583920BEA5AC", 0xF60, 1, "_add"            , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,   0x0, 0, "dyld_stub_binder", NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              })),
+              },
+            new())),
         MakeSource("x86.dylib",
           new Image("A10BBDBE5A2FEEE781690DF79F5673DEEC966E23E121B948E543C58BAA862806154ACF3F381DCADB49271C266F18EC44", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_I386, CPU_SUBTYPE.CPU_SUBTYPE_I386_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_NO_REEXPORTED_DYLIBS, 0, null, null, null, null, 2,
             new Command[]
@@ -633,7 +645,8 @@ namespace JetBrains.FormatRipper.Tests
               {
                 new("E2E936F5D47B065FE1CF011E3655F5074A02602717980FA54483223554B97391", 0xF90, 1, "_add"            , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,   0x0, 0, "dyld_stub_binder", NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -671,7 +684,8 @@ namespace JetBrains.FormatRipper.Tests
                 new("C1AE95F80498B3C3C33138CE6FD2F54F9DC31036620E6E14547C4D5272675C76",   0x0, 1, "_get_message"  , NT.N_SECT | NT.N_EXT, 0),
                 new("E829932F9A3221A89CD9568CB61621CBC1C1F8271DF208BB243FE9D4E731C9FE",  0x10, 1, "_set_value"    , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,   0x4, 0, "_common_value" , NT.N_UNDF | NT.N_EXT, NDUtil.SetCommAlign(2)),
-              }),
+              },
+            new() { ["_const_message"] = "const" }),
           new Image("9D8B567011234359DE1676B85F7B2E11B2918CB67F9769934D488D7E60BCA78C969C79D8442CE2E6E6957A08DE2C2E6E", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_I386, CPU_SUBTYPE.CPU_SUBTYPE_I386_ALL, MH_FileType.MH_OBJECT, MH_Flags.MH_SUBSECTIONS_VIA_SYMBOLS, 0, null, null, null, null, 7,
             new Command[]
               {
@@ -701,7 +715,8 @@ namespace JetBrains.FormatRipper.Tests
                 new("D57DD0FED5DCACECE44508571D9440B10A60ACFBFCBC5C725CFE64718FF8E717",   0x0, 1, "_get_message"  , NT.N_SECT | NT.N_EXT, 0),
                 new("6137C5671D868DE3899CA0A7CCC6593584094DC501A7F6B793195A0C3F210F80",  0x20, 1, "_set_value"    , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,   0x4, 0, "_common_value" , NT.N_UNDF | NT.N_EXT, NDUtil.SetCommAlign(2)),
-              }),
+              },
+            new() { ["_const_message"] = "const" }),
           new Image("D3840A6186A48DA333F4A9AEF08A44C12D29F87D322E45261AC4864880B0D505DC8ECED3444863F4B081CCEEA2646BE0", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_OBJECT, MH_Flags.MH_SUBSECTIONS_VIA_SYMBOLS, 0, null, null, null, null, 14,
             new Command[]
               {
@@ -737,7 +752,8 @@ namespace JetBrains.FormatRipper.Tests
                 new("F4B540B6BFDC88EE0CC6F75D75831DD0925A3F1BE3016A2DF51E2D0FA4E285F9",  0x0, 1, "_get_message"  , NT.N_SECT | NT.N_EXT, 0),
                 new("92BC95A4886E6CA3110542A8C89CFE55E2E7C184FCAE924C8AF80B4E6584D555",  0xC, 1, "_set_value"    , NT.N_SECT | NT.N_EXT, 0),
                 new(null                                                              ,  0x4, 0, "_common_value" , NT.N_UNDF | NT.N_EXT, NDUtil.SetCommAlign(2)),
-              })),
+              },
+            new() { ["_const_message"] = "const" })),
         // @formatter:on
       };
 
@@ -830,7 +846,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,         0x0,  0, "_strncasecmp"                     , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,         0x0,  0, "_strncmp"                         , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,         0x0,  0, "dyld_stub_binder"                 , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              }),
+              },
+            new()),
           new Image("69E47EEE22D91610CDAD200175C64F2443B54A12ACFC07FBAF114566BD6AA057649EEA6FBB675B21BD23F679A9612FDE", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_EXECUTE, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_PIE, Options.HasSignedBlob, "5CDCC9053E5F2E0581DA1B5EA926EB2A4B9C389324ADDAE416A0C938DB2436DE1C87422DF8A4A71C6109B7BB4BB19745", null, null, null, 46,
             new Command[]
               {
@@ -916,7 +933,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,         0x0,  0, "_strncasecmp"                     , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,         0x0,  0, "_strncmp"                         , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,         0x0,  0, "dyld_stub_binder"                 , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -1172,6 +1190,20 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,         0x0, 0, "_wmemset"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal4),
                 new(null                                                              ,         0x0, 0, "_write"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal4),
                 new(null                                                              ,         0x0, 0, "dyld_stub_binder"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal4),
+              },
+            new()
+              {
+                ["__ZNSt3__114__num_get_base5__srcE"                                                ] = "0123456789abcdefABCDEFxX+-pPiInN",
+                ["__ZTSN5boost10wrapexceptINS_16bad_lexical_castEEE"                                ] = "N5boost10wrapexceptINS_16bad_lexical_castEEE",
+                ["__ZTSN5boost6system6detail22generic_error_categoryE"                              ] = "N5boost6system6detail22generic_error_categoryE",
+                ["__ZTSNSt3__111__money_putIwEE"                                                    ] = "NSt3__111__money_putIwEE",
+                ["__ZTSNSt3__114__codecvt_utf8IDiEE"                                                ] = "NSt3__114__codecvt_utf8IDiEE",
+                ["__ZTSNSt3__114collate_bynameIwEE"                                                 ] = "NSt3__114collate_bynameIwEE",
+                ["__ZTSNSt3__115time_get_bynameIcNS_19istreambuf_iteratorIcNS_11char_traitsIcEEEEEE"] = "NSt3__115time_get_bynameIcNS_19istreambuf_iteratorIcNS_11char_traitsIcEEEEEE",
+                ["__ZTSNSt3__118basic_stringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE"        ] = "NSt3__118basic_stringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE",
+                ["__ZTSNSt3__17codecvtIDsDu11__mbstate_tEE"                                         ] = "NSt3__17codecvtIDsDu11__mbstate_tEE",
+                ["__ZTSNSt3__18time_getIcNS_19istreambuf_iteratorIcNS_11char_traitsIcEEEEEE"        ] = "NSt3__18time_getIcNS_19istreambuf_iteratorIcNS_11char_traitsIcEEEEEE",
+                ["__ZTSSt16nested_exception"                                                        ] = "St16nested_exception",
               })),
         // @formatter:on
       };
@@ -1424,7 +1456,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,     0x0, 0, "_vfprintf"                                                                                                                                                                                                                                                                                                                                                                        , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal2),
                 new(null                                                              ,     0x0, 0, "_vsnprintf"                                                                                                                                                                                                                                                                                                                                                                       , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal2),
                 new(null                                                              ,     0x0, 0, "dyld_stub_binder"                                                                                                                                                                                                                                                                                                                                                                 , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal2),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -1672,7 +1705,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,        0x0,  0, "_waitpid"                                                                                                                , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,        0x0,  0, "_write"                                                                                                                  , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
                 new(null                                                              ,        0x0,  0, "dyld_stub_binder"                                                                                                        , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -1766,7 +1800,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_memcmp"                                    , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal2),
                 new(null                                                              ,    0x0, 0, "_memcpy"                                    , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal2),
                 new(null                                                              ,    0x0, 0, "dyld_stub_binder"                           , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal2),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -2018,7 +2053,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                                                                                   , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "_writev"                                                                                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "dyld_stub_binder"                                                                                                                                                                                         , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
-              }),
+              },
+            new()),
           new Image("FEE6A776548AFF09BC321CB84216F8491B75379A7C2935534A62AD09009BF5E5EEAC8C63E0A2C141F6B5EC0A488FECFA", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_APP_EXTENSION_SAFE, Options.HasSignedBlob | Options.HasCmsBlob, "9DB34454E4A80EF9849C850249759DE7BA46ADFF9FCEC765A985BF74363104EA59166CC58208FE32F5EB7BC074A7D430", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", null, null, 10152,
             new Command[]
               {
@@ -2262,7 +2298,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                                                                                    , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "_writev"                                                                                                                                                                                                   , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "dyld_stub_binder"                                                                                                                                                                                          , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
-              }),
+              },
+            new()),
           new Image("48293D53D6394A724766CBA69FA6FC8C9134021A03FF2E478DD3541FF1B75DC7FA1744715F0F3B7CD3C6F5D07CB8A11C", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_APP_EXTENSION_SAFE, Options.HasSignedBlob | Options.HasCmsBlob, "DEE34BB522EE25E88D8CE98D0174BC985F9CEBB83A4DA8C09C8164D2E311FB0AE02BC65A9B58E287468E027971F916EB", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", null, null, 10018,
             new Command[]
               {
@@ -2507,7 +2544,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                                                                                    , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "_writev"                                                                                                                                                                                                   , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "dyld_stub_binder"                                                                                                                                                                                          , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -2761,7 +2799,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                                                                                   , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "_writev"                                                                                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "dyld_stub_binder"                                                                                                                                                                                         , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
-              }),
+              },
+            new()),
           new Image("ACF08B432AC2DD1DCC33AEA2C9731ECCEED8992869C909586D22A88863F2FF9B9DE72681F5E2303664DEEACA2E82A02B", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM, CPU_SUBTYPE.CPU_SUBTYPE_ARM_V7S, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS | MH_Flags.MH_APP_EXTENSION_SAFE, Options.HasSignedBlob | Options.HasCmsBlob, "6AAB394CA282E8838774C0BE0D73BEB6A16FB21561599C5CD6A9C7EAE29CE73E317ABCE032C997B825DE89D754D87B17", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", null, null, 9873,
             new Command[]
               {
@@ -3006,7 +3045,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                                                                                   , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "_writev"                                                                                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "dyld_stub_binder"                                                                                                                                                                                         , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
-              }),
+              },
+            new()),
           new Image("79AFACB4D3E10902033D45D69822938A3D50A3C115C702F22948A81FF85508FDD5380312D128BEBF9295CC660F2D1BC9", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM, CPU_SUBTYPE.CPU_SUBTYPE_ARM_V7K, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS | MH_Flags.MH_APP_EXTENSION_SAFE, Options.HasSignedBlob | Options.HasCmsBlob, "844CF546207CBB6F191838F50E6B98225348224BD031D008F00FFD4D371402C545E59A84E41E6946509D7CB373CA31A2", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", null, null, 9868,
             new Command[]
               {
@@ -3253,7 +3293,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                                                                                   , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "_writev"                                                                                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "dyld_stub_binder"                                                                                                                                                                                         , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
-              }),
+              },
+            new()),
           new Image("8DC213840E8F0BDF3FD20618A717C71DADD6C1DB4DF3C541C12696127C59C8481898B89138D85BE6A370144DB61F2C8D", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS | MH_Flags.MH_APP_EXTENSION_SAFE, Options.HasSignedBlob | Options.HasCmsBlob, "EB4B9910F8BD4988D7C23B06CFD1E695889B66C9E517636C83E3E7530DE774D2F9250383581A4E84017191D43E4B910B", "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B", null, null, 10040,
             new Command[]
               {
@@ -3500,7 +3541,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                                                                                    , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "_writev"                                                                                                                                                                                                   , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
                 new(null                                                              ,    0x0, 0, "dyld_stub_binder"                                                                                                                                                                                          , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal3),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -3753,7 +3795,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,         0x0, 0, "_pthread_create"                  , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal3),
                 new(null                                                              ,         0x0, 0, "_pthread_join"                    , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal3),
                 new(null                                                              ,         0x0, 0, "_pthread_threadid_np"             , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal3),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -4006,7 +4049,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,         0x0,  0, "_vfprintf"                                                                                                                       , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal2),
                 new(null                                                              ,         0x0,  0, "_vsnprintf"                                                                                                                      , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal2),
                 new(null                                                              ,         0x0,  0, "dyld_stub_binder"                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal2),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -4087,7 +4131,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,         0x0, 0, "___cxa_throw"                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal1),
                 new(null                                                              ,         0x0, 0, "___gxx_personality_v0"                                                                                                       , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal1),
                 new(null                                                              ,         0x0, 0, "_memset"                                                                                                                     , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal2),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -4123,7 +4168,8 @@ namespace JetBrains.FormatRipper.Tests
             new Symbol[]
               {
                 new(null, 0x0, 0, "dyld_stub_binder", NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal1),
-              })),
+              },
+            new())),
         // @formatter:on
       };
 
@@ -4132,7 +4178,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityMarkerSources() => new object?[]
       {
         // @formatter:off
-        MakeSource("unity_scripting_backend_il2cpp.dylib", UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE, MachOFile.Endian.Big,
+        MakeSource("unity_scripting_backend_il2cpp.dylib", MachOFile.Endian.Big,
           new Image("5A29C8F15E89E703A5D3278AB43943714BAE8CC68DCDC0FAD0151ACD47468D99B6D87B75A981E394C2A3B7235474BDF6", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_NO_REEXPORTED_DYLIBS, 0, null, null, null, null, 1,
             new Command[]
               {
@@ -4159,7 +4205,8 @@ namespace JetBrains.FormatRipper.Tests
             new Symbol[]
               {
                 new("E56576919ADCE0615C24125D6DAE2291E8D5BD21FA852FBC37A22454E01E8375", 0x2E8, 2, "_UnityScriptingBackend", NT.N_SECT | NT.N_EXT, 0),
-              }),
+              },
+            new() { ["_UnityScriptingBackend"] = "IL2CPP" }),
           new Image("D802CC112A582C122874C1E1E329576B1BD3D507F61F1912D15B44AD936943BD1E799CB93FDEDE13752A902F311E6B52", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_NO_REEXPORTED_DYLIBS, Options.HasSignedBlob, "FD98DE4277C543B49E3CF09FC436E96135D0E1DA2AB2A98F403885D03F199D7769693198702740669D0FE66ED091E105", null, null, null, 1,
             new Command[]
               {
@@ -4187,7 +4234,8 @@ namespace JetBrains.FormatRipper.Tests
             new Symbol[]
               {
                 new("E56576919ADCE0615C24125D6DAE2291E8D5BD21FA852FBC37A22454E01E8375", 0x2D8, 2, "_UnityScriptingBackend", NT.N_SECT | NT.N_EXT, 0),
-              })),
+              },
+            new() { ["_UnityScriptingBackend"] = "IL2CPP" })),
         // @formatter:on
       };
 
@@ -4196,7 +4244,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityMacosArm64EditorSources() => new object?[]
       {
         // @formatter:off
-        MakeOptionalSource("unity/macos_arm64_editor_coreclr/Unity", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity/macos_arm64_editor_coreclr/Unity",
           new Image("93E7F09A3925D49FD651730265FD588B6D1F06E45FDBA09CA4270AF64920BCE70EA547F131438DCD1EAF4D2B622EB2F2", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_EXECUTE, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_PIE | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements | Options.HasEntitlementsDer, "3B9A0D78928DBF9989C3B28BC7559EF66552732BE544C948F361E2C9C33F7A0A54BE54185334C91123598EB33FAC7D4F", "2F38F105DC6E596C30CE7B7447541CED912B5DF5D229DDA2A1A2D7046925D44869247E8A765FBF4E1B7F41B0B43882AC", "332DC6F6794DB65AEDF01ADD0DE28AB97558E3F45E7C5AE7380C9763DCC05F8818037CC6268779E1516708C6BBBF88D0", "FE81009379A7FD1C88CD5AEFE79A28E8C54BE40515CE4644B043B4C9A9F2468D69BBDB0E6C149430487D5E90F407751C", 823610,
             new Command[]
               {
@@ -4511,6 +4559,18 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,         0x0, 0, "_wmemcmp"                                                                                                                                                           , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal44),
                 new(null                                                              ,         0x0, 0, "_write"                                                                                                                                                             , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal44),
                 new(null                                                              ,         0x0, 0, "_writev"                                                                                                                                                            , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal44),
+              },
+            new()
+              {
+                ["_UnityScriptingBackend"          ] = "CoreCLR",
+                ["__ZTSN8tinyxml210XMLCommentE"    ] = "N8tinyxml210XMLCommentE",
+                ["__ZTSN8tinyxml210XMLElementE"    ] = "N8tinyxml210XMLElementE",
+                ["__ZTSN8tinyxml210XMLUnknownE"    ] = "N8tinyxml210XMLUnknownE",
+                ["__ZTSN8tinyxml211XMLDocumentE"   ] = "N8tinyxml211XMLDocumentE",
+                ["__ZTSN8tinyxml214XMLDeclarationE"] = "N8tinyxml214XMLDeclarationE",
+                ["__ZTSN8tinyxml27XMLNodeE"        ] = "N8tinyxml27XMLNodeE",
+                ["__ZTSN8tinyxml27XMLTextE"        ] = "N8tinyxml27XMLTextE",
+                ["_tls11downgrade"                 ] = "DOWNGRD",
               })),
         // @formatter:on
       };
@@ -4520,7 +4580,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityMacosArm64PlayerDevelopmentSources() => new object?[]
       {
         // @formatter:off
-        MakeOptionalSource("unity/macos_arm64_player_development_coreclr/UnityPlayer.dylib", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity/macos_arm64_player_development_coreclr/UnityPlayer.dylib",
           new Image("DFFA948F02996958DB3719D9965BDAA35CB78B35A8ACBC0842B3F46C4301DF3D5870BBABCB9B9D9E9045D8C599DECCB7", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "8ADB675987C6522484A62B314CC6A3F711ECAB494B31AF545C21A24669D0B2F4CADAC745234250AF82250D975732A958", "1426BC3DF558724E58B37176FE3B901D3DE3D3D699BAF37A42136D2744BE80D83BDF2ED945CC2778665A68839D4F96CF", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 933054,
             new Command[]
               {
@@ -4810,8 +4870,9 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_wmemchr"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_wmemcmp"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
-              })),
-        MakeOptionalSource("unity/macos_arm64_player_development_il2cpp/UnityPlayer.dylib", UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE,
+              },
+            new() { ["_UnityScriptingBackend"] = "CoreCLR" })),
+        MakeOptionalSource("unity/macos_arm64_player_development_il2cpp/UnityPlayer.dylib",
           new Image("1D46F263389774FF747223A84A5EE69CBC42518D58F710B12472A27F687936F753D3F8E4AB1FC9DD9DEDD48FB181C646", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "55DE4CE8B3ACAC700FA2ADA9B617E6AD964885572B27F78D639968D97D8963235FF844B5A65FF2189159A41DEEAFCC6D", "2606876EEC5ABF4709B5E6C27937E7CBF594009EE4ECF02A495426C3DFC4DFB86ADCAA9B4A5E0FFD77A097268E8BCC85", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 920305,
             new Command[]
               {
@@ -5101,8 +5162,9 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_wmemchr"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_wmemcmp"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
-              })),
-        MakeOptionalSource("unity/macos_arm64_player_development_mono/UnityPlayer.dylib", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE,
+              },
+            new() { ["_UnityScriptingBackend"] = "IL2CPP" })),
+        MakeOptionalSource("unity/macos_arm64_player_development_mono/UnityPlayer.dylib",
           new Image("0418740C118DEE36DD271EED4C4DC2B3D3C440F474202A8BE95FE8B36ED4EBB376995DF1AF15F26222BAF73606D776DB", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "AF2E302EB981A2CAB32F2339A6B6625B466297C6BFB488BF3EF3285259971AA039CDDD22401C48C1E9EC3EA2D9072FD7", "24E25C75D29AF10A9F3F3CF39C2A4C5F9BB9FF022BA718BF118BA59410E864E0C68E686B279FE2BDFA5A32D3EF991A3D", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 922076,
             new Command[]
               {
@@ -5392,7 +5454,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_wmemchr"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_wmemcmp"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
-              })),
+              },
+            new() { ["_UnityScriptingBackend"] = "Mono" })),
         // @formatter:on
       };
 
@@ -5401,7 +5464,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityMacosArm64PlayerNondevelopmentSources() => new object?[]
       {
         // @formatter:off
-        MakeOptionalSource("unity/macos_arm64_player_nondevelopment_coreclr/UnityPlayer.dylib", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity/macos_arm64_player_nondevelopment_coreclr/UnityPlayer.dylib",
           new Image("2E370C33AE1A37EC5F5167D4FDAD4618182BF8F9B1ECFEF737B1341F4399963CAA1BD16137C49543663F6ECD0576EE20", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "1DDCBBAA2AF9D1256E11AF75EA5202F5526FBE477DAA2BFDC66DE676BC726E4D0578FF5A29EFF7063DECBF6F44DC20B4", "2300AD94A32D4B9BF506ED6C1733AAF94B65D6B016398FDBD2A0FE97290E27411C7090447915CE742ED9D54027BF2264", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 4970,
             new Command[]
               {
@@ -5690,8 +5753,9 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,       0x0,  0, "_wcslen"                                                        , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_wmemcmp"                                                       , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_write"                                                         , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
-              })),
-        MakeOptionalSource("unity/macos_arm64_player_nondevelopment_il2cpp/UnityPlayer.dylib", UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE,
+              },
+            new() { ["_UnityScriptingBackend"] = "CoreCLR" })),
+        MakeOptionalSource("unity/macos_arm64_player_nondevelopment_il2cpp/UnityPlayer.dylib",
           new Image("6702CBA472F68CB94D2088C238CC52218BD2FE56BBD1276E9A084CBED49128AAB1982D099B591E5EF8B18F1E68CC7866", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "3C135E1A69F3BB6BE85CDCDBBE58AD23BC9DF3256444CE71F7D7CF252132AE699581A47B6654167B625DFD0BCD280F06", "99B8FE20916043445CD8900DC3E621994A20F42C0A2959BC91783AA1716E8E9331263837A627EF9AD51488A23FB81AEA", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 4970,
             new Command[]
               {
@@ -5980,8 +6044,9 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,       0x0,  0, "_wcslen"                                                        , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_wmemcmp"                                                       , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_write"                                                         , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
-              })),
-        MakeOptionalSource("unity/macos_arm64_player_nondevelopment_mono/UnityPlayer.dylib", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE,
+              },
+            new() { ["_UnityScriptingBackend"] = "IL2CPP" })),
+        MakeOptionalSource("unity/macos_arm64_player_nondevelopment_mono/UnityPlayer.dylib",
           new Image("7BBCD044C2F75D0749BB319E1B92501776180EDB42B7066F0E8B266958C160D5B4D5BD2122AB7616F75CB97421898AFE", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "3A821DEB8A19033CC6D0819BA3437F11A55A48193CF74CEB6F6573DD1531A6529BAF31BE3887F62223BCC0369FCA2377", "57F4A8792840F2D0F5AD6AF8208E6F83157F8992D397ACA1D012685B3CF8F6FA99AFE6A9E01461BA391F16D6F95624EE", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 4970,
             new Command[]
               {
@@ -6270,7 +6335,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,       0x0,  0, "_wcslen"                                                        , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_wmemcmp"                                                       , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_write"                                                         , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
-              })),
+              },
+            new() { ["_UnityScriptingBackend"] = "Mono" })),
         // @formatter:on
       };
 
@@ -6279,7 +6345,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityMacosX64EditorSources() => new object?[]
       {
         // @formatter:off
-        MakeOptionalSource("unity/macos_x64_editor_mono/Unity", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity/macos_x64_editor_mono/Unity",
           new Image("FB0F270653E48267C3BCFD3E92F986A93466CEB00410111CA11E1DAB42F1A090644F91D8A7025E5218C75BA77CC2CE85", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_EXECUTE, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_PIE | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements | Options.HasEntitlementsDer, "31D3FEB58184551FEF57EB1A97F8C4D0CE71D807CB76E28A9DFBA11CB1C96D447E2977A7BBA5896B238DAF306C6DC0C6", "E9A8439C4BC13E69950E2D822382FE9B2E71F136E7FB1AA736230A7FF4FB9D5C60F33FA272643A9EF22702899B360D20", "332DC6F6794DB65AEDF01ADD0DE28AB97558E3F45E7C5AE7380C9763DCC05F8818037CC6268779E1516708C6BBBF88D0", "FE81009379A7FD1C88CD5AEFE79A28E8C54BE40515CE4644B043B4C9A9F2468D69BBDB0E6C149430487D5E90F407751C", 803490,
             new Command[]
               {
@@ -6591,6 +6657,21 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,         0x0, 0, "_wmemcmp"                                                                                                                                                           , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal44),
                 new(null                                                              ,         0x0, 0, "_write"                                                                                                                                                             , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal44),
                 new(null                                                              ,         0x0, 0, "_writev"                                                                                                                                                            , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal44),
+              },
+            new()
+              {
+                ["_UnityScriptingBackend"                                                                                                                                            ] = "Mono",
+                ["__ZTSFKPKcvE"                                                                                                                                                      ] = "FKPKcvE",
+                ["__ZTSFbyE"                                                                                                                                                         ] = "FbyE",
+                ["__ZTSFmvE"                                                                                                                                                         ] = "FmvE",
+                ["__ZTSFviE"                                                                                                                                                         ] = "FviE",
+                ["__ZTSFxiPviE"                                                                                                                                                      ] = "FxiPviE",
+                ["__ZTSN4asio6detail11noncopyableE"                                                                                                                                  ] = "N4asio6detail11noncopyableE",
+                ["__ZTSN4asio6detail30execution_context_service_baseINS0_22deadline_timer_serviceINS0_18chrono_time_traitsINSt3__16chrono12steady_clockENS_11wait_traitsIS6_EEEEEEEE"] = "N4asio6detail30execution_context_service_baseINS0_22deadline_timer_serviceINS0_18chrono_time_traitsINSt3__16chrono12steady_clockENS_11wait_traitsIS6_EEEEEEEE",
+                ["__ZTSNSt3__110shared_ptrIN4asio3ssl6detail17openssl_init_base7do_initEE27__shared_ptr_default_deleteIS5_S5_EE"                                                     ] = "NSt3__110shared_ptrIN4asio3ssl6detail17openssl_init_base7do_initEE27__shared_ptr_default_deleteIS5_S5_EE",
+                ["__ZTSNSt3__118__back_ref_collateIcNS_12regex_traitsIcEEEE"                                                                                                         ] = "NSt3__118__back_ref_collateIcNS_12regex_traitsIcEEEE",
+                ["__ZTSPFviE"                                                                                                                                                        ] = "PFviE",
+                ["_tls11downgrade"                                                                                                                                                   ] = "DOWNGRD",
               })),
         // @formatter:on
       };
@@ -6600,7 +6681,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityMacosX64PlayerDevelopmentSources() => new object?[]
       {
         // @formatter:off
-        MakeOptionalSource("unity/macos_x64_player_development_il2cpp/UnityPlayer.dylib", UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity/macos_x64_player_development_il2cpp/UnityPlayer.dylib",
           new Image("68A5FC9F939642C4E8D035914804B6C0C369FCF1C045B94B6E90F95A0672B9C21B3A6E2F8B12AE03EBFF73A38801449B", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "3105E47A86E21F53973034E98A267C1A1E35392020069457CAB4E529B20E19411856412956C405026F395FC7C675DCC2", "DE49301FEE641EB66520AB01A8770E50392563334998CB30A94E5A66DE784CCC82FB7E5BDB866EBD8C5BA8E7A3AA1205", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 945424,
             new Command[]
               {
@@ -6889,8 +6970,22 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_wmemchr"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_wmemcmp"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
+              },
+            new()
+              {
+                ["_UnityScriptingBackend"                                                    ] = "IL2CPP",
+                ["__ZTSNSt3__110__back_refIcEE"                                              ] = "NSt3__110__back_refIcEE",
+                ["__ZTSNSt3__111__end_stateIcEE"                                             ] = "NSt3__111__end_stateIcEE",
+                ["__ZTSNSt3__113__empty_stateIcEE"                                           ] = "NSt3__113__empty_stateIcEE",
+                ["__ZTSNSt3__114basic_ofstreamIcNS_11char_traitsIcEEEE"                      ] = "NSt3__114basic_ofstreamIcNS_11char_traitsIcEEEE",
+                ["__ZTSNSt3__116__back_ref_icaseIcNS_12regex_traitsIcEEEE"                   ] = "NSt3__116__back_ref_icaseIcNS_12regex_traitsIcEEEE",
+                ["__ZTSNSt3__117__repeat_one_loopIcEE"                                       ] = "NSt3__117__repeat_one_loopIcEE",
+                ["__ZTSNSt3__119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE"] = "NSt3__119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE",
+                ["__ZTSNSt3__120__r_anchor_multilineIcEE"                                    ] = "NSt3__120__r_anchor_multilineIcEE",
+                ["__ZTSNSt3__123__match_any_but_newlineIcEE"                                 ] = "NSt3__123__match_any_but_newlineIcEE",
+                ["__ZTSNSt3__16__nodeIcEE"                                                   ] = "NSt3__16__nodeIcEE",
               })),
-        MakeOptionalSource("unity/macos_x64_player_development_mono/UnityPlayer.dylib", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity/macos_x64_player_development_mono/UnityPlayer.dylib",
           new Image("B330B7BD4350460F68CC5F250C2C4B2C7EB9C8220C4D3D3385CF6F84CABC8A76BE5F6ABA60BA8A2BA271B80C30232C6B", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "E10C84917BD2BD502199947F5AE236559368C96E53851B0A670B3B847CB92A0F12C4CEC3587DABFC53F629099366C5DD", "6218787FEF210DBD8A42EA8AA5944DEBA3C5AD7BF47952641F9F0B8E9F4A888E54BBD99D370B5A757B111ABB6696D7D8", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 947240,
             new Command[]
               {
@@ -7179,6 +7274,20 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_wmemchr"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_wmemcmp"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
+              },
+            new()
+              {
+                ["_UnityScriptingBackend"                                                    ] = "Mono",
+                ["__ZTSNSt3__110__back_refIcEE"                                              ] = "NSt3__110__back_refIcEE",
+                ["__ZTSNSt3__111__end_stateIcEE"                                             ] = "NSt3__111__end_stateIcEE",
+                ["__ZTSNSt3__113__empty_stateIcEE"                                           ] = "NSt3__113__empty_stateIcEE",
+                ["__ZTSNSt3__114basic_ofstreamIcNS_11char_traitsIcEEEE"                      ] = "NSt3__114basic_ofstreamIcNS_11char_traitsIcEEEE",
+                ["__ZTSNSt3__116__back_ref_icaseIcNS_12regex_traitsIcEEEE"                   ] = "NSt3__116__back_ref_icaseIcNS_12regex_traitsIcEEEE",
+                ["__ZTSNSt3__117__repeat_one_loopIcEE"                                       ] = "NSt3__117__repeat_one_loopIcEE",
+                ["__ZTSNSt3__119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE"] = "NSt3__119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE",
+                ["__ZTSNSt3__120__r_anchor_multilineIcEE"                                    ] = "NSt3__120__r_anchor_multilineIcEE",
+                ["__ZTSNSt3__123__match_any_but_newlineIcEE"                                 ] = "NSt3__123__match_any_but_newlineIcEE",
+                ["__ZTSNSt3__16__nodeIcEE"                                                   ] = "NSt3__16__nodeIcEE",
               })),
         // @formatter:on
       };
@@ -7188,7 +7297,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityMacosX64PlayerNondevelopmentSources() => new object?[]
       {
         // @formatter:off
-        MakeOptionalSource("unity/macos_x64_player_nondevelopment_il2cpp/UnityPlayer.dylib", UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE,
+        MakeOptionalSource("unity/macos_x64_player_nondevelopment_il2cpp/UnityPlayer.dylib",
           new Image("014B1186F28DCCDF0FA81D3288AD9BCA0057904E4109E06551710991103034209FEF252125F0C1C0AB788CC691871B18", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "5A11FE21F1460136C5E415C96C74A4D51A0B482AE2262850A98D89A2B3F992151602FE3D02138AD501CF3B0CBED783E8", "54CDB32C375F4E86540ED67DD21D82862B939C90EC6BF5F1F5F94A1C2ED6BF12ABBA294967964FB04297878829408460", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 5196,
             new Command[]
               {
@@ -7476,8 +7585,9 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,       0x0,  0, "_wcslen"                                                        , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_wmemcmp"                                                       , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_write"                                                         , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
-              })),
-        MakeOptionalSource("unity/macos_x64_player_nondevelopment_mono/UnityPlayer.dylib", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE,
+              },
+            new() { ["_UnityScriptingBackend"] = "IL2CPP" })),
+        MakeOptionalSource("unity/macos_x64_player_nondevelopment_mono/UnityPlayer.dylib",
           new Image("EC45D4CC4FB3973815860CD43389E563AE5B2A51A13D622E2627122AF6ABC099FC37E950E065F037048EBF15B9DF0F10", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "89C980BCF95AE3A19A9CBEDBA5A196CCC1DB50CC4A3926F75E46410BAEC0A935A8405A0E53A08864BD96DD3E85183430", "C08C2F9077DFEBB77EDE49E481D90C0AB887E46AE54E0DA19554D40C93C9D167D293499250A8B1F20783881300339E57", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 5196,
             new Command[]
               {
@@ -7765,7 +7875,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,       0x0,  0, "_wcslen"                                                        , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_wmemcmp"                                                       , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_write"                                                         , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
-              })),
+              },
+            new() { ["_UnityScriptingBackend"] = "Mono" })),
         // @formatter:on
       };
 
@@ -7774,7 +7885,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityMacosX64Arm64PlayerDevelopmentSources() => new object?[]
       {
         // @formatter:off
-        MakeOptionalSource("unity/macos_x64arm64_player_development_il2cpp/UnityPlayer.dylib", UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE, MachOFile.Endian.Big,
+        MakeOptionalSource("unity/macos_x64arm64_player_development_il2cpp/UnityPlayer.dylib", MachOFile.Endian.Big,
           new Image("EF00964030ADE85FCF6B1FAB4B22090C124FB8EF0DAF295739FB131145D383FB79086DBEF084E568230A56936CF848BD", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "3105E47A86E21F53973034E98A267C1A1E35392020069457CAB4E529B20E19411856412956C405026F395FC7C675DCC2", "7E4825AB59FDAD002D8EE1B53A4E24E94F3557F96370954C92D5D36D6EAE51F8871C8465062D3B91E7BA74B3B58DD365", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 945424,
             new Command[]
               {
@@ -8063,6 +8174,20 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_wmemchr"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_wmemcmp"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
+              },
+            new()
+              {
+                ["_UnityScriptingBackend"                                                    ] = "IL2CPP",
+                ["__ZTSNSt3__110__back_refIcEE"                                              ] = "NSt3__110__back_refIcEE",
+                ["__ZTSNSt3__111__end_stateIcEE"                                             ] = "NSt3__111__end_stateIcEE",
+                ["__ZTSNSt3__113__empty_stateIcEE"                                           ] = "NSt3__113__empty_stateIcEE",
+                ["__ZTSNSt3__114basic_ofstreamIcNS_11char_traitsIcEEEE"                      ] = "NSt3__114basic_ofstreamIcNS_11char_traitsIcEEEE",
+                ["__ZTSNSt3__116__back_ref_icaseIcNS_12regex_traitsIcEEEE"                   ] = "NSt3__116__back_ref_icaseIcNS_12regex_traitsIcEEEE",
+                ["__ZTSNSt3__117__repeat_one_loopIcEE"                                       ] = "NSt3__117__repeat_one_loopIcEE",
+                ["__ZTSNSt3__119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE"] = "NSt3__119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE",
+                ["__ZTSNSt3__120__r_anchor_multilineIcEE"                                    ] = "NSt3__120__r_anchor_multilineIcEE",
+                ["__ZTSNSt3__123__match_any_but_newlineIcEE"                                 ] = "NSt3__123__match_any_but_newlineIcEE",
+                ["__ZTSNSt3__16__nodeIcEE"                                                   ] = "NSt3__16__nodeIcEE",
               }),
           new Image("20A6AEFEC2069D2ECB814BC9944A2D4FBEBD875C5F4A28618C4F299956F357935108A6CF75FB73523927DC8CFC561D44", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "55DE4CE8B3ACAC700FA2ADA9B617E6AD964885572B27F78D639968D97D8963235FF844B5A65FF2189159A41DEEAFCC6D", "868211DD34008A57A69951F3E25ABDD21FAB117FB081547C110F6393A216D5BF92762FA89740745B796B74FCB45F02E7", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 920305,
             new Command[]
@@ -8353,8 +8478,9 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_wmemchr"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_wmemcmp"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
-              })),
-        MakeOptionalSource("unity/macos_x64arm64_player_development_mono/UnityPlayer.dylib", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, MachOFile.Endian.Big,
+              },
+            new() { ["_UnityScriptingBackend"] = "IL2CPP" })),
+        MakeOptionalSource("unity/macos_x64arm64_player_development_mono/UnityPlayer.dylib", MachOFile.Endian.Big,
           new Image("C765662C8469B0721FF49EECA1658B360107DFDFF62E6D542A3C487C22DB2178D0769D1B64EDB09C707918A4EB4BAF1C", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "E10C84917BD2BD502199947F5AE236559368C96E53851B0A670B3B847CB92A0F12C4CEC3587DABFC53F629099366C5DD", "249899E35B5A0754B934DF68341517B4EBE0228123CDFD1396F4C38EA3B8318A146B98F37BF55513E37F17DD16E716C4", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 947240,
             new Command[]
               {
@@ -8643,6 +8769,20 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_wmemchr"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_wmemcmp"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
+              },
+            new()
+              {
+                ["_UnityScriptingBackend"                                                    ] = "Mono",
+                ["__ZTSNSt3__110__back_refIcEE"                                              ] = "NSt3__110__back_refIcEE",
+                ["__ZTSNSt3__111__end_stateIcEE"                                             ] = "NSt3__111__end_stateIcEE",
+                ["__ZTSNSt3__113__empty_stateIcEE"                                           ] = "NSt3__113__empty_stateIcEE",
+                ["__ZTSNSt3__114basic_ofstreamIcNS_11char_traitsIcEEEE"                      ] = "NSt3__114basic_ofstreamIcNS_11char_traitsIcEEEE",
+                ["__ZTSNSt3__116__back_ref_icaseIcNS_12regex_traitsIcEEEE"                   ] = "NSt3__116__back_ref_icaseIcNS_12regex_traitsIcEEEE",
+                ["__ZTSNSt3__117__repeat_one_loopIcEE"                                       ] = "NSt3__117__repeat_one_loopIcEE",
+                ["__ZTSNSt3__119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE"] = "NSt3__119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE",
+                ["__ZTSNSt3__120__r_anchor_multilineIcEE"                                    ] = "NSt3__120__r_anchor_multilineIcEE",
+                ["__ZTSNSt3__123__match_any_but_newlineIcEE"                                 ] = "NSt3__123__match_any_but_newlineIcEE",
+                ["__ZTSNSt3__16__nodeIcEE"                                                   ] = "NSt3__16__nodeIcEE",
               }),
           new Image("B13AEF111FC4E85A821F838731BFFD11BD8A2D92E97D38BD7033AC595BCD1C6F142694D5A455951EB8215CB4A2FF7D21", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "AF2E302EB981A2CAB32F2339A6B6625B466297C6BFB488BF3EF3285259971AA039CDDD22401C48C1E9EC3EA2D9072FD7", "6C071EA016613EAE5BFF14C3BDF25BEE74B3D92B084AA1A4854847CBCDCB8D83BCBFB1FDB6E8A42654567A2A1FEAE441", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 922076,
             new Command[]
@@ -8933,7 +9073,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,    0x0, 0, "_wmemchr"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_wmemcmp"                                                                                                                                , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
                 new(null                                                              ,    0x0, 0, "_write"                                                                                                                                  , NT.N_UNDF | NT.N_EXT , SetLibraryOrdinal25),
-              })),
+              },
+            new() { ["_UnityScriptingBackend"] = "Mono" })),
         // @formatter:on
       };
 
@@ -8942,7 +9083,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityMacosX64Arm64PlayerNondevelopmentSources() => new object?[]
       {
         // @formatter:off
-        MakeOptionalSource("unity/macos_x64arm64_player_nondevelopment_il2cpp/UnityPlayer.dylib", UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE, MachOFile.Endian.Big,
+        MakeOptionalSource("unity/macos_x64arm64_player_nondevelopment_il2cpp/UnityPlayer.dylib", MachOFile.Endian.Big,
           new Image("4E68AD47DFA93A2D543E2F2A51D6ED8982558438EAE17673192A68325B6AAB6E1C6D617F466E6FEFAB40DB5D94231716", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "5A11FE21F1460136C5E415C96C74A4D51A0B482AE2262850A98D89A2B3F992151602FE3D02138AD501CF3B0CBED783E8", "FD7BCE99EEFCFE43D20C6A46D4D3E476B3FAB5867DE9ADC6CC2D74143D1075552A79BCA847BFE08279BB60491051F13B", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 5196,
             new Command[]
               {
@@ -9230,7 +9371,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,       0x0,  0, "_wcslen"                                                        , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_wmemcmp"                                                       , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_write"                                                         , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
-              }),
+              },
+            new() { ["_UnityScriptingBackend"] = "IL2CPP" }),
           new Image("AFB798FFDF6E1BF89E3C8B1CBF1F276B689C82B6F8B76569059F31D2AADF559D040EC25B3C12460F09A1E442FBD88951", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "3C135E1A69F3BB6BE85CDCDBBE58AD23BC9DF3256444CE71F7D7CF252132AE699581A47B6654167B625DFD0BCD280F06", "B15B0DF860AE4D0280E5FFD14149BB0FE8ACD3D573D6FECE0713833E1AA6FCA05576246AE2A64AA98C327B35B283EA71", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 4970,
             new Command[]
               {
@@ -9519,8 +9661,9 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,       0x0,  0, "_wcslen"                                                        , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_wmemcmp"                                                       , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_write"                                                         , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
-              })),
-        MakeOptionalSource("unity/macos_x64arm64_player_nondevelopment_mono/UnityPlayer.dylib", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, MachOFile.Endian.Big,
+              },
+            new() { ["_UnityScriptingBackend"] = "IL2CPP" })),
+        MakeOptionalSource("unity/macos_x64arm64_player_nondevelopment_mono/UnityPlayer.dylib", MachOFile.Endian.Big,
           new Image("E5B951EDD99012E56B8AFC2698A300B0D498224C259BFBCE89E02BDE649D6661805500DA0CBA582D596BCE235A2E2FB6", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_X86_64, CPU_SUBTYPE.CPU_SUBTYPE_X86_64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "89C980BCF95AE3A19A9CBEDBA5A196CCC1DB50CC4A3926F75E46410BAEC0A935A8405A0E53A08864BD96DD3E85183430", "30C73A203FD771BC744B73B072F404B583622C50E7A1D602882049DB51F4BFC862391AD8FBF4EEDD570AFCA64444FA47", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 5196,
             new Command[]
               {
@@ -9808,7 +9951,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,       0x0,  0, "_wcslen"                                                        , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_wmemcmp"                                                       , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_write"                                                         , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
-              }),
+              },
+            new() { ["_UnityScriptingBackend"] = "Mono" }),
           new Image("5C7B57490DCCA78BE3B6C58881ADB4A8015CA603021DFEECFA19E9239C5403B6ED33A27B5FB7058AAE7DD0F084A6BB4D", MachOFile.Endian.Little, CPU_TYPE.CPU_TYPE_ARM64, CPU_SUBTYPE.CPU_SUBTYPE_ARM64_ALL, MH_FileType.MH_DYLIB, MH_Flags.MH_NOUNDEFS | MH_Flags.MH_DYLDLINK | MH_Flags.MH_TWOLEVEL | MH_Flags.MH_WEAK_DEFINES | MH_Flags.MH_BINDS_TO_WEAK | MH_Flags.MH_NO_REEXPORTED_DYLIBS | MH_Flags.MH_HAS_TLV_DESCRIPTORS, Options.HasCmsBlob | Options.HasSignedBlob | Options.HasEntitlements, "3A821DEB8A19033CC6D0819BA3437F11A55A48193CF74CEB6F6573DD1531A6529BAF31BE3887F62223BCC0369FCA2377", "A507B4CA543FF0DA9EB1A36C6D5BAF3132FF43739E4C2E059650C154458E98C90824EAB912DFEEE2A569AB5CDCDB99DF", "186879FC8C8EB25F193272388DB72409024EE0E952547F513C80856B986B76F905F3558E0A392D3D05049404973BC6DD", null, 4970,
             new Command[]
               {
@@ -10097,7 +10241,8 @@ namespace JetBrains.FormatRipper.Tests
                 new(null                                                              ,       0x0,  0, "_wcslen"                                                        , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_wmemcmp"                                                       , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
                 new(null                                                              ,       0x0,  0, "_write"                                                         , NT.N_UNDF | NT.N_EXT, SetLibraryOrdinal24),
-              })),
+              },
+            new() { ["_UnityScriptingBackend"] = "Mono" })),
         // @formatter:on
       };
   }

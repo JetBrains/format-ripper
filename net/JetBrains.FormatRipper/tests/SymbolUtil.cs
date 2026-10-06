@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 
@@ -63,6 +64,17 @@ namespace JetBrains.FormatRipper.Tests
       foreach (var name in ourArtificialNames)
         lookups.Add(new Lookup(MakeMissing(allNames, name), null));
       return lookups;
+    }
+
+    public static void AssertStrings(Dictionary<string, string> expectedStrings, Func<string, DelegateUtil.CreateStreamDelegate?> tryGetCreateStream, Func<Stream, string> readStringZ)
+    {
+      foreach (var pair in expectedStrings)
+      {
+        var createStream = tryGetCreateStream(pair.Key);
+        Assert.IsNotNull(createStream, $"The symbol \"{pair.Key}\" is not found or has no data");
+        using var stream = createStream!();
+        Assert.AreEqual(pair.Value, readStringZ(stream), $"Unexpected string of the symbol \"{pair.Key}\"");
+      }
     }
 
     public static void AssertLookups(ICollection<string> errors)

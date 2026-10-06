@@ -62,7 +62,9 @@ namespace JetBrains.FormatRipper.Tests
               new("409FABABD8B5C888E92C27045C5F1D7F79C6698650645568D4974870EF770B38",    100,      0x0,  0x1, 0, ".shstrtab"   , SHT.SHT_STRTAB    , 0, 0, 0),
             },
           new Symbol[] {},
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("busybox-static.nixos-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_X86_64, 0, null, 0, 0,
           new Program[]
             {
@@ -89,7 +91,9 @@ namespace JetBrains.FormatRipper.Tests
               new("301A17CBF802398053BBA550A0721E6B451FCFF9EC131953EF2461095BD0D1C1",     85,      0x0,  0x1, 0, ".shstrtab"   , SHT.SHT_STRTAB  , 0, 0, 0),
             },
           new Symbol[] {},
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -338,7 +342,9 @@ namespace JetBrains.FormatRipper.Tests
               new("F29FB5887E2EB991D4E7BE54D62D078B4C5D6A88D6E6E9463B5DABE5EB3B4AE5", 4,  0xBCC8,             7, "_init"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("F29FB5887E2EB991D4E7BE54D62D078B4C5D6A88D6E6E9463B5DABE5EB3B4AE5", 4, 0xB2100,            10, "_fini"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("busybox.alpine-armhf", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-musl-armhf.so.1", 397, 0,
           new Program[]
             {
@@ -580,7 +586,9 @@ namespace JetBrains.FormatRipper.Tests
               new("CBABFB4E1C850011EB62175A9B52F3BA9DB5386C82674C506397851863AE97AB", 2,  0x5531,             7, "_init"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("CBABFB4E1C850011EB62175A9B52F3BA9DB5386C82674C506397851863AE97AB", 2, 0x82EDD,            10, "_fini"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("busybox.alpine-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-musl-i386.so.1", 392, 0,
           new Program[]
             {
@@ -824,7 +832,9 @@ namespace JetBrains.FormatRipper.Tests
               new("5EE0DD4D4840229FAB4A86438EFBCAF1B9571AF94F5ACE5ACC94DE19E98EA9AB", 1,  0x6000,             7, "_init"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("5EE0DD4D4840229FAB4A86438EFBCAF1B9571AF94F5ACE5ACC94DE19E98EA9AB", 1, 0x9D781,            11, "_fini"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("busybox.alpine-ppc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/lib/ld-musl-powerpc64le.so.1", 391, 0,
           new Program[]
             {
@@ -1064,7 +1074,9 @@ namespace JetBrains.FormatRipper.Tests
               new("73818FEE3A36F0F0E32C5B1AAC4F2B2963EC433A74BAA2A9CD3C4F6A206A40F6", 16,   0xD248,             7, "_init"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x60),
               new("D9D48B4AA77E2DE7A1AD639CB69CBE0DED340CBB5D70DF333F0DE6602AEDF079", 16,  0xD8090,             9, "_fini"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x60),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("busybox.alpine-s390x", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_S390, 0, "/lib/ld-musl-s390x.so.1", 400, 0,
           new Program[]
             {
@@ -1303,7 +1315,9 @@ namespace JetBrains.FormatRipper.Tests
               new("0332EE119E2D18088987EA88D80D1EF170B88D4102379710572909E75F4915A9",  104,  0xF670,             9, "main"                       , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("3D063EFDEF1D7C8438A863C7BE60EF5D22654B2B2E4FBAE78EB10E8FD536CE9A",    2, 0xC88A0,            10, "_fini"                      , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("busybox.alpine-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/lib/ld-musl-x86_64.so.1", 392, 0,
           new Program[]
             {
@@ -1545,7 +1559,9 @@ namespace JetBrains.FormatRipper.Tests
               new("AF5570F5A1810B7AF78CAF4BC70A660F0DF51E42BAF91D4DE5B2328DE0E83DFC", 8, 0xC9288,            16, "stdin"                  , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("AF5570F5A1810B7AF78CAF4BC70A660F0DF51E42BAF91D4DE5B2328DE0E83DFC", 8, 0xC9280,            16, "stdout"                 , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -1795,7 +1811,9 @@ namespace JetBrains.FormatRipper.Tests
               new("1CAA46F35FB34184CD4DBE344017E6A469537D617B362D6C6336C5DC32F7467F",  160,  0xC82C0,             1, "main.init"                                                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("57F6122369FA5A2E5F891FC943674A0FF5901BD0AE470F28E9685B19D9EA2CE9",  144,  0xC8360,             1, "type..hash.main.Cat"                                             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("E96CED4CFDE00CF149677AFD796F3213738FD043D4636DF7887137A28082EB23",  240,  0xC83F0,             1, "type..eq.main.Cat"                                               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new(),
+          new() { ["runtime/internal/sys.DefaultGoroot.str"] = "/usr/local/go" }),
         Make("catsay.x86", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_386, 0, null, 0, 3762,
           new Program[]
             {
@@ -2037,7 +2055,9 @@ namespace JetBrains.FormatRipper.Tests
               new("4C39B0B0DB70E23E6B2064DE93F9912FC6629E0D19868B8B0F6BB754C919C2EC",     97, 0x80ED410,             1, "main.init"                                                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("5E8746C02A9E48AD58AEF015850E0F83A244AB6E1A9432791737B46966E1A1B7",    114, 0x80ED480,             1, "type..hash.main.Cat"                                             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("3153CECA8A96180D31DD2B2E8D3889330A6497C9FA3DE5C753DF50EF3E0B496E",    174, 0x80ED500,             1, "type..eq.main.Cat"                                               , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new(),
+          new() { ["runtime/internal/sys.DefaultGoroot.str"] = "/usr/local/go" }),
         // @formatter:on
       };
 
@@ -2496,7 +2516,9 @@ namespace JetBrains.FormatRipper.Tests
               new("C4CA3F2669FC7AF122ECEA4A2089029A0B60D5BDAF40DD6A7C35CBCB59B8F311",   20, 0x4A1768,            13, "sha256_stream"                         , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("25AD3E4EBF5E76ADEDB744098D965B3A48D048B2543F03C172DF0940812BCE0D",  336, 0x42A918,            13, "force_symlinkat"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("37B5D965FA952FD66A6D707E47A8076983EC76FBD9A89CC34A8366CC8E5C1EE3",  104, 0x49A6F8,            13, "argmatch_to_argument"                  , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new(),
+          new() { ["version_etc_copyright"] = "Copyright %s %d Free Software Foundation, Inc." }),
         Make("coreutils.nixos-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_X86_64, 0, "/nix/store/jsp3h3wpzc842j0rz61m5ly71ak6qgdn-glibc-2.32-54/lib/ld-linux-x86-64.so.2", 351, 3787,
           new Program[]
             {
@@ -2950,7 +2972,9 @@ namespace JetBrains.FormatRipper.Tests
               new("DB3EA4DE86E22FD936825836A4E9A893FC13E8B49C1F42DEBAA363B6AB3B06F4",   77, 0x4A8430,            14, "argmatch_to_argument"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("0A954376AA6FD6AF6976C6647DADED7FE49D7B4C531EB815CF2F83109884BD81",  144, 0x50F8C0,            14, "__gmpn_modexact_1_odd_x86_64"        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("38079670A556F9E96EAF4D29EB2F0FA188C9E5EFC80DEA473D33804A9FCC70B3",   10, 0x4EE980,            14, "__gmpn_cnd_add_n"                    , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new(),
+          new() { ["version_etc_copyright"] = "Copyright %s %d Free Software Foundation, Inc." }),
         // @formatter:on
       };
 
@@ -3072,7 +3096,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0, 0x632C, SHN.SHN_ABS  , "_edata"           , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x632C, SHN.SHN_ABS  , "__bss_start"      , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("grep.android-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/system/bin/linker64", 66, 0,
           new Program[]
             {
@@ -3185,7 +3211,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0,  0x8650, SHN.SHN_ABS  , "_edata"           , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
               new(null, 0,  0x8650, SHN.SHN_ABS  , "__bss_start"      , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -3261,7 +3289,9 @@ namespace JetBrains.FormatRipper.Tests
               new("26FA8AAEB02CE9296FA67471233B9926BAA33E4A15CDED8129A1B97CC5A88494", 72,   0x7A5,            12, "__cyg_profile_func_exit"    , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  0, 0x11044,            22, "__bss_start"                , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -3320,7 +3350,9 @@ namespace JetBrains.FormatRipper.Tests
               new("1A835ED8734F86355CA5B835D824D486993AABF1913CD3A011B7446C0514B7C9",  4,    0x0,             6, "tdata_var"            , STT.STT_TLS    , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 24,    0xC,             7, "tbss_var"             , STT.STT_TLS    , STB.STB_GLOBAL, 0x0),
               new("B20B9296C0AC3519C13AF1DCB9C5B580CB17F9BCE0698411A3E31B04F7E30437",  4,  0x180,             5, "get"                  , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new(),
+          new()),
         Make("libtls.lld-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, null, 6, 8,
           new Program[]
             {
@@ -3377,7 +3409,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  0,    0x0, SHN.SHN_UNDEF, "__tls_get_addr", STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
               new("98CE95A0063827B2CE18558B9D02A54E094EAFAEC8B5B7D2427EB7EE149119A6",  8,    0x8,            11, "tdata_var2"    , STT.STT_TLS   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 24,   0x10,            12, "tbss_var"      , STT.STT_TLS   , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -3465,7 +3499,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,    0,    0x0, SHN.SHN_UNDEF, "stderr"                     , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("636E0F09534B20F5081C5D83CE4370E4CFAD61F6F3F139409237D36381B7BD1B", 2635, 0x1570,            14, "ulockmgr_op"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -3549,7 +3585,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  8, 0x231590,            24, "optarg"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  4, 0x231598,            24, "optind"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.freebsd-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_386, 0, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
@@ -3626,7 +3664,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  0, 0x401FF0, SHN.SHN_UNDEF, "rmdir"              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  0, 0x402000, SHN.SHN_UNDEF, "strdup"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.freebsd-powerpc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_PPC, 0, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
@@ -3703,7 +3743,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  4, 0x100313E0,            25, "optarg"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  4, 0x10031408,            25, "optind"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.freebsd-powerpc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
@@ -3782,7 +3824,9 @@ namespace JetBrains.FormatRipper.Tests
               new("5E928D8B199C65BA326C7A24F79A851100E4EB6E5A95B4AE5F1379140256F0B5", 8, 0x10031A60,            24, "__progname"         , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              , 8, 0x10031A70,            26, "environ"            , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.freebsd-powerpc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
@@ -3861,7 +3905,9 @@ namespace JetBrains.FormatRipper.Tests
               new("89FBF58F09F5B44BFB534268D88E42122A668CFA182C4E937D4E280F618C88BD", 8, 0x10031B00,            24, "__progname"         , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              , 8, 0x10031B10,            26, "environ"            , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.freebsd-riscv64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_RISCV, EF.EF_RISCV_FLOAT_ABI_DOUBLE | EF.EF_RISCV_RVC, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
@@ -3940,7 +3986,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  8, 0x14590,            26, "optarg"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  4, 0x14598,            26, "optind"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.freebsd-sparc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_SPARCV9, EF.EF_SPARCV9_RMO, "/libexec/ld-elf.so.1", 29, 0,
           new Program[]
             {
@@ -4013,7 +4061,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   40, 0x2015E0, SHN.SHN_UNDEF, "mkdtemp"            , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   64, 0x201718,            23, "__stack_chk_guard"  , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.freebsd-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_FREEBSD, 0, ET.ET_EXEC, EM.EM_X86_64, 0, "/libexec/ld-elf.so.1", 26, 0,
           new Program[]
             {
@@ -4090,7 +4140,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  8, 0x204680,            25, "optarg"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  4, 0x204688,            25, "optind"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -4224,7 +4276,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "strspn"                       , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "__assert_fail"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.gentoo-armv7a_hf-uclibc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-uClibc.so.0", 91, 0,
           new Program[]
             {
@@ -4357,7 +4411,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  0, 0x19394,            20, "__bss_end__"                  , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,  0, 0x19394,            20, "__end__"                      , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.gentoo-hppa2.0", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_LINUX, 0, ET.ET_DYN, EM.EM_PARISC, EF.EFA_PARISC_1_1, "/lib/ld.so.1", 77, 0,
           new Program[]
             {
@@ -4482,7 +4538,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,    0x0, SHN.SHN_UNDEF, "calloc"                       , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0, 0xC2FC, SHN.SHN_ABS  , "_GLOBAL_OFFSET_TABLE_"        , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.gentoo-ia64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_IA_64, EF.EF_IA_64_ABI64, "/lib/ld-linux-ia64.so.2", 68, 0,
           new Program[]
             {
@@ -4600,7 +4658,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   0,    0x0, SHN.SHN_UNDEF, "__ctype_b_loc"                , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0,    0x0, SHN.SHN_UNDEF, "calloc"                       , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.gentoo-m68k", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_68K, 0, "/lib/ld.so.1", 77, 0,
           new Program[]
             {
@@ -4720,7 +4780,9 @@ namespace JetBrains.FormatRipper.Tests
               new("1CEEABF0C6A5A30BAD12CDAC0E3AB015A7188A42E6AEBB556AAD00BB9CD693AD",    2, 0x607C,            12, "__libc_csu_fini"              , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("FECB66183685EBEFFA9A1F04D13E90481EE3C395030DF6BFF12846747A35A284",   80, 0x602C,            12, "__libc_csu_init"              , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new() { ["version_etc_copyright"] = "Copyright %s %d Free Software Foundation, Inc." },
+          new()),
         Make("mktemp.gentoo-mipsel3-uclibc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 1, ET.ET_EXEC, EM.EM_MIPS, EF.EF_MIPS_ARCH_3 | EF.EF_MIPS_ABI_O32 | EF.EF_MIPS_32BITMODE | EF.EF_MIPS_CPIC | EF.EF_MIPS_NOREORDER, "/lib/ld-uClibc.so.0", 90, 0,
           new Program[]
             {
@@ -4865,7 +4927,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,    0, 0x407E10, SHN.SHN_UNDEF, "__uClibc_main"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,    0, 0x407E00, SHN.SHN_UNDEF, "__cxa_atexit"                 , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.gentoo-sparc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_SPARC32PLUS, EF.EF_SPARC_SUN_US3 | EF.EF_SPARC_SUN_US1 | EF.EF_SPARC_32PLUS, "/lib/ld-linux.so.2", 79, 0,
           new Program[]
             {
@@ -4990,7 +5054,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "calloc"                       , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("209425336127279CD1B301B5A1A159FFD74AAA96DD64DAE5BA81C9F84F3E78C8", 4,  0x8A10,            13, "_IO_stdin_used"               , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -5090,7 +5156,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   0, 0x32028, SHN.SHN_ABS  , "__data_start", STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0, 0x32028, SHN.SHN_ABS  , "__bss_start" , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.openbsd-armv7", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_SOFT, "/usr/libexec/ld.so", 30, 0,
           new Program[]
             {
@@ -5172,7 +5240,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 4, 0x311F8,            24, "environ"            , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x31231,            24, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.openbsd-hppa", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_HPUX, 0, ET.ET_DYN, EM.EM_PARISC, EF.EFA_PARISC_1_1, "/usr/libexec/ld.so", 55, 0,
           new Program[]
             {
@@ -5274,7 +5344,9 @@ namespace JetBrains.FormatRipper.Tests
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0,  0xB6C,             3, "__fini"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              ,   0, 0x3848, SHN.SHN_ABS  , "_GLOBAL_OFFSET_TABLE_", STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.openbsd-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/usr/libexec/ld.so", 29, 0,
           new Program[]
             {
@@ -5352,7 +5424,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0,        0x0, SHN.SHN_UNDEF, "vwarnx"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x20001159,            23, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.openbsd-landisk", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_SH, EF.EF_SH2E, "/usr/libexec/ld.so", 50, 0,
           new Program[]
             {
@@ -5445,7 +5519,9 @@ namespace JetBrains.FormatRipper.Tests
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0,   0xC8C,             4, "__fini"             , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0, 0x11F7C,            19, "___dtors_end"       , STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.openbsd-luna88k", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_EXEC, EM.EM_88K, 0, "/usr/libexec/ld.so", 32, 0,
           new Program[]
             {
@@ -5522,7 +5598,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  76, 0x22220, SHN.SHN_UNDEF, "mkdtemp"     , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 152, 0x22250, SHN.SHN_UNDEF, "vwarnx"      , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.openbsd-macppc", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC, 0, "/usr/libexec/ld.so", 29, 0,
           new Program[]
             {
@@ -5601,7 +5679,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0,     0x0, SHN.SHN_UNDEF, "vwarnx"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x316D5,            24, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.openbsd-octeon", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_MIPS, EF.EF_MIPS_ARCH_3 | EF.EF_MIPS_CPIC | EF.EF_MIPS_PIC | EF.EF_MIPS_NOREORDER, "/usr/libexec/ld.so", 62, 0,
           new Program[]
             {
@@ -5708,7 +5788,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 400,   0xD70, SHN.SHN_UNDEF, "getenv"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("44BE8A44502F14CF3C91F17ED512334605E68DBB38E50680CF3A8676B363BA15", 108,   0xC88,             2, "fatalx"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.openbsd-powerpc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/usr/libexec/ld.so", 29, 0,
           new Program[]
             {
@@ -5788,7 +5870,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0,     0x0, SHN.SHN_UNDEF, "vwarnx"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x60),
               new(null, 0, 0x31A61,            25, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.openbsd-sparc64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_SPARCV9, EF.EF_SPARCV9_RMO, "/usr/libexec/ld.so", 51, 0,
           new Program[]
             {
@@ -5884,7 +5968,9 @@ namespace JetBrains.FormatRipper.Tests
               new("8559A4DC5DA6632A57FADF60AEBB7CE456CEA65940E1E3A480FBFEA6EC3B0D18", 116,    0x800,             2, "fatal"                , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",   0,    0xBE0,             3, "__fini"               , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("mktemp.openbsd-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/usr/libexec/ld.so", 29, 0,
           new Program[]
             {
@@ -5962,7 +6048,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null, 0,    0x0, SHN.SHN_UNDEF, "vwarnx"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new(null, 0, 0x4A89,            23, "_end"               , STT.STT_NOTYPE, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -6091,7 +6179,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,    8, 0x7330,            23, "program_name"                 , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
               new("C8E1E8B9CDD4ED4C2964C3CE7B9FDACCDD814CF2E96AA281C3E5F9F6F736F492",   47, 0x5EA0,            13, "version_etc_copyright"        , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new() { ["version_etc_copyright"] = "Copyright %s %d Free Software Foundation, Inc." },
+          new()),
         // @formatter:on
       };
 
@@ -6183,7 +6273,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,    0x0, SHN.SHN_UNDEF, "close"                        , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("7B11C1133330CD161071BF23A0C9B6CE5320A8F3A0F83620035A72BE46DF4104", 4, 0x2004,            18, "_IO_stdin_used"               , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("nologin.opensuse-ppc64le", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_PPC64, EF.EF_PPC64_ABI_VER2, "/lib64/ld64.so.2", 28, 0,
           new Program[]
             {
@@ -6259,7 +6351,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "_ITM_registerTMCloneTable"    , STT.STT_NOTYPE , STB.STB_WEAK  , 0x0),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "setlocale"                    , STT.STT_FUNC   , STB.STB_GLOBAL, 0x60),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("nologin.opensuse-s390x", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2MSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_S390, 0, "/lib/ld64.so.1", 28, 0,
           new Program[]
             {
@@ -6335,7 +6429,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,   0,   0x0, SHN.SHN_UNDEF, "close"                        , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("7257276638A1A175B90122B60518982DBB387970D30F15CAD6756189608CE503", 908, 0xEE0,            14, "main"                         , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -6421,7 +6517,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "__errno_location"           , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new(null                                                              , 0,     0x0, SHN.SHN_UNDEF, "getenv"                     , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("tempfile.ubuntu-armhf", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_ARM, EF.EF_ARM_EABI_VER5 | EF.EF_ARM_ABI_FLOAT_HARD, "/lib/ld-linux-armhf.so.3", 34, 0,
           new Program[]
             {
@@ -6501,7 +6599,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 4, 0x1208C,            23, "progname"                   , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
               new("7B11C1133330CD161071BF23A0C9B6CE5320A8F3A0F83620035A72BE46DF4104", 4,   0xD90,            15, "_IO_stdin_used"             , STT.STT_OBJECT , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("tempfile.ubuntu-i386", ELFCLASS.ELFCLASS32, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_386, 0, "/lib/ld-linux.so.2", 29, 0,
           new Program[]
             {
@@ -6581,7 +6681,9 @@ namespace JetBrains.FormatRipper.Tests
               new("7B11C1133330CD161071BF23A0C9B6CE5320A8F3A0F83620035A72BE46DF4104", 4, 0x2004,            18, "_IO_stdin_used"             , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("9D9F290527A6BE626A8F5985B26E19B237B44872B03631811DF4416FC1713178", 4, 0x2000,            18, "_fp_hw"                     , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         Make("tempfile.ubuntu-x86_64", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, 0, "/lib64/ld-linux-x86-64.so.2", 28, 0,
           new Program[]
             {
@@ -6661,7 +6763,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 8, 0x4040,            26, "stderr"                     , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new(null                                                              , 8, 0x4020,            26, "optarg"                     , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -6715,7 +6819,9 @@ namespace JetBrains.FormatRipper.Tests
               new("2E57D20D5A55BEE90F7D21D0B2C1C179307D07E45E4E928BC9FBA312843BC295",    333,     0x0,  0x1, 0, ".shstrtab"               , SHT.SHT_STRTAB        , 0, 0, 0),
             },
           new Symbol[] {},
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -6753,7 +6859,9 @@ namespace JetBrains.FormatRipper.Tests
               new("2F130B6D9ED42C045D955D9582331AA3D8A8069EE4EE625D02DA679544B3B9C7", 20, 0x0,             2, "main"                 , STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0, 0x0,             6, "__x86.get_pc_thunk.ax", STT.STT_FUNC   , STB.STB_GLOBAL, 0x2),
               new(null                                                              ,  0, 0x0, SHN.SHN_UNDEF, "_GLOBAL_OFFSET_TABLE_", STT.STT_NOTYPE , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new(),
+          new()),
         Make("64bit.o", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_REL, EM.EM_X86_64, EF.EF_NONE, null, 0, 4,
           new Program[] {},
           new Section[]
@@ -6778,7 +6886,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              ,  0, 0x0, SHN.SHN_ABS  , "1.c" , STT.STT_FILE   , STB.STB_LOCAL , 0x0),
               new("E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",  0, 0x0,             1, ""    , STT.STT_SECTION, STB.STB_LOCAL , 0x0),
               new("C9F89522CFDA9535DB46C25DC5A93C5CD9F0F04FA8A767926EEF0C918F5EFB29", 15, 0x0,             1, "main", STT.STT_FUNC   , STB.STB_GLOBAL, 0x0),
-            }),
+            },
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -6817,7 +6927,9 @@ namespace JetBrains.FormatRipper.Tests
             },
           new Section[] {},
           new Symbol[] {},
-          new Symbol[] {}),
+          new Symbol[] {},
+          new(),
+          new()),
         // @formatter:on
       };
 
@@ -6826,7 +6938,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityEditorSources() => new object?[]
       {
         // @formatter:off
-        MakeOptional("unity/linux_x64_editor_coreclr/Unity", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, "/lib64/ld-linux-x86-64.so.2", UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 1311, 0,
+        MakeOptional("unity/linux_x64_editor_coreclr/Unity", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, "/lib64/ld-linux-x86-64.so.2", 1311, 0,
           new Program[]
             {
               new("A461BCA804327E9F2037AC964C81DE7D88E9DD764959BCC8EFBDA53496C6CB67",       672, PT.PT_PHDR        , PF.PF_R),
@@ -7083,8 +7195,10 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,       0x0, SHN.SHN_UNDEF, "__register_atfork"                              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("BBCB67510FDCE4BA0A6002D839F48FC8D37BE3C10726CD7375A4793A7639BA8E", 8, 0x2984A40,            12, "UnityScriptingBackend"                          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
-        MakeOptional("unity/linux_x64_editor_mono/Unity", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, "/lib64/ld-linux-x86-64.so.2", UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 1313, 0,
+          new Symbol[] {},
+          new() { ["UnityScriptingBackend"] = "CoreCLR" },
+          new()),
+        MakeOptional("unity/linux_x64_editor_mono/Unity", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, "/lib64/ld-linux-x86-64.so.2", 1313, 0,
           new Program[]
             {
               new("E0A460DACECA2A19F4E4D59FDBFA0780B9EAAADC7AAE554D5B7E79D2858C1489",       672, PT.PT_PHDR        , PF.PF_R),
@@ -7341,7 +7455,9 @@ namespace JetBrains.FormatRipper.Tests
               new(null                                                              , 0,       0x0, SHN.SHN_UNDEF, "__register_atfork"                              , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
               new("F17EF01C994DEC67EDBD32608DE18F843B12A6949E14F86B684B5ABAEE07F000", 5, 0x29C2A3A,            12, "UnityScriptingBackend"                          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new() { ["UnityScriptingBackend"] = "Mono" },
+          new()),
         // @formatter:on
       };
 
@@ -7350,7 +7466,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityPlayerDevelopmentSources() => new object?[]
       {
         // @formatter:off
-        MakeOptional("unity/linux_x64_player_development_coreclr/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 412, 0,
+        MakeOptional("unity/linux_x64_player_development_coreclr/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, 412, 0,
           new Program[]
             {
               new("099A466433F5B0596E7D75D476BE84C68DBCB217134F52E0BB86C8AAE235EE7F",      616, PT.PT_PHDR        , PF.PF_R),
@@ -7603,8 +7719,10 @@ namespace JetBrains.FormatRipper.Tests
               new("BBCB67510FDCE4BA0A6002D839F48FC8D37BE3C10726CD7375A4793A7639BA8E",    8,  0x8DA8FE,             9, "UnityScriptingBackend"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("C2B730552C27C9EDE0EA73FECCFC4BC8542634E8CFA7E3367F3A523DC9E2F02E", 6838, 0x3CAAE70,            15, "_Z10PlayerMainiPPc"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
-        MakeOptional("unity/linux_x64_player_development_il2cpp/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE, 412, 0,
+          new Symbol[] {},
+          new() { ["UnityScriptingBackend"] = "CoreCLR" },
+          new()),
+        MakeOptional("unity/linux_x64_player_development_il2cpp/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, 412, 0,
           new Program[]
             {
               new("BD80B2FA97FBBEA7457933F63FD4730F7EFF213C24CAEE1BABE041E7895E023C",      616, PT.PT_PHDR        , PF.PF_R),
@@ -7857,8 +7975,10 @@ namespace JetBrains.FormatRipper.Tests
               new("E56576919ADCE0615C24125D6DAE2291E8D5BD21FA852FBC37A22454E01E8375",    7,  0x983F84,             9, "UnityScriptingBackend"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("5EC0899D2B83B00AF3122DF382298110DB34E3F8FFBCB3DF0BA32E149758EC4A", 6854, 0x3B39780,            15, "_Z10PlayerMainiPPc"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
-        MakeOptional("unity/linux_x64_player_development_mono/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 412, 0,
+          new Symbol[] {},
+          new() { ["UnityScriptingBackend"] = "IL2CPP" },
+          new()),
+        MakeOptional("unity/linux_x64_player_development_mono/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, 412, 0,
           new Program[]
             {
               new("4BCD293B436523EF740434DC832E5712B0B242BA1154D97BCD1F3F31C3D7876F",      616, PT.PT_PHDR        , PF.PF_R),
@@ -8111,7 +8231,9 @@ namespace JetBrains.FormatRipper.Tests
               new("F17EF01C994DEC67EDBD32608DE18F843B12A6949E14F86B684B5ABAEE07F000",    5,  0x98661C,             9, "UnityScriptingBackend"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("DAE6D46A0B5DF7B88A60D75230D0C74132A2A79ACC7F4314B08B14E8358F34B3", 6838, 0x3B4F790,            15, "_Z10PlayerMainiPPc"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new() { ["UnityScriptingBackend"] = "Mono" },
+          new()),
         // @formatter:on
       };
 
@@ -8120,7 +8242,7 @@ namespace JetBrains.FormatRipper.Tests
     private static object?[] MakeUnityPlayerNondevelopmentSources() => new object?[]
       {
         // @formatter:off
-        MakeOptional("unity/linux_x64_player_nondevelopment_coreclr/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE, 391, 0,
+        MakeOptional("unity/linux_x64_player_nondevelopment_coreclr/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, 391, 0,
           new Program[]
             {
               new("AD66F5AC22F93CD982C61A4FFD788A46EEFAFEF74EED38117D157BDFEB5E8D07",      616, PT.PT_PHDR        , PF.PF_R),
@@ -8373,8 +8495,10 @@ namespace JetBrains.FormatRipper.Tests
               new("BBCB67510FDCE4BA0A6002D839F48FC8D37BE3C10726CD7375A4793A7639BA8E",     8,  0x36BB9D,             9, "UnityScriptingBackend"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("6507CD93A060D6CC9278BC53D525249C8AAC4F2BCC282BCFC5F3A853CAB562D1", 89472, 0x26E6010,            15, "_Z10PlayerMainiPPc"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
-        MakeOptional("unity/linux_x64_player_nondevelopment_il2cpp/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE, 391, 0,
+          new Symbol[] {},
+          new() { ["UnityScriptingBackend"] = "CoreCLR" },
+          new()),
+        MakeOptional("unity/linux_x64_player_nondevelopment_il2cpp/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, 391, 0,
           new Program[]
             {
               new("2014725EB8C7D17EE305CC19BFAE6FA6EB16BEC705E8AE9EC8692E622A1D3FE7",      616, PT.PT_PHDR        , PF.PF_R),
@@ -8627,8 +8751,10 @@ namespace JetBrains.FormatRipper.Tests
               new("E56576919ADCE0615C24125D6DAE2291E8D5BD21FA852FBC37A22454E01E8375",     7,  0x44FAFD,             9, "UnityScriptingBackend"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("0A6DE737489E40CD80847B74EA48721EFC1C9EE01C1A927D79CB9DF7CE06630C", 88967, 0x2692370,            15, "_Z10PlayerMainiPPc"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
-        MakeOptional("unity/linux_x64_player_nondevelopment_mono/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE, 391, 0,
+          new Symbol[] {},
+          new() { ["UnityScriptingBackend"] = "IL2CPP" },
+          new()),
+        MakeOptional("unity/linux_x64_player_nondevelopment_mono/UnityPlayer.so", ELFCLASS.ELFCLASS64, ELFDATA.ELFDATA2LSB, ELFOSABI.ELFOSABI_NONE, 0, ET.ET_DYN, EM.EM_X86_64, EF.EF_NONE, null, 391, 0,
           new Program[]
             {
               new("FD124E3DA42D1BCCDFF6D1602DBE7C2621AC16EB282AEFCB0B60A4DB74C72FDD",      616, PT.PT_PHDR        , PF.PF_R),
@@ -8881,7 +9007,9 @@ namespace JetBrains.FormatRipper.Tests
               new("F17EF01C994DEC67EDBD32608DE18F843B12A6949E14F86B684B5ABAEE07F000",     5,  0x4507A7,             9, "UnityScriptingBackend"          , STT.STT_OBJECT, STB.STB_GLOBAL, 0x0),
               new("E830AF3B9A077026C39539ED90E081081B8864DCBC159755A03D451BAA64FD99", 86768, 0x269F970,            15, "_Z10PlayerMainiPPc"             , STT.STT_FUNC  , STB.STB_GLOBAL, 0x0),
             },
-          new Symbol[] {}),
+          new Symbol[] {},
+          new() { ["UnityScriptingBackend"] = "Mono" },
+          new()),
         // @formatter:on
       };
   }

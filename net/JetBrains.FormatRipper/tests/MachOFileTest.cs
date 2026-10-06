@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using JetBrains.FormatRipper.MachO;
 using JetBrains.FormatRipper.MachO.Impl;
 using JetBrains.Tests;
@@ -96,8 +94,9 @@ namespace JetBrains.FormatRipper.Tests
       public readonly string? EntitlementsDerHash;
       public readonly int SymbolCount;
       public readonly Command[] Commands;
-      public readonly DataSection[]? DataSections;
-      public readonly Symbol[]? Symbols;
+      public readonly DataSection[] DataSections;
+      public readonly Symbol[] Symbols;
+      public readonly Dictionary<string, string> SymbolStrings;
 
       internal Image(
         string hash,
@@ -113,8 +112,9 @@ namespace JetBrains.FormatRipper.Tests
         string? entitlementsDerHash,
         int symbolCount,
         Command[] commands,
-        DataSection[]? dataSections,
-        Symbol[]? symbols)
+        DataSection[] dataSections,
+        Symbol[] symbols,
+        Dictionary<string, string> symbolStrings)
       {
         Hash = hash;
         Endian = endian;
@@ -131,6 +131,7 @@ namespace JetBrains.FormatRipper.Tests
         Commands = commands;
         DataSections = dataSections;
         Symbols = symbols;
+        SymbolStrings = symbolStrings;
       }
     }
 
@@ -141,7 +142,6 @@ namespace JetBrains.FormatRipper.Tests
         false,
         filename,
         null,
-        null,
         new[] { image }
       };
 
@@ -153,45 +153,27 @@ namespace JetBrains.FormatRipper.Tests
         false,
         filename,
         fatEndian,
-        null,
-        images
-      };
-
-    private static object?[] MakeSource(
-      string filename,
-      string? expectedUnityScriptingBackend,
-      MachOFile.Endian fatEndian,
-      params Image[] images) => new object?[]
-      {
-        false,
-        filename,
-        fatEndian,
-        expectedUnityScriptingBackend,
         images
       };
 
     private static object?[] MakeOptionalSource(
       string filename,
-      string? expectedUnityScriptingBackend,
       Image image) => new object?[]
       {
         true,
         filename,
         null,
-        expectedUnityScriptingBackend,
         new[] { image }
       };
 
     private static object?[] MakeOptionalSource(
       string filename,
-      string? expectedUnityScriptingBackend,
       MachOFile.Endian fatEndian,
       params Image[] images) => new object?[]
       {
         true,
         filename,
         fatEndian,
-        expectedUnityScriptingBackend,
         images
       };
 
@@ -201,7 +183,6 @@ namespace JetBrains.FormatRipper.Tests
       bool canIgnoreMissingResource,
       string resourceName,
       MachOFile.Endian? expectedFatEndian,
-      string? expectedUnityScriptingBackend,
       Image[] expectedImages)
     {
       TestDataUtil.OpenRead(ResourceCategory.MachO, resourceName, stream =>
@@ -212,7 +193,6 @@ namespace JetBrains.FormatRipper.Tests
           Assert.AreEqual(expectedFatEndian, file.FatEndian);
           Assert.AreEqual(expectedImages.Length, images.Length);
 
-          string? unityScriptingBackend = null;
           for (var n = 0; n < images.Length; n++)
           {
             var image = images[n];
@@ -316,15 +296,10 @@ namespace JetBrains.FormatRipper.Tests
               Assert.Null(expectedImage.EntitlementsDerHash);
 
             var dataSections = MachOUtil.ReadDataSections(image);
-            if (expectedImage.DataSections != null)
-            {
-              var expectedDataSections = expectedImage.DataSections;
-              Assert.AreEqual(expectedDataSections.Length, dataSections.Count, $"Unexpected data image count in the image {n}");
-              for (var k = 0; k < expectedDataSections.Length; ++k)
-                AssertDataSection(expectedDataSections[k], dataSections[k]);
-            }
-            else
-              GenerateDataSectionInfos(dataSections);
+            var expectedDataSections = expectedImage.DataSections;
+            Assert.AreEqual(expectedDataSections.Length, dataSections.Count, $"Unexpected data image count in the image {n}");
+            for (var k = 0; k < expectedDataSections.Length; ++k)
+              AssertDataSection(expectedDataSections[k], dataSections[k]);
 
             var symbols = new List<MachOUtil.Symbol>(expectedImage.SymbolCount);
             Assert.IsTrue(MachOUtil.GetSymbols(image, dataSections, symbol =>
@@ -335,49 +310,26 @@ namespace JetBrains.FormatRipper.Tests
             Assert.AreEqual(expectedImage.SymbolCount, symbols.Count, $"Unexpected symbol count in the image {n}");
 
             var verifiedSymbols = SymbolUtil.SelectEdges(symbols);
-            if (expectedImage.Symbols != null)
+            var expectedImageSymbols = expectedImage.Symbols;
+            Assert.AreEqual(expectedImageSymbols.Length, verifiedSymbols.Length);
+            for (var k = 0; k < expectedImageSymbols.Length; ++k)
             {
-              var expectedImageSymbols = expectedImage.Symbols;
-              Assert.AreEqual(expectedImageSymbols.Length, verifiedSymbols.Length);
-              for (var k = 0; k < expectedImageSymbols.Length; ++k)
-              {
-                var expectedSymbol = expectedImageSymbols[k];
-                var symbol = verifiedSymbols[k];
+              var expectedSymbol = expectedImageSymbols[k];
+              var symbol = verifiedSymbols[k];
 
-                Assert.AreEqual(expectedSymbol.Name, symbol.Name);
-                Assert.AreEqual(expectedSymbol.Value, symbol.Value, $"Expected 0x{expectedSymbol.Value:X}, but was 0x{symbol.Value:X}");
-                Assert.AreEqual(expectedSymbol.SectionIndex, symbol.SectionIndex);
-                Assert.AreEqual(expectedSymbol.Type, symbol.Type, $"Expected 0x{(byte)expectedSymbol.Type:X}, but was 0x{(byte)symbol.Type:X}");
-                Assert.AreEqual(expectedSymbol.Desc, symbol.Description, $"Expected 0x{(ushort)expectedSymbol.Desc:X}, but was 0x{(ushort)symbol.Description:X}");
+              Assert.AreEqual(expectedSymbol.Name, symbol.Name);
+              Assert.AreEqual(expectedSymbol.Value, symbol.Value, $"Expected 0x{expectedSymbol.Value:X}, but was 0x{symbol.Value:X}");
+              Assert.AreEqual(expectedSymbol.SectionIndex, symbol.SectionIndex);
+              Assert.AreEqual(expectedSymbol.Type, symbol.Type, $"Expected 0x{(byte)expectedSymbol.Type:X}, but was 0x{(byte)symbol.Type:X}");
+              Assert.AreEqual(expectedSymbol.Desc, symbol.Description, $"Expected 0x{(ushort)expectedSymbol.Desc:X}, but was 0x{(ushort)symbol.Description:X}");
 
-                var hash = symbol.CreateStream == null ? null : CalculateStreamHash(() => symbol.CreateStream());
-                Assert.AreEqual(expectedSymbol.Hash, hash);
-              }
+              var hash = symbol.CreateStream == null ? null : CalculateStreamHash(() => symbol.CreateStream());
+              Assert.AreEqual(expectedSymbol.Hash, hash);
             }
-            else
-              GenerateSymbolInfos(verifiedSymbols);
 
             SymbolUtil.AssertLookups(CheckLookups(image, dataSections, symbols, SymbolUtil.MakeLookups(symbols, x => x.Name, IsExternal, IsDefined), symbols.Count <= SymbolUtil.MaxLinearLookupSymbolCount));
-
-            if (unityScriptingBackend == null)
-              foreach (var symbol in symbols)
-                if (symbol.Name == UnityUtil.UNITY_SCRIPTING_BACKEND_MACHO_SYMBOL &&
-                    (symbol.Type & (NT.N_STAB | NT.N_TYPE | NT.N_EXT)) == (NT.N_SECT | NT.N_EXT))
-                {
-                  using var dataStream = symbol.CreateStream!();
-                  unityScriptingBackend = MachOUtil.ReadStringZ(dataStream);
-                  break;
-                }
+            SymbolUtil.AssertStrings(expectedImage.SymbolStrings, name => MachOUtil.TryGetSymbol(image, dataSections, name, out var symbol) ? symbol.CreateStream : null, MachOUtil.ReadStringZ);
           }
-
-          if (unityScriptingBackend != null)
-            Assert.Contains(unityScriptingBackend, new[]
-              {
-                UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
-                UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE,
-                UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE
-              });
-          Assert.AreEqual(expectedUnityScriptingBackend, unityScriptingBackend);
         }, str =>
         {
           if (canIgnoreMissingResource)
@@ -445,9 +397,6 @@ namespace JetBrains.FormatRipper.Tests
       return null;
     }
 
-    private const int Sha256HashStringLength = 2 * 256 / 8;
-    private const string @null = "null";
-
     private static string CalculateStreamHash(Func<Stream> createStream)
     {
       using var itemStream = createStream();
@@ -480,205 +429,6 @@ namespace JetBrains.FormatRipper.Tests
 
       var hash = dataSection.CreateSection == null ? null : CalculateStreamHash(() => dataSection.CreateSection());
       Assert.AreEqual(expectedDataSection.Hash, hash);
-    }
-
-    private static void GenerateDataSectionInfos(ICollection<MachOUtil.DataSection> dataSectionItems)
-    {
-      Console.WriteLine("            new DataSection[]");
-      Console.WriteLine("              {");
-
-      var maxHashLength = dataSectionItems.Select(x => x.CreateSection == null ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
-      var maxAddressLength = dataSectionItems.Select(x => ("0x" + x.Address.ToString("X")).Length).DefaultIfEmpty(0).Max();
-      var maxSizeLength = dataSectionItems.Select(x => x.Size.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxSectionNameLength = dataSectionItems.Select(x => x.SectionName.Length).DefaultIfEmpty(0).Max();
-      var maxSegmentNameLength = dataSectionItems.Select(x => x.SegmentName.Length).DefaultIfEmpty(0).Max();
-      foreach (var dataSectionItem in dataSectionItems)
-        Console.WriteLine("                {0},", GetStr(dataSectionItem, maxHashLength, maxAddressLength, maxSizeLength, maxSectionNameLength, maxSegmentNameLength));
-
-      Console.WriteLine("              },");
-
-      static string GetStr(MachOUtil.DataSection dataSectionItem, int maxHashLength, int maxAddressLength, int maxSizeLength, int maxSectionNameLength, int maxSegmentNameLength) => string.Format(
-        "new({0}, {1}, {2}, {3}, {4}, {5})",
-        (dataSectionItem.CreateSection == null ? @null : '"' + CalculateStreamHash(() => dataSectionItem.CreateSection()) + '"').PadRight(maxHashLength),
-        ("0x" + dataSectionItem.Address.ToString("X")).PadLeft(maxAddressLength),
-        dataSectionItem.Size.ToString().PadLeft(maxSizeLength),
-        ('"' + dataSectionItem.SectionName + '"').PadRight(maxSectionNameLength + 2),
-        ('"' + dataSectionItem.SegmentName + '"').PadRight(maxSegmentNameLength + 2),
-        GetFlagsStr(dataSectionItem.Flags));
-
-      static string GetFlagsStr(SEC flags)
-      {
-        // Note: the section type is a value in the low byte, the section attributes are the flags in the high bytes
-        var names = Enum.GetNames(typeof(SEC));
-        var values = (SEC[])Enum.GetValues(typeof(SEC));
-
-        var type = flags & SEC.SECTION_TYPE;
-        var builder = new StringBuilder(GetTypeStr());
-        var rest = (uint)(flags & SEC.SECTION_ATTRIBUTES);
-        for (var n = names.Length - 1; n >= 0; --n)
-        {
-          var value = (uint)values[n];
-          if (value == 0 || (rest & value) != value || IsMask(names[n]))
-            continue;
-          rest &= ~value;
-          builder.Append(" | SEC." + names[n]);
-        }
-
-        if (rest != 0)
-          builder.Append($" | (SEC)0x{rest:X8}");
-        return builder.ToString();
-
-        string GetTypeStr()
-        {
-          for (var n = 0; n < names.Length; ++n)
-            if (values[n] == type && !IsMask(names[n]))
-              return "SEC." + names[n];
-          return $"(SEC)0x{(uint)type:X2}";
-        }
-
-        static bool IsMask(string name) => name is nameof(SEC.SECTION_ATTRIBUTES) or nameof(SEC.SECTION_ATTRIBUTES_USR) or nameof(SEC.SECTION_ATTRIBUTES_SYS) or nameof(SEC.SECTION_TYPE);
-      }
-    }
-
-    private static void GenerateSymbolInfos(ICollection<MachOUtil.Symbol> symbolItems)
-    {
-      Console.WriteLine("            new Symbol[]");
-      Console.WriteLine("              {");
-
-      var maxHashLength = symbolItems.Select(x => x.CreateStream == null ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
-      var maxNameLength = symbolItems.Select(x => x.Name.Length).DefaultIfEmpty(0).Max();
-      var maxValueLength = symbolItems.Select(x => ("0x" + x.Value.ToString("X")).Length).DefaultIfEmpty(0).Max();
-      var maxSectionIndexLength = symbolItems.Select(x => x.SectionIndex.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxTypeLength = symbolItems.Select(x => GetTypeStr(x.Type).Length).DefaultIfEmpty(0).Max();
-      foreach (var symbolItem in symbolItems)
-      {
-        var hash = symbolItem.CreateStream == null ? null : CalculateStreamHash(() => symbolItem.CreateStream());
-
-        Console.WriteLine(
-          "                new({0}, {1}, {2}, {3}, {4}, {5}),",
-          (hash == null ? @null : '"' + hash + '"').PadRight(maxHashLength),
-          ("0x" + symbolItem.Value.ToString("X")).PadLeft(maxValueLength),
-          symbolItem.SectionIndex.ToString().PadLeft(maxSectionIndexLength),
-          ('"' + symbolItem.Name + '"').PadRight(maxNameLength + 2),
-          GetTypeStr(symbolItem.Type).PadRight(maxTypeLength),
-          GetDescStr(symbolItem.Type, symbolItem.Value, symbolItem.Description));
-      }
-
-      Console.WriteLine("              },");
-
-      static string GetTypeStr(NT type)
-      {
-        if ((type & NT.N_STAB) != 0)
-          return GetStr(type);
-
-        var builder = new StringBuilder();
-        if ((type & NT.N_PEXT) != 0)
-          builder.Append("NT.N_PEXT | ");
-        builder.Append(GetStr(type & NT.N_TYPE));
-        if ((type & NT.N_EXT) != 0)
-          builder.Append(" | NT.N_EXT");
-        return builder.ToString();
-      }
-
-      static string GetStr(NT type)
-      {
-        // Note: N_SECT aliases the N_TYPE mask and N_RBRAC aliases the N_STAB mask, so the masks are skipped here
-        var names = Enum.GetNames(typeof(NT));
-        var values = (NT[])Enum.GetValues(typeof(NT));
-        for (var n = 0; n < names.Length; ++n)
-          if (values[n] == type && names[n] is not (nameof(NT.N_STAB) or nameof(NT.N_PEXT) or nameof(NT.N_TYPE) or nameof(NT.N_EXT)))
-            return "NT." + names[n];
-        return $"(NT)0x{(byte)type:X2}";
-      }
-
-      static string GetDescStr(NT type, ulong value, ND desc)
-      {
-        // Note: the n_desc field of a stab is a plain number, not a set of flags
-        if ((type & NT.N_STAB) != 0)
-          return desc == 0 ? "0" : $"(ND)0x{(ushort)desc:X4}";
-
-        // Note: a common symbol is an undefined external one with the non-zero value which holds the symbol size
-        var isCommon = (type & (NT.N_TYPE | NT.N_EXT)) == (NT.N_UNDF | NT.N_EXT) && value != 0;
-        var isUndefined = (type & NT.N_TYPE) is NT.N_UNDF or NT.N_PBUD;
-        var rest = (ushort)desc;
-        var builder = new StringBuilder();
-
-        void Append(string str)
-        {
-          if (builder.Length > 0)
-            builder.Append(" | ");
-          builder.Append(str);
-        }
-
-        void AppendFlag(ND flag, string name)
-        {
-          if ((rest & (ushort)flag) == 0)
-            return;
-          rest &= (ushort)~(ushort)flag;
-          Append("ND." + name);
-        }
-
-        string? setter = null;
-        byte field = 0;
-
-        if (isCommon)
-        {
-          field = NDUtil.GetCommAlign(desc);
-          rest &= unchecked((ushort)~(ushort)ND.COMM_ALIGN);
-          if (field != 0)
-            setter = nameof(NDUtil.SetCommAlign);
-        }
-        else if (isUndefined)
-        {
-          field = NDUtil.GetLibraryOrdinal(desc);
-          rest &= unchecked((ushort)~(ushort)ND.LIBRARY_ORDINAL);
-          switch ((ND)(field << 8))
-          {
-          case ND.SELF_LIBRARY_ORDINAL: break;
-          case ND.MAX_LIBRARY_ORDINAL: Append("ND." + nameof(ND.MAX_LIBRARY_ORDINAL)); break;
-          case ND.DYNAMIC_LOOKUP_ORDINAL: Append("ND." + nameof(ND.DYNAMIC_LOOKUP_ORDINAL)); break;
-          case ND.EXECUTABLE_ORDINAL: Append("ND." + nameof(ND.EXECUTABLE_ORDINAL)); break;
-          default: setter = nameof(NDUtil.SetLibraryOrdinal); break;
-          }
-        }
-        else
-        {
-          AppendFlag(ND.N_COLD_FUNC, nameof(ND.N_COLD_FUNC));
-          AppendFlag(ND.N_ALT_ENTRY, nameof(ND.N_ALT_ENTRY));
-          AppendFlag(ND.N_SYMBOL_RESOLVER, nameof(ND.N_SYMBOL_RESOLVER));
-        }
-
-        AppendFlag(ND.N_WEAK_DEF, isUndefined ? nameof(ND.N_REF_TO_WEAK) : nameof(ND.N_WEAK_DEF));
-        AppendFlag(ND.N_WEAK_REF, nameof(ND.N_WEAK_REF));
-        AppendFlag(ND.N_NO_DEAD_STRIP, nameof(ND.N_NO_DEAD_STRIP));
-        AppendFlag(ND.REFERENCED_DYNAMICALLY, nameof(ND.REFERENCED_DYNAMICALLY));
-        AppendFlag(ND.N_ARM_THUMB_DEF, nameof(ND.N_ARM_THUMB_DEF));
-
-        var referenceName = (rest & (ushort)ND.REFERENCE_TYPE) switch
-          {
-            (ushort)ND.REFERENCE_FLAG_UNDEFINED_LAZY => nameof(ND.REFERENCE_FLAG_UNDEFINED_LAZY),
-            (ushort)ND.REFERENCE_FLAG_DEFINED => nameof(ND.REFERENCE_FLAG_DEFINED),
-            (ushort)ND.REFERENCE_FLAG_PRIVATE_DEFINED => nameof(ND.REFERENCE_FLAG_PRIVATE_DEFINED),
-            (ushort)ND.REFERENCE_FLAG_PRIVATE_UNDEFINED_NON_LAZY => nameof(ND.REFERENCE_FLAG_PRIVATE_UNDEFINED_NON_LAZY),
-            (ushort)ND.REFERENCE_FLAG_PRIVATE_UNDEFINED_LAZY => nameof(ND.REFERENCE_FLAG_PRIVATE_UNDEFINED_LAZY),
-            _ => null
-          };
-        if (referenceName != null)
-        {
-          rest &= unchecked((ushort)~(ushort)ND.REFERENCE_TYPE);
-          Append("ND." + referenceName);
-        }
-
-        if (rest != 0)
-          Append($"(ND)0x{rest:X4}");
-
-        if (setter != null)
-          return builder.Length == 0
-            ? $"{nameof(NDUtil)}.{setter}({field})"
-            : $"{nameof(NDUtil)}.{setter}({field}, {builder})";
-
-        return builder.Length == 0 ? "0" : builder.ToString();
-      }
     }
   }
 }

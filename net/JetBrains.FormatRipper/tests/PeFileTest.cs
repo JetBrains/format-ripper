@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using JetBrains.FormatRipper.Pe;
 using JetBrains.Tests;
 using NUnit.Framework;
@@ -104,9 +102,11 @@ namespace JetBrains.FormatRipper.Tests
       string expectedOrderedIncludeRanges,
       int expectedExportCount,
       int expectedSymbolCount,
-      Section[]? expectedSections,
-      Export[]? expectedExports,
-      Symbol[]? expectedSymbols = null) => new object?[]
+      Section[] expectedSections,
+      Export[] expectedExports,
+      Symbol[] expectedSymbols,
+      Dictionary<string, string> expectedExportStrings,
+      Dictionary<string, string> expectedSymbolStrings) => new object?[]
         {
           false,
           resourceName,
@@ -117,12 +117,13 @@ namespace JetBrains.FormatRipper.Tests
           expectedCmsBlobHash,
           expectedSecurityDataDirectoryRange,
           expectedOrderedIncludeRanges,
-          null,
           expectedExportCount,
           expectedSymbolCount,
           expectedSections,
           expectedExports,
-          expectedSymbols
+          expectedSymbols,
+          expectedExportStrings,
+          expectedSymbolStrings
         };
 
     private static object?[] MakeOptional(
@@ -134,12 +135,13 @@ namespace JetBrains.FormatRipper.Tests
       string? expectedCmsBlobHash,
       string expectedSecurityDataDirectoryRange,
       string expectedOrderedIncludeRanges,
-      string? expectedUnityScriptingBackend,
       int expectedExportCount,
       int expectedSymbolCount,
-      Section[]? expectedSections,
-      Export[]? expectedExports,
-      Symbol[]? expectedSymbols = null) => new object?[]
+      Section[] expectedSections,
+      Export[] expectedExports,
+      Symbol[] expectedSymbols,
+      Dictionary<string, string> expectedExportStrings,
+      Dictionary<string, string> expectedSymbolStrings) => new object?[]
         {
           true,
           resourceName,
@@ -150,12 +152,13 @@ namespace JetBrains.FormatRipper.Tests
           expectedCmsBlobHash,
           expectedSecurityDataDirectoryRange,
           expectedOrderedIncludeRanges,
-          expectedUnityScriptingBackend,
           expectedExportCount,
           expectedSymbolCount,
           expectedSections,
           expectedExports,
-          expectedSymbols
+          expectedSymbols,
+          expectedExportStrings,
+          expectedSymbolStrings
         };
 
     [TestCaseSource(typeof(PeFileTest), nameof(Sources))]
@@ -170,12 +173,13 @@ namespace JetBrains.FormatRipper.Tests
       string? expectedCmsBlobHash,
       string expectedSecurityDataDirectoryRange,
       string expectedOrderedIncludeRanges,
-      string? expectedUnityScriptingBackend,
       int expectedExportCount,
       int expectedSymbolCount,
-      Section[]? expectedSections,
-      Export[]? expectedExports,
-      Symbol[]? expectedSymbols)
+      Section[] expectedSections,
+      Export[] expectedExports,
+      Symbol[] expectedSymbols,
+      Dictionary<string, string> expectedExportStrings,
+      Dictionary<string, string> expectedSymbolStrings)
     {
       TestDataUtil.OpenRead(ResourceCategory.Pe, resourceName, stream =>
         {
@@ -212,27 +216,22 @@ namespace JetBrains.FormatRipper.Tests
           ValidateUtil.Validate(computeHashInfo!);
           Assert.AreEqual(expectedOrderedIncludeRanges, computeHashInfo!.ToString());
 
-          if (expectedSections != null)
+          var sections = file.Sections;
+          Assert.AreEqual(expectedSections.Length, sections.Length);
+          for (var n = 0; n < expectedSections.Length; ++n)
           {
-            var sections = file.Sections;
-            Assert.AreEqual(expectedSections.Length, sections.Length);
-            for (var n = 0; n < expectedSections.Length; ++n)
-            {
-              var expectedSection = expectedSections[n];
-              var section = sections[n];
+            var expectedSection = expectedSections[n];
+            var section = sections[n];
 
-              Assert.AreEqual(expectedSection.Name, section.Name);
-              Assert.AreEqual(expectedSection.VirtualAddress, section.VirtualAddress, $"Expected 0x{expectedSection.VirtualAddress:X}, but was 0x{section.VirtualAddress:X}");
-              Assert.AreEqual(expectedSection.VirtualSize, section.VirtualSize);
-              Assert.AreEqual(expectedSection.SizeOfRawData, section.SizeOfRawData);
-              Assert.AreEqual(expectedSection.Characteristics, section.Characteristics, $"Expected 0x{(uint)expectedSection.Characteristics:X}, but was 0x{(uint)section.Characteristics:X}");
+            Assert.AreEqual(expectedSection.Name, section.Name);
+            Assert.AreEqual(expectedSection.VirtualAddress, section.VirtualAddress, $"Expected 0x{expectedSection.VirtualAddress:X}, but was 0x{section.VirtualAddress:X}");
+            Assert.AreEqual(expectedSection.VirtualSize, section.VirtualSize);
+            Assert.AreEqual(expectedSection.SizeOfRawData, section.SizeOfRawData);
+            Assert.AreEqual(expectedSection.Characteristics, section.Characteristics, $"Expected 0x{(uint)expectedSection.Characteristics:X}, but was 0x{(uint)section.Characteristics:X}");
 
-              var hash = section.CreateStream == null ? null : CalculateStreamHash(() => section.CreateStream());
-              Assert.AreEqual(expectedSection.Hash, hash);
-            }
+            var hash = section.CreateStream == null ? null : CalculateStreamHash(() => section.CreateStream());
+            Assert.AreEqual(expectedSection.Hash, hash);
           }
-          else
-            GenerateSectionInfos(file.Sections);
 
           var exports = new List<PeUtil.Export>(expectedExportCount);
           Assert.IsTrue(PeUtil.GetExports(file, export =>
@@ -243,27 +242,23 @@ namespace JetBrains.FormatRipper.Tests
           Assert.AreEqual(expectedExportCount, exports.Count, "Unexpected export count");
 
           var verifiedExports = SymbolUtil.SelectEdges(exports);
-          if (expectedExports != null)
+          Assert.AreEqual(expectedExports.Length, verifiedExports.Length);
+          for (var n = 0; n < expectedExports.Length; ++n)
           {
-            Assert.AreEqual(expectedExports.Length, verifiedExports.Length);
-            for (var n = 0; n < expectedExports.Length; ++n)
-            {
-              var expectedExport = expectedExports[n];
-              var export = verifiedExports[n];
+            var expectedExport = expectedExports[n];
+            var export = verifiedExports[n];
 
-              Assert.AreEqual(expectedExport.Name, export.Name);
-              Assert.AreEqual(expectedExport.Ordinal, export.Ordinal);
-              Assert.AreEqual(expectedExport.VirtualAddress, export.VirtualAddress, $"Expected 0x{expectedExport.VirtualAddress:X}, but was 0x{export.VirtualAddress:X}");
-              Assert.AreEqual(expectedExport.Forwarder, export.Forwarder);
+            Assert.AreEqual(expectedExport.Name, export.Name);
+            Assert.AreEqual(expectedExport.Ordinal, export.Ordinal);
+            Assert.AreEqual(expectedExport.VirtualAddress, export.VirtualAddress, $"Expected 0x{expectedExport.VirtualAddress:X}, but was 0x{export.VirtualAddress:X}");
+            Assert.AreEqual(expectedExport.Forwarder, export.Forwarder);
 
-              var hash = export.CreateStream == null ? null : CalculateStreamHash(() => export.CreateStream());
-              Assert.AreEqual(expectedExport.Hash, hash);
-            }
+            var hash = export.CreateStream == null ? null : CalculateStreamHash(() => export.CreateStream());
+            Assert.AreEqual(expectedExport.Hash, hash);
           }
-          else
-            GenerateExportInfos(verifiedExports);
 
           SymbolUtil.AssertLookups(CheckExportLookups(file, exports, SymbolUtil.MakeLookups(exports, x => x.Name, IsNamed, _ => true), exports.Count <= SymbolUtil.MaxLinearLookupSymbolCount));
+          SymbolUtil.AssertStrings(expectedExportStrings, name => PeUtil.TryGetExport(file, name, out var export) ? export.CreateStream : null, PeUtil.ReadStringZ);
 
           var symbols = new List<PeUtil.Symbol>(expectedSymbolCount);
           Assert.IsTrue(PeUtil.GetSymbols(file, symbol =>
@@ -274,48 +269,26 @@ namespace JetBrains.FormatRipper.Tests
           Assert.AreEqual(expectedSymbolCount, symbols.Count, "Unexpected symbol count");
 
           var verifiedSymbols = SymbolUtil.SelectEdges(symbols);
-          if (expectedSymbols != null)
+          Assert.AreEqual(expectedSymbols.Length, verifiedSymbols.Length);
+          for (var n = 0; n < expectedSymbols.Length; ++n)
           {
-            Assert.AreEqual(expectedSymbols.Length, verifiedSymbols.Length);
-            for (var n = 0; n < expectedSymbols.Length; ++n)
-            {
-              var expectedSymbol = expectedSymbols[n];
-              var symbol = verifiedSymbols[n];
+            var expectedSymbol = expectedSymbols[n];
+            var symbol = verifiedSymbols[n];
 
-              Assert.AreEqual(expectedSymbol.Name, symbol.Name);
-              Assert.AreEqual(expectedSymbol.Value, symbol.Value, $"Expected 0x{expectedSymbol.Value:X}, but was 0x{symbol.Value:X}");
-              Assert.AreEqual(expectedSymbol.SectionNumber, symbol.SectionNumber, $"Expected 0x{expectedSymbol.SectionNumber:X}, but was 0x{symbol.SectionNumber:X}");
-              Assert.AreEqual(expectedSymbol.BaseType, symbol.BaseType);
-              Assert.AreEqual(expectedSymbol.DerivedType, symbol.DerivedType);
-              Assert.AreEqual(expectedSymbol.StorageClass, symbol.StorageClass);
-              Assert.AreEqual(expectedSymbol.NumberOfAuxSymbols, symbol.NumberOfAuxSymbols);
+            Assert.AreEqual(expectedSymbol.Name, symbol.Name);
+            Assert.AreEqual(expectedSymbol.Value, symbol.Value, $"Expected 0x{expectedSymbol.Value:X}, but was 0x{symbol.Value:X}");
+            Assert.AreEqual(expectedSymbol.SectionNumber, symbol.SectionNumber, $"Expected 0x{expectedSymbol.SectionNumber:X}, but was 0x{symbol.SectionNumber:X}");
+            Assert.AreEqual(expectedSymbol.BaseType, symbol.BaseType);
+            Assert.AreEqual(expectedSymbol.DerivedType, symbol.DerivedType);
+            Assert.AreEqual(expectedSymbol.StorageClass, symbol.StorageClass);
+            Assert.AreEqual(expectedSymbol.NumberOfAuxSymbols, symbol.NumberOfAuxSymbols);
 
-              var hash = symbol.CreateStream == null ? null : CalculateStreamHash(() => symbol.CreateStream());
-              Assert.AreEqual(expectedSymbol.Hash, hash);
-            }
+            var hash = symbol.CreateStream == null ? null : CalculateStreamHash(() => symbol.CreateStream());
+            Assert.AreEqual(expectedSymbol.Hash, hash);
           }
-          else
-            GenerateSymbolInfos(verifiedSymbols);
 
           SymbolUtil.AssertLookups(CheckSymbolLookups(file, symbols, SymbolUtil.MakeLookups(symbols, x => x.Name, IsExternal, IsDefined)));
-
-          string? unityScriptingBackend = null;
-          foreach (var export in exports)
-            if (export is { Name: UnityUtil.UNITY_SCRIPTING_BACKEND_ELF_PE_SYMBOL, Forwarder: null })
-            {
-              using var dataStream = export.CreateStream!();
-              unityScriptingBackend = PeUtil.ReadStringZ(dataStream);
-              break;
-            }
-
-          if (unityScriptingBackend != null)
-            Assert.Contains(unityScriptingBackend, new[]
-              {
-                UnityUtil.CORECLR_UNITY_SCRIPTING_BACKEND_VALUE,
-                UnityUtil.IL2CPP_UNITY_SCRIPTING_BACKEND_VALUE,
-                UnityUtil.MONO_UNITY_SCRIPTING_BACKEND_VALUE
-              });
-          Assert.AreEqual(expectedUnityScriptingBackend, unityScriptingBackend);
+          SymbolUtil.AssertStrings(expectedSymbolStrings, name => PeUtil.TryGetSymbol(file, name, out var symbol) ? symbol.CreateStream : null, PeUtil.ReadStringZ);
         }, str =>
         {
           if (canIgnoreMissingResource)
@@ -407,167 +380,11 @@ namespace JetBrains.FormatRipper.Tests
       return expectedStream.Length == stream.Length;
     }
 
-    private const int Sha256HashStringLength = 2 * 256 / 8;
-    private const string @null = "null";
-
     private static string CalculateStreamHash(Func<Stream> createStream)
     {
       using var itemStream = createStream();
       using var hashAlgorithm = SHA256.Create();
       return HexUtil.ConvertToHexString(hashAlgorithm.ComputeHash(itemStream));
-    }
-
-    private static void GenerateSectionInfos(PeFile.Section[] sections)
-    {
-      if (sections.Length == 0)
-      {
-        Console.WriteLine("          new Section[] {},");
-        return;
-      }
-
-      Console.WriteLine("          new Section[]");
-      Console.WriteLine("            {");
-
-      var maxHashLength = sections.Select(x => x.CreateStream == null ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
-      var maxVirtualAddressLength = sections.Select(x => ("0x" + x.VirtualAddress.ToString("X")).Length).DefaultIfEmpty(0).Max();
-      var maxVirtualSizeLength = sections.Select(x => x.VirtualSize.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxSizeOfRawDataLength = sections.Select(x => x.SizeOfRawData.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxNameLength = sections.Select(x => x.Name.Length).DefaultIfEmpty(0).Max();
-      foreach (var section in sections)
-      {
-        var hash = section.CreateStream == null ? null : CalculateStreamHash(() => section.CreateStream());
-
-        Console.WriteLine(
-          "              new({0}, {1}, {2}, {3}, {4}, {5}),",
-          (hash == null ? @null : '"' + hash + '"').PadRight(maxHashLength),
-          ("0x" + section.VirtualAddress.ToString("X")).PadLeft(maxVirtualAddressLength),
-          section.VirtualSize.ToString().PadLeft(maxVirtualSizeLength),
-          section.SizeOfRawData.ToString().PadLeft(maxSizeOfRawDataLength),
-          ('"' + section.Name + '"').PadRight(maxNameLength + 2),
-          GetCharacteristicsStr(section.Characteristics));
-      }
-
-      Console.WriteLine("            },");
-
-      static string GetCharacteristicsStr(IMAGE_SCN characteristics)
-      {
-        // Note: the alignment is a value in the IMAGE_SCN_ALIGN_MASK bits, the other bits are the flags
-        var names = Enum.GetNames(typeof(IMAGE_SCN));
-        var values = (IMAGE_SCN[])Enum.GetValues(typeof(IMAGE_SCN));
-
-        var builder = new StringBuilder();
-
-        void Append(string str)
-        {
-          if (builder.Length > 0)
-            builder.Append(" | ");
-          builder.Append(str);
-        }
-
-        var align = characteristics & IMAGE_SCN.IMAGE_SCN_ALIGN_MASK;
-        if (align != 0)
-        {
-          var index = Array.IndexOf(values, align);
-          Append(index >= 0 && align != IMAGE_SCN.IMAGE_SCN_ALIGN_MASK ? "IMAGE_SCN." + names[index] : $"(IMAGE_SCN)0x{(uint)align:X8}");
-        }
-
-        var rest = (uint)(characteristics & ~IMAGE_SCN.IMAGE_SCN_ALIGN_MASK);
-        for (var n = 0; n < names.Length; ++n)
-        {
-          var value = (uint)values[n];
-          if (value == 0 || (value & (value - 1)) != 0 || (value & (uint)IMAGE_SCN.IMAGE_SCN_ALIGN_MASK) != 0 || (rest & value) != value)
-            continue;
-          rest &= ~value;
-          Append("IMAGE_SCN." + names[n]);
-        }
-
-        if (rest != 0)
-          Append($"(IMAGE_SCN)0x{rest:X8}");
-        return builder.Length == 0 ? "0" : builder.ToString();
-      }
-    }
-
-    private static void GenerateExportInfos(ICollection<PeUtil.Export> exports)
-    {
-      if (exports.Count == 0)
-      {
-        Console.WriteLine("          new Export[] {},");
-        return;
-      }
-
-      Console.WriteLine("          new Export[]");
-      Console.WriteLine("            {");
-
-      var maxHashLength = exports.Select(x => x.CreateStream == null ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
-      var maxOrdinalLength = exports.Select(x => x.Ordinal.ToString().Length).DefaultIfEmpty(0).Max();
-      var maxVirtualAddressLength = exports.Select(x => ("0x" + x.VirtualAddress.ToString("X")).Length).DefaultIfEmpty(0).Max();
-      var maxNameLength = exports.Select(x => GetStr(x.Name).Length).DefaultIfEmpty(0).Max();
-      foreach (var export in exports)
-      {
-        var hash = export.CreateStream == null ? null : CalculateStreamHash(() => export.CreateStream());
-
-        Console.WriteLine(
-          "              new({0}, {1}, {2}, {3}, {4}),",
-          (hash == null ? @null : '"' + hash + '"').PadRight(maxHashLength),
-          export.Ordinal.ToString().PadLeft(maxOrdinalLength),
-          ("0x" + export.VirtualAddress.ToString("X")).PadLeft(maxVirtualAddressLength),
-          GetStr(export.Name).PadRight(maxNameLength),
-          GetStr(export.Forwarder));
-      }
-
-      Console.WriteLine("            },");
-
-      static string GetStr(string? str) => str == null ? @null : '"' + str + '"';
-    }
-
-    private static void GenerateSymbolInfos(ICollection<PeUtil.Symbol> symbols)
-    {
-      if (symbols.Count == 0)
-      {
-        Console.WriteLine("          new Symbol[] {},");
-        return;
-      }
-
-      Console.WriteLine("          new Symbol[]");
-      Console.WriteLine("            {");
-
-      var maxHashLength = symbols.Select(x => x.CreateStream == null ? @null.Length : Sha256HashStringLength + 2).DefaultIfEmpty(0).Max();
-      var maxValueLength = symbols.Select(x => ("0x" + x.Value.ToString("X")).Length).DefaultIfEmpty(0).Max();
-      var maxSectionNumberLength = symbols.Select(x => GetSectionNumberStr(x.SectionNumber).Length).DefaultIfEmpty(0).Max();
-      var maxNameLength = symbols.Select(x => x.Name.Length).DefaultIfEmpty(0).Max();
-      var maxBaseTypeLength = symbols.Select(x => GetEnumStr(x.BaseType).Length).DefaultIfEmpty(0).Max();
-      var maxDerivedTypeLength = symbols.Select(x => GetEnumStr(x.DerivedType).Length).DefaultIfEmpty(0).Max();
-      var maxStorageClassLength = symbols.Select(x => GetEnumStr(x.StorageClass).Length).DefaultIfEmpty(0).Max();
-      foreach (var symbol in symbols)
-      {
-        var hash = symbol.CreateStream == null ? null : CalculateStreamHash(() => symbol.CreateStream());
-
-        var sectionNumberStr = GetSectionNumberStr(symbol.SectionNumber);
-        Console.WriteLine(
-          "              new({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}),",
-          (hash == null ? @null : '"' + hash + '"').PadRight(maxHashLength),
-          ("0x" + symbol.Value.ToString("X")).PadLeft(maxValueLength),
-          sectionNumberStr.StartsWith("IMAGE_SYM.") ? sectionNumberStr.PadRight(maxSectionNumberLength) : sectionNumberStr.PadLeft(maxSectionNumberLength),
-          ('"' + symbol.Name + '"').PadRight(maxNameLength + 2),
-          GetEnumStr(symbol.BaseType).PadRight(maxBaseTypeLength),
-          GetEnumStr(symbol.DerivedType).PadRight(maxDerivedTypeLength),
-          GetEnumStr(symbol.StorageClass).PadRight(maxStorageClassLength),
-          symbol.NumberOfAuxSymbols);
-      }
-
-      Console.WriteLine("            },");
-
-      static string GetSectionNumberStr(ushort sectionNumber)
-      {
-        var name = (IMAGE_SYM)sectionNumber == IMAGE_SYM.IMAGE_SYM_UNDEFINED || (IMAGE_SYM)sectionNumber > IMAGE_SYM.IMAGE_SYM_SECTION_MAX ? Enum.GetName(typeof(IMAGE_SYM), (IMAGE_SYM)sectionNumber) : null;
-        return name != null ? "IMAGE_SYM." + name : sectionNumber.ToString();
-      }
-
-      static string GetEnumStr<T>(T value) where T : struct, Enum
-      {
-        var name = Enum.GetName(typeof(T), value);
-        return name != null ? typeof(T).Name + "." + name : $"({typeof(T).Name})0x{Convert.ToUInt64(value):X}";
-      }
     }
   }
 }
