@@ -16,6 +16,7 @@
     <PackageTags>jetbrains signature verify netstandard</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <Version>3.0.0-preview.2</Version>
     <PackageProjectUrl>https://github.com/JetBrains/format-ripper</PackageProjectUrl>
   </PropertyGroup>
@@ -41,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="../../icon.png" Pack="true" Visible="false" PackagePath="" />
+    <None Include="../../README.md" Pack="true" Visible="false" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
